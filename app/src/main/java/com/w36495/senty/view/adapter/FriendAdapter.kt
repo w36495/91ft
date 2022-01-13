@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.w36495.senty.R
 import com.w36495.senty.data.domain.Friend
 import com.w36495.senty.databinding.FriendListItemBinding
+import com.w36495.senty.view.GiftListActivity
 
 class FriendAdapter(private val context: Context) : RecyclerView.Adapter<FriendAdapter.FriendHolder>() {
 
@@ -20,10 +21,10 @@ class FriendAdapter(private val context: Context) : RecyclerView.Adapter<FriendA
             binding.friendItemImg.setImageResource(R.drawable.ic_launcher_background)
 
             itemView.setOnClickListener {
-//                val intent = Intent(context, GiftListActivity::class.java)
-//                intent.putExtra("friendName", friend.name)
-//                intent.putExtra("friendPhone", friend.phone)
-//                context.startActivity(intent)
+                val intent = Intent(context, GiftListActivity::class.java)
+                intent.putExtra("friendName", friend.name)
+                intent.putExtra("friendPhone", friend.phone)
+                context.startActivity(intent)
             }
         }
     }

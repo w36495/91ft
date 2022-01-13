@@ -19,7 +19,7 @@
             android:id="@+id/friend_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="친구 목록"
+            android:text="@string/title_friendList"
             android:textSize="24sp"
             android:textStyle="bold"
             android:layout_margin="10dp"

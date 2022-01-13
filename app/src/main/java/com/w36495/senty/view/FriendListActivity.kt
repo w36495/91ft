@@ -8,7 +8,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.w36495.senty.R
 import com.w36495.senty.data.domain.Friend
 import com.w36495.senty.databinding.ActivityFriendListBinding
 import com.w36495.senty.view.adapter.FriendAdapter
@@ -60,7 +59,7 @@ class FriendListActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        friendListViewModel.friendList.observe(this, androidx.lifecycle.Observer { friend ->
+        friendListViewModel.friendList.observe(this, { friend ->
             friendAdapter.setFriendList(friend!!)
         })
     }
