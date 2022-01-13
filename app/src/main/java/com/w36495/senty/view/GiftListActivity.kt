@@ -1,6 +1,10 @@
 package com.w36495.senty.view
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,6 +19,8 @@ class GiftListActivity : AppCompatActivity() {
     private lateinit var giftListViewModel: GiftListViewModel
 
     private lateinit var giftAdapter: GiftAdapter
+
+    private lateinit var resultGiftInfo: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,6 +51,26 @@ class GiftListActivity : AppCompatActivity() {
         binding.giftRecyclerView.setHasFixedSize(true)
         binding.giftRecyclerView.adapter = giftAdapter
 
+        resultGiftInfo = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val giftDate = result.data?.getStringExtra("giftDate")?:""
+                val giftTitle = result.data?.getStringExtra("giftTitle")?:""
+                val giftMemo = result.data?.getStringExtra("giftMemo")?:""
+                val giftType = result.data?.getBooleanExtra("giftType", false)
+                giftListViewModel.addGift(Gift(giftType!!, giftDate, giftTitle, giftMemo))
+            }
+        }
+
+        binding.fabGiftAdd.setOnClickListener {
+            val intent = Intent(this, GiftAddActivity::class.java)
+            resultGiftInfo.launch(intent)
+        }
+
+        giftListViewModel.giftList.observe(this, { gift ->
+            giftAdapter.setGiftList(gift)
+        })
+
 
     }
+
 }

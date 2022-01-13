@@ -20,6 +20,7 @@
         </activity>
         <activity android:name=".view.FriendAddActivity" />
         <activity android:name=".view.GiftListActivity" />
+        <activity android:name=".view.GiftAddActivity" />
     </application>
 
 </manifest>
