@@ -54,8 +54,8 @@ class FriendListActivity : AppCompatActivity() {
     }
 
     private fun openFriendAddActivity() {
-//        val intent = Intent(this, FriendAddActivity::class.java)
-//        resultFriendInfo.launch(intent)
+        val intent = Intent(this, FriendAddActivity::class.java)
+        resultFriendInfo.launch(intent)
     }
 
     override fun onResume() {
