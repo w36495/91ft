@@ -17,4 +17,9 @@ class FriendListViewModel : ViewModel() {
         _friendList.value = friendListItem
     }
 
+    fun updateFriendInfo(friend: Friend, position: Int) {
+        friendListItem.set(position, friend)
+        _friendList.value = friendListItem
+    }
+
 }

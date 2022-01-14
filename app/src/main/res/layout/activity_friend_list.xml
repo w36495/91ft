@@ -7,8 +7,8 @@
 
     <data>
         <variable
-            name="friendListViewModel"
-            type="com.w36495.senty.viewModel.FriendListViewModel" />
+            name="friendListActivity"
+            type="com.w36495.senty.view.GiftListActivity" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
