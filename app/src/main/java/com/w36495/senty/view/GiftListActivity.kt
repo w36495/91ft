@@ -8,12 +8,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.w36495.senty.GiftSelectListener
 import com.w36495.senty.data.domain.Gift
 import com.w36495.senty.databinding.ActivityGiftListBinding
 import com.w36495.senty.view.adapter.GiftAdapter
 import com.w36495.senty.viewModel.GiftListViewModel
 
-class GiftListActivity : AppCompatActivity() {
+class GiftListActivity : AppCompatActivity(), GiftSelectListener {
 
     private lateinit var binding: ActivityGiftListBinding
     private lateinit var giftListViewModel: GiftListViewModel
@@ -30,7 +31,7 @@ class GiftListActivity : AppCompatActivity() {
 
         giftListViewModel = ViewModelProvider(this)[GiftListViewModel::class.java]
 
-        giftAdapter = GiftAdapter(this)
+        giftAdapter = GiftAdapter(this, this)
 
         val giftList = arrayListOf<Gift>()
         giftList.add(Gift(true, "2020/12/01", "생일선물", "기분이조타"))
@@ -70,7 +71,21 @@ class GiftListActivity : AppCompatActivity() {
             giftAdapter.setGiftList(gift)
         })
 
+        if (intent.hasExtra("giftPosition")) {
+            giftListViewModel.updateGift(
+                Gift(intent.getBooleanExtra("giftType", false),
+                    intent.getStringExtra("giftDate").toString(),
+                    intent.getStringExtra("giftTitle").toString(),
+                    intent.getStringExtra("giftMemo").toString()),
+                intent.getIntExtra("giftPosition", -1)
+            )
+        }
 
+
+    }
+
+    override fun onGiftItemClicked(gift: Gift, position: Int) {
+        GiftDetailDialog(gift, position).show(supportFragmentManager, "giftDetailDialog")
     }
 
 }

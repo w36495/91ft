@@ -17,4 +17,9 @@ class GiftListViewModel : ViewModel() {
         _giftList.value = giftListItem
     }
 
+    fun updateGift(gift: Gift, position: Int) {
+        giftListItem[position] = gift
+        _giftList.value = giftListItem
+    }
+
 }

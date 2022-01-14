@@ -5,13 +5,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.w36495.senty.GiftSelectListener
 import com.w36495.senty.R
 import com.w36495.senty.data.domain.Gift
 import com.w36495.senty.data.domain.GiftType
 import com.w36495.senty.databinding.GiftListGiveItemBinding
 import com.w36495.senty.databinding.GiftListReceiveItemBinding
 
-class GiftAdapter(private val context: Context) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class GiftAdapter(private val context: Context, private val giftSelectListener: GiftSelectListener) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private var giftList = arrayListOf<Gift>()
 
@@ -46,19 +47,28 @@ class GiftAdapter(private val context: Context) : RecyclerView.Adapter<RecyclerV
         notifyDataSetChanged()
     }
 
-    class GiftReceiveHolder(private val binding: GiftListReceiveItemBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class GiftReceiveHolder(private val binding: GiftListReceiveItemBinding) : RecyclerView.ViewHolder(binding.root) {
         fun receiveGiftBind(gift: Gift) {
             binding.giftListImg.setImageResource(R.drawable.ic_launcher_background)
             binding.giftListDate.text = gift.giftDate
             binding.giftListTitle.text = gift.giftTitle
+
+            itemView.setOnClickListener {
+                giftSelectListener.onGiftItemClicked(gift, adapterPosition)
+            }
         }
+
     }
 
-    class GiftGiveHolder(private val binding: GiftListGiveItemBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class GiftGiveHolder(private val binding: GiftListGiveItemBinding) : RecyclerView.ViewHolder(binding.root) {
         fun giveGiftBind(gift: Gift) {
             binding.giftListImg.setImageResource(R.drawable.ic_launcher_background)
             binding.giftListDate.text = gift.giftDate
             binding.giftListTitle.text = gift.giftTitle
+
+            itemView.setOnClickListener {
+                giftSelectListener.onGiftItemClicked(gift, adapterPosition)
+            }
         }
     }
 
