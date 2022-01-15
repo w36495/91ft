@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'com.google.gms.google-services'
 }
 
 android {
@@ -56,8 +57,13 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version")
 
     // firebase
-//    implementation platform('com.google.firebase:firebase-bom:29.0.3')
-//    implementation 'com.google.firebase:firebase-analytics-ktx'
+    implementation platform('com.google.firebase:firebase-bom:29.0.3')
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+
+    implementation 'com.firebaseui:firebase-ui-auth:7.2.0'
+
+    // firebase - Realtime Database
+    implementation 'com.google.firebase:firebase-database'
 
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

@@ -35,9 +35,6 @@ class FriendListActivity : AppCompatActivity(), FriendSelectListener {
             openFriendAddActivity()
         }
 
-        friendListViewModel.addFriendInfo(Friend("김철수", "010-9999-4444", "img"))
-        friendListViewModel.addFriendInfo(Friend("김방구", "010-4444-2222", "img"))
-
         // 새로운 친구의 정보가 등록되었을 때
         resultFriendInfo = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {

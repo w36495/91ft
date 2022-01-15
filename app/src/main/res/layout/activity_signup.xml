@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="signUpActivity"
+            type="com.w36495.senty.view.SignUpActivity" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <EditText
+            android:id="@+id/signup_email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/hint_email"
+            android:inputType="textEmailAddress"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/signup_passwd"/>
+
+        <EditText
+            android:id="@+id/signup_passwd"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/hint_password"
+            android:inputType="textPassword"
+            app:layout_constraintTop_toBottomOf="@id/signup_email"
+            app:layout_constraintStart_toStartOf="@id/signup_email"
+            app:layout_constraintEnd_toEndOf="@id/signup_email" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_signup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_signup"
+            app:layout_constraintTop_toBottomOf="@id/signup_passwd"
+            app:layout_constraintStart_toStartOf="@id/signup_passwd"
+            app:layout_constraintEnd_toEndOf="@id/signup_passwd" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>
