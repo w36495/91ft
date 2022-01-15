@@ -24,6 +24,11 @@
     <string name="tv_title">제목</string>
     <string name="tv_memo">메모</string>
     <string name="tv_email">이메일</string>
+    <string name="tv_passwd">비밀번호</string>
+
+    <string name="desc_main">정성스런 선물을 주고받았을 때의 감정과 느낌을</string>
+    <string name="desc_sub">senty와 함께 기록해보세요.</string>
+    <string name="desc_signup_main">비밀번호를 재설정할 때 사용되는 이메일이므로\n실제 사용하는 이메일을 입력해주세요.</string>
 
     <string name="radio_receive">받은 선물</string>
     <string name="radio_give">보낸 선물</string>
