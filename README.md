@@ -26,7 +26,7 @@
 - [ ] 선물 목록 공유  
  
 
-### Git Message Convention role  
+### Git Commit Message
   - feat : 새로운 기능 추가  
   - fix : 버그 수정  
   - docs : 문서 수정
