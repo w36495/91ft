@@ -1,7 +1,19 @@
 package com.w36495.senty.data.domain
 
-data class Friend(
-    val name: String,
-    val phone: String,
-    val img: String
-)
+import com.google.firebase.database.Exclude
+
+data class Friend constructor(
+    var key: String = "",
+    val name: String = "",
+    val phone: String = ""
+) {
+    @Exclude
+    fun toMap(): Map<String, Any?> {
+        return mapOf(
+            "key" to key,
+            "name" to name,
+            "phone" to phone
+        )
+
+    }
+}

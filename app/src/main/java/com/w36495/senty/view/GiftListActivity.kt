@@ -8,10 +8,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.w36495.senty.GiftSelectListener
 import com.w36495.senty.data.domain.Gift
 import com.w36495.senty.databinding.ActivityGiftListBinding
 import com.w36495.senty.view.adapter.GiftAdapter
+import com.w36495.senty.view.listener.GiftSelectListener
 import com.w36495.senty.viewModel.GiftListViewModel
 
 class GiftListActivity : AppCompatActivity(), GiftSelectListener {
@@ -80,8 +80,6 @@ class GiftListActivity : AppCompatActivity(), GiftSelectListener {
                 intent.getIntExtra("giftPosition", -1)
             )
         }
-
-
     }
 
     override fun onGiftItemClicked(gift: Gift, position: Int) {

@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.w36495.senty.GiftSelectListener
+import com.w36495.senty.view.listener.GiftSelectListener
 import com.w36495.senty.R
 import com.w36495.senty.data.domain.Gift
 import com.w36495.senty.data.domain.GiftType

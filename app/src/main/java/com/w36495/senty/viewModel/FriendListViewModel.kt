@@ -1,32 +1,34 @@
 package com.w36495.senty.viewModel
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.w36495.senty.data.domain.Friend
 import com.w36495.senty.data.repository.FriendRepository
 
 class FriendListViewModel : ViewModel() {
 
-    private val _friendList = MutableLiveData<ArrayList<Friend>>()
-    private val friendListItem : ArrayList<Friend> = arrayListOf()
-    private val friendRepository = FriendRepository()
+    private val friendRepository: FriendRepository = FriendRepository()
+    val friendList: LiveData<List<Friend>> = friendRepository.getFriendsList()
 
-    val friendList : LiveData<ArrayList<Friend>> = _friendList
-
-    init {
-        friendRepository.initializeDatabaseReference()
-    }
-
+    /**
+     * 친구 정보 등록
+     */
     fun addFriendInfo(friend: Friend) {
-        friendRepository.writeNewFriend("toby", friend.name, friend.phone)
-        friendListItem.add(friend)
-        _friendList.value = friendListItem
+        friendRepository.writeNewFriend(friend)
     }
 
-    fun updateFriendInfo(friend: Friend, position: Int) {
-        friendListItem[position] = friend
-        _friendList.value = friendListItem
+    /**
+     * 친구 정보 수정
+     */
+    fun updateFriendInfo(friend: Friend) {
+        friendRepository.updateFriendInfo(friend)
+    }
+
+    /**
+     * 친구 정보 삭제
+     */
+    fun removeFriend(friendKey: String) {
+        friendRepository.deleteFriend(friendKey)
     }
 
 }

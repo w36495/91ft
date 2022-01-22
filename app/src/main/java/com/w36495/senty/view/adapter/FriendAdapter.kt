@@ -7,11 +7,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.w36495.senty.R
 import com.w36495.senty.data.domain.Friend
 import com.w36495.senty.databinding.FriendListItemBinding
-import com.w36495.senty.view.FriendSelectListener
+import com.w36495.senty.view.listener.FriendSelectListener
 
 class FriendAdapter(private val context: Context, private val friendSelectListener: FriendSelectListener) : RecyclerView.Adapter<FriendAdapter.FriendHolder>() {
 
-    private var friendList = arrayListOf<Friend>()
+    private var friendList: List<Friend> = listOf()
 
     inner class FriendHolder(private val binding: FriendListItemBinding) : RecyclerView.ViewHolder(binding.root){
         fun bind(friend: Friend) {
@@ -20,7 +20,7 @@ class FriendAdapter(private val context: Context, private val friendSelectListen
             binding.friendItemImg.setImageResource(R.drawable.ic_launcher_background)
 
             itemView.setOnClickListener {
-                friendSelectListener.onFriendInfoClicked(friend, adapterPosition)
+                friendSelectListener.onFriendInfoClicked(friend)
             }
         }
     }
@@ -36,8 +36,9 @@ class FriendAdapter(private val context: Context, private val friendSelectListen
 
     override fun getItemCount(): Int = friendList.size
 
-    fun setFriendList(friendList: ArrayList<Friend>) {
+    fun setFriendList(friendList: List<Friend>) {
         this.friendList = friendList
         notifyDataSetChanged()
     }
+
 }

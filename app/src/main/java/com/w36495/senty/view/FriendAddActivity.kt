@@ -9,7 +9,7 @@ class FriendAddActivity : AppCompatActivity() {
     private lateinit var binding: ActivityFriendAddBinding
 
     private var isUpdate : Boolean = false  // 친구 정보 등록 : false, 친구 정보 수정 : true
-    private var friendPosition: Int = -1    // 수정되는 친구의 배열 위치
+    private lateinit var friendKey: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,7 +22,7 @@ class FriendAddActivity : AppCompatActivity() {
         if (intent.hasExtra("friendName")) {
             binding.friendAddName.setText(intent.getStringExtra("friendName"))
             binding.friendAddPhone.setText(intent.getStringExtra("friendPhone"))
-            friendPosition = intent.getIntExtra("friendPosition", -1)
+            friendKey = intent.getStringExtra("friendKey").toString()
             isUpdate = true
         }
 
@@ -36,9 +36,9 @@ class FriendAddActivity : AppCompatActivity() {
         intent.putExtra("friendName", binding.friendAddName.text.toString())
         intent.putExtra("friendPhone", binding.friendAddPhone.text.toString())
 
-        // 친구의 정보를 수정하면 -> position도 함께 전달
+        // 친구의 정보 수정
         if (isUpdate) {
-            intent.putExtra("friendPosition", friendPosition)
+            intent.putExtra("friendKey", friendKey)
             startActivity(intent)
         }
         // 친구의 정보 등록
@@ -46,6 +46,5 @@ class FriendAddActivity : AppCompatActivity() {
             setResult(RESULT_OK, intent)
             finish()
         }
-
     }
 }
