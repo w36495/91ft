@@ -1,5 +1,6 @@
 package com.w36495.senty.view
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
@@ -14,6 +15,7 @@ class FriendInfoActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var binding: ActivityFriendInfoBinding
     private lateinit var friend: Friend
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityFriendInfoBinding.inflate(layoutInflater)
@@ -23,14 +25,15 @@ class FriendInfoActivity : AppCompatActivity(), View.OnClickListener {
         setInit()
     }
 
-    fun setInit() {
+    private fun setInit() {
+        friend = intent.getSerializableExtra("showFriendInfo") as Friend
 
-        if (intent.hasExtra("friendKey")) {
-            friend = Friend(
-                intent.getStringExtra("friendKey").toString(),
-                intent.getStringExtra("friendName").toString(),
-                intent.getStringExtra("friendPhone").toString()
-            )
+        val sharedPref = getSharedPreferences("friend", Context.MODE_PRIVATE)
+        with (sharedPref.edit()) {
+            putString("friendKey", friend.key)
+            putString("friendName", friend.name)
+            putString("friendPhone", friend.phone)
+            commit()
         }
 
         binding.friendDetailName.text = friend.name
@@ -48,13 +51,12 @@ class FriendInfoActivity : AppCompatActivity(), View.OnClickListener {
     override fun onClick(view: View) {
         when (view.id) {
             R.id.friend_info_gift -> {
+                // 선물 목록 버튼 클릭
                 val giftListIntent = Intent(this, GiftListActivity::class.java)
-                giftListIntent.putExtra("friendKey", friend.key)
-                giftListIntent.putExtra("friendName", friend.name)
-                giftListIntent.putExtra("friendPhone", friend.phone)
                 startActivity(giftListIntent)
             }
             R.id.friend_info_update -> {
+                // 친구 정보 수정 버튼 클릭
                 val updateIntent = Intent(this, FriendAddActivity::class.java)
                 updateIntent.putExtra("friendKey", friend.key)
                 updateIntent.putExtra("friendName", friend.name)
@@ -62,21 +64,19 @@ class FriendInfoActivity : AppCompatActivity(), View.OnClickListener {
                 startActivity(updateIntent)
             }
             R.id.friend_info_delete -> {
+                // 친구 정보 삭제 버튼 클릭
                 MaterialAlertDialogBuilder(this)
                     .setTitle(R.string.msg_friend_delete_title)
                     .setMessage(R.string.msg_friend_delete_content)
-                    .setNeutralButton(resources.getText(R.string.btn_cancel)) {_, _ ->
-
-                    }
+                    .setNeutralButton(resources.getText(R.string.btn_cancel)) {_, _ -> }
                     .setPositiveButton(resources.getString(R.string.btn_delete)) {_, _ ->
                         val deleteIntnet = Intent(this, FriendListActivity::class.java)
-                        deleteIntnet.putExtra("friendKey", friend.key)
-                        setResult(RESULT_OK, deleteIntnet)
+                        deleteIntnet.putExtra("deleteFriendKey", friend.key)
+                        startActivity(deleteIntnet)
                         Toast.makeText(this, R.string.msg_friend_delete, Toast.LENGTH_SHORT).show()
                         finish()
                     }
                     .show()
-
             }
         }
     }

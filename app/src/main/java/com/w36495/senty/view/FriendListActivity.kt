@@ -2,12 +2,10 @@ package com.w36495.senty.view
 
 import android.app.Activity
 import android.content.Intent
-import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.w36495.senty.data.domain.Friend
@@ -24,9 +22,7 @@ class FriendListActivity : AppCompatActivity(), FriendSelectListener {
     private lateinit var friendAdapter: FriendAdapter
 
     private lateinit var resultFriendInfo: ActivityResultLauncher<Intent>
-    private lateinit var resultFriendDelete: ActivityResultLauncher<Intent>
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityFriendListBinding.inflate(layoutInflater)
@@ -36,9 +32,9 @@ class FriendListActivity : AppCompatActivity(), FriendSelectListener {
         friendAdapter = FriendAdapter(this, this)
         friendListViewModel = ViewModelProvider(this)[FriendListViewModel::class.java]
 
-
+        // 친구 정보 등록 버튼 클릭
         binding.fabFriendAdd.setOnClickListener {
-            openFriendAddActivity()
+            addFriend()
         }
 
         // 새로운 친구의 정보가 등록되었을 때
@@ -52,14 +48,6 @@ class FriendListActivity : AppCompatActivity(), FriendSelectListener {
             }
         }
 
-        // 친구 정보 삭제
-        resultFriendDelete = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val friendKey = result.data?.getStringExtra("friendKey") ?: ""
-                friendListViewModel.removeFriend(friendKey)
-            }
-        }
-
         // 친구의 정보가 수정되었을 때
         if (intent.hasExtra("friendName")) {
             friendListViewModel.updateFriendInfo(
@@ -67,6 +55,10 @@ class FriendListActivity : AppCompatActivity(), FriendSelectListener {
                     intent.getStringExtra("friendKey")!!,
                     intent.getStringExtra("friendName")!!,
                     intent.getStringExtra("friendPhone")!!))
+        }
+        // 친구 정보 삭제
+        else if (intent.hasExtra("deleteFriendKey")) {
+            friendListViewModel.removeFriend(intent.getStringExtra("deleteFriendKey")!!)
         }
 
         binding.friendRecyclerView.layoutManager = LinearLayoutManager(this)
@@ -78,20 +70,18 @@ class FriendListActivity : AppCompatActivity(), FriendSelectListener {
     /**
      * 친구 등록 액티비티 호출
      */
-    private fun openFriendAddActivity() {
+    private fun addFriend() {
         val intent = Intent(this, FriendAddActivity::class.java)
         resultFriendInfo.launch(intent)
     }
 
     /**
-     * 친구 정보 조회 다이얼로그 호출
+     * 친구 정보 조회
      */
     override fun onFriendInfoClicked(friend: Friend) {
-        val intent = Intent(this, FriendInfoActivity::class.java)
-        intent.putExtra("friendKey", friend.key)
-        intent.putExtra("friendName", friend.name)
-        intent.putExtra("friendPhone", friend.phone)
-        resultFriendDelete.launch(intent)
+        val showFriendIntent = Intent(this, FriendInfoActivity::class.java)
+        showFriendIntent.putExtra("showFriendInfo", friend)
+        startActivity(showFriendIntent)
     }
 
     override fun onResume() {

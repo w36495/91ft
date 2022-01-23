@@ -17,7 +17,7 @@ class FriendRepository {
     fun writeNewFriend(friend: Friend) {
         val friendKey = database.push().key!!
         friend.key = friendKey
-        database.child(userId).child(friendKey).setValue(friend)
+        database.child(userId).child("friends").child(friendKey).setValue(friend)
     }
 
     /**
@@ -25,7 +25,7 @@ class FriendRepository {
      */
     fun getFriendsList(): LiveData<List<Friend>> {
         val friendListLiveData = MutableLiveData<List<Friend>>()
-        val friendDatabase = FirebaseDatabase.getInstance().getReference(userId)
+        val friendDatabase = FirebaseDatabase.getInstance().getReference(userId).child("friends")
 
         friendDatabase.addValueEventListener(object: ValueEventListener {
             // onDataChange : 경로의 전체 내용을 읽고 변경사항을 수신 대기
@@ -55,7 +55,7 @@ class FriendRepository {
         val postValues = friend.toMap()
 
         val childUpdate = hashMapOf<String, Any>(
-            "/$userId/${friend.key}/" to postValues
+            "/$userId/friends/${friend.key}/" to postValues
         )
 
         database.updateChildren(childUpdate)
@@ -65,7 +65,7 @@ class FriendRepository {
      * 친구 정보 삭제
      */
     fun deleteFriend(friendKey: String) {
-        database.child(userId).child(friendKey).removeValue()
+        database.child(userId).child("friends").child(friendKey).removeValue()
     }
 
 }

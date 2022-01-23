@@ -14,7 +14,7 @@ import com.w36495.senty.databinding.GiftListReceiveItemBinding
 
 class GiftAdapter(private val context: Context, private val giftSelectListener: GiftSelectListener) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private var giftList = arrayListOf<Gift>()
+    private var giftList = listOf<Gift>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
 
@@ -42,7 +42,7 @@ class GiftAdapter(private val context: Context, private val giftSelectListener: 
 
     override fun getItemCount(): Int = giftList.size
 
-    fun setGiftList(giftList: ArrayList<Gift>) {
+    fun setGiftList(giftList: List<Gift>) {
         this.giftList = giftList
         notifyDataSetChanged()
     }
@@ -54,7 +54,7 @@ class GiftAdapter(private val context: Context, private val giftSelectListener: 
             binding.giftListTitle.text = gift.giftTitle
 
             itemView.setOnClickListener {
-                giftSelectListener.onGiftItemClicked(gift, adapterPosition)
+                giftSelectListener.onGiftItemClicked(gift)
             }
         }
 
@@ -67,7 +67,7 @@ class GiftAdapter(private val context: Context, private val giftSelectListener: 
             binding.giftListTitle.text = gift.giftTitle
 
             itemView.setOnClickListener {
-                giftSelectListener.onGiftItemClicked(gift, adapterPosition)
+                giftSelectListener.onGiftItemClicked(gift)
             }
         }
     }
@@ -76,7 +76,7 @@ class GiftAdapter(private val context: Context, private val giftSelectListener: 
      * 받은/보낸 선물에 따라 viewType 설정
      */
     override fun getItemViewType(position: Int): Int {
-        return if (giftList[position].isReceived) {
+        return if (giftList[position].received) {
             GiftType.RECEIVE
         } else {
             GiftType.GIVE

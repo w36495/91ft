@@ -19,10 +19,10 @@
         <activity android:name=".view.FriendListActivity" />
         <activity android:name=".view.FriendInfoActivity" />
         <activity android:name=".view.FriendAddActivity" />
-        <activity android:name=".view.GiftListActivity" />
         <activity android:name=".view.GiftAddActivity" />
         <activity android:name=".view.SignInActivity" />
         <activity android:name=".view.SignUpActivity" />
+        <activity android:name=".view.GiftListActivity" />
     </application>
 
 </manifest>
