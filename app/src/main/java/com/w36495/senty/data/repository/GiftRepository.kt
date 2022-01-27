@@ -1,23 +1,36 @@
 package com.w36495.senty.data.repository
 
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
+import com.google.firebase.storage.UploadTask
 import com.w36495.senty.data.domain.Gift
 
 class GiftRepository(private val friendKey: String) {
 
     private var database: DatabaseReference = FirebaseDatabase.getInstance().reference
+    private var storage = FirebaseStorage.getInstance()
     private var userId: String = FirebaseAuth.getInstance().currentUser!!.uid
 
     /**
      * 선물 등록
      */
-    fun saveNewGift(gift: Gift) {
+    fun saveNewGift(gift: Gift, giftImage: Uri) {
         val giftKey = database.push().key!!
         gift.giftKey = giftKey
-        database.child(userId).child("gifts").child(friendKey).child(giftKey).setValue(gift)
+
+        // 사진 등록
+        val giftImagePath = System.currentTimeMillis().toString()
+        val giftImageFileRef: StorageReference = storage.reference.child("images").child(userId).child(friendKey).child(giftImagePath)
+        val uploadTask: UploadTask = giftImageFileRef.putFile(giftImage)
+        uploadTask.addOnSuccessListener {
+            gift.giftImagePath = giftImagePath
+            database.child(userId).child("gifts").child(friendKey).child(giftKey).setValue(gift)
+        }.addOnFailureListener { }
     }
 
     /**
@@ -62,5 +75,9 @@ class GiftRepository(private val friendKey: String) {
      */
     fun deleteGift(gift: Gift) {
         database.child(userId).child("gifts").child(friendKey).child(gift.giftKey).removeValue()
+        val giftImageFileRef: StorageReference = storage.reference.child("images").child(userId).child(friendKey).child(gift.giftImagePath)
+        giftImageFileRef.delete()
+            .addOnSuccessListener {  }
+            .addOnFailureListener {  }
     }
 }

@@ -33,6 +33,7 @@ class SignInActivity : AppCompatActivity() {
         binding.btnSignup.setOnClickListener {
             val intent = Intent(this, SignUpActivity::class.java)
             startActivity(intent)
+            finish()
         }
 
         // 비밀번호 찾기 버튼 클릭
@@ -51,12 +52,11 @@ class SignInActivity : AppCompatActivity() {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    val user = auth.currentUser
-                    Toast.makeText(this, "로그인 성공", Toast.LENGTH_SHORT).show()
                     val intent = Intent(this, FriendListActivity::class.java)
                     startActivity(intent)
+                    finish()
                 } else {
-                    Toast.makeText(this, "로그인 실패", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "이메일 또는 비밀번호를 확인하세요.", Toast.LENGTH_SHORT).show()
                 }
             }
     }

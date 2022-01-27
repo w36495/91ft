@@ -19,12 +19,14 @@ class MainActivity : AppCompatActivity() {
         binding.mainLogin.setOnClickListener {
             val loginIntent = Intent(this, SignInActivity::class.java)
             startActivity(loginIntent)
+            finish()
         }
 
         // 회원가입 액티비티로 이동
         binding.mainSignup.setOnClickListener {
             val signupIntent = Intent(this, SignUpActivity::class.java)
             startActivity(signupIntent)
+            finish()
         }
     }
 }

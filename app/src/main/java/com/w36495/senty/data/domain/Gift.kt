@@ -8,7 +8,8 @@ data class Gift(
     val received: Boolean = false,
     val giftDate: String = "",
     val giftTitle: String = "",
-    val giftMemo: String = ""
+    val giftMemo: String = "",
+    var giftImagePath: String = ""
 ): Serializable {
     @Exclude
     fun toMap(): Map<String, Any?> {
@@ -17,7 +18,8 @@ data class Gift(
             "received" to received,
             "giftDate" to giftDate,
             "giftTitle" to giftTitle,
-            "giftMemo" to giftMemo
+            "giftMemo" to giftMemo,
+            "giftImagePath" to giftImagePath
         )
 
     }

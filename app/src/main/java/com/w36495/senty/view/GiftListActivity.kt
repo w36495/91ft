@@ -3,6 +3,7 @@ package com.w36495.senty.view
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -52,7 +53,8 @@ class GiftListActivity : AppCompatActivity(), GiftSelectListener {
         resultAddGift = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 val resultGift = result.data?.getSerializableExtra("saveGift") as Gift
-                giftViewModel.addGift(resultGift)
+                val resultGiftImage = result.data?.getParcelableExtra<Uri>("saveGiftImageUri")
+                giftViewModel.addGift(resultGift, resultGiftImage!!)
             }
         }
 
