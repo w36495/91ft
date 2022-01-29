@@ -30,14 +30,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <ImageView
-                android:id="@+id/gift_list_direction"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_baseline_arrow_right_alt_24"
-                app:layout_constraintBottom_toBottomOf="@id/gift_list_img"
-                app:layout_constraintStart_toStartOf="parent" />
-
             <TextView
                 android:id="@+id/gift_list_date"
                 android:layout_width="0dp"

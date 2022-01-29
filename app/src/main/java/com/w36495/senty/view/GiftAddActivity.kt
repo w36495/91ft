@@ -15,9 +15,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import com.w36495.senty.R
 import com.w36495.senty.data.domain.Gift
 import com.w36495.senty.databinding.ActivityGiftAddBinding
+import com.w36495.senty.view.adapter.GlideApp
 import java.util.*
 
 class GiftAddActivity : AppCompatActivity() {
@@ -29,6 +32,7 @@ class GiftAddActivity : AppCompatActivity() {
 
     private lateinit var giftKey: String
     private var giftImageUri: Uri? = null
+    private lateinit var oldGiftImagePath: String
 
     private lateinit var resultGalleryImage: ActivityResultLauncher<Intent>
 
@@ -43,6 +47,12 @@ class GiftAddActivity : AppCompatActivity() {
         if (intent.hasExtra("updateGift")) {
             isUpdate = true
             val updateGift = intent.getSerializableExtra("updateGift") as Gift
+
+            GlideApp.with(binding.root)
+                .load(Firebase.storage.reference.child(updateGift.giftImagePath!!))
+                .into(binding.giftAddImg)
+
+            oldGiftImagePath = updateGift.giftImagePath!!
 
             if (updateGift.received) {
                 binding.giftAddTypeReceive.isChecked = true
@@ -78,13 +88,13 @@ class GiftAddActivity : AppCompatActivity() {
                 isReceive,
                 binding.giftAddDate.text.toString(),
                 binding.giftAddTitle.text.toString(),
-                binding.giftAddMemo.text.toString()
+                binding.giftAddMemo.text.toString(),
+                giftImageUri.toString()
             )
-
             intent.putExtra("saveGift", gift)
-            intent.putExtra("saveGiftImageUri", giftImageUri)
 
             if (isUpdate) {
+                intent.putExtra("oldGiftImagePath", oldGiftImagePath)
                 startActivity(intent)
                 finish()
             } else {
@@ -93,11 +103,12 @@ class GiftAddActivity : AppCompatActivity() {
             }
         }
 
-        resultGalleryImage = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                setImageByGallery(result)
+        resultGalleryImage =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    setImageByGallery(result)
+                }
             }
-        }
     }
 
     // 날짜 선택이 가능한 달력 다이얼로그 호출
@@ -106,14 +117,14 @@ class GiftAddActivity : AppCompatActivity() {
         val mYear = calendar.get(Calendar.YEAR)
         val mMonth = calendar.get(Calendar.MONTH)
         val mDay = calendar.get(Calendar.DAY_OF_MONTH)
-        val datePickerDialog = DatePickerDialog.OnDateSetListener { view, year, month, dayOfMonth ->
+        val datePickerDialog = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
             lateinit var printMonth: String
-            lateinit var printDayOfMonth : String
+            lateinit var printDayOfMonth: String
             // 월 2자리 표현
-            if ((month+1) in 1..9) {
-                printMonth = "0${month+1}"
+            if ((month + 1) in 1..9) {
+                printMonth = "0${month + 1}"
             } else {
-                printMonth = (month+1).toString()
+                printMonth = (month + 1).toString()
             }
             // 일 2자리 표현
             if (dayOfMonth in 1..9) {

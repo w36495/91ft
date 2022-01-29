@@ -3,7 +3,6 @@ package com.w36495.senty.view
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -50,13 +49,15 @@ class GiftListActivity : AppCompatActivity(), GiftSelectListener {
         binding.giftFriendPhone.text = friend.phone
 
         // 선물 정보 등록
-        resultAddGift = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val resultGift = result.data?.getSerializableExtra("saveGift") as Gift
-                val resultGiftImage = result.data?.getParcelableExtra<Uri>("saveGiftImageUri")
-                giftViewModel.addGift(resultGift, resultGiftImage!!)
+        resultAddGift =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    result.data?.let {
+                        val resultGift = it.getSerializableExtra("saveGift") as Gift
+                        giftViewModel.addGift(resultGift)
+                    }
+                }
             }
-        }
 
         // 선물 등록 버튼 클릭
         binding.fabGiftAdd.setOnClickListener {
@@ -67,7 +68,8 @@ class GiftListActivity : AppCompatActivity(), GiftSelectListener {
         // 선물 정보를 수정하는 경우
         if (intent.hasExtra("saveGift")) {
             val updateGift = intent.getSerializableExtra("saveGift") as Gift
-            giftViewModel.updateGift(updateGift)
+            val oldGiftImagePath = intent.getStringExtra("oldGiftImagePath")
+            giftViewModel.updateGift(updateGift, oldGiftImagePath!!)
         }
         // 선물 정보를 삭제하는 경우
         else if (intent.hasExtra("deleteGift")) {

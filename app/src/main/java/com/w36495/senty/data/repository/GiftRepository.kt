@@ -6,31 +6,31 @@ import androidx.lifecycle.MutableLiveData
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageReference
-import com.google.firebase.storage.UploadTask
 import com.w36495.senty.data.domain.Gift
 
 class GiftRepository(private val friendKey: String) {
 
     private var database: DatabaseReference = FirebaseDatabase.getInstance().reference
     private var storage = FirebaseStorage.getInstance()
+
     private var userId: String = FirebaseAuth.getInstance().currentUser!!.uid
 
     /**
      * 선물 등록
      */
-    fun saveNewGift(gift: Gift, giftImage: Uri) {
+    fun saveNewGift(gift: Gift) {
         val giftKey = database.push().key!!
         gift.giftKey = giftKey
 
         // 사진 등록
         val giftImagePath = System.currentTimeMillis().toString()
-        val giftImageFileRef: StorageReference = storage.reference.child("images").child(userId).child(friendKey).child(giftImagePath)
-        val uploadTask: UploadTask = giftImageFileRef.putFile(giftImage)
-        uploadTask.addOnSuccessListener {
-            gift.giftImagePath = giftImagePath
-            database.child(userId).child("gifts").child(friendKey).child(giftKey).setValue(gift)
-        }.addOnFailureListener { }
+        storage.reference.child("images/gifts/${giftImagePath}")
+            .putFile(Uri.parse(gift.giftImagePath))
+            .addOnSuccessListener {
+                gift.giftImagePath = "images/gifts/$giftImagePath"
+                database.child(userId).child("gifts").child(friendKey).child(giftKey).setValue(gift)
+            }
+            .addOnFailureListener { }
     }
 
     /**
@@ -40,7 +40,8 @@ class GiftRepository(private val friendKey: String) {
         val giftListLiveData = MutableLiveData<List<Gift>>()
         val giftDatabase = FirebaseDatabase.getInstance().getReference(userId).child("gifts").child(friendKey)
 
-        giftDatabase.addValueEventListener(object: ValueEventListener {
+        // 선물 정보
+        giftDatabase.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
                     val giftList = snapshot.children.map { giftSnapshot ->
@@ -54,30 +55,45 @@ class GiftRepository(private val friendKey: String) {
             }
             override fun onCancelled(error: DatabaseError) { }
         })
+
         return giftListLiveData
     }
 
     /**
      * 선물 수정
      */
-    fun updateGift(gift: Gift) {
-        val giftValue = gift.toMap()
+    fun updateGift(gift: Gift, oldImagePath: String) {
+        val updateGiftImagePath = System.currentTimeMillis().toString()
 
-        val giftUpdate = hashMapOf<String, Any>(
-            "/$userId/gifts/${friendKey}/${gift.giftKey}/" to giftValue
-        )
+        storage.reference.child("images/gifts/$updateGiftImagePath")
+            .putFile(Uri.parse(gift.giftImagePath))
+            .addOnSuccessListener {
+                gift.giftImagePath = "images/gifts/$updateGiftImagePath"
 
-        database.updateChildren(giftUpdate)
+                val giftValue = gift.toMap()
+                val giftUpdate = hashMapOf<String, Any>(
+                    "/$userId/gifts/${friendKey}/${gift.giftKey}/" to giftValue
+                )
+                database.updateChildren(giftUpdate)
+            }
+            .addOnFailureListener { }
+
+        // 기존의 image path 삭제
+        storage.reference.child(oldImagePath).delete()
+            .addOnSuccessListener {
+
+            }
     }
 
     /**
      * 선물 삭제
      */
     fun deleteGift(gift: Gift) {
-        database.child(userId).child("gifts").child(friendKey).child(gift.giftKey).removeValue()
-        val giftImageFileRef: StorageReference = storage.reference.child("images").child(userId).child(friendKey).child(gift.giftImagePath)
-        giftImageFileRef.delete()
-            .addOnSuccessListener {  }
-            .addOnFailureListener {  }
+        storage.reference.child(gift.giftImagePath!!).delete()
+            .addOnSuccessListener {
+                database.child(userId).child("gifts").child(friendKey).child(gift.giftKey)
+                    .removeValue()
+            }
+            .addOnFailureListener { }
     }
 }

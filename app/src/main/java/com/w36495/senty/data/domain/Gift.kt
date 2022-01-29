@@ -9,7 +9,7 @@ data class Gift(
     val giftDate: String = "",
     val giftTitle: String = "",
     val giftMemo: String = "",
-    var giftImagePath: String = ""
+    var giftImagePath: String? = null
 ): Serializable {
     @Exclude
     fun toMap(): Map<String, Any?> {

@@ -1,6 +1,5 @@
 package com.w36495.senty.viewModel
 
-import android.net.Uri
 import androidx.lifecycle.*
 import com.w36495.senty.data.domain.Gift
 import com.w36495.senty.data.repository.GiftRepository
@@ -24,15 +23,15 @@ class GiftViewModel(friendKey: String) : ViewModel() {
     /**
      * 선물 등록
      */
-    fun addGift(gift: Gift, giftImage: Uri) {
-        giftRepository.saveNewGift(gift, giftImage)
+    fun addGift(gift: Gift) {
+        giftRepository.saveNewGift(gift)
     }
 
     /**
      * 선물 수정
      */
-    fun updateGift(gift: Gift) {
-        giftRepository.updateGift(gift)
+    fun updateGift(gift: Gift, oldImagePath: String) {
+        giftRepository.updateGift(gift, oldImagePath)
     }
 
     /**

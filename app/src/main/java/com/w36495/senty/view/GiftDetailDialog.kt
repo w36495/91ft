@@ -9,9 +9,12 @@ import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import com.w36495.senty.R
 import com.w36495.senty.data.domain.Gift
 import com.w36495.senty.databinding.DialogGiftDetailBinding
+import com.w36495.senty.view.adapter.GlideApp
 
 class GiftDetailDialog(private val gift: Gift) : DialogFragment() {
 
@@ -43,6 +46,10 @@ class GiftDetailDialog(private val gift: Gift) : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        GlideApp.with(view)
+            .load(Firebase.storage.reference.child(gift.giftImagePath!!))
+            .into(binding.giftDetailImg)
 
         if (gift.received) {
             binding.giftDetailTopTitle.setText(R.string.title_giftReceive)
