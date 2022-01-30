@@ -20,7 +20,6 @@ import com.google.firebase.storage.ktx.storage
 import com.w36495.senty.R
 import com.w36495.senty.data.domain.Gift
 import com.w36495.senty.databinding.ActivityGiftAddBinding
-import com.w36495.senty.view.adapter.GlideApp
 import java.util.*
 
 class GiftAddActivity : AppCompatActivity() {
@@ -67,7 +66,7 @@ class GiftAddActivity : AppCompatActivity() {
         }
 
         binding.giftAddImgBtn.setOnClickListener {
-            getImageByGallery()
+            ImagePermission().getImageByGallery(view, resultGalleryImage)
         }
 
         // 날짜 선택버튼 클릭
@@ -135,28 +134,6 @@ class GiftAddActivity : AppCompatActivity() {
             binding.giftAddDate.setText("${year}/${printMonth}/${printDayOfMonth}")
         }
         DatePickerDialog(this, datePickerDialog, mYear, mMonth, mDay).show()
-    }
-
-    // TODO 카메라로부터 사진 가져오기
-    private fun selectCamera() {
-        val permission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-        if (permission == PackageManager.PERMISSION_DENIED) {
-            // 권한이 없어서 요청
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 777)
-        }
-    }
-
-    private fun getImageByGallery() {
-        val writePermission = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        val readPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-
-        if (writePermission == PackageManager.PERMISSION_DENIED || readPermission == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE), 888)
-        } else {
-            val galleryIntent = Intent(Intent.ACTION_PICK)
-            galleryIntent.type = MediaStore.Images.Media.CONTENT_TYPE
-            resultGalleryImage.launch(galleryIntent)
-        }
     }
 
     private fun setImageByGallery(result: ActivityResult) {

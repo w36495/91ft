@@ -13,6 +13,7 @@ import com.w36495.senty.data.domain.Gift
 import com.w36495.senty.data.domain.GiftType
 import com.w36495.senty.databinding.GiftListGiveItemBinding
 import com.w36495.senty.databinding.GiftListReceiveItemBinding
+import com.w36495.senty.view.GlideApp
 
 class GiftAdapter(
     private val context: Context,

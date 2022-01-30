@@ -14,7 +14,6 @@ import com.google.firebase.storage.ktx.storage
 import com.w36495.senty.R
 import com.w36495.senty.data.domain.Gift
 import com.w36495.senty.databinding.DialogGiftDetailBinding
-import com.w36495.senty.view.adapter.GlideApp
 
 class GiftDetailDialog(private val gift: Gift) : DialogFragment() {
 
