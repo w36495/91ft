@@ -1,19 +1,14 @@
 package com.w36495.senty.view
 
-import android.Manifest
 import android.app.Activity
 import android.app.DatePickerDialog
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
@@ -31,7 +26,7 @@ class GiftAddActivity : AppCompatActivity() {
 
     private lateinit var giftKey: String
     private var giftImageUri: Uri? = null
-    private lateinit var oldGiftImagePath: String
+    private var oldGiftImagePath: String? = null
 
     private lateinit var resultGalleryImage: ActivityResultLauncher<Intent>
 
@@ -47,11 +42,13 @@ class GiftAddActivity : AppCompatActivity() {
             isUpdate = true
             val updateGift = intent.getSerializableExtra("updateGift") as Gift
 
-            GlideApp.with(binding.root)
-                .load(Firebase.storage.reference.child(updateGift.giftImagePath!!))
-                .into(binding.giftAddImg)
+            updateGift.imagePath?.let { imagePath ->
+                GlideApp.with(binding.root)
+                    .load(Firebase.storage.reference.child(imagePath))
+                    .into(binding.giftAddImg)
+            }
 
-            oldGiftImagePath = updateGift.giftImagePath!!
+            oldGiftImagePath = updateGift.imagePath
 
             if (updateGift.received) {
                 binding.giftAddTypeReceive.isChecked = true
@@ -59,12 +56,13 @@ class GiftAddActivity : AppCompatActivity() {
                 binding.giftAddTypeGive.isChecked = true
             }
 
-            giftKey = updateGift.giftKey
-            binding.giftAddDate.setText(updateGift.giftDate)
-            binding.giftAddTitle.setText(updateGift.giftTitle)
-            binding.giftAddMemo.setText(updateGift.giftMemo)
+            giftKey = updateGift.key
+            binding.giftAddDate.setText(updateGift.date)
+            binding.giftAddTitle.setText(updateGift.title)
+            binding.giftAddMemo.setText(updateGift.memo)
         }
 
+        // 선물 이미지 선택 버튼 클릭
         binding.giftAddImgBtn.setOnClickListener {
             ImagePermission().getImageByGallery(view, resultGalleryImage)
         }
@@ -74,7 +72,7 @@ class GiftAddActivity : AppCompatActivity() {
             showDateDialog()
         }
 
-        // 등록 버튼 클릭 시
+        // 등록 버튼 클릭
         binding.giftAddSave.setOnClickListener {
             val intent = Intent(this, GiftListActivity::class.java)
 
@@ -88,8 +86,11 @@ class GiftAddActivity : AppCompatActivity() {
                 binding.giftAddDate.text.toString(),
                 binding.giftAddTitle.text.toString(),
                 binding.giftAddMemo.text.toString(),
-                giftImageUri.toString()
+                if (isUpdate) {
+                    giftImageUri?.toString() ?: oldGiftImagePath
+                } else giftImageUri?.toString()
             )
+
             intent.putExtra("saveGift", gift)
 
             if (isUpdate) {

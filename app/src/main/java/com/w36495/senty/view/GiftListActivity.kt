@@ -9,6 +9,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import com.w36495.senty.data.domain.Friend
 import com.w36495.senty.data.domain.Gift
 import com.w36495.senty.databinding.ActivityGiftListBinding
@@ -21,9 +23,8 @@ class GiftListActivity : AppCompatActivity(), GiftSelectListener {
     private lateinit var binding: ActivityGiftListBinding
     private lateinit var giftViewModel: GiftViewModel
 
-    private lateinit var giftAdapter: GiftAdapter
-
     private lateinit var resultAddGift: ActivityResultLauncher<Intent>
+    private lateinit var giftAdapter: GiftAdapter
 
     private lateinit var friend: Friend // 친구의 정보 저장 변수
 
@@ -39,7 +40,8 @@ class GiftListActivity : AppCompatActivity(), GiftSelectListener {
         friend = Friend(
             sharedPref.getString("friendKey", "")!!,
             sharedPref.getString("friendName", "")!!,
-            sharedPref.getString("friendPhone", "")!!
+            sharedPref.getString("friendPhone", "")!!,
+            sharedPref.getString("friendImagePath", null)
         )
 
         giftAdapter = GiftAdapter(view.context, this)
@@ -47,6 +49,11 @@ class GiftListActivity : AppCompatActivity(), GiftSelectListener {
 
         binding.giftFriendName.text = friend.name
         binding.giftFriendPhone.text = friend.phone
+        friend.imagePath?.let { imgPath ->
+            GlideApp.with(this)
+                .load(Firebase.storage.reference.child(imgPath))
+                .into(binding.giftFriendImg)
+        }
 
         // 선물 정보 등록
         resultAddGift =
@@ -54,7 +61,7 @@ class GiftListActivity : AppCompatActivity(), GiftSelectListener {
                 if (result.resultCode == Activity.RESULT_OK) {
                     result.data?.let {
                         val resultGift = it.getSerializableExtra("saveGift") as Gift
-                        giftViewModel.addGift(resultGift)
+                        giftViewModel.saveGift(resultGift)
                     }
                 }
             }
@@ -65,14 +72,15 @@ class GiftListActivity : AppCompatActivity(), GiftSelectListener {
             resultAddGift.launch(addGiftIntent)
         }
 
-        // 선물 정보를 수정하는 경우
+        // 선물 정보 수정
         if (intent.hasExtra("saveGift")) {
             val updateGift = intent.getSerializableExtra("saveGift") as Gift
             val oldGiftImagePath = intent.getStringExtra("oldGiftImagePath")
-            giftViewModel.updateGift(updateGift, oldGiftImagePath!!)
+            giftViewModel.updateGift(updateGift, oldGiftImagePath)
         }
-        // 선물 정보를 삭제하는 경우
-        else if (intent.hasExtra("deleteGift")) {
+
+        // 선물 정보 삭제
+        else if (intent.hasExtra("removeGift")) {
             val deleteGift = intent.getSerializableExtra("deleteGift") as Gift
             giftViewModel.removeGift(deleteGift)
         }
@@ -80,14 +88,6 @@ class GiftListActivity : AppCompatActivity(), GiftSelectListener {
         binding.giftRecyclerView.layoutManager = LinearLayoutManager(view.context)
         binding.giftRecyclerView.setHasFixedSize(true)
         binding.giftRecyclerView.adapter = giftAdapter
-
-    }
-
-    override fun onResume() {
-        super.onResume()
-        giftViewModel.giftList.observe(this, { gift ->
-            giftAdapter.setGiftList(gift)
-        })
     }
 
     /**
@@ -95,5 +95,12 @@ class GiftListActivity : AppCompatActivity(), GiftSelectListener {
      */
     override fun onGiftItemClicked(gift: Gift) {
         GiftDetailDialog(gift).show(supportFragmentManager, "giftDetailDialog")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        giftViewModel.giftList.observe(this, { gift ->
+            giftAdapter.setGiftList(gift)
+        })
     }
 }

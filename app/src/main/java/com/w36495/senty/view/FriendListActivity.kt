@@ -29,7 +29,7 @@ class FriendListActivity : AppCompatActivity(), FriendSelectListener {
         val view = binding.root
         setContentView(view)
 
-        friendAdapter = FriendAdapter(this, this)
+        friendAdapter = FriendAdapter(this)
         friendListViewModel = ViewModelProvider(this)[FriendListViewModel::class.java]
 
         // 친구 정보 등록 버튼 클릭
@@ -38,33 +38,31 @@ class FriendListActivity : AppCompatActivity(), FriendSelectListener {
         }
 
         // 새로운 친구의 정보가 등록되었을 때
-        resultFriendInfo = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val friendKey = result.data?.getStringExtra("friendKey") ?: ""
-                val friendName = result.data?.getStringExtra("friendName") ?: ""
-                val friendPhone = result.data?.getStringExtra("friendPhone") ?: ""
-
-                friendListViewModel.addFriendInfo(Friend(friendKey, friendName, friendPhone))
+        resultFriendInfo =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    result.data?.let {
+                        val addFriendInfo = it.getSerializableExtra("saveFriend") as Friend
+                        friendListViewModel.addFriend(addFriendInfo)
+                    }
+                }
             }
-        }
 
         // 친구의 정보가 수정되었을 때
-        if (intent.hasExtra("friendName")) {
-            friendListViewModel.updateFriendInfo(
-                Friend(
-                    intent.getStringExtra("friendKey")!!,
-                    intent.getStringExtra("friendName")!!,
-                    intent.getStringExtra("friendPhone")!!))
+        if (intent.hasExtra("saveFriend")) {
+            val updateFriendInfo = intent.getSerializableExtra("saveFriend") as Friend
+            val oldFriendImagePath: String? = intent.getStringExtra("oldFriendImagePath")
+            friendListViewModel.updateFriend(updateFriendInfo, oldFriendImagePath)
         }
         // 친구 정보 삭제
-        else if (intent.hasExtra("deleteFriendKey")) {
-            friendListViewModel.removeFriend(intent.getStringExtra("deleteFriendKey")!!)
+        else if (intent.hasExtra("deleteFriend")) {
+            val deleteFriend = intent.getSerializableExtra("deleteFriend") as Friend
+            friendListViewModel.removeFriend(deleteFriend)
         }
 
         binding.friendRecyclerView.layoutManager = LinearLayoutManager(this)
         binding.friendRecyclerView.setHasFixedSize(true)
         binding.friendRecyclerView.adapter = friendAdapter
-
     }
 
     /**

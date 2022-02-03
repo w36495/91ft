@@ -1,23 +1,33 @@
 package com.w36495.senty.view.adapter
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import com.w36495.senty.R
 import com.w36495.senty.data.domain.Friend
 import com.w36495.senty.databinding.FriendListItemBinding
+import com.w36495.senty.view.GlideApp
 import com.w36495.senty.view.listener.FriendSelectListener
 
-class FriendAdapter(private val context: Context, private val friendSelectListener: FriendSelectListener) : RecyclerView.Adapter<FriendAdapter.FriendHolder>() {
+class FriendAdapter(private val friendSelectListener: FriendSelectListener) :
+    RecyclerView.Adapter<FriendAdapter.FriendHolder>() {
 
     private var friendList: List<Friend> = listOf()
 
-    inner class FriendHolder(private val binding: FriendListItemBinding) : RecyclerView.ViewHolder(binding.root){
+    inner class FriendHolder(private val binding: FriendListItemBinding) :
+        RecyclerView.ViewHolder(binding.root) {
         fun bind(friend: Friend) {
             binding.friendListName.text = friend.name
             binding.friendListPhone.text = friend.phone
             binding.friendItemImg.setImageResource(R.drawable.ic_launcher_background)
+
+            friend.imagePath?.let { imagePath ->
+                GlideApp.with(binding.root)
+                    .load(Firebase.storage.reference.child(imagePath))
+                    .into(binding.friendItemImg)
+            }
 
             itemView.setOnClickListener {
                 friendSelectListener.onFriendInfoClicked(friend)
@@ -26,7 +36,8 @@ class FriendAdapter(private val context: Context, private val friendSelectListen
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FriendHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.friend_list_item, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.friend_list_item, parent, false)
         return FriendHolder(FriendListItemBinding.bind(view))
     }
 

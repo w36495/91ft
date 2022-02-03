@@ -46,9 +46,11 @@ class GiftDetailDialog(private val gift: Gift) : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        GlideApp.with(view)
-            .load(Firebase.storage.reference.child(gift.giftImagePath!!))
-            .into(binding.giftDetailImg)
+        gift.imagePath?.let { imagePath ->
+            GlideApp.with(view)
+                .load(Firebase.storage.reference.child(imagePath))
+                .into(binding.giftDetailImg)
+        }
 
         if (gift.received) {
             binding.giftDetailTopTitle.setText(R.string.title_giftReceive)
@@ -56,18 +58,17 @@ class GiftDetailDialog(private val gift: Gift) : DialogFragment() {
             binding.giftDetailTopTitle.setText(R.string.title_giftGive)
         }
 
-        binding.giftDetailDate.text = gift.giftDate
-        binding.giftDetailTitle.text = gift.giftTitle
-        binding.giftDetailMemo.text = gift.giftMemo
+        binding.giftDetailDate.text = gift.date
+        binding.giftDetailTitle.text = gift.title
+        binding.giftDetailMemo.text = gift.memo
 
         // 선물 수정 버튼 클릭
         binding.giftDetailUpdate.setOnClickListener {
-            val updateGiftIntent = Intent(view.context, GiftAddActivity::class.java)
-            updateGiftIntent.putExtra("updateGift", gift)
-            startActivity(updateGiftIntent)
+            updateGift(view)
             dismiss()
         }
 
+        // 닫기 버튼 클릭
         binding.giftDetailClose.setOnClickListener {
             dismiss()
         }
@@ -82,11 +83,29 @@ class GiftDetailDialog(private val gift: Gift) : DialogFragment() {
                 }
                 // 삭제 버튼
                 .setPositiveButton(resources.getString(R.string.btn_delete)) { _, _ ->
-                    deleteGift(view)
+                    removeGift(view)
                     dismiss()
                 }
                 .show()
         }
+    }
+
+    /**
+     * 선물 정보 수정
+     */
+    private fun updateGift(view: View) {
+        val updateGiftIntent = Intent(view.context, GiftAddActivity::class.java)
+        updateGiftIntent.putExtra("updateGift", gift)
+        startActivity(updateGiftIntent)
+    }
+
+    /**
+     * 선물 정보 삭제
+     */
+    private fun removeGift(view: View) {
+        val removeGiftIntent = Intent(view.context, GiftListActivity::class.java)
+        removeGiftIntent.putExtra("removeGift", gift)
+        startActivity(removeGiftIntent)
     }
 
     override fun onResume() {
@@ -97,11 +116,4 @@ class GiftDetailDialog(private val gift: Gift) : DialogFragment() {
         params?.width = (deviceWidth * 0.9).toInt()
         dialog?.window?.attributes = params as WindowManager.LayoutParams
     }
-
-    private fun deleteGift(view: View) {
-        val deleteGiftIntent = Intent(view.context, GiftListActivity::class.java)
-        deleteGiftIntent.putExtra("deleteGift", gift)
-        startActivity(deleteGiftIntent)
-    }
-
 }

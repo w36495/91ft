@@ -4,20 +4,36 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.google.firebase.storage.FirebaseStorage
+import android.net.Uri
+import com.google.android.gms.tasks.Task
 import com.w36495.senty.data.domain.Friend
 
 class FriendRepository {
 
     private var database: DatabaseReference = FirebaseDatabase.getInstance().reference
+    private var storage = FirebaseStorage.getInstance()
+
     private var userId: String = FirebaseAuth.getInstance().currentUser!!.uid
 
     /**
      * 친구 정보 등록
      */
-    fun writeNewFriend(friend: Friend) {
-        val friendKey = database.push().key!!
-        friend.key = friendKey
-        database.child(userId).child("friends").child(friendKey).setValue(friend)
+    fun insertFriend(friend: Friend) {
+        friend.key = database.push().key!!
+
+        if (friend.imagePath == null) {
+            database.child(userId).child("friends").child(friend.key).setValue(friend)
+        } else {
+            val friendImageFileName = System.currentTimeMillis().toString()
+            storage.reference.child("images/${friend.key}/$friendImageFileName")
+                .putFile(Uri.parse(friend.imagePath))
+                .addOnSuccessListener {
+                    friend.imagePath = "images/${friend.key}/$friendImageFileName"
+                    database.child(userId).child("friends").child(friend.key).setValue(friend)
+                }
+                .addOnFailureListener { }
+        }
     }
 
     /**
@@ -27,8 +43,7 @@ class FriendRepository {
         val friendListLiveData = MutableLiveData<List<Friend>>()
         val friendDatabase = FirebaseDatabase.getInstance().getReference(userId).child("friends")
 
-        friendDatabase.addValueEventListener(object: ValueEventListener {
-            // onDataChange : 경로의 전체 내용을 읽고 변경사항을 수신 대기
+        friendDatabase.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
                     val friendList = snapshot.children.map { friendSnapshot ->
@@ -41,9 +56,7 @@ class FriendRepository {
                 }
             }
 
-            override fun onCancelled(error: DatabaseError) {
-            }
-
+            override fun onCancelled(error: DatabaseError) {}
         })
         return friendListLiveData
     }
@@ -51,21 +64,60 @@ class FriendRepository {
     /**
      * 친구 정보 수정
      */
-    fun updateFriendInfo(friend: Friend) {
-        val postValues = friend.toMap()
-
-        val childUpdate = hashMapOf<String, Any>(
-            "/$userId/friends/${friend.key}/" to postValues
-        )
-
-        database.updateChildren(childUpdate)
+    fun updateFriend(friend: Friend, oldImagePath: String?) {
+        oldImagePath?.let { path ->
+            if (friend.imagePath == path) {
+                updateFriendInfoOnlyText(friend)
+            } else {
+                updateFriendInfo(friend)
+                storage.reference.child(path).delete()
+                    .addOnSuccessListener { }
+                    .addOnFailureListener { }
+            }
+        } ?: run {
+            friend.imagePath?.let {
+                updateFriendInfo(friend)
+            } ?: updateFriendInfoOnlyText(friend)
+        }
     }
 
     /**
      * 친구 정보 삭제
      */
-    fun deleteFriend(friendKey: String) {
-        database.child(userId).child("friends").child(friendKey).removeValue()
+    fun deleteFriend(friend: Friend) {
+        database.child(userId).child("friends").child(friend.key).removeValue() // 친구 정보 삭제
+        database.child(userId).child("gifts").child(friend.key).removeValue()   // 해당 친구의 선물 목록 삭제
+
+        storage.reference.child("images/${friend.key}").listAll()
+            .addOnSuccessListener { items ->
+                items.items.forEach { item ->
+                    item.delete()
+                }
+            }
     }
 
+    /**
+     * 친구 정보 수정 (텍스트 + 이미지)
+     */
+    private fun updateFriendInfo(friend: Friend) {
+        val updateFriendImagePath = System.currentTimeMillis().toString()
+        storage.reference.child("images/${friend.key}/$updateFriendImagePath")
+            .putFile(Uri.parse(friend.imagePath))
+            .addOnSuccessListener {
+                friend.imagePath = "images/${friend.key}/$updateFriendImagePath"
+                updateFriendInfoOnlyText(friend)
+            }
+            .addOnFailureListener { }
+    }
+
+    /**
+     * 친구 정보 수정 (텍스트)
+     */
+    private fun updateFriendInfoOnlyText(friend: Friend): Task<Void> {
+        val postValues = friend.toMap()
+        val childUpdate = hashMapOf<String, Any>(
+            "/$userId/friends/${friend.key}/" to postValues
+        )
+        return database.updateChildren(childUpdate)
+    }
 }

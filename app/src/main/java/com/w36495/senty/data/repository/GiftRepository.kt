@@ -8,29 +8,34 @@ import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
 import com.w36495.senty.data.domain.Gift
 
-class GiftRepository(private val friendKey: String) {
+class GiftRepository(friendKey: String) {
 
     private var database: DatabaseReference = FirebaseDatabase.getInstance().reference
     private var storage = FirebaseStorage.getInstance()
 
     private var userId: String = FirebaseAuth.getInstance().currentUser!!.uid
 
+    private val imageBasePath = "images/${friendKey}/"
+    private val databaseBasePath = "${userId}/gifts/${friendKey}/"
+
     /**
      * 선물 등록
      */
-    fun saveNewGift(gift: Gift) {
-        val giftKey = database.push().key!!
-        gift.giftKey = giftKey
+    fun insertGift(gift: Gift) {
+        gift.key = database.push().key!!
 
-        // 사진 등록
-        val giftImagePath = System.currentTimeMillis().toString()
-        storage.reference.child("images/gifts/${giftImagePath}")
-            .putFile(Uri.parse(gift.giftImagePath))
-            .addOnSuccessListener {
-                gift.giftImagePath = "images/gifts/$giftImagePath"
-                database.child(userId).child("gifts").child(friendKey).child(giftKey).setValue(gift)
-            }
-            .addOnFailureListener { }
+        gift.imagePath?.let { imagePath ->
+            val giftImagePath = System.currentTimeMillis().toString()
+            storage.reference.child(imageBasePath + giftImagePath)
+                .putFile(Uri.parse(imagePath))
+                .addOnSuccessListener {
+                    gift.imagePath = imageBasePath + giftImagePath
+                    database.child(databaseBasePath + gift.key)
+                        .setValue(gift)
+                }
+                .addOnFailureListener { }
+        } ?: database.child(databaseBasePath + gift.key)
+            .setValue(gift)
     }
 
     /**
@@ -38,9 +43,8 @@ class GiftRepository(private val friendKey: String) {
      */
     fun getGiftsList(): LiveData<List<Gift>> {
         val giftListLiveData = MutableLiveData<List<Gift>>()
-        val giftDatabase = FirebaseDatabase.getInstance().getReference(userId).child("gifts").child(friendKey)
+        val giftDatabase = FirebaseDatabase.getInstance().reference.child(databaseBasePath)
 
-        // 선물 정보
         giftDatabase.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
@@ -53,47 +57,65 @@ class GiftRepository(private val friendKey: String) {
                     giftListLiveData.postValue(giftList)
                 }
             }
-            override fun onCancelled(error: DatabaseError) { }
-        })
 
+            override fun onCancelled(error: DatabaseError) {}
+        })
         return giftListLiveData
     }
 
     /**
      * 선물 수정
      */
-    fun updateGift(gift: Gift, oldImagePath: String) {
-        val updateGiftImagePath = System.currentTimeMillis().toString()
-
-        storage.reference.child("images/gifts/$updateGiftImagePath")
-            .putFile(Uri.parse(gift.giftImagePath))
-            .addOnSuccessListener {
-                gift.giftImagePath = "images/gifts/$updateGiftImagePath"
-
-                val giftValue = gift.toMap()
-                val giftUpdate = hashMapOf<String, Any>(
-                    "/$userId/gifts/${friendKey}/${gift.giftKey}/" to giftValue
-                )
-                database.updateChildren(giftUpdate)
+    fun updateGift(gift: Gift, oldImagePath: String?) {
+        oldImagePath?.let { oldPath ->
+            if (gift.imagePath == oldPath) {
+                updateGiftInfoOnlyText(gift)
+            } else {
+                updateGiftInfo(gift)
+                storage.reference.child(oldPath).delete()
+                    .addOnSuccessListener { }
+                    .addOnFailureListener { }
             }
-            .addOnFailureListener { }
-
-        // 기존의 image path 삭제
-        storage.reference.child(oldImagePath).delete()
-            .addOnSuccessListener {
-
-            }
+        } ?: run {
+            gift.imagePath?.let {
+                updateGiftInfo(gift)
+            } ?: updateGiftInfoOnlyText(gift)
+        }
     }
 
     /**
      * 선물 삭제
      */
     fun deleteGift(gift: Gift) {
-        storage.reference.child(gift.giftImagePath!!).delete()
+        database.child(databaseBasePath + gift.key)
+            .removeValue()
+        storage.reference.child(gift.imagePath!!).delete()
+            .addOnSuccessListener { }
+            .addOnFailureListener { }
+    }
+
+    /**
+     * 선물 정보 수정 (텍스트 + 이미지)
+     */
+    private fun updateGiftInfo(gift: Gift) {
+        val updateGiftImagePath = System.currentTimeMillis().toString()
+        storage.reference.child(imageBasePath + updateGiftImagePath)
+            .putFile(Uri.parse(gift.imagePath))
             .addOnSuccessListener {
-                database.child(userId).child("gifts").child(friendKey).child(gift.giftKey)
-                    .removeValue()
+                gift.imagePath = imageBasePath + updateGiftImagePath
+                updateGiftInfoOnlyText(gift)
             }
             .addOnFailureListener { }
+    }
+
+    /**
+     * 선물 정보 수정 (텍스트)
+     */
+    private fun updateGiftInfoOnlyText(gift: Gift) {
+        val giftValue = gift.toMap()
+        val giftUpdate = hashMapOf<String, Any>(
+            "${databaseBasePath}/${gift.key}" to giftValue
+        )
+        database.updateChildren(giftUpdate)
     }
 }

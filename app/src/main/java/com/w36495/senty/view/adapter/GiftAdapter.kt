@@ -26,7 +26,8 @@ class GiftAdapter(
 
         val view: View
 
-        val inflater: LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val inflater: LayoutInflater =
+            context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         return if (viewType == GiftType.RECEIVE) {
             view = inflater.inflate(R.layout.gift_list_receive_item, parent, false)
@@ -34,6 +35,45 @@ class GiftAdapter(
         } else {
             view = inflater.inflate(R.layout.gift_list_give_item, parent, false)
             GiftGiveHolder(GiftListGiveItemBinding.bind(view))
+        }
+    }
+
+    inner class GiftReceiveHolder(private val binding: GiftListReceiveItemBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun receiveGiftBind(gift: Gift) {
+            binding.giftListImg.setImageResource(R.drawable.ic_launcher_background)
+            binding.giftListDate.text = gift.date
+            binding.giftListTitle.text = gift.title
+
+            gift.imagePath?.let { imgPath ->
+                GlideApp.with(binding.root)
+                    .load(Firebase.storage.reference.child(imgPath))
+                    .into(binding.giftListImg)
+            }
+
+            itemView.setOnClickListener {
+                giftSelectListener.onGiftItemClicked(gift)
+            }
+        }
+
+    }
+
+    inner class GiftGiveHolder(private val binding: GiftListGiveItemBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun giveGiftBind(gift: Gift) {
+            binding.giftListImg.setImageResource(R.drawable.ic_launcher_background)
+            binding.giftListDate.text = gift.date
+            binding.giftListTitle.text = gift.title
+
+            gift.imagePath?.let { imgPath ->
+                GlideApp.with(binding.root)
+                    .load(Firebase.storage.reference.child(imgPath))
+                    .into(binding.giftListImg)
+            }
+
+            itemView.setOnClickListener {
+                giftSelectListener.onGiftItemClicked(gift)
+            }
         }
     }
 
@@ -50,37 +90,6 @@ class GiftAdapter(
     fun setGiftList(giftList: List<Gift>) {
         this.giftList = giftList
         notifyDataSetChanged()
-    }
-
-    inner class GiftReceiveHolder(private val binding: GiftListReceiveItemBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        fun receiveGiftBind(gift: Gift) {
-            binding.giftListImg.setImageResource(R.drawable.ic_launcher_background)
-            binding.giftListDate.text = gift.giftDate
-            binding.giftListTitle.text = gift.giftTitle
-
-            GlideApp.with(binding.root)
-                .load(Firebase.storage.reference.child(gift.giftImagePath!!))
-                .into(binding.giftListImg)
-
-            itemView.setOnClickListener {
-                giftSelectListener.onGiftItemClicked(gift)
-            }
-        }
-
-    }
-
-    inner class GiftGiveHolder(private val binding: GiftListGiveItemBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        fun giveGiftBind(gift: Gift) {
-            binding.giftListImg.setImageResource(R.drawable.ic_launcher_background)
-            binding.giftListDate.text = gift.giftDate
-            binding.giftListTitle.text = gift.giftTitle
-
-            itemView.setOnClickListener {
-                giftSelectListener.onGiftItemClicked(gift)
-            }
-        }
     }
 
     /**

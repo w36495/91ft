@@ -23,14 +23,14 @@ class GiftViewModel(friendKey: String) : ViewModel() {
     /**
      * 선물 등록
      */
-    fun addGift(gift: Gift) {
-        giftRepository.saveNewGift(gift)
+    fun saveGift(gift: Gift) {
+        giftRepository.insertGift(gift)
     }
 
     /**
      * 선물 수정
      */
-    fun updateGift(gift: Gift, oldImagePath: String) {
+    fun updateGift(gift: Gift, oldImagePath: String?) {
         giftRepository.updateGift(gift, oldImagePath)
     }
 

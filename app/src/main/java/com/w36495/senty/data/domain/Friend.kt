@@ -6,14 +6,16 @@ import java.io.Serializable
 data class Friend constructor(
     var key: String = "",
     val name: String = "",
-    val phone: String = ""
+    val phone: String = "",
+    var imagePath: String? = null
 ) : Serializable {
     @Exclude
     fun toMap(): Map<String, Any?> {
         return mapOf(
             "key" to key,
             "name" to name,
-            "phone" to phone
+            "phone" to phone,
+            "imagePath" to imagePath
         )
 
     }

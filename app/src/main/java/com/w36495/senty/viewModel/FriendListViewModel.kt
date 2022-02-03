@@ -13,22 +13,21 @@ class FriendListViewModel : ViewModel() {
     /**
      * 친구 정보 등록
      */
-    fun addFriendInfo(friend: Friend) {
-        friendRepository.writeNewFriend(friend)
+    fun addFriend(friend: Friend) {
+        friendRepository.insertFriend(friend)
     }
 
     /**
      * 친구 정보 수정
      */
-    fun updateFriendInfo(friend: Friend) {
-        friendRepository.updateFriendInfo(friend)
+    fun updateFriend(friend: Friend, oldFriendImagePath: String?) {
+        friendRepository.updateFriend(friend, oldFriendImagePath)
     }
 
     /**
      * 친구 정보 삭제
      */
-    fun removeFriend(friendKey: String) {
-        friendRepository.deleteFriend(friendKey)
+    fun removeFriend(friend: Friend) {
+        friendRepository.deleteFriend(friend)
     }
-
 }

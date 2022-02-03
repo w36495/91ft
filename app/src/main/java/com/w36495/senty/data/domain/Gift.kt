@@ -4,22 +4,22 @@ import com.google.firebase.database.Exclude
 import java.io.Serializable
 
 data class Gift(
-    var giftKey: String = "",
+    var key: String = "",
     val received: Boolean = false,
-    val giftDate: String = "",
-    val giftTitle: String = "",
-    val giftMemo: String = "",
-    var giftImagePath: String? = null
+    val date: String = "",
+    val title: String = "",
+    val memo: String = "",
+    var imagePath: String? = null
 ): Serializable {
     @Exclude
     fun toMap(): Map<String, Any?> {
         return mapOf(
-            "giftKey" to giftKey,
+            "key" to key,
             "received" to received,
-            "giftDate" to giftDate,
-            "giftTitle" to giftTitle,
-            "giftMemo" to giftMemo,
-            "giftImagePath" to giftImagePath
+            "date" to date,
+            "title" to title,
+            "memo" to memo,
+            "imagePath" to imagePath
         )
 
     }
