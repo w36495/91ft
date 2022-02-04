@@ -53,23 +53,29 @@ class GiftDetailDialog(private val gift: Gift) : DialogFragment() {
         }
 
         if (gift.received) {
-            binding.giftDetailTopTitle.setText(R.string.title_giftReceive)
+            binding.giftDetailToolbar.title = getString(R.string.toolbar_gift_receive)
         } else {
-            binding.giftDetailTopTitle.setText(R.string.title_giftGive)
+            binding.giftDetailToolbar.title = getString(R.string.toolbar_gift_give)
         }
 
         binding.giftDetailDate.text = gift.date
         binding.giftDetailTitle.text = gift.title
         binding.giftDetailMemo.text = gift.memo
 
+        // 닫기 버튼 클릭
+        binding.giftDetailToolbar.setOnMenuItemClickListener { menu ->
+            when (menu.itemId) {
+                R.id.close -> {
+                    dismiss()
+                    true
+                }
+                else -> false
+            }
+        }
+
         // 선물 수정 버튼 클릭
         binding.giftDetailUpdate.setOnClickListener {
             updateGift(view)
-            dismiss()
-        }
-
-        // 닫기 버튼 클릭
-        binding.giftDetailClose.setOnClickListener {
             dismiss()
         }
 

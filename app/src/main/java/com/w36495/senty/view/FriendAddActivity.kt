@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
+import com.w36495.senty.R
 import com.w36495.senty.data.domain.Friend
 import com.w36495.senty.databinding.ActivityFriendAddBinding
 
@@ -32,6 +33,7 @@ class FriendAddActivity : AppCompatActivity() {
 
         if (intent.hasExtra("updateFriend")) {
             isUpdate = true
+            binding.friendAddToolbar.title = getString(R.string.toolbar_friend_update)
 
             val updateFriendInfo = intent.getSerializableExtra("updateFriend") as Friend
             friendKey = updateFriendInfo.key
@@ -52,6 +54,11 @@ class FriendAddActivity : AppCompatActivity() {
 
         binding.friendAddSave.setOnClickListener {
             saveFriend()
+        }
+
+        // 뒤로가기 버튼 클릭
+        binding.friendAddToolbar.setNavigationOnClickListener {
+            onBackPressed()
         }
 
         resultGalleryImage =

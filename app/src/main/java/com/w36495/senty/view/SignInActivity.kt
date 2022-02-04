@@ -24,8 +24,8 @@ class SignInActivity : AppCompatActivity() {
 
         // 로그인 버튼 클릭
         binding.btnLogin.setOnClickListener {
-            val userEmail = binding.signinEmail.text.toString()
-            val userPassword = binding.signinPasswd.text.toString()
+            val userEmail = binding.signinEmail.editText?.text.toString()
+            val userPassword = binding.signinPasswd.editText?.text.toString()
             signIn(userEmail, userPassword)
         }
 
@@ -41,6 +41,10 @@ class SignInActivity : AppCompatActivity() {
             ResetPasswdDialog().show(supportFragmentManager, "resetPasswdDialog")
         }
 
+        // 뒤로가기 버튼 클릭
+        binding.signinToolbar.setNavigationOnClickListener {
+            onBackPressed()
+        }
     }
 
     // firebase 로그인
@@ -67,7 +71,7 @@ class SignInActivity : AppCompatActivity() {
     private fun validateForm(): Boolean {
         var valid = true
 
-        val email = binding.signinEmail.text.toString()
+        val email = binding.signinEmail.editText?.text.toString()
         if (TextUtils.isEmpty(email)) {
             binding.signinEmail.error = "필수입력입니다."
             valid = false
@@ -75,7 +79,7 @@ class SignInActivity : AppCompatActivity() {
             binding.signinEmail.error = null
         }
 
-        val password = binding.signinPasswd.text.toString()
+        val password = binding.signinPasswd.editText?.text.toString()
         if (TextUtils.isEmpty(password)) {
             binding.signinPasswd.error = "필수입력입니다."
             valid = false

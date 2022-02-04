@@ -40,6 +40,8 @@ class GiftAddActivity : AppCompatActivity() {
         // 선물 조회 다이얼로그를 통해 넘겨받은 선물 정보 셋팅
         if (intent.hasExtra("updateGift")) {
             isUpdate = true
+            binding.giftAddToolbar.title = getString(R.string.toolbar_gift_update)
+
             val updateGift = intent.getSerializableExtra("updateGift") as Gift
 
             updateGift.imagePath?.let { imagePath ->
@@ -100,6 +102,24 @@ class GiftAddActivity : AppCompatActivity() {
             } else {
                 setResult(RESULT_OK, intent)
                 finish()
+            }
+        }
+
+        // 뒤로가기 버튼 클릭
+        binding.giftAddToolbar.setNavigationOnClickListener {
+            onBackPressed()
+        }
+
+        // 홈 버튼 클릭
+        binding.giftAddToolbar.setOnMenuItemClickListener { menu ->
+            when (menu.itemId) {
+                R.id.home -> {
+                    val moveFriendListIntent = Intent(this, FriendListActivity::class.java)
+                    startActivity(moveFriendListIntent)
+                    finish()
+                    true
+                }
+                else -> false
             }
         }
 

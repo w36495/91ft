@@ -41,14 +41,14 @@ class GiftAdapter(
     inner class GiftReceiveHolder(private val binding: GiftListReceiveItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun receiveGiftBind(gift: Gift) {
-            binding.giftListImg.setImageResource(R.drawable.ic_launcher_background)
-            binding.giftListDate.text = gift.date
-            binding.giftListTitle.text = gift.title
+            binding.giftItemImg.setImageResource(R.drawable.ic_launcher_background)
+            binding.giftItemDate.text = gift.date
+            binding.giftItemTitle.text = gift.title
 
             gift.imagePath?.let { imgPath ->
                 GlideApp.with(binding.root)
                     .load(Firebase.storage.reference.child(imgPath))
-                    .into(binding.giftListImg)
+                    .into(binding.giftItemImg)
             }
 
             itemView.setOnClickListener {
@@ -61,14 +61,14 @@ class GiftAdapter(
     inner class GiftGiveHolder(private val binding: GiftListGiveItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun giveGiftBind(gift: Gift) {
-            binding.giftListImg.setImageResource(R.drawable.ic_launcher_background)
-            binding.giftListDate.text = gift.date
-            binding.giftListTitle.text = gift.title
+            binding.giftItemImg.setImageResource(R.drawable.ic_launcher_background)
+            binding.giftItemDate.text = gift.date
+            binding.giftItemTitle.text = gift.title
 
             gift.imagePath?.let { imgPath ->
                 GlideApp.with(binding.root)
                     .load(Firebase.storage.reference.child(imgPath))
-                    .into(binding.giftListImg)
+                    .into(binding.giftItemImg)
             }
 
             itemView.setOnClickListener {

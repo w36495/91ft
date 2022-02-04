@@ -16,44 +16,16 @@
         android:background="@drawable/dialog_white_rounded"
         android:orientation="vertical">
 
-        <LinearLayout
-            android:id="@+id/gift_detail_top_layout"
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/gift_detail_toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="1"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/gift_detail_img" >
-
-            <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="15dp"
-                android:src="@drawable/ic_baseline_card_giftcard_24"
-                android:visibility="invisible"
-                android:background="@android:color/transparent"/>
-
-            <TextView
-                android:id="@+id/gift_detail_top_title"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:gravity="center"
-                android:text="@string/title_giftReceive"
-                android:textSize="20sp"
-                android:layout_weight="1"/>
-
-            <ImageButton
-                android:id="@+id/gift_detail_close"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_baseline_close_24"
-                android:padding="15dp"
-                android:background="@android:color/transparent"/>
-
-        </LinearLayout>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:menu="@menu/top_app_bar_close"
+            app:title="@string/toolbar_gift_receive"
+            app:titleCentered="true" />
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/gift_detail_img"
@@ -61,9 +33,9 @@
             android:layout_height="150dp"
             android:layout_marginTop="30dp"
             android:src="@drawable/ic_launcher_background"
-            app:layout_constraintTop_toBottomOf="@id/gift_detail_top_layout"
-            app:layout_constraintStart_toStartOf="@id/gift_detail_top_layout"
-            app:layout_constraintEnd_toEndOf="@id/gift_detail_top_layout"
+            app:layout_constraintTop_toBottomOf="@id/gift_detail_toolbar"
+            app:layout_constraintStart_toStartOf="@id/gift_detail_toolbar"
+            app:layout_constraintEnd_toEndOf="@id/gift_detail_toolbar"
             app:layout_constraintBottom_toTopOf="@id/gift_detail_layout1"/>
 
         <LinearLayout
@@ -159,15 +131,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/btn_delete"
-            android:backgroundTint="@color/red"
+            android:backgroundTint="@color/senty_red"
             app:layout_constraintTop_toBottomOf="@id/gift_detail_update"
             app:layout_constraintStart_toStartOf="@id/gift_detail_update"
             app:layout_constraintEnd_toEndOf="@id/gift_detail_update"/>
 
-
-
-
-
-
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </layout>

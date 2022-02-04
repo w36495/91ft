@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
+import com.w36495.senty.R
 import com.w36495.senty.data.domain.Friend
 import com.w36495.senty.data.domain.Gift
 import com.w36495.senty.databinding.ActivityGiftListBinding
@@ -47,12 +48,12 @@ class GiftListActivity : AppCompatActivity(), GiftSelectListener {
         giftAdapter = GiftAdapter(view.context, this)
         giftViewModel = ViewModelProvider(this, GiftViewModel.GiftViewModelFactory(friend.key))[GiftViewModel::class.java]
 
-        binding.giftFriendName.text = friend.name
-        binding.giftFriendPhone.text = friend.phone
+        binding.giftListName.text = friend.name
+        binding.giftListPhone.text = friend.phone
         friend.imagePath?.let { imgPath ->
             GlideApp.with(this)
                 .load(Firebase.storage.reference.child(imgPath))
-                .into(binding.giftFriendImg)
+                .into(binding.giftListImg)
         }
 
         // 선물 정보 등록
@@ -70,6 +71,24 @@ class GiftListActivity : AppCompatActivity(), GiftSelectListener {
         binding.fabGiftAdd.setOnClickListener {
             val addGiftIntent = Intent(this, GiftAddActivity::class.java)
             resultAddGift.launch(addGiftIntent)
+        }
+
+        // 뒤로가기 버튼 클릭
+        binding.giftListToolbar.setNavigationOnClickListener {
+            onBackPressed()
+        }
+
+        // 홈 버튼 클릭
+        binding.giftListToolbar.setOnMenuItemClickListener { menu ->
+            when (menu.itemId) {
+                R.id.home -> {
+                    val moveFriendListIntent = Intent(this, FriendListActivity::class.java)
+                    startActivity(moveFriendListIntent)
+                    finish()
+                    true
+                }
+                else -> false
+            }
         }
 
         // 선물 정보 수정

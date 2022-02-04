@@ -53,6 +53,10 @@ class FriendInfoActivity : AppCompatActivity(), View.OnClickListener {
         binding.friendInfoUpdate.setOnClickListener(this)
         // 친구 정보 삭제
         binding.friendInfoDelete.setOnClickListener(this)
+        // 뒤로가기 버튼 클릭
+        binding.friendInfoToolbar.setNavigationOnClickListener {
+            onBackPressed()
+        }
 
     }
 

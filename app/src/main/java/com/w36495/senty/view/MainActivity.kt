@@ -16,17 +16,11 @@ class MainActivity : AppCompatActivity() {
         setContentView(view)
 
         // 로그인 액티비티로 이동
-        binding.mainLogin.setOnClickListener {
-            val loginIntent = Intent(this, SignInActivity::class.java)
-            startActivity(loginIntent)
-            finish()
+        binding.mainEmailLogin.setOnClickListener {
+            val emailLoginIntent = Intent(this, SignInActivity::class.java)
+            startActivity(emailLoginIntent)
         }
 
-        // 회원가입 액티비티로 이동
-        binding.mainSignup.setOnClickListener {
-            val signupIntent = Intent(this, SignUpActivity::class.java)
-            startActivity(signupIntent)
-            finish()
-        }
+        // TODO 구글 이메일 로그인
     }
 }

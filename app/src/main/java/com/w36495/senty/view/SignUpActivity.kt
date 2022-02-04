@@ -6,6 +6,7 @@ import android.text.TextUtils
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
+import com.w36495.senty.R
 import com.w36495.senty.databinding.ActivitySignupBinding
 
 class SignUpActivity : AppCompatActivity() {
@@ -22,12 +23,17 @@ class SignUpActivity : AppCompatActivity() {
 
         auth = FirebaseAuth.getInstance()
 
+        // 회원가입 버튼 클릭
         binding.btnSignup.setOnClickListener {
-            val userEmail = binding.signupEmail.text.toString()
-            val userPassword = binding.signupPasswd.text.toString()
+            val userEmail = binding.signupEmail.editText?.text.toString()
+            val userPassword = binding.signupPasswd.editText?.text.toString()
             createAccount(userEmail, userPassword)
         }
 
+        // 뒤로가기 버튼 클릭
+        binding.signupToolbar.setNavigationOnClickListener {
+            onBackPressed()
+        }
     }
 
     // firebase 회원가입
@@ -39,12 +45,12 @@ class SignUpActivity : AppCompatActivity() {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    Toast.makeText(this, "회원가입이 완료되었습니다.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.msg_complete_signup), Toast.LENGTH_SHORT).show()
                     val intent = Intent(this, SignInActivity::class.java)
                     startActivity(intent)
                     finish()
                 } else {
-                    Toast.makeText(this, "회원가입에 실패하였습니다.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.msg_failed_signup), Toast.LENGTH_SHORT).show()
                 }
             }
     }
@@ -53,17 +59,17 @@ class SignUpActivity : AppCompatActivity() {
     private fun validateForm(): Boolean {
         var valid = true
 
-        val email = binding.signupEmail.text.toString()
+        val email = binding.signupEmail.editText?.text.toString()
         if (TextUtils.isEmpty(email)) {
-            binding.signupEmail.error = "필수입력입니다."
+            binding.signupEmail.error = getString(R.string.error_input)
             valid = false
         } else {
             binding.signupEmail.error = null
         }
 
-        val password = binding.signupPasswd.text.toString()
+        val password = binding.signupPasswd.editText?.text.toString()
         if (TextUtils.isEmpty(password)) {
-            binding.signupPasswd.error = "필수입력입니다."
+            binding.signupPasswd.error = getString(R.string.error_input)
             valid = false
         } else {
             binding.signupPasswd.error = null
