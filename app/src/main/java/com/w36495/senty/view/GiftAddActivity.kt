@@ -15,6 +15,7 @@ import com.google.firebase.storage.ktx.storage
 import com.w36495.senty.R
 import com.w36495.senty.data.domain.Gift
 import com.w36495.senty.databinding.ActivityGiftAddBinding
+import com.w36495.senty.util.DateUtil
 import java.util.*
 
 class GiftAddActivity : AppCompatActivity() {
@@ -62,6 +63,8 @@ class GiftAddActivity : AppCompatActivity() {
             binding.giftAddDate.setText(updateGift.date)
             binding.giftAddTitle.setText(updateGift.title)
             binding.giftAddMemo.setText(updateGift.memo)
+        } else {
+            binding.giftAddDate.setText(DateUtil.getDateTime())
         }
 
         // 선물 이미지 선택 버튼 클릭
@@ -69,9 +72,8 @@ class GiftAddActivity : AppCompatActivity() {
             ImagePermission().getImageByGallery(view, resultGalleryImage)
         }
 
-        // 날짜 선택버튼 클릭
-        binding.giftAddDateBtn.setOnClickListener {
-            showDateDialog()
+        binding.giftAddDate.setOnClickListener {
+            showDateDialog(binding.giftAddDate.text.toString())
         }
 
         // 등록 버튼 클릭
@@ -125,26 +127,28 @@ class GiftAddActivity : AppCompatActivity() {
 
         resultGalleryImage =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                if (result.resultCode == Activity.RESULT_OK) {
+                if (result.resultCode == RESULT_OK) {
                     setImageByGallery(result)
                 }
             }
     }
 
     // 날짜 선택이 가능한 달력 다이얼로그 호출
-    private fun showDateDialog() {
-        val calendar = Calendar.getInstance()
-        val mYear = calendar.get(Calendar.YEAR)
-        val mMonth = calendar.get(Calendar.MONTH)
-        val mDay = calendar.get(Calendar.DAY_OF_MONTH)
+    private fun showDateDialog(selectedDate: String) {
+        val selectedDateToken = selectedDate.split('/')
+        val mYear = selectedDateToken[0].toInt()
+        val mMonth = selectedDateToken[1].toInt()
+        println("mMonth : $mMonth")
+        val mDay = selectedDateToken[2].toInt()
         val datePickerDialog = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
             lateinit var printMonth: String
             lateinit var printDayOfMonth: String
+            println("선택된 월 : $month")
             // 월 2자리 표현
-            if ((month + 1) in 1..9) {
-                printMonth = "0${month + 1}"
+            if ((month+1) in 1..9) {
+                printMonth = "0${month+1}"
             } else {
-                printMonth = (month + 1).toString()
+                printMonth = (month+1).toString()
             }
             // 일 2자리 표현
             if (dayOfMonth in 1..9) {
@@ -152,9 +156,10 @@ class GiftAddActivity : AppCompatActivity() {
             } else {
                 printDayOfMonth = dayOfMonth.toString()
             }
+            println("printMonth : $printMonth")
             binding.giftAddDate.setText("${year}/${printMonth}/${printDayOfMonth}")
         }
-        DatePickerDialog(this, datePickerDialog, mYear, mMonth, mDay).show()
+        DatePickerDialog(this, datePickerDialog, mYear, mMonth-1, mDay).show()
     }
 
     private fun setImageByGallery(result: ActivityResult) {

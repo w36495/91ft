@@ -34,13 +34,11 @@ class FriendInfoActivity : AppCompatActivity(), View.OnClickListener {
         with(sharedPref.edit()) {
             putString("friendKey", friend.key)
             putString("friendName", friend.name)
-            putString("friendPhone", friend.phone)
             putString("friendImagePath", friend.imagePath)
             commit()
         }
 
         binding.friendDetailName.text = friend.name
-        binding.friendDetailPhone.text = friend.phone
         friend.imagePath?.let { imgPath ->
             GlideApp.with(view)
                 .load(Firebase.storage.reference.child(imgPath))

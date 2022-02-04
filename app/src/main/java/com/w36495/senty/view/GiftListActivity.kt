@@ -41,7 +41,6 @@ class GiftListActivity : AppCompatActivity(), GiftSelectListener {
         friend = Friend(
             sharedPref.getString("friendKey", "")!!,
             sharedPref.getString("friendName", "")!!,
-            sharedPref.getString("friendPhone", "")!!,
             sharedPref.getString("friendImagePath", null)
         )
 
@@ -49,7 +48,6 @@ class GiftListActivity : AppCompatActivity(), GiftSelectListener {
         giftViewModel = ViewModelProvider(this, GiftViewModel.GiftViewModelFactory(friend.key))[GiftViewModel::class.java]
 
         binding.giftListName.text = friend.name
-        binding.giftListPhone.text = friend.phone
         friend.imagePath?.let { imgPath ->
             GlideApp.with(this)
                 .load(Firebase.storage.reference.child(imgPath))

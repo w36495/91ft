@@ -60,41 +60,15 @@
 
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/friend_info_layout2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:orientation="horizontal"
-            app:layout_constraintEnd_toEndOf="@id/friend_info_layout1"
-            app:layout_constraintStart_toStartOf="@id/friend_info_layout1"
-            app:layout_constraintTop_toBottomOf="@id/friend_info_layout1">
-
-            <TextView
-                android:layout_width="100dp"
-                android:layout_height="wrap_content"
-                android:text="@string/tv_phone"
-                android:textAlignment="center"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/friend_detail_phone"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
-                android:padding="8dp" />
-
-        </LinearLayout>
-
         <com.google.android.material.button.MaterialButton
             android:id="@+id/friend_info_gift"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="50dp"
             android:text="@string/tv_gift_list"
-            app:layout_constraintEnd_toEndOf="@id/friend_info_layout2"
-            app:layout_constraintStart_toStartOf="@id/friend_info_layout2"
-            app:layout_constraintTop_toBottomOf="@id/friend_info_layout2" />
+            app:layout_constraintEnd_toEndOf="@id/friend_info_layout1"
+            app:layout_constraintStart_toStartOf="@id/friend_info_layout1"
+            app:layout_constraintTop_toBottomOf="@id/friend_info_layout1" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/friend_info_update"

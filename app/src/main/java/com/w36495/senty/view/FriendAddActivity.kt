@@ -38,7 +38,6 @@ class FriendAddActivity : AppCompatActivity() {
             val updateFriendInfo = intent.getSerializableExtra("updateFriend") as Friend
             friendKey = updateFriendInfo.key
             binding.friendAddName.setText(updateFriendInfo.name)
-            binding.friendAddPhone.setText(updateFriendInfo.phone)
             oldFriendImagePath = updateFriendInfo.imagePath
 
             updateFriendInfo.imagePath?.let { imgPath ->
@@ -81,31 +80,28 @@ class FriendAddActivity : AppCompatActivity() {
      */
     private fun saveFriend() {
         val friendAddIntent = Intent(this, FriendListActivity::class.java)
+            val friend = Friend(
+                if (isUpdate) friendKey else "",
+                binding.friendAddName.text.toString(),
+                if (isUpdate) {
+                    friendImageUri?.toString() ?: oldFriendImagePath
+                } else {
+                    friendImageUri?.toString()
+                }
+            )
 
-        val friend = Friend(
-            if (isUpdate) friendKey else "",
-            binding.friendAddName.text.toString(),
-            binding.friendAddPhone.text.toString(),
+            friendAddIntent.putExtra("saveFriend", friend)
+
+            // 친구의 정보 수정
             if (isUpdate) {
-                friendImageUri?.toString() ?: oldFriendImagePath
-            } else {
-                friendImageUri?.toString()
+                friendAddIntent.putExtra("oldFriendImagePath", oldFriendImagePath)
+                startActivity(friendAddIntent)
+                finish()
             }
-
-        )
-
-        friendAddIntent.putExtra("saveFriend", friend)
-
-        // 친구의 정보 수정
-        if (isUpdate) {
-            friendAddIntent.putExtra("oldFriendImagePath", oldFriendImagePath)
-            startActivity(friendAddIntent)
-            finish()
-        }
-        // 친구의 정보 등록
-        else {
-            setResult(RESULT_OK, friendAddIntent)
-            finish()
-        }
+            // 친구의 정보 등록
+            else {
+                setResult(RESULT_OK, friendAddIntent)
+                finish()
+            }
     }
 }

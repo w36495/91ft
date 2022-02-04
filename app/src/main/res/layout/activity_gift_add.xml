@@ -16,7 +16,7 @@
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/gift_add_toolbar"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -26,148 +26,155 @@
             app:title="@string/toolbar_gift_add"
             app:titleCentered="true" />
 
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/gift_add_img"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            android:layout_marginTop="12dp"
-            android:src="@drawable/ic_launcher_background"
-            app:layout_constraintBottom_toTopOf="@id/gift_add_img_btn"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/gift_add_toolbar" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/gift_add_img_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="@string/btn_addImg"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@id/gift_add_type"
-            app:layout_constraintEnd_toEndOf="@id/gift_add_img"
-            app:layout_constraintStart_toStartOf="@id/gift_add_img"
-            app:layout_constraintTop_toBottomOf="@id/gift_add_img" />
-
-        <RadioGroup
-            android:id="@+id/gift_add_type"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:orientation="horizontal"
-            app:layout_constraintBottom_toTopOf="@id/gift_add_layout1"
-            app:layout_constraintEnd_toEndOf="@id/gift_add_img_btn"
-            app:layout_constraintStart_toStartOf="@id/gift_add_img_btn"
-            app:layout_constraintTop_toBottomOf="@id/gift_add_img_btn">
-
-            <RadioButton
-                android:id="@+id/gift_add_type_receive"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:checked="true"
-                android:text="@string/radio_receive" />
-
-            <RadioButton
-                android:id="@+id/gift_add_type_give"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="@string/radio_give" />
-        </RadioGroup>
-
-        <LinearLayout
-            android:id="@+id/gift_add_layout1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:orientation="horizontal"
-            android:weightSum="1"
-            app:layout_constraintBottom_toTopOf="@id/gift_add_layout2"
-            app:layout_constraintEnd_toEndOf="@id/gift_add_type"
-            app:layout_constraintStart_toStartOf="@id/gift_add_type"
-            app:layout_constraintTop_toBottomOf="@id/gift_add_type">
-
-            <TextView
-                android:layout_width="100dp"
-                android:layout_height="wrap_content"
-                android:text="@string/tv_date"
-                android:textAlignment="center"
-                android:textStyle="bold" />
-
-            <EditText
-                android:id="@+id/gift_add_date"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="@string/hint_date"
-                android:inputType="text" />
-
-            <Button
-                android:id="@+id/gift_add_date_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
-                android:drawableLeft="@drawable/ic_baseline_calendar_month_24"
-                android:text="날짜선택" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/gift_add_layout2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:orientation="horizontal"
-            app:layout_constraintEnd_toEndOf="@id/gift_add_layout1"
-            app:layout_constraintStart_toStartOf="@id/gift_add_layout1"
-            app:layout_constraintTop_toBottomOf="@id/gift_add_layout1">
-
-            <TextView
-                android:layout_width="100dp"
-                android:layout_height="wrap_content"
-                android:text="@string/tv_title"
-                android:textAlignment="center"
-                android:textStyle="bold" />
-
-            <EditText
-                android:id="@+id/gift_add_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
-                android:hint="@string/hint_title"
-                android:inputType="text" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/gift_add_layout3"
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="15dp"
-            android:orientation="horizontal"
-            app:layout_constraintBottom_toTopOf="@id/gift_add_save"
-            app:layout_constraintEnd_toEndOf="@id/gift_add_layout2"
-            app:layout_constraintStart_toStartOf="@id/gift_add_layout2"
-            app:layout_constraintTop_toBottomOf="@id/gift_add_layout2">
+            app:layout_constraintTop_toBottomOf="@id/gift_add_toolbar"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/gift_add_save">
 
-            <TextView
-                android:layout_width="100dp"
-                android:layout_height="wrap_content"
-                android:text="@string/tv_memo"
-                android:textAlignment="center"
-                android:textStyle="bold" />
-
-            <EditText
-                android:id="@+id/gift_add_memo"
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginEnd="10dp"
-                android:gravity="top"
-                android:hint="@string/hint_memo"
-                android:inputType="textMultiLine" />
+                android:layout_height="match_parent" >
 
-        </LinearLayout>
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/gift_add_img"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    android:src="@drawable/ic_launcher_background"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toTopOf="@id/gift_add_img_btn"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
 
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/gift_add_img_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/btn_addImg"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toTopOf="@id/gift_add_type"
+                    app:layout_constraintEnd_toEndOf="@id/gift_add_img"
+                    app:layout_constraintStart_toStartOf="@id/gift_add_img"
+                    app:layout_constraintTop_toBottomOf="@id/gift_add_img" />
+
+                <RadioGroup
+                    android:id="@+id/gift_add_type"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal"
+                    app:layout_constraintBottom_toTopOf="@id/gift_add_layout1"
+                    app:layout_constraintEnd_toEndOf="@id/gift_add_img_btn"
+                    app:layout_constraintStart_toStartOf="@id/gift_add_img_btn"
+                    app:layout_constraintTop_toBottomOf="@id/gift_add_img_btn">
+
+                    <RadioButton
+                        android:id="@+id/gift_add_type_receive"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:text="@string/radio_receive" />
+
+                    <RadioButton
+                        android:id="@+id/gift_add_type_give"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/radio_give" />
+                </RadioGroup>
+
+                <LinearLayout
+                    android:id="@+id/gift_add_layout1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"
+                    android:orientation="horizontal"
+                    android:weightSum="1"
+                    app:layout_constraintBottom_toTopOf="@id/gift_add_layout2"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/gift_add_type">
+
+                    <TextView
+                        android:layout_width="100dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/tv_date"
+                        android:textAlignment="center"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/gift_add_date"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="10dp"
+                        android:layout_weight="1"
+                        android:focusable="false"
+                        android:hint="@string/hint_date" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/gift_add_layout2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"
+                    android:orientation="horizontal"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/gift_add_layout1">
+
+                    <TextView
+                        android:layout_width="100dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/tv_title"
+                        android:textAlignment="center"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/gift_add_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="10dp"
+                        android:hint="@string/hint_title"
+                        android:inputType="text" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/gift_add_layout3"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"
+                    android:orientation="horizontal"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/gift_add_layout2">
+
+                    <TextView
+                        android:layout_width="100dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/tv_memo"
+                        android:textAlignment="center"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/gift_add_memo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="10dp"
+                        android:gravity="top"
+                        android:hint="@string/hint_memo"
+                        android:inputType="textMultiLine" />
+
+                </LinearLayout>
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.core.widget.NestedScrollView>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/gift_add_save"
@@ -177,8 +184,8 @@
             android:background="@drawable/btn_dark_grey"
             android:text="@string/btn_save"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@id/gift_add_layout3"
-            app:layout_constraintStart_toStartOf="@id/gift_add_layout3" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

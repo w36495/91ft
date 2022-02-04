@@ -6,7 +6,6 @@ import java.io.Serializable
 data class Friend constructor(
     var key: String = "",
     val name: String = "",
-    val phone: String = "",
     var imagePath: String? = null
 ) : Serializable {
     @Exclude
@@ -14,9 +13,7 @@ data class Friend constructor(
         return mapOf(
             "key" to key,
             "name" to name,
-            "phone" to phone,
             "imagePath" to imagePath
         )
-
     }
 }

@@ -20,7 +20,6 @@ class FriendAdapter(private val friendSelectListener: FriendSelectListener) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(friend: Friend) {
             binding.friendListName.text = friend.name
-            binding.friendListPhone.text = friend.phone
             binding.friendItemImg.setImageResource(R.drawable.ic_launcher_background)
 
             friend.imagePath?.let { imagePath ->
