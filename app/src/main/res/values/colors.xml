@@ -1,14 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-
-
-    <color name="senty_green1">#5F8827</color>
-    <color name="senty_green2">#85AF4B</color>
+    <color name="senty_green1">#7da453</color>
+    <color name="senty_green2">#aed581</color>
+    <color name="senty_green3">#e1ffb1</color>
     <color name="senty_gray1">#383838</color>
     <color name="senty_gray2">#F3F3F3</color>
     <color name="senty_red">#EB4E3D</color>
