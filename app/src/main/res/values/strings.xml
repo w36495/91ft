@@ -12,7 +12,7 @@
     <string name="toolbar_gift_update">선물수정</string>
     <string name="toolbar_gift_receive">받은선물</string>
     <string name="toolbar_gift_give">보낸선물</string>
-    <string name="title_forget_passwd">비밀번호 재설정</string>
+    <string name="toolbar_forget_passwd">비밀번호 재설정</string>
     <string name="title_close">닫기</string>
     <string name="title_home">홈</string>
 
@@ -36,6 +36,8 @@
     <string name="tv_passwd">비밀번호</string>
     <string name="tv_passwd2">비밀번호 (8자 이상)</string>
     <string name="tv_gift_list">선물 목록</string>
+    <string name="tv_gift_memo_count_before">0/100</string>
+    <string name="tv_gift_memo_count_after">/100</string>
 
     <string name="desc_main">정성스런 선물을 주고받았을 때의 감정과 느낌을</string>
     <string name="desc_sub">senty와 함께 기록해보세요.</string>
@@ -45,6 +47,7 @@
     <string name="desc_home">홈 화면으로 이동</string>
     <string name="desc_fab_friend_add">친구 등록 버튼</string>
     <string name="desc_fab_gift_add">선물 등록 버튼</string>
+    <string name="desc_gift_img">선물 사진</string>
 
     <string name="radio_receive">받은 선물</string>
     <string name="radio_give">보낸 선물</string>
@@ -66,6 +69,9 @@
     <string name="msg_friend_delete">친구의 정보가 삭제되었습니다.</string>
     <string name="msg_complete_signup">회원가입이 완료되었습니다.</string>
     <string name="msg_failed_signup">회원가입에 실패하였습니다.</string>
+
+    <string name="toast_empty_email">이메일을 입력하세요.</string>
+    <string name="toast_send_email">비밀번호 재설정 이메일이 발송되었습니다.</string>
 
     <string name="error_input">필수입력입니다.</string>
 </resources>

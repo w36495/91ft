@@ -9,6 +9,7 @@ import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import com.google.firebase.auth.FirebaseAuth
+import com.w36495.senty.R
 import com.w36495.senty.databinding.DialogPasswdResetBinding
 
 class ResetPasswdDialog : DialogFragment() {
@@ -45,17 +46,29 @@ class ResetPasswdDialog : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // 확인 버튼 클릭
         binding.resetPasswdCheck.setOnClickListener {
             val inputEmail = binding.resetEmail.text.toString()
             if (inputEmail.isEmpty()) {
-                Toast.makeText(view.context, "이메일을 입력하세요.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    view.context,
+                    getString(R.string.toast_empty_email),
+                    Toast.LENGTH_SHORT
+                ).show()
             } else {
                 sendPasswordResetEmail(view, inputEmail)
             }
         }
 
-        binding.resetPasswdClose.setOnClickListener {
-            dismiss()
+        // 닫기 버튼 클릭
+        binding.resetPasswdToolbar.setOnMenuItemClickListener { menu ->
+            when (menu.itemId) {
+                R.id.close -> {
+                    dismiss()
+                    true
+                }
+                else -> false
+            }
         }
 
     }
@@ -65,7 +78,11 @@ class ResetPasswdDialog : DialogFragment() {
         auth.sendPasswordResetEmail(email)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    Toast.makeText(view.context, "비밀번호 재설정 이메일이 발송되었습니다.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        view.context,
+                        getString(R.string.toast_send_email),
+                        Toast.LENGTH_SHORT
+                    ).show()
                     dismiss()
                 }
             }

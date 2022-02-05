@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
+
         <variable
             name="giftDetailDialog"
             type="com.w36495.senty.view.GiftDetailDialog" />
     </data>
 
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/dialog_white_rounded"
+        android:background="@drawable/dialog_rounded_white"
         android:orientation="vertical">
 
         <com.google.android.material.appbar.MaterialToolbar
@@ -27,34 +26,36 @@
             app:title="@string/toolbar_gift_receive"
             app:titleCentered="true" />
 
-        <de.hdodenhof.circleimageview.CircleImageView
+        <ImageView
             android:id="@+id/gift_detail_img"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            android:layout_marginTop="30dp"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginHorizontal="16dp"
+            android:contentDescription="@string/desc_gift_img"
+            android:scaleType="centerCrop"
             android:src="@drawable/ic_launcher_background"
-            app:layout_constraintTop_toBottomOf="@id/gift_detail_toolbar"
-            app:layout_constraintStart_toStartOf="@id/gift_detail_toolbar"
-            app:layout_constraintEnd_toEndOf="@id/gift_detail_toolbar"
-            app:layout_constraintBottom_toTopOf="@id/gift_detail_layout1"/>
+            app:layout_constraintDimensionRatio="w, 1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/gift_detail_toolbar" />
 
         <LinearLayout
             android:id="@+id/gift_detail_layout1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:orientation="horizontal"
-            android:layout_marginTop="20dp"
-            app:layout_constraintTop_toBottomOf="@id/gift_detail_img"
-            app:layout_constraintStart_toStartOf="@id/gift_detail_img"
-            app:layout_constraintEnd_toEndOf="@id/gift_detail_img"
-            app:layout_constraintBottom_toTopOf="@id/gift_detail_layout2">
+            app:layout_constraintBottom_toTopOf="@id/gift_detail_layout2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/gift_detail_img">
 
             <TextView
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:text="@string/tv_date"
-                android:textStyle="bold"
-                android:textAlignment="center"/>
+                android:textAlignment="center"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/gift_detail_date"
@@ -68,25 +69,28 @@
             android:id="@+id/gift_detail_layout2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:layout_marginTop="15dp"
-            app:layout_constraintTop_toBottomOf="@id/gift_detail_layout1"
-            app:layout_constraintStart_toStartOf="@id/gift_detail_layout1"
-            app:layout_constraintEnd_toEndOf="@id/gift_detail_layout1"
-            app:layout_constraintBottom_toTopOf="@id/gift_detail_layout3">
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toTopOf="@id/gift_detail_layout3"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/gift_detail_layout1">
 
             <TextView
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:text="@string/tv_title"
-                android:textStyle="bold"
-                android:textAlignment="center"/>
+                android:textAlignment="center"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/gift_detail_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp" />
+                android:layout_marginEnd="10dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:singleLine="true" />
 
         </LinearLayout>
 
@@ -94,18 +98,18 @@
             android:id="@+id/gift_detail_layout3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:layout_marginTop="15dp"
-            app:layout_constraintTop_toBottomOf="@id/gift_detail_layout2"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="@id/gift_detail_layout2"
             app:layout_constraintStart_toStartOf="@id/gift_detail_layout2"
-            app:layout_constraintEnd_toEndOf="@id/gift_detail_layout2">
+            app:layout_constraintTop_toBottomOf="@id/gift_detail_layout2">
 
             <TextView
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:text="@string/tv_memo"
-                android:textStyle="bold"
-                android:textAlignment="center"/>
+                android:textAlignment="center"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/gift_detail_memo"
@@ -115,27 +119,33 @@
 
         </LinearLayout>
 
-        <com.google.android.material.button.MaterialButton
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/gift_detail_update"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/btn_rounded_gray"
             android:text="@string/btn_update"
-            android:layout_marginTop="50dp"
-            app:layout_constraintTop_toBottomOf="@id/gift_detail_layout3"
-            app:layout_constraintStart_toStartOf="@id/gift_detail_layout3"
-            app:layout_constraintEnd_toEndOf="@id/gift_detail_layout3"
-            app:layout_constraintBottom_toTopOf="@id/gift_detail_remove" />
+            app:layout_constraintBottom_toTopOf="@id/gift_detail_remove"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/gift_detail_layout3" />
 
-        <com.google.android.material.button.MaterialButton
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/gift_detail_remove"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:background="@drawable/btn_rounded_gray"
             android:text="@string/btn_delete"
-            android:backgroundTint="@color/senty_red"
-            app:layout_constraintTop_toBottomOf="@id/gift_detail_update"
-            app:layout_constraintStart_toStartOf="@id/gift_detail_update"
-            app:layout_constraintEnd_toEndOf="@id/gift_detail_update"/>
+            android:textColor="@color/senty_red"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/gift_detail_update" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 </layout>

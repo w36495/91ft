@@ -26,8 +26,8 @@
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/friend_info_img"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
             android:layout_marginTop="12dp"
             android:src="@drawable/ic_launcher_background"
             app:layout_constraintEnd_toEndOf="parent"
@@ -60,30 +60,41 @@
 
         </LinearLayout>
 
-        <com.google.android.material.button.MaterialButton
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/friend_info_gift"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="50dp"
             android:text="@string/tv_gift_list"
+            android:textColor="@color/black"
+            android:layout_marginHorizontal="8dp"
+            android:background="@drawable/btn_rounded_green"
             app:layout_constraintEnd_toEndOf="@id/friend_info_layout1"
             app:layout_constraintStart_toStartOf="@id/friend_info_layout1"
             app:layout_constraintTop_toBottomOf="@id/friend_info_layout1" />
 
-        <com.google.android.material.button.MaterialButton
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/friend_info_update"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/btn_update"
+            android:textColor="@color/black"
+            android:layout_marginTop="8dp"
+            android:layout_marginHorizontal="8dp"
+            android:background="@drawable/btn_rounded_gray"
             app:layout_constraintEnd_toEndOf="@id/friend_info_gift"
             app:layout_constraintStart_toStartOf="@id/friend_info_gift"
             app:layout_constraintTop_toBottomOf="@id/friend_info_gift" />
 
-        <com.google.android.material.button.MaterialButton
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/friend_info_delete"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/btn_delete"
+            android:textColor="@color/senty_red"
+            android:layout_marginHorizontal="8dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/btn_rounded_gray"
             app:layout_constraintEnd_toEndOf="@id/friend_info_update"
             app:layout_constraintStart_toStartOf="@id/friend_info_update"
             app:layout_constraintTop_toBottomOf="@id/friend_info_update" />

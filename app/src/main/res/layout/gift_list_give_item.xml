@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto" >
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
+
         <variable
             name="gift"
             type="com.w36495.senty.data.domain.Gift" />
@@ -26,9 +26,9 @@
                 android:layout_width="84dp"
                 android:layout_height="84dp"
                 android:src="@drawable/ic_launcher_background"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"/>
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/gift_item_date"
@@ -36,23 +36,26 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="10dp"
                 android:textAlignment="textEnd"
-                app:layout_constraintEnd_toStartOf="@id/gift_item_img"
-                app:layout_constraintTop_toTopOf="@id/gift_item_img"
                 app:layout_constraintBottom_toTopOf="@id/gift_item_title"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintEnd_toStartOf="@id/gift_item_img"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/gift_item_img" />
 
             <TextView
                 android:id="@+id/gift_item_title"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="10dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:textAlignment="textEnd"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:textAlignment="textEnd"
-                app:layout_constraintTop_toBottomOf="@id/gift_item_date"
-                app:layout_constraintEnd_toStartOf="@id/gift_item_img"
                 app:layout_constraintBottom_toBottomOf="@id/gift_item_img"
-                app:layout_constraintStart_toStartOf="@id/gift_item_date" />
+                app:layout_constraintEnd_toStartOf="@id/gift_item_img"
+                app:layout_constraintStart_toStartOf="@id/gift_item_date"
+                app:layout_constraintTop_toBottomOf="@id/gift_item_date" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

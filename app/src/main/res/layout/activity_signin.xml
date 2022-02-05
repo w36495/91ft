@@ -39,7 +39,8 @@
 
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -58,7 +59,8 @@
 
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -72,31 +74,30 @@
             app:layout_constraintEnd_toEndOf="@id/signin_passwd"
             app:layout_constraintTop_toBottomOf="@id/signin_passwd" />
 
-        <com.google.android.material.button.MaterialButton
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_login"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="8dp"
+            android:background="@drawable/btn_rounded_green"
+            android:backgroundTint="@null"
             android:text="@string/btn_login"
             android:textColor="@color/black"
             app:cornerRadius="18dp"
-            android:backgroundTint="@null"
-            android:background="@drawable/btn_rounded_green"
             app:layout_constraintBottom_toTopOf="@id/btn_signup"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/signin_forget_passwd" />
 
-        <com.google.android.material.button.MaterialButton
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_signup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="8dp"
-            android:layout_marginTop="28dp"
-            android:background="@color/senty_gray2"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/btn_rounded_gray"
             android:text="@string/btn_signup"
             android:textColor="@color/black"
-            app:backgroundTint="@color/senty_gray2"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/btn_login" />
