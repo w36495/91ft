@@ -27,49 +27,25 @@
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/gift_list_img"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
             android:src="@drawable/ic_launcher_background"
+            app:layout_constraintBottom_toTopOf="@id/gift_list_name"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/gift_list_toolbar" />
 
         <TextView
             android:id="@+id/gift_list_name"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="8dp"
-            android:padding="5dp"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@id/gift_list_phone"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/gift_list_img"
-            app:layout_constraintTop_toBottomOf="@id/gift_list_toolbar"/>
-
-        <TextView
-            android:id="@+id/gift_list_phone"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginTop="18dp"
             android:padding="5dp"
             android:textSize="16sp"
-            app:layout_constraintBottom_toBottomOf="@id/gift_list_img"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@id/gift_recyclerView"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/gift_list_img"
-            app:layout_constraintTop_toBottomOf="@id/gift_list_name" />
-
-        <View
-            android:id="@+id/gift_line1"
-            android:layout_width="match_parent"
-            android:layout_height="0.5dp"
-            android:layout_marginTop="10dp"
-            android:background="@color/black"
-            app:layout_constraintEnd_toEndOf="@id/gift_list_phone"
-            app:layout_constraintStart_toStartOf="@id/gift_list_img"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/gift_list_img" />
 
         <androidx.recyclerview.widget.RecyclerView
@@ -77,23 +53,26 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginTop="10dp"
+            android:background="@drawable/bg_rounded_gray"
+            android:paddingHorizontal="20dp"
+            android:paddingTop="20dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@id/gift_line1"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@id/gift_line1"
-            app:layout_constraintTop_toBottomOf="@id/gift_line1"
-            app:layout_constraintVertical_bias="1.0" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/gift_list_name" />
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
             android:id="@+id/fab_gift_add"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="20dp"
+            android:layout_margin="16dp"
             android:contentDescription="@string/desc_fab_gift_add"
-            android:src="@drawable/ic_baseline_add_24"
-            app:fabSize="normal"
+            android:text="@string/btn_gift_add"
+            app:icon="@drawable/ic_baseline_add_24"
+
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
