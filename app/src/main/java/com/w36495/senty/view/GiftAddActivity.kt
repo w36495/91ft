@@ -1,10 +1,11 @@
 package com.w36495.senty.view
 
-import android.app.Activity
 import android.app.DatePickerDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -16,7 +17,6 @@ import com.w36495.senty.R
 import com.w36495.senty.data.domain.Gift
 import com.w36495.senty.databinding.ActivityGiftAddBinding
 import com.w36495.senty.util.DateUtil
-import java.util.*
 
 class GiftAddActivity : AppCompatActivity() {
 
@@ -111,6 +111,21 @@ class GiftAddActivity : AppCompatActivity() {
         binding.giftAddToolbar.setNavigationOnClickListener {
             onBackPressed()
         }
+
+        // 메모 작성시, 글자 수 표시
+        binding.giftAddMemo.addTextChangedListener(object: TextWatcher{
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                binding.giftAddTextCount.setText(R.string.tv_gift_memo_count_before)
+            }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                val userInput = binding.giftAddMemo.text.toString()
+                binding.giftAddTextCount.setText(userInput.length.toString() + getString(R.string.tv_gift_memo_count_after))
+            }
+            override fun afterTextChanged(s: Editable?) {
+                val userInput = binding.giftAddMemo.text.toString()
+                binding.giftAddTextCount.setText(userInput.length.toString() + getString(R.string.tv_gift_memo_count_after))
+            }
+        })
 
         // 홈 버튼 클릭
         binding.giftAddToolbar.setOnMenuItemClickListener { menu ->
