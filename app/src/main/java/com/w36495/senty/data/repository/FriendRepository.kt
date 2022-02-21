@@ -15,6 +15,7 @@ class FriendRepository {
     private var storage = FirebaseStorage.getInstance()
 
     private var userId: String = FirebaseAuth.getInstance().currentUser!!.uid
+    val progress = MutableLiveData<Double>()
 
     /**
      * 친구 정보 등록
@@ -31,6 +32,9 @@ class FriendRepository {
                 .addOnSuccessListener {
                     friend.imagePath = "images/${friend.key}/$friendImageFileName"
                     database.child(userId).child("friends").child(friend.key).setValue(friend)
+                }
+                .addOnProgressListener {
+                    progress.postValue((100.0 * it.bytesTransferred) / it.totalByteCount)
                 }
                 .addOnFailureListener { }
         }
@@ -106,6 +110,9 @@ class FriendRepository {
             .addOnSuccessListener {
                 friend.imagePath = "images/${friend.key}/$updateFriendImagePath"
                 updateFriendInfoOnlyText(friend)
+            }
+            .addOnProgressListener {
+                progress.postValue((100.0 * it.bytesTransferred) / it.totalByteCount)
             }
             .addOnFailureListener { }
     }

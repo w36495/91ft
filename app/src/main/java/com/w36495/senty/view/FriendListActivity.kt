@@ -12,16 +12,17 @@ import com.w36495.senty.data.domain.Friend
 import com.w36495.senty.databinding.ActivityFriendListBinding
 import com.w36495.senty.view.adapter.FriendAdapter
 import com.w36495.senty.view.listener.FriendSelectListener
-import com.w36495.senty.viewModel.FriendListViewModel
+import com.w36495.senty.viewModel.FriendViewModel
 
 class FriendListActivity : AppCompatActivity(), FriendSelectListener {
 
     private lateinit var binding: ActivityFriendListBinding
-    private lateinit var friendListViewModel: FriendListViewModel
+    private lateinit var friendViewModel: FriendViewModel
 
     private lateinit var friendAdapter: FriendAdapter
 
     private lateinit var resultFriendInfo: ActivityResultLauncher<Intent>
+    private lateinit var progressDialog: ProgressDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,7 +31,8 @@ class FriendListActivity : AppCompatActivity(), FriendSelectListener {
         setContentView(view)
 
         friendAdapter = FriendAdapter(this)
-        friendListViewModel = ViewModelProvider(this)[FriendListViewModel::class.java]
+        friendViewModel = ViewModelProvider(this)[FriendViewModel::class.java]
+        progressDialog = ProgressDialog(this)
 
         // 친구 정보 등록 버튼 클릭
         binding.fabFriendAdd.setOnClickListener {
@@ -43,7 +45,7 @@ class FriendListActivity : AppCompatActivity(), FriendSelectListener {
                 if (result.resultCode == Activity.RESULT_OK) {
                     result.data?.let {
                         val addFriendInfo = it.getSerializableExtra("saveFriend") as Friend
-                        friendListViewModel.addFriend(addFriendInfo)
+                        friendViewModel.addFriend(addFriendInfo)
                     }
                 }
             }
@@ -52,12 +54,12 @@ class FriendListActivity : AppCompatActivity(), FriendSelectListener {
         if (intent.hasExtra("saveFriend")) {
             val updateFriendInfo = intent.getSerializableExtra("saveFriend") as Friend
             val oldFriendImagePath: String? = intent.getStringExtra("oldFriendImagePath")
-            friendListViewModel.updateFriend(updateFriendInfo, oldFriendImagePath)
+            friendViewModel.updateFriend(updateFriendInfo, oldFriendImagePath)
         }
         // 친구 정보 삭제
         else if (intent.hasExtra("deleteFriend")) {
             val deleteFriend = intent.getSerializableExtra("deleteFriend") as Friend
-            friendListViewModel.removeFriend(deleteFriend)
+            friendViewModel.removeFriend(deleteFriend)
         }
 
         binding.friendRecyclerView.layoutManager = LinearLayoutManager(this)
@@ -84,8 +86,23 @@ class FriendListActivity : AppCompatActivity(), FriendSelectListener {
 
     override fun onResume() {
         super.onResume()
-        friendListViewModel.friendList.observe(this, { friend ->
+        friendViewModel.friendList.observe(this, { friend ->
             friendAdapter.setFriendList(friend)
         })
+        friendViewModel.friendProgress.observe(this, { progress ->
+            showProgressDialog(progress)
+        })
     }
+
+    /**
+     * Progress 다이얼로그 호출
+     */
+    private fun showProgressDialog(progress: Double) {
+        if (progress == 0.0) {
+            progressDialog.show()
+        } else if (progress == 100.0) {
+            progressDialog.dismiss()
+        }
+    }
+
 }

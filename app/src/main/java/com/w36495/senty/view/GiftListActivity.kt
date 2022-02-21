@@ -26,6 +26,7 @@ class GiftListActivity : AppCompatActivity(), GiftSelectListener {
 
     private lateinit var resultAddGift: ActivityResultLauncher<Intent>
     private lateinit var giftAdapter: GiftAdapter
+    private lateinit var progressDialog: ProgressDialog
 
     private lateinit var friend: Friend // 친구의 정보 저장 변수
 
@@ -45,7 +46,11 @@ class GiftListActivity : AppCompatActivity(), GiftSelectListener {
         )
 
         giftAdapter = GiftAdapter(view.context, this)
-        giftViewModel = ViewModelProvider(this, GiftViewModel.GiftViewModelFactory(friend.key))[GiftViewModel::class.java]
+        giftViewModel = ViewModelProvider(
+            this,
+            GiftViewModel.GiftViewModelFactory(friend.key)
+        )[GiftViewModel::class.java]
+        progressDialog = ProgressDialog(this)
 
         binding.giftListName.text = friend.name
         friend.imagePath?.let { imgPath ->
@@ -119,5 +124,19 @@ class GiftListActivity : AppCompatActivity(), GiftSelectListener {
         giftViewModel.giftList.observe(this, { gift ->
             giftAdapter.setGiftList(gift)
         })
+        giftViewModel.giftProgress.observe(this, { progress ->
+            showProgressDialog(progress)
+        })
+    }
+
+    /**
+     * Progress 다이얼로그 호출
+     */
+    private fun showProgressDialog(progress: Double) {
+        if (progress == 0.0) {
+            progressDialog.show()
+        } else if (progress == 100.0) {
+            progressDialog.dismiss()
+        }
     }
 }

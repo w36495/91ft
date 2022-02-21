@@ -19,6 +19,7 @@ class GiftViewModel(friendKey: String) : ViewModel() {
     private val giftRepository = GiftRepository(friendKey)
 
     val giftList: LiveData<List<Gift>> = giftRepository.getGiftsList()
+    val giftProgress: LiveData<Double> = giftRepository.progress
 
     /**
      * 선물 등록

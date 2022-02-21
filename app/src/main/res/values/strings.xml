@@ -38,6 +38,7 @@
     <string name="tv_gift_list">선물 목록</string>
     <string name="tv_gift_memo_count_before">0/100</string>
     <string name="tv_gift_memo_count_after">/100</string>
+    <string name="tv_progress_title">잠시만 기다려주세요.</string>
 
     <string name="desc_main">정성스런 선물을 주고받았을 때의 감정과 느낌을</string>
     <string name="desc_sub">senty와 함께 기록해보세요.</string>

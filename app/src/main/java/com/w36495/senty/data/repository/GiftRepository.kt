@@ -14,6 +14,7 @@ class GiftRepository(friendKey: String) {
     private var storage = FirebaseStorage.getInstance()
 
     private var userId: String = FirebaseAuth.getInstance().currentUser!!.uid
+    val progress = MutableLiveData<Double>()
 
     private val imageBasePath = "images/${friendKey}/"
     private val databaseBasePath = "${userId}/gifts/${friendKey}/"
@@ -32,6 +33,9 @@ class GiftRepository(friendKey: String) {
                     gift.imagePath = imageBasePath + giftImagePath
                     database.child(databaseBasePath + gift.key)
                         .setValue(gift)
+                }
+                .addOnProgressListener {
+                    progress.postValue((100.0 * it.bytesTransferred) / it.totalByteCount)
                 }
                 .addOnFailureListener { }
         } ?: database.child(databaseBasePath + gift.key)
@@ -104,6 +108,9 @@ class GiftRepository(friendKey: String) {
             .addOnSuccessListener {
                 gift.imagePath = imageBasePath + updateGiftImagePath
                 updateGiftInfoOnlyText(gift)
+            }
+            .addOnProgressListener {
+                progress.postValue((100.0 * it.bytesTransferred) / it.totalByteCount)
             }
             .addOnFailureListener { }
     }
