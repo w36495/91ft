@@ -67,43 +67,6 @@ class FriendListActivity : AppCompatActivity(), FriendSelectListener {
             friendViewModel.removeFriend(deleteFriend)
         }
 
-        // 로그아웃 / 회원탈퇴 메뉴 클릭시
-        binding.friendListToolbar.setOnMenuItemClickListener { menu ->
-            val user = FirebaseAuth.getInstance().currentUser!!
-            val mainIntent = Intent(this, MainActivity::class.java)
-
-            when (menu.itemId) {
-                R.id.user_logout -> {
-                    AuthUI.getInstance().signOut(this).addOnCompleteListener {
-                        Toast.makeText(this, getString(R.string.toast_user_logout), Toast.LENGTH_SHORT).show()
-                        finishAffinity()
-                        startActivity(mainIntent)
-                    }
-                    true
-                }
-                R.id.user_delete -> {
-                    MaterialAlertDialogBuilder(this)
-                        .setTitle(R.string.msg_user_delete_title)
-                        .setMessage(R.string.msg_user_delete_content)
-                        .setNeutralButton(resources.getText(R.string.btn_cancel)) { _, _ -> }
-                        .setPositiveButton(resources.getString(R.string.btn_delete)) { _, _ ->
-                            user.delete()
-                                .addOnCompleteListener { task ->
-                                    if (task.isSuccessful) {
-                                        Toast.makeText(this, getString(R.string.toast_user_delete), Toast.LENGTH_SHORT).show()
-                                        finishAffinity()
-                                        startActivity(mainIntent)
-                                    }
-                                }
-                            finish()
-                        }
-                        .show()
-                    true
-                }
-                else -> false
-            }
-        }
-
         binding.friendRecyclerView.layoutManager = LinearLayoutManager(this)
         binding.friendRecyclerView.setHasFixedSize(true)
         binding.friendRecyclerView.adapter = friendAdapter
@@ -146,6 +109,5 @@ class FriendListActivity : AppCompatActivity(), FriendSelectListener {
             progressDialog.dismiss()
         }
     }
-
 
 }

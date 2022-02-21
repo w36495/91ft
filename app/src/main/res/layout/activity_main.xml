@@ -60,6 +60,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="8dp"
                 android:layout_marginTop="10dp"
+                android:visibility="invisible"
                 android:layout_marginBottom="20dp"
                 android:background="@color/senty_gray1"
                 android:text="@string/btn_google_login"

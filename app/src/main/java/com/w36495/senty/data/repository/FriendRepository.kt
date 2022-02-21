@@ -18,6 +18,13 @@ class FriendRepository {
     val progress = MutableLiveData<Double>()
 
     /**
+     * 유저 정보 삭제
+     */
+    fun deleteUser() {
+        database.child(userId).removeValue().addOnCompleteListener {  }
+    }
+
+    /**
      * 친구 정보 등록
      */
     fun insertFriend(friend: Friend) {
@@ -127,4 +134,5 @@ class FriendRepository {
         )
         return database.updateChildren(childUpdate)
     }
+
 }
