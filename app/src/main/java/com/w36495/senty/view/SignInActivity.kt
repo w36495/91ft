@@ -57,6 +57,7 @@ class SignInActivity : AppCompatActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     val intent = Intent(this, FriendListActivity::class.java)
+                    finishAffinity()
                     startActivity(intent)
                     finish()
                 } else {

@@ -24,6 +24,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/white"
+                app:menu="@menu/top_app_bar_auth"
                 app:layout_scrollFlags="scroll|enterAlways"
                 app:title="@string/toolbar_friend_list"
                 app:titleCentered="true" />

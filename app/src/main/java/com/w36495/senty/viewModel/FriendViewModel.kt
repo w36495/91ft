@@ -5,10 +5,12 @@ import androidx.lifecycle.ViewModel
 import com.w36495.senty.data.domain.Friend
 import com.w36495.senty.data.repository.FriendRepository
 
-class FriendListViewModel : ViewModel() {
+class FriendViewModel : ViewModel() {
 
     private val friendRepository: FriendRepository = FriendRepository()
+
     val friendList: LiveData<List<Friend>> = friendRepository.getFriendsList()
+    val friendProgress: LiveData<Double> = friendRepository.progress
 
     /**
      * 친구 정보 등록
@@ -30,4 +32,5 @@ class FriendListViewModel : ViewModel() {
     fun removeFriend(friend: Friend) {
         friendRepository.deleteFriend(friend)
     }
+
 }
