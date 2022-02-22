@@ -25,7 +25,7 @@
                 android:id="@+id/gift_item_img"
                 android:layout_width="84dp"
                 android:layout_height="84dp"
-                android:src="@drawable/ic_launcher_background"
+                android:src="@drawable/ic_gift_basic_image"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />

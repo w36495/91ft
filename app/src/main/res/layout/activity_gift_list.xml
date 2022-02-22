@@ -30,7 +30,7 @@
             android:id="@+id/gift_list_img"
             android:layout_width="96dp"
             android:layout_height="96dp"
-            android:src="@drawable/ic_launcher_background"
+            android:src="@drawable/ic_friend_profile_basic_image"
             app:layout_constraintBottom_toTopOf="@id/gift_list_name"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

@@ -43,7 +43,7 @@
                     android:id="@+id/gift_add_img"
                     android:layout_width="150dp"
                     android:layout_height="150dp"
-                    android:src="@drawable/ic_launcher_background"
+                    android:src="@drawable/ic_gift_basic_image"
                     app:layout_constraintBottom_toTopOf="@id/gift_add_img_btn"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"

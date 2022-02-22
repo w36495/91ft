@@ -20,7 +20,7 @@ class FriendAdapter(private val friendSelectListener: FriendSelectListener) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(friend: Friend) {
             binding.friendListName.text = friend.name
-            binding.friendItemImg.setImageResource(R.drawable.ic_launcher_background)
+            binding.friendItemImg.setImageResource(R.drawable.ic_friend_profile_basic_image)
 
             friend.imagePath?.let { imagePath ->
                 GlideApp.with(binding.root)

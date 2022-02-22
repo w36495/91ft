@@ -41,7 +41,7 @@ class GiftAdapter(
     inner class GiftReceiveHolder(private val binding: GiftListReceiveItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun receiveGiftBind(gift: Gift) {
-            binding.giftItemImg.setImageResource(R.drawable.ic_launcher_background)
+            binding.giftItemImg.setImageResource(R.drawable.ic_gift_basic_image)
             binding.giftItemDate.text = gift.date
             binding.giftItemTitle.text = gift.title
 
@@ -61,7 +61,7 @@ class GiftAdapter(
     inner class GiftGiveHolder(private val binding: GiftListGiveItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun giveGiftBind(gift: Gift) {
-            binding.giftItemImg.setImageResource(R.drawable.ic_launcher_background)
+            binding.giftItemImg.setImageResource(R.drawable.ic_gift_basic_image)
             binding.giftItemDate.text = gift.date
             binding.giftItemTitle.text = gift.title
 
