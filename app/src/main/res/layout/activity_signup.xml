@@ -33,6 +33,7 @@
             android:layout_marginTop="12dp"
             android:hint="@string/tv_email"
             app:helperText="@string/desc_signup_email"
+            app:helperTextEnabled="true"
             app:layout_constraintBottom_toTopOf="@id/signup_passwd"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -51,15 +52,44 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="8dp"
             android:layout_marginTop="12dp"
-            android:hint="@string/tv_passwd2"
-            app:layout_constraintBottom_toTopOf="@id/btn_signup"
+            android:hint="@string/tv_passwd"
+            app:endIconDrawable="@drawable/ic_baseline_visibility_24"
+            app:endIconMode="password_toggle"
+            app:helperText="@string/helper_input_password"
+            app:helperTextEnabled="true"
+            app:layout_constraintBottom_toTopOf="@id/signup_passwd_check"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/signup_email">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:maxLength="20" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/signup_passwd_check"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
+            android:layout_marginTop="12dp"
+            android:hint="@string/tv_passwd_check"
+            app:endIconDrawable="@drawable/ic_baseline_visibility_24"
+            app:endIconMode="password_toggle"
+            app:layout_constraintBottom_toTopOf="@id/btn_signup"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/signup_passwd">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:maxLength="20" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -73,7 +103,7 @@
             android:text="@string/btn_signup"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/signup_passwd" />
+            app:layout_constraintTop_toBottomOf="@id/signup_passwd_check" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
