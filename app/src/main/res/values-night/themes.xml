@@ -4,13 +4,19 @@
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/senty_green2</item>
         <item name="colorPrimaryVariant">@color/senty_green1</item>
-        <item name="colorOnPrimary">@color/black</item>
+        <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/senty_green2</item>
         <item name="colorSecondaryVariant">@color/senty_green1</item>
         <item name="colorOnSecondary">@color/black</item>
+
         <!-- Status bar color. -->
-        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:enforceNavigationBarContrast" tools:targetApi="q">false</item>
+        <item name="android:enforceStatusBarContrast" tools:targetApi="q">false</item>
+
         <!-- Customize your theme here. -->
     </style>
 </resources>
