@@ -44,15 +44,15 @@
                 android:text="@string/desc_sub"
                 android:textAlignment="center" />
 
-            <com.google.android.material.button.MaterialButton
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/main_email_login"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="8dp"
                 android:layout_marginTop="18dp"
-                android:background="@color/senty_gray1"
+                android:background="@drawable/btn_all_rounded_dark_gray"
                 android:text="@string/btn_email_login"
-                app:backgroundTint="@color/senty_gray1" />
+                android:textColor="@color/white" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/main_google_login"
@@ -60,10 +60,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="8dp"
                 android:layout_marginTop="10dp"
-                android:visibility="invisible"
                 android:layout_marginBottom="20dp"
                 android:background="@color/senty_gray1"
                 android:text="@string/btn_google_login"
+                android:visibility="invisible"
                 app:backgroundTint="@color/senty_gray1" />
 
         </LinearLayout>
