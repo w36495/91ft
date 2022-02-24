@@ -6,6 +6,8 @@ import android.text.TextUtils
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.w36495.senty.R
 import com.w36495.senty.databinding.ActivitySignupBinding
 import com.w36495.senty.util.StringUtils
@@ -46,12 +48,36 @@ class SignUpActivity : AppCompatActivity() {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    Toast.makeText(this, getString(R.string.msg_complete_signup), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        getString(R.string.msg_complete_signup),
+                        Toast.LENGTH_SHORT
+                    ).show()
                     val intent = Intent(this, SignInActivity::class.java)
                     startActivity(intent)
                     finish()
                 } else {
-                    Toast.makeText(this, getString(R.string.msg_failed_signup), Toast.LENGTH_SHORT).show()
+                    when (task.exception) {
+                        is FirebaseAuthInvalidCredentialsException -> {
+                            Toast.makeText(
+                                this,
+                                getString(R.string.toast_email_invalid_exception),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        is FirebaseAuthUserCollisionException -> {
+                            Toast.makeText(
+                                this,
+                                getString(R.string.toast_email_collision_exception),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        else -> Toast.makeText(
+                            this,
+                            getString(R.string.msg_failed_signup),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 }
             }
     }
