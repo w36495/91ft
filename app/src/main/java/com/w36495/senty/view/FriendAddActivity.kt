@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -79,6 +80,11 @@ class FriendAddActivity : AppCompatActivity() {
      * 친구의 정보 저장
      */
     private fun saveFriend() {
+        if (binding.friendAddName.text.isEmpty()) {
+            Toast.makeText(this, getString(R.string.toast_empty_friend_title), Toast.LENGTH_SHORT)
+                .show()
+            return
+        }
         val friendAddIntent = Intent(this, FriendListActivity::class.java)
             val friend = Friend(
                 if (isUpdate) friendKey else "",

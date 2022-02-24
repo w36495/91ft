@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -78,6 +79,11 @@ class GiftAddActivity : AppCompatActivity() {
 
         // 등록 버튼 클릭
         binding.giftAddSave.setOnClickListener {
+            if (binding.giftAddTitle.text.isEmpty()) {
+                Toast.makeText(this, getString(R.string.toast_empty_gift_title), Toast.LENGTH_SHORT)
+                    .show()
+                return@setOnClickListener
+            }
             val intent = Intent(this, GiftListActivity::class.java)
 
             when (binding.giftAddType.checkedRadioButtonId) {

@@ -2,10 +2,10 @@ package com.w36495.senty.view
 
 import android.content.Intent
 import android.os.Bundle
-import android.text.TextUtils
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
+import com.w36495.senty.R
 import com.w36495.senty.databinding.ActivitySigninBinding
 
 class SignInActivity : AppCompatActivity() {
@@ -49,7 +49,7 @@ class SignInActivity : AppCompatActivity() {
 
     // firebase 로그인
     private fun signIn(email: String, password: String) {
-        if (!validateForm()) {
+        if (!isValid(email, password)) {
             return
         }
 
@@ -61,33 +61,25 @@ class SignInActivity : AppCompatActivity() {
                     startActivity(intent)
                     finish()
                 } else {
-                    Toast.makeText(this, "이메일 또는 비밀번호를 확인하세요.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        getString(R.string.toast_login_exception),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
     }
 
-
-
-    // 입력값(이메일, 비밀번호) 유효값 검사
-    private fun validateForm(): Boolean {
+    private fun isValid(email: String, password: String): Boolean {
         var valid = true
-
-        val email = binding.signinEmail.editText?.text.toString()
-        if (TextUtils.isEmpty(email)) {
-            binding.signinEmail.error = "필수입력입니다."
+        if (email.isEmpty()) {
+            Toast.makeText(this, getString(R.string.toast_empty_email), Toast.LENGTH_SHORT).show()
             valid = false
-        } else {
-            binding.signinEmail.error = null
-        }
-
-        val password = binding.signinPasswd.editText?.text.toString()
-        if (TextUtils.isEmpty(password)) {
-            binding.signinPasswd.error = "필수입력입니다."
+        } else if (password.isEmpty()) {
+            Toast.makeText(this, getString(R.string.toast_empty_password), Toast.LENGTH_SHORT)
+                .show()
             valid = false
-        } else {
-            binding.signinPasswd.error = null
         }
-
         return valid
     }
 
