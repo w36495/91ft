@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.w36495.senty.R
 import com.w36495.senty.databinding.ActivitySignupBinding
+import com.w36495.senty.util.StringUtils
 
 class SignUpActivity : AppCompatActivity() {
 
@@ -64,7 +65,13 @@ class SignUpActivity : AppCompatActivity() {
             binding.signupEmail.error = getString(R.string.error_input)
             valid = false
         } else {
-            binding.signupEmail.error = null
+            // 이메일 형식 정규표현식 검사
+            if (!StringUtils.isValidEmail(email)) {
+                binding.signupEmail.error = getString(R.string.error_input_email)
+                valid = false
+            } else {
+                binding.signupEmail.error = null
+            }
         }
 
         val password = binding.signupPasswd.editText?.text.toString()
@@ -72,9 +79,34 @@ class SignUpActivity : AppCompatActivity() {
             binding.signupPasswd.error = getString(R.string.error_input)
             valid = false
         } else {
-            binding.signupPasswd.error = null
+            // 길이가 8자미만일때
+            if (password.length < 8) {
+                binding.signupPasswd.error = getString(R.string.error_input_password_length)
+                valid = false
+            } else if (!StringUtils.isValidPassword(password)) {
+                // 8자 이상인데 영문자/숫자로 이루어지지 않았을 때
+                binding.signupPasswd.error = getString(R.string.error_input_password)
+                valid = false
+            } else {
+                binding.signupPasswd.error = null
+            }
+        }
+
+        val passwordCheck = binding.signupPasswdCheck.editText?.text.toString()
+        if (TextUtils.isEmpty(passwordCheck)) {
+            binding.signupPasswdCheck.error = getString(R.string.error_input)
+            valid = false
+        } else {
+            // 비밀번호와 비밀번호 확인이 일치하지 않을 때
+            if (password != passwordCheck) {
+                binding.signupPasswdCheck.error = getString(R.string.error_input_password_check)
+                valid = false
+            } else {
+                binding.signupPasswdCheck.error = null
+            }
         }
 
         return valid
     }
+
 }
