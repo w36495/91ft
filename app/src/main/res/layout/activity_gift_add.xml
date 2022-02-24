@@ -112,8 +112,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="10dp"
                         android:layout_weight="1"
-                        android:focusable="false"
-                        android:hint="@string/hint_date" />
+                        android:focusable="false" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -138,8 +137,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="10dp"
-                        android:hint="@string/hint_title"
-                        android:inputType="text" />
+                        android:inputType="text"
+                        android:maxLength="20" />
 
                 </LinearLayout>
 
@@ -166,7 +165,6 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="10dp"
                         android:gravity="top"
-                        android:hint="@string/hint_memo"
                         android:inputType="textMultiLine"
                         android:maxLength="100" />
 
