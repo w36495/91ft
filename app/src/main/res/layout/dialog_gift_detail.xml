@@ -33,7 +33,7 @@
             android:layout_marginHorizontal="16dp"
             android:contentDescription="@string/desc_gift_img"
             android:scaleType="centerCrop"
-            android:src="@drawable/ic_gift_basic_image"
+            android:src="@drawable/bg_gift_basic_image"
             app:layout_constraintDimensionRatio="w, 1:1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

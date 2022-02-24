@@ -27,7 +27,7 @@
                 android:id="@+id/friend_item_img"
                 android:layout_width="84dp"
                 android:layout_height="84dp"
-                android:src="@drawable/ic_friend_profile_basic_image"
+                android:src="@drawable/bg_friend_basic_image"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
