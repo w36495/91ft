@@ -24,7 +24,7 @@ class GiftAddActivity : AppCompatActivity() {
     private lateinit var binding: ActivityGiftAddBinding
 
     private var isReceive = true
-    private var isUpdate = false // 선물 등록 : false, 선물 수정 : true
+    private var isUpdate = false
 
     private lateinit var giftKey: String
     private var giftImageUri: Uri? = null
@@ -119,14 +119,16 @@ class GiftAddActivity : AppCompatActivity() {
         }
 
         // 메모 작성시, 글자 수 표시
-        binding.giftAddMemo.addTextChangedListener(object: TextWatcher{
+        binding.giftAddMemo.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
                 binding.giftAddTextCount.setText(R.string.tv_gift_memo_count_before)
             }
+
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 val userInput = binding.giftAddMemo.text.toString()
                 binding.giftAddTextCount.setText(userInput.length.toString() + getString(R.string.tv_gift_memo_count_after))
             }
+
             override fun afterTextChanged(s: Editable?) {
                 val userInput = binding.giftAddMemo.text.toString()
                 binding.giftAddTextCount.setText(userInput.length.toString() + getString(R.string.tv_gift_memo_count_after))
@@ -159,17 +161,15 @@ class GiftAddActivity : AppCompatActivity() {
         val selectedDateToken = selectedDate.split('/')
         val mYear = selectedDateToken[0].toInt()
         val mMonth = selectedDateToken[1].toInt()
-        println("mMonth : $mMonth")
         val mDay = selectedDateToken[2].toInt()
         val datePickerDialog = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
             lateinit var printMonth: String
             lateinit var printDayOfMonth: String
-            println("선택된 월 : $month")
             // 월 2자리 표현
-            if ((month+1) in 1..9) {
-                printMonth = "0${month+1}"
+            if ((month + 1) in 1..9) {
+                printMonth = "0${month + 1}"
             } else {
-                printMonth = (month+1).toString()
+                printMonth = (month + 1).toString()
             }
             // 일 2자리 표현
             if (dayOfMonth in 1..9) {
@@ -177,10 +177,9 @@ class GiftAddActivity : AppCompatActivity() {
             } else {
                 printDayOfMonth = dayOfMonth.toString()
             }
-            println("printMonth : $printMonth")
             binding.giftAddDate.setText("${year}/${printMonth}/${printDayOfMonth}")
         }
-        DatePickerDialog(this, datePickerDialog, mYear, mMonth-1, mDay).show()
+        DatePickerDialog(this, datePickerDialog, mYear, mMonth - 1, mDay).show()
     }
 
     private fun setImageByGallery(result: ActivityResult) {

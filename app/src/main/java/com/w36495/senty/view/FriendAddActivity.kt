@@ -86,28 +86,28 @@ class FriendAddActivity : AppCompatActivity() {
             return
         }
         val friendAddIntent = Intent(this, FriendListActivity::class.java)
-            val friend = Friend(
-                if (isUpdate) friendKey else "",
-                binding.friendAddName.text.toString(),
-                if (isUpdate) {
-                    friendImageUri?.toString() ?: oldFriendImagePath
-                } else {
-                    friendImageUri?.toString()
-                }
-            )
-
-            friendAddIntent.putExtra("saveFriend", friend)
-
-            // 친구의 정보 수정
+        val friend = Friend(
+            if (isUpdate) friendKey else "",
+            binding.friendAddName.text.toString(),
             if (isUpdate) {
-                friendAddIntent.putExtra("oldFriendImagePath", oldFriendImagePath)
-                startActivity(friendAddIntent)
-                finish()
+                friendImageUri?.toString() ?: oldFriendImagePath
+            } else {
+                friendImageUri?.toString()
             }
-            // 친구의 정보 등록
-            else {
-                setResult(RESULT_OK, friendAddIntent)
-                finish()
-            }
+        )
+
+        friendAddIntent.putExtra("saveFriend", friend)
+
+        // 친구의 정보 수정
+        if (isUpdate) {
+            friendAddIntent.putExtra("oldFriendImagePath", oldFriendImagePath)
+            startActivity(friendAddIntent)
+            finish()
+        }
+        // 친구의 정보 등록
+        else {
+            setResult(RESULT_OK, friendAddIntent)
+            finish()
+        }
     }
 }
