@@ -38,7 +38,9 @@ class GiftRepository(friendKey: String) {
                 .addOnProgressListener {
                     progress.postValue((100.0 * it.bytesTransferred) / it.totalByteCount)
                 }
-                .addOnFailureListener { }
+                .addOnFailureListener { exception ->
+                    throw StorageError("insert gift error", exception.cause!!)
+                }
         } ?: database.child(databaseBasePath + gift.key)
             .setValue(gift)
     }
@@ -79,7 +81,9 @@ class GiftRepository(friendKey: String) {
                 updateGiftInfo(gift)
                 storage.reference.child(oldPath).delete()
                     .addOnSuccessListener { }
-                    .addOnFailureListener { }
+                    .addOnFailureListener { exception ->
+                        throw StorageError("old image update gift error", exception.cause!!)
+                    }
             }
         } ?: run {
             gift.imagePath?.let {
@@ -96,7 +100,9 @@ class GiftRepository(friendKey: String) {
             .removeValue()
         storage.reference.child(gift.imagePath!!).delete()
             .addOnSuccessListener { }
-            .addOnFailureListener { }
+            .addOnFailureListener { exception ->
+                throw StorageError("update gift(image+text) error", exception.cause!!)
+            }
     }
 
     /**
