@@ -9,8 +9,12 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.firebase.ui.auth.AuthUI
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.auth.FirebaseAuth
+import com.w36495.senty.R
 import com.w36495.senty.data.domain.Friend
 import com.w36495.senty.databinding.ActivityFriendListBinding
 import com.w36495.senty.view.adapter.FriendAdapter
@@ -66,6 +70,44 @@ class FriendListActivity : AppCompatActivity(), FriendSelectListener {
         else if (intent.hasExtra("deleteFriend")) {
             val deleteFriend = intent.getSerializableExtra("deleteFriend") as Friend
             friendViewModel.removeFriend(deleteFriend)
+        }
+
+        // 로그아웃 / 회원탈퇴 메뉴 클릭시
+        binding.friendListToolbar.setOnMenuItemClickListener { menu ->
+            val user = FirebaseAuth.getInstance().currentUser!!
+            val mainIntent = Intent(this, MainActivity::class.java)
+
+            when (menu.itemId) {
+                R.id.user_logout -> {
+                    AuthUI.getInstance().signOut(this).addOnCompleteListener {
+                        Toast.makeText(this, getString(R.string.toast_user_logout), Toast.LENGTH_SHORT).show()
+                        finishAffinity()
+                        startActivity(mainIntent)
+                    }
+                    true
+                }
+                R.id.user_delete -> {
+                    MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_App_MaterialAlertDialog)
+                        .setTitle(R.string.msg_user_delete_title)
+                        .setMessage(R.string.msg_user_delete_content)
+                        .setNeutralButton(resources.getText(R.string.btn_cancel)) { _, _ -> }
+                        .setPositiveButton(resources.getString(R.string.btn_delete)) { _, _ ->
+                            user.delete()
+                                .addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        friendViewModel.removeUser()
+                                        Toast.makeText(this, getString(R.string.toast_user_delete), Toast.LENGTH_SHORT).show()
+                                        finishAffinity()
+                                        startActivity(mainIntent)
+                                    }
+                                }
+                            finish()
+                        }
+                        .show()
+                    true
+                }
+                else -> false
+            }
         }
 
         binding.friendRecyclerView.layoutManager = LinearLayoutManager(this)

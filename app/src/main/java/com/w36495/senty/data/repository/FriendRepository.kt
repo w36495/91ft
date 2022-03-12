@@ -19,10 +19,11 @@ class FriendRepository {
     val progress = MutableLiveData<Double>()
 
     /**
-     * 유저 정보 삭제
+     * 유저 정보 삭제 (회원탈퇴)
      */
     fun deleteUser() {
-        database.child(userId).removeValue().addOnCompleteListener {  }
+        database.child(userId).removeValue()
+        storage.reference.child("images/$userId").delete()
     }
 
     /**

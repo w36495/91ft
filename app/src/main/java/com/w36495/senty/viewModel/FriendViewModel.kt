@@ -18,6 +18,13 @@ class FriendViewModel : ViewModel() {
     val friendListToast: LiveData<String?> = _friendToast
 
     /**
+     * 유저 정보 삭제
+     */
+    fun removeUser() {
+        friendRepository.deleteUser()
+    }
+
+    /**
      * 친구 정보 등록
      */
     fun addFriend(friend: Friend) {
