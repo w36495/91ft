@@ -78,7 +78,7 @@ class FriendInfoActivity : AppCompatActivity(), View.OnClickListener {
             }
             R.id.friend_info_delete -> {
                 // 친구 정보 삭제 버튼 클릭
-                MaterialAlertDialogBuilder(this)
+                MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_App_MaterialAlertDialog)
                     .setTitle(R.string.msg_friend_delete_title)
                     .setMessage(R.string.msg_friend_delete_content)
                     .setNeutralButton(resources.getText(R.string.btn_cancel)) { _, _ -> }

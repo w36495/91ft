@@ -81,10 +81,10 @@ class GiftDetailDialog(private val gift: Gift) : DialogFragment() {
 
         // 선물 삭제 버튼 클릭
         binding.giftDetailRemove.setOnClickListener {
-            MaterialAlertDialogBuilder(view.context)
+            MaterialAlertDialogBuilder(view.context, R.style.ThemeOverlay_App_MaterialAlertDialog)
                 .setMessage(resources.getString(R.string.msg_gift_delete))
                 // 취소 버튼
-                .setNegativeButton(resources.getString(R.string.btn_cancel)) { _, _ ->
+                .setNeutralButton(resources.getString(R.string.btn_cancel)) { _, _ ->
                     dismiss()
                 }
                 // 삭제 버튼
