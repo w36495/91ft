@@ -17,7 +17,7 @@ class GiftRepository(friendKey: String) {
     private var userId: String = FirebaseAuth.getInstance().currentUser!!.uid
     val progress = MutableLiveData<Double>()
 
-    private val imageBasePath = "images/${friendKey}/"
+    private val imageBasePath = "images/$userId/${friendKey}/"
     private val databaseBasePath = "${userId}/gifts/${friendKey}/"
 
     /**

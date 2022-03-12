@@ -39,7 +39,7 @@ class FriendRepository {
             storage.reference.child("images/${friend.key}/$friendImageFileName")
                 .putFile(Uri.parse(friend.imagePath))
                 .addOnSuccessListener {
-                    friend.imagePath = "images/${friend.key}/$friendImageFileName"
+                    friend.imagePath = "images/$userId/${friend.key}/$friendImageFileName"
                     database.child(userId).child("friends").child(friend.key).setValue(friend)
                 }
                 .addOnProgressListener {
@@ -105,7 +105,7 @@ class FriendRepository {
         database.child(userId).child("friends").child(friend.key).removeValue() // 친구 정보 삭제
         database.child(userId).child("gifts").child(friend.key).removeValue()   // 해당 친구의 선물 목록 삭제
 
-        storage.reference.child("images/${friend.key}").listAll()
+        storage.reference.child("images/$userId/${friend.key}").listAll()
             .addOnSuccessListener { items ->
                 items.items.forEach { item ->
                     item.delete()
@@ -121,10 +121,10 @@ class FriendRepository {
      */
     private fun updateFriendInfo(friend: Friend) {
         val updateFriendImagePath = System.currentTimeMillis().toString()
-        storage.reference.child("images/${friend.key}/$updateFriendImagePath")
+        storage.reference.child("images/$userId/${friend.key}/$updateFriendImagePath")
             .putFile(Uri.parse(friend.imagePath))
             .addOnSuccessListener {
-                friend.imagePath = "images/${friend.key}/$updateFriendImagePath"
+                friend.imagePath = "images/$userId/${friend.key}/$updateFriendImagePath"
                 updateFriendInfoOnlyText(friend)
             }
             .addOnProgressListener {
