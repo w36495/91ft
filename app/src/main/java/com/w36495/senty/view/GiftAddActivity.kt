@@ -2,6 +2,7 @@ package com.w36495.senty.view
 
 import android.app.DatePickerDialog
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_NO_HISTORY
 import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
@@ -110,6 +111,7 @@ class GiftAddActivity : AppCompatActivity() {
 
             if (isUpdate) {
                 intent.putExtra("oldGiftImagePath", oldGiftImagePath)
+                intent.flags = FLAG_ACTIVITY_NO_HISTORY
                 startActivity(intent)
                 finish()
             } else {

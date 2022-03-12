@@ -3,6 +3,7 @@ package com.w36495.senty.view
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -92,6 +93,7 @@ class GiftListActivity : AppCompatActivity(), GiftSelectListener {
             when (menu.itemId) {
                 R.id.home -> {
                     val moveFriendListIntent = Intent(this, FriendListActivity::class.java)
+                    moveFriendListIntent.flags = FLAG_ACTIVITY_CLEAR_TOP
                     startActivity(moveFriendListIntent)
                     finish()
                     true

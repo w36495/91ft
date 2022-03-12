@@ -2,6 +2,7 @@ package com.w36495.senty.view
 
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
 import android.os.Bundle
 import android.view.*
 import android.widget.Toast
@@ -85,6 +86,7 @@ class FriendInfoActivity : AppCompatActivity(), View.OnClickListener {
                     .setPositiveButton(resources.getString(R.string.btn_delete)) { _, _ ->
                         val deleteIntnet = Intent(this, FriendListActivity::class.java)
                         deleteIntnet.putExtra("deleteFriend", friend)
+                        deleteIntnet.flags = FLAG_ACTIVITY_CLEAR_TOP
                         startActivity(deleteIntnet)
                         Toast.makeText(this, R.string.msg_friend_delete, Toast.LENGTH_SHORT).show()
                         finish()
