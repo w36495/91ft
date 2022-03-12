@@ -12,6 +12,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import com.w36495.senty.R
 import com.w36495.senty.data.domain.Friend
 import com.w36495.senty.data.domain.Gift
@@ -125,10 +127,10 @@ class GiftListActivity : AppCompatActivity(), GiftSelectListener {
 
     override fun onResume() {
         super.onResume()
-        giftViewModel.giftList.observe(this, { gift ->
+        giftViewModel.giftList.observe(this) { gift ->
             giftAdapter.setGiftList(gift)
-        })
-        giftViewModel.giftProgress.observe(this, { progress ->
+        }
+        giftViewModel.giftProgress.observe(this) { progress ->
             showProgressDialog(progress)
         }
         giftViewModel.giftToast.observe(this) { exception ->

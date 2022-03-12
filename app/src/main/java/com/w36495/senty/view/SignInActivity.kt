@@ -33,7 +33,6 @@ class SignInActivity : AppCompatActivity() {
         binding.btnSignup.setOnClickListener {
             val intent = Intent(this, SignUpActivity::class.java)
             startActivity(intent)
-            finish()
         }
 
         // 비밀번호 찾기 버튼 클릭
