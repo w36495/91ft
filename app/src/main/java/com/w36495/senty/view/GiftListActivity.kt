@@ -4,13 +4,12 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.ktx.storage
 import com.w36495.senty.R
 import com.w36495.senty.data.domain.Friend
 import com.w36495.senty.data.domain.Gift
@@ -126,7 +125,10 @@ class GiftListActivity : AppCompatActivity(), GiftSelectListener {
         })
         giftViewModel.giftProgress.observe(this, { progress ->
             showProgressDialog(progress)
-        })
+        }
+        giftViewModel.giftToast.observe(this) { exception ->
+            Toast.makeText(this, exception, Toast.LENGTH_SHORT).show()
+        }
     }
 
     /**

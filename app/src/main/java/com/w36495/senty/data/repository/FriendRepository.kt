@@ -8,6 +8,7 @@ import com.google.firebase.storage.FirebaseStorage
 import android.net.Uri
 import com.google.android.gms.tasks.Task
 import com.w36495.senty.data.domain.Friend
+import com.w36495.senty.data.exception.StorageError
 
 class FriendRepository {
 
@@ -43,7 +44,9 @@ class FriendRepository {
                 .addOnProgressListener {
                     progress.postValue((100.0 * it.bytesTransferred) / it.totalByteCount)
                 }
-                .addOnFailureListener { }
+                .addOnFailureListener { exception ->
+                    throw StorageError("insert Friend Exception", exception.cause!!)
+                }
         }
     }
 
@@ -83,7 +86,9 @@ class FriendRepository {
                 updateFriendInfo(friend)
                 storage.reference.child(path).delete()
                     .addOnSuccessListener { }
-                    .addOnFailureListener { }
+                    .addOnFailureListener { exception ->
+                        throw StorageError("old image update friend error", exception.cause!!)
+                    }
             }
         } ?: run {
             friend.imagePath?.let {
@@ -105,6 +110,9 @@ class FriendRepository {
                     item.delete()
                 }
             }
+            .addOnFailureListener { exception ->
+                throw StorageError("delete friend error", exception.cause!!)
+            }
     }
 
     /**
@@ -121,7 +129,9 @@ class FriendRepository {
             .addOnProgressListener {
                 progress.postValue((100.0 * it.bytesTransferred) / it.totalByteCount)
             }
-            .addOnFailureListener { }
+            .addOnFailureListener { exception ->
+                throw StorageError("update friend(image_text error", exception.cause!!)
+            }
     }
 
     /**

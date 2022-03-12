@@ -9,10 +9,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.firebase.ui.auth.AuthUI
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.firebase.auth.FirebaseAuth
-import com.w36495.senty.R
 import com.w36495.senty.data.domain.Friend
 import com.w36495.senty.databinding.ActivityFriendListBinding
 import com.w36495.senty.view.adapter.FriendAdapter
@@ -91,12 +87,15 @@ class FriendListActivity : AppCompatActivity(), FriendSelectListener {
 
     override fun onResume() {
         super.onResume()
-        friendViewModel.friendList.observe(this, { friend ->
+        friendViewModel.friendList.observe(this) { friend ->
             friendAdapter.setFriendList(friend)
-        })
-        friendViewModel.friendProgress.observe(this, { progress ->
+        }
+        friendViewModel.friendProgress.observe(this) { progress ->
             showProgressDialog(progress)
-        })
+        }
+        friendViewModel.friendListToast.observe(this) { exception ->
+            Toast.makeText(this, exception, Toast.LENGTH_SHORT).show()
+        }
     }
 
     /**

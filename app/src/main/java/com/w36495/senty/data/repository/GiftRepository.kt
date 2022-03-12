@@ -7,6 +7,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
 import com.w36495.senty.data.domain.Gift
+import com.w36495.senty.data.exception.StorageError
 
 class GiftRepository(friendKey: String) {
 
