@@ -9,6 +9,8 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.MobileAds
 import com.w36495.senty.data.domain.Friend
 import com.w36495.senty.databinding.ActivityFriendListBinding
 import com.w36495.senty.view.adapter.FriendAdapter
@@ -34,6 +36,9 @@ class FriendListActivity : AppCompatActivity(), FriendSelectListener {
         friendAdapter = FriendAdapter(this)
         friendViewModel = ViewModelProvider(this)[FriendViewModel::class.java]
         progressDialog = ProgressDialog(this)
+
+        MobileAds.initialize(this) {}
+        binding.adView.loadAd(AdRequest.Builder().build())
 
         // 친구 정보 등록 버튼 클릭
         binding.fabFriendAdd.setOnClickListener {

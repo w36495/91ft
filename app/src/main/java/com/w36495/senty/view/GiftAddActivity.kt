@@ -12,6 +12,8 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.MobileAds
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import com.w36495.senty.R
@@ -38,6 +40,9 @@ class GiftAddActivity : AppCompatActivity() {
         binding = ActivityGiftAddBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
+
+        MobileAds.initialize(this) {}
+        binding.adView.loadAd(AdRequest.Builder().build())
 
         // 선물 조회 다이얼로그를 통해 넘겨받은 선물 정보 셋팅
         if (intent.hasExtra("updateGift")) {

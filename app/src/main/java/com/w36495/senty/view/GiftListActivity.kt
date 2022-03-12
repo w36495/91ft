@@ -10,6 +10,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.MobileAds
 import com.w36495.senty.R
 import com.w36495.senty.data.domain.Friend
 import com.w36495.senty.data.domain.Gift
@@ -35,6 +37,9 @@ class GiftListActivity : AppCompatActivity(), GiftSelectListener {
         binding = ActivityGiftListBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
+
+        MobileAds.initialize(this) {}
+        binding.adView.loadAd(AdRequest.Builder().build())
 
         // 친구의 정보를 클릭했을 때 저장했던 정보 불러오기
         val sharedPref = getSharedPreferences("friend", Context.MODE_PRIVATE)

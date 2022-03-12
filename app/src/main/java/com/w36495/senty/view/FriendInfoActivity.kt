@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.view.*
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.MobileAds
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
@@ -23,6 +25,9 @@ class FriendInfoActivity : AppCompatActivity(), View.OnClickListener {
         binding = ActivityFriendInfoBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
+
+        MobileAds.initialize(this) {}
+        binding.adView.loadAd(AdRequest.Builder().build())
 
         setInit(view)
     }
