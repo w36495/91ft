@@ -19,4 +19,9 @@
 
         <!-- Customize your theme here. -->
     </style>
+
+    <!-- Splash screen -->
+    <style name="Theme.Senty.Splash">
+        <item name="android:windowBackground">@drawable/background_splash_screen</item>
+    </style>
 </resources>
