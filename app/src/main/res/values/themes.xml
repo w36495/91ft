@@ -19,6 +19,11 @@
 
         <!-- Customize your theme here. -->
     </style>
+경
+    <style name="ThemeOverlay.App.MaterialAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.App.PositiveButton</item>
+        <item name="buttonBarNeutralButtonStyle">@style/Widget.App.NeutralButton</item>
+    </style>
 
     <!-- Splash screen -->
     <style name="Theme.Senty.Splash">

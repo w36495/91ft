@@ -10,4 +10,20 @@
         <item name="colorPrimary">@color/senty_green2</item>
     </style>
 
+    <style name="Widget.App.PositiveButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.PositiveButton</item>
+    </style>
+
+    <style name="Widget.App.NeutralButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.NeutralButton</item>
+    </style>
+
+    <style name="ThemeOverlay.App.PositiveButton" parent="">
+        <item name="colorPrimary">@color/senty_red</item>
+    </style>
+
+    <style name="ThemeOverlay.App.NeutralButton" parent="">
+        <item name="colorPrimary">@color/senty_gray1</item>
+    </style>
+
 </resources>
