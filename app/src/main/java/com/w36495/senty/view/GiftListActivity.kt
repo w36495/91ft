@@ -111,7 +111,7 @@ class GiftListActivity : AppCompatActivity(), GiftSelectListener {
 
         // 선물 정보 삭제
         else if (intent.hasExtra("removeGift")) {
-            val deleteGift = intent.getSerializableExtra("deleteGift") as Gift
+            val deleteGift = intent.getSerializableExtra("removeGift") as Gift
             giftViewModel.removeGift(deleteGift)
         }
 
