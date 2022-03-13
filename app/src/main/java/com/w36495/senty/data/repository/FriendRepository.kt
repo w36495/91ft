@@ -36,7 +36,7 @@ class FriendRepository {
             database.child(userId).child("friends").child(friend.key).setValue(friend)
         } else {
             val friendImageFileName = System.currentTimeMillis().toString()
-            storage.reference.child("images/${friend.key}/$friendImageFileName")
+            storage.reference.child("images/$userId/${friend.key}/$friendImageFileName")
                 .putFile(Uri.parse(friend.imagePath))
                 .addOnSuccessListener {
                     friend.imagePath = "images/$userId/${friend.key}/$friendImageFileName"
