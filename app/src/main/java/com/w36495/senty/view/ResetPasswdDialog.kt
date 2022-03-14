@@ -11,6 +11,7 @@ import androidx.fragment.app.DialogFragment
 import com.google.firebase.auth.FirebaseAuth
 import com.w36495.senty.R
 import com.w36495.senty.databinding.DialogPasswdResetBinding
+import com.w36495.senty.util.StringUtils
 
 class ResetPasswdDialog : DialogFragment() {
 
@@ -53,6 +54,12 @@ class ResetPasswdDialog : DialogFragment() {
                 Toast.makeText(
                     view.context,
                     getString(R.string.toast_empty_email),
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else if (!StringUtils.isValidEmail(inputEmail)) {
+                Toast.makeText(
+                    view.context,
+                    R.string.toast_email_invalid_exception,
                     Toast.LENGTH_SHORT
                 ).show()
             } else {
