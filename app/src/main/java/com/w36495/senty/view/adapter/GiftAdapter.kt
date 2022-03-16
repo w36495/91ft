@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
@@ -88,8 +89,10 @@ class GiftAdapter(
     override fun getItemCount(): Int = giftList.size
 
     fun setGiftList(giftList: List<Gift>) {
+        val diffUtil = GiftDiffUtil(this.giftList, giftList)
+        val diffResult = DiffUtil.calculateDiff(diffUtil)
         this.giftList = giftList
-        notifyDataSetChanged()
+        diffResult.dispatchUpdatesTo(this)
     }
 
     /**
@@ -102,4 +105,33 @@ class GiftAdapter(
             GiftType.GIVE
         }
     }
+}
+
+class GiftDiffUtil(
+    private val oldGiftList: List<Gift>,
+    private val newGiftList: List<Gift>
+    ) : DiffUtil.Callback() {
+    override fun getOldListSize(): Int = oldGiftList.size
+
+    override fun getNewListSize(): Int = newGiftList.size
+
+    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+        return oldGiftList[oldItemPosition].key == newGiftList[newItemPosition].key
+    }
+
+    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+        val oldGift = oldGiftList[oldItemPosition]
+        val newGift = newGiftList[newItemPosition]
+
+        return when {
+            oldGift.key != newGift.key -> false
+            oldGift.received != newGift.received -> false
+            oldGift.date != newGift.date -> false
+            oldGift.title != newGift.title -> false
+            oldGift.memo != newGift.memo -> false
+            oldGift.imagePath != newGift.imagePath -> false
+            else -> true
+        }
+    }
+
 }

@@ -2,6 +2,7 @@ package com.w36495.senty.view.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
@@ -47,8 +48,39 @@ class FriendAdapter(private val friendSelectListener: FriendSelectListener) :
     override fun getItemCount(): Int = friendList.size
 
     fun setFriendList(friendList: List<Friend>) {
+        val diffUtil = FriendDiffUtil(this.friendList, friendList)
+        val diffResult = DiffUtil.calculateDiff(diffUtil)
         this.friendList = friendList
-        notifyDataSetChanged()
+        diffResult.dispatchUpdatesTo(this)
+    }
+
+}
+
+class FriendDiffUtil(
+    private val oldFriendList: List<Friend>,
+    private val newFriendList: List<Friend>
+) : DiffUtil.Callback() {
+    override fun getOldListSize(): Int = oldFriendList.size
+
+    override fun getNewListSize(): Int = newFriendList.size
+
+    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+        val oldItem = oldFriendList[oldItemPosition]
+        val newItem = newFriendList[newItemPosition]
+
+        return oldItem.key == newItem.key
+    }
+
+    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+        val oldItem = oldFriendList[oldItemPosition]
+        val newItem = newFriendList[newItemPosition]
+
+        return when {
+            oldItem.key != newItem.key -> false
+            oldItem.name != newItem.name -> false
+            oldItem.imagePath != newItem.imagePath -> false
+            else -> true
+        }
     }
 
 }
