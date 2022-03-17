@@ -6,6 +6,7 @@ import android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
 import android.os.Bundle
 import android.view.*
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
@@ -15,11 +16,14 @@ import com.google.firebase.storage.ktx.storage
 import com.w36495.senty.R
 import com.w36495.senty.data.domain.Friend
 import com.w36495.senty.databinding.ActivityFriendInfoBinding
+import com.w36495.senty.viewModel.FriendViewModel
 
 class FriendInfoActivity : AppCompatActivity(), View.OnClickListener {
 
     private lateinit var binding: ActivityFriendInfoBinding
     private lateinit var friend: Friend
+
+    private val friendViewModel by viewModels<FriendViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,13 +55,9 @@ class FriendInfoActivity : AppCompatActivity(), View.OnClickListener {
                 .into(binding.friendInfoImg)
         }
 
-        // 선물 목록으로 이동
         binding.friendInfoGift.setOnClickListener(this)
-        // 친구 정보 수정으로 이동
         binding.friendInfoUpdate.setOnClickListener(this)
-        // 친구 정보 삭제
         binding.friendInfoDelete.setOnClickListener(this)
-        // 뒤로가기 버튼 클릭
         binding.friendInfoToolbar.setNavigationOnClickListener {
             onBackPressed()
         }
@@ -67,32 +67,33 @@ class FriendInfoActivity : AppCompatActivity(), View.OnClickListener {
     override fun onClick(view: View) {
         when (view.id) {
             R.id.friend_info_gift -> {
-                // 선물 목록 버튼 클릭
                 val giftListIntent = Intent(this, GiftListActivity::class.java)
                 startActivity(giftListIntent)
             }
             R.id.friend_info_update -> {
-                // 친구 정보 수정 버튼 클릭
-                val updateIntent = Intent(this, FriendAddActivity::class.java)
-                updateIntent.putExtra("updateFriend", friend)
-                startActivity(updateIntent)
+                val updateFriendInfoIntent = Intent(this, FriendAddActivity::class.java)
+                updateFriendInfoIntent.putExtra("updateFriend", friend)
+                startActivity(updateFriendInfoIntent)
             }
             R.id.friend_info_delete -> {
-                // 친구 정보 삭제 버튼 클릭
-                MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_App_MaterialAlertDialog)
-                    .setTitle(R.string.msg_friend_delete_title)
-                    .setMessage(R.string.msg_friend_delete_content)
-                    .setNeutralButton(resources.getText(R.string.btn_cancel)) { _, _ -> }
-                    .setPositiveButton(resources.getString(R.string.btn_delete)) { _, _ ->
-                        val deleteIntnet = Intent(this, FriendListActivity::class.java)
-                        deleteIntnet.putExtra("deleteFriend", friend)
-                        deleteIntnet.flags = FLAG_ACTIVITY_CLEAR_TOP
-                        startActivity(deleteIntnet)
-                        Toast.makeText(this, R.string.msg_friend_delete, Toast.LENGTH_SHORT).show()
-                        finish()
-                    }
-                    .show()
+                showFriendInfoDeleteDialog()
             }
         }
+    }
+
+    private fun showFriendInfoDeleteDialog() {
+        MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_App_MaterialAlertDialog)
+            .setTitle(R.string.msg_friend_delete_title)
+            .setMessage(R.string.msg_friend_delete_content)
+            .setNeutralButton(resources.getText(R.string.btn_cancel)) { _, _ -> }
+            .setPositiveButton(resources.getString(R.string.btn_delete)) { _, _ ->
+                friendViewModel.removeFriend(friend)
+                val moveFriendListIntent = Intent(this, FriendListActivity::class.java)
+                moveFriendListIntent.flags = FLAG_ACTIVITY_CLEAR_TOP
+                startActivity(moveFriendListIntent)
+                Toast.makeText(this, R.string.msg_friend_delete, Toast.LENGTH_SHORT).show()
+                finish()
+            }
+            .show()
     }
 }

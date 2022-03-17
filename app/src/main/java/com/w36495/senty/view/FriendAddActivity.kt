@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.google.android.gms.ads.AdRequest
@@ -17,11 +18,13 @@ import com.google.firebase.storage.ktx.storage
 import com.w36495.senty.R
 import com.w36495.senty.data.domain.Friend
 import com.w36495.senty.databinding.ActivityFriendAddBinding
+import com.w36495.senty.viewModel.FriendViewModel
 
 class FriendAddActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityFriendAddBinding
     private lateinit var resultGalleryImage: ActivityResultLauncher<Intent>
+    private val friendViewModel by viewModels<FriendViewModel>()
 
     private lateinit var friendKey: String
     private var friendImageUri: Uri? = null
@@ -61,7 +64,6 @@ class FriendAddActivity : AppCompatActivity() {
             saveFriend()
         }
 
-        // 뒤로가기 버튼 클릭
         binding.friendAddToolbar.setNavigationOnClickListener {
             onBackPressed()
         }
@@ -90,7 +92,7 @@ class FriendAddActivity : AppCompatActivity() {
                 .show()
             return
         }
-        val friendAddIntent = Intent(this, FriendListActivity::class.java)
+
         val friend = Friend(
             if (isUpdate) friendKey else "",
             binding.friendAddName.text.toString(),
@@ -101,18 +103,16 @@ class FriendAddActivity : AppCompatActivity() {
             }
         )
 
-        friendAddIntent.putExtra("saveFriend", friend)
-
         // 친구의 정보 수정
         if (isUpdate) {
-            friendAddIntent.putExtra("oldFriendImagePath", oldFriendImagePath)
-            startActivity(friendAddIntent)
-            finish()
+            friendViewModel.updateFriend(friend, oldFriendImagePath)
+        } else {
+            // 친구의 정보 등록
+            friendViewModel.addFriend(friend)
         }
-        // 친구의 정보 등록
-        else {
-            setResult(RESULT_OK, friendAddIntent)
-            finish()
-        }
+
+        val moveFriendListIntent = Intent(this, FriendListActivity::class.java)
+        startActivity(moveFriendListIntent)
+        finish()
     }
 }
