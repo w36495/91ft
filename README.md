@@ -1,21 +1,29 @@
 # 🎁 Senty
 소중한 사람들과 정성스럽게 주고받은 선물을 기록할 수 있는 어플리케이션  
 
-⏳ 기간
+⏳ 개발 기간
 ---
-2022.01. ~ 2022.02.  
+2022.01. ~ 2022.03.  
+
+🚀 PlayStore
+---
+https://play.google.com/store/apps/details?id=com.w36495.senty
 
 🛠 기술 스택
 ---
 - 100% kotlin  
 - firebase의 realtime database, storage, authentication 사용
-- viewModel + liveData + dataBinding + repository 활용한 MVVM 패턴 적용
+- MVVM + Repository 의 구조
+- AAC(livaData, databinding, viewModel) 사용
+- Glide 
     
 💪 기능  
 ---
 > 회원  
 - [x] 로그인  
+- [x] 로그아웃
 - [x] 회원가입
+- [x] 회원탈퇴
 - [x] 비밀번호 재설정
   
 > 친구  
