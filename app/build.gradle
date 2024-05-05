@@ -3,19 +3,24 @@ plugins {
     id 'kotlin-android'
     id 'com.google.gms.google-services'
     id 'kotlin-kapt'
+    id 'androidx.navigation.safeargs'
 }
 
 android {
-    compileSdk 31
+    namespace = "com.w36495.senty"
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.w36495.senty"
         minSdk 21
-        targetSdk 31
+        targetSdk 34
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary true
+        }
     }
 
     buildTypes {
@@ -25,25 +30,35 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        freeCompilerArgs = ['-Xjvm-default=all-compatibility']
+        jvmTarget = '17'
     }
 
     buildFeatures {
         dataBinding true
+        compose = true
     }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.2"
+    }
+    packagingOptions {
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
+    }
+
 }
 
 dependencies {
-
     def lifecycle_version = "2.4.0"
 
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.4.1'
-    implementation 'com.google.android.material:material:1.5.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
 
     implementation("androidx.cardview:cardview:1.0.0")
@@ -53,20 +68,57 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version") // viewModel
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version")  // liveData
 
-    implementation platform('com.google.firebase:firebase-bom:29.0.3')  // firebase
+    implementation("androidx.viewpager2:viewpager2:1.0.0")  // viewpager2
+
+    implementation platform('com.google.firebase:firebase-bom:32.2.0')  // firebase
     implementation 'com.google.firebase:firebase-analytics-ktx'
 
+    implementation 'com.google.firebase:firebase-auth-ktx'      // firebase - Authentication
     implementation 'com.firebaseui:firebase-ui-auth:7.2.0'      // firebase - Authentication
+    implementation 'com.google.android.gms:play-services-auth:20.6.0'
     implementation 'com.google.firebase:firebase-database'      // firebase - Realtime Database
     implementation 'com.google.firebase:firebase-storage-ktx'   // firebase - Cloud Storage
     implementation 'com.firebaseui:firebase-ui-storage:7.2.0'   // firebase - StorageUI
+
+    implementation 'com.google.android.gms:play-services-ads:21.5.0'
+
+    implementation 'androidx.activity:activity-ktx:1.5.0'
+    implementation 'androidx.fragment:fragment-ktx:1.5.3'
+
+    // Compose
+    def composeBom = platform('androidx.compose:compose-bom:2024.05.00')
+    implementation composeBom
+    androidTestImplementation composeBom
+
+    implementation 'androidx.activity:activity-compose:1.9.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
+
+    implementation 'androidx.compose.material3:material3'                       // UI
+    implementation 'androidx.compose.ui:ui'
+    implementation 'androidx.compose.ui:ui-graphics'
+    implementation 'androidx.compose.material:material-icons-extended'          // Icon
+    implementation 'androidx.compose.ui:ui-tooling-preview'                     // Preview support
+    debugImplementation 'androidx.compose.ui:ui-tooling'                        // Preview support
+    androidTestImplementation 'androidx.compose.ui:ui-test-junit4'              // UI Tests
+    debugImplementation 'androidx.compose.ui:ui-test-manifest'                  // UI Tests
+
+    // Jetpack Navigation
+    def nav_version = "2.7.7"
+    implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
+    implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
+    implementation "androidx.navigation:navigation-compose:$nav_version"        // with compose
+
+    implementation 'com.google.accompanist:accompanist-pager:0.13.0'            // compose TabLayout
+    implementation 'com.google.accompanist:accompanist-pager-indicators:0.13.0' // compose TabLayout - Indicator
+    implementation 'com.google.accompanist:accompanist-appcompat-theme:0.28.0'
 
     // Glide
     implementation 'com.github.bumptech.glide:glide:4.12.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
     kapt 'com.github.bumptech.glide:compiler:4.12.0'
 
-    testImplementation 'junit:junit:'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    // Test
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.ext:junit-ktx:1.1.5'
 }
