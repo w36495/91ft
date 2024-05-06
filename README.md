@@ -53,14 +53,4 @@ https://play.google.com/store/apps/details?id=com.w36495.senty
  |선물목록|선물등록/수정|선물조회|선물삭제|  
  |--|--|--|--|  
  |![선물목록](https://user-images.githubusercontent.com/52291662/152778511-ee2c219b-c65c-4b2d-ab16-d18075c0e2e1.png)|![선물등록](https://user-images.githubusercontent.com/52291662/152778523-24b0e7f1-04f9-45e9-9fe4-fc2351e4ee8e.png)|![선물조회](https://user-images.githubusercontent.com/52291662/152778537-8f2d0b5a-015c-4eb8-8151-2f1d56d9f031.png)|![선물삭제](https://user-images.githubusercontent.com/52291662/152957272-1300621e-d042-4f5b-97b1-d3a9aad292b5.png)|  
-   
----
-### Git Commit Message
-  - feat : 새로운 기능 추가  
-  - fix : 버그 수정  
-  - docs : 문서 수정
-  - style : 코드 포맷팅, 세미콜론 누락, 코드 변경이 없는 경우  
-  - refactor : 코드 리팩토링  
-  - test : 테스트 코드, 리팩토링 테스트 코드 추가  
-  - chore : 빌드 업무 수정, 패키지 매니저 수정
-  
+
