@@ -4,6 +4,7 @@
 ⏳ 개발 기간
 ---
 2022.01. ~ 2022.03.  
+2024.05. ~ version2 진행중
 
 🚀 PlayStore
 ---
@@ -11,11 +12,11 @@ https://play.google.com/store/apps/details?id=com.w36495.senty
 
 🛠 기술 스택
 ---
-- 100% kotlin  
+- MVVM(Model-View-ViewModel) + Repository Pattern
 - firebase의 realtime database, storage, authentication 사용
-- MVVM + Repository 의 구조
 - AAC(livaData, databinding, viewModel) 사용
-- Glide 
+- Glide
+- View -> Compose 로 변환 작업중!
     
 💪 기능  
 ---
@@ -41,7 +42,7 @@ https://play.google.com/store/apps/details?id=com.w36495.senty
  ### 회원기능  
  |이메일로 로그인|이메일로 회원가입|비밀번호 재설정|  
  |--|--|--|
- |![로그인](https://user-images.githubusercontent.com/52291662/152777924-6d722f5d-88f3-4ebd-8954-b5f3fb14bc7f.png)|![회원가입](https://user-images.githubusercontent.com/52291662/152777442-b4687203-70c8-4790-976c-5f8cd3223808.png)|![비밀번호재설정](https://user-images.githubusercontent.com/52291662/152777494-71c27bd7-5ae8-4ef8-af4f-8917f4d49a94.png)|  
+ |![로그인](https://github.com/w36495/Senty/assets/52291662/abe361c2-4cac-4995-a0a7-76580076816b)|![회원가입](https://github.com/w36495/Senty/assets/52291662/e6a209ed-2e37-4e1d-99b3-8ecebd23e23c)|![비밀번호재설정](https://github.com/w36495/Senty/assets/52291662/a18337aa-6b61-451e-821e-29404a238af1)|  
    
  ### 친구기능  
  |친구목록|친구등록/수정|친구조회|친구삭제|
