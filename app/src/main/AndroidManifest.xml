@@ -35,6 +35,7 @@
         <activity android:name=".view.LoginActivity" />
         <activity android:name=".view.SignupActivity" />
         <activity android:name=".view.GiftListActivity" />
+        <activity android:name=".view.AppActivity" />
     </application>
 
 </manifest>
