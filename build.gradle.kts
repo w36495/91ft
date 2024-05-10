@@ -11,5 +11,6 @@ buildscript {
         classpath("androidx.navigation:navigation-safe-args-gradle-plugin:2.7.7")        // Navigation - Safe Args
         classpath("com.google.gms:google-services:4.3.15")
         classpath("com.google.dagger:hilt-android-gradle-plugin:2.51.1")
+        classpath("org.jetbrains.kotlin:kotlin-serialization:1.9.0")
     }
 }

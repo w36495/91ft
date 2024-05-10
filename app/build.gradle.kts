@@ -8,6 +8,7 @@ plugins {
     id("kotlin-kapt")
     id("androidx.navigation.safeargs")
     id("com.google.dagger.hilt.android")
+    id("kotlinx-serialization")
 }
 
 val localProperties = Properties()
@@ -152,6 +153,9 @@ dependencies {
     // Hilt
     implementation("com.google.dagger:hilt-android:2.51.1")
     kapt("com.google.dagger:hilt-android-compiler:2.51.1")
+
+    // Kotlin Serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
 
     // Test
     testImplementation("junit:junit:4.13.2")
