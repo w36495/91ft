@@ -7,6 +7,7 @@ plugins {
     id("com.google.gms.google-services")
     id("kotlin-kapt")
     id("androidx.navigation.safeargs")
+    id("com.google.dagger.hilt.android")
 }
 
 val localProperties = Properties()
@@ -63,7 +64,10 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+}
 
+kapt {
+    correctErrorTypes = true
 }
 
 dependencies {
@@ -122,6 +126,7 @@ dependencies {
     implementation("androidx.navigation:navigation-ui-ktx:$nav_version")
     implementation("androidx.navigation:navigation-compose:$nav_version")        // with compose
     implementation("androidx.compose.material:material:1.6.7")                  // Bottom Navigation
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")                // with Hilt
 
     implementation("com.google.accompanist:accompanist-pager:0.13.0")            // compose TabLayout
     implementation("com.google.accompanist:accompanist-pager-indicators:0.13.0") // compose TabLayout - Indicator
@@ -143,6 +148,10 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")                         // okhttp3
     implementation("com.squareup.moshi:moshi-kotlin:1.15.1")                            // Moshi
     implementation("com.squareup.retrofit2:converter-moshi:2.9.0")               // Moshi-Converter
+
+    // Hilt
+    implementation("com.google.dagger:hilt-android:2.51.1")
+    kapt("com.google.dagger:hilt-android-compiler:2.51.1")
 
     // Test
     testImplementation("junit:junit:4.13.2")
