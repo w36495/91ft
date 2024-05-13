@@ -1,5 +1,6 @@
 package com.w36495.senty.view.ui
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.w36495.senty.domain.FriendGroupRepository
@@ -24,7 +25,7 @@ class FriendGroupViewModel @Inject constructor(
                 val result = friendGroupRepository.getFriendGroups()
                 _friendGroups.update { result.map { it.toDomainModel() } }
             } catch (exception: Exception) {
-                // TODO : Handle error
+                Log.d("FriendGroupViewModel", exception.printStackTrace().toString())
             }
         }
     }
