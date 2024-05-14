@@ -8,7 +8,8 @@ import com.w36495.senty.view.entity.FriendGroup
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -21,12 +22,16 @@ class FriendGroupViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            try {
-                val result = friendGroupRepository.getFriendGroups()
-                _friendGroups.update { result.map { it.toDomainModel() } }
-            } catch (exception: Exception) {
-                Log.d("FriendGroupViewModel", exception.printStackTrace().toString())
-            }
+            friendGroupRepository.getFriendGroups()
+                .catch {
+                    Log.d("FriendGroupViewModel", it.message.toString())
+                }
+                .map { groups ->
+                    groups.map { it.toDomainModel() }
+                }
+                .collect {
+                    _friendGroups.value = it
+                }
         }
     }
 }
