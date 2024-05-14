@@ -1,4 +1,4 @@
-package com.w36495.senty.data.service
+package com.w36495.senty.data.remote.service
 
 import okhttp3.ResponseBody
 import retrofit2.Response

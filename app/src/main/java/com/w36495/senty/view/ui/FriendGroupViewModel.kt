@@ -3,7 +3,7 @@ package com.w36495.senty.view.ui
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.w36495.senty.domain.FriendGroupRepository
+import com.w36495.senty.domain.repository.FriendGroupRepository
 import com.w36495.senty.view.entity.FriendGroup
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

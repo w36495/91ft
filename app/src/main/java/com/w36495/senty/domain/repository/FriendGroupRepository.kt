@@ -1,4 +1,4 @@
-package com.w36495.senty.domain
+package com.w36495.senty.domain.repository
 
 import com.w36495.senty.data.domain.FriendGroupEntity
 

@@ -2,8 +2,8 @@ package com.w36495.senty.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
 import com.w36495.senty.data.domain.FriendGroupEntity
-import com.w36495.senty.data.service.FriendGroupService
-import com.w36495.senty.domain.FriendGroupRepository
+import com.w36495.senty.data.remote.service.FriendGroupService
+import com.w36495.senty.domain.repository.FriendGroupRepository
 import kotlinx.serialization.json.Json
 import org.json.JSONObject
 import javax.inject.Inject
