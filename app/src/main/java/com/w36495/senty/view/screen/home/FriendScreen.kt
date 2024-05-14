@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.w36495.senty.util.getTextColorByBackgroundColor
 import com.w36495.senty.view.entity.FriendEntity
 import com.w36495.senty.view.entity.FriendGroup
 import com.w36495.senty.view.ui.component.buttons.SentyOutlinedButtonWithIcon
@@ -192,7 +193,8 @@ fun FriendGroupChip(
         Text(
             text = group.name,
             modifier = Modifier.padding(4.dp),
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color(group.color.getTextColorByBackgroundColor())
         )
     }
 }
