@@ -14,7 +14,7 @@ import retrofit2.Response
 import javax.inject.Inject
 
 class FriendRepositoryImpl @Inject constructor(
-    private val friendService: FriendService
+    private val friendService: FriendService,
 ) : FriendRepository {
     private var userId: String = FirebaseAuth.getInstance().currentUser!!.uid
 

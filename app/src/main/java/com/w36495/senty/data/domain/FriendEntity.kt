@@ -26,7 +26,6 @@ data class FriendEntity(
     fun toDomainEntity(): FriendEntity {
         val friendEntity = FriendEntity(
             name = name,
-            groupId = groupId,
             birthday = birthday,
             memo = memo
         )

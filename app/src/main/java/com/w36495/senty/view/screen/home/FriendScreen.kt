@@ -128,7 +128,7 @@ fun FriendItemContent(
             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-//            FriendGroupChip(group = friend.getFriendGroup())
+            FriendGroupChip(group = friend.group!!)
             Text(
                 text = friend.displayBirthday(),
                 style = MaterialTheme.typography.labelLarge,
@@ -155,7 +155,7 @@ fun FriendItemContent(
                 style = MaterialTheme.typography.labelLarge
             )
             Text(
-                text = "11",
+                text = friend.receivedGiftCount.toString(),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.padding(horizontal = 4.dp)
@@ -166,7 +166,7 @@ fun FriendItemContent(
                 modifier = Modifier.padding(start = 4.dp)
             )
             Text(
-                text = "123",
+                text = friend.sentGiftCount.toString(),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.padding(horizontal = 4.dp)
@@ -184,7 +184,7 @@ fun FriendGroupChip(
     Chip(
         modifier = modifier,
         colors = ChipDefaults.chipColors(
-            backgroundColor = Color(0xFF235843)
+            backgroundColor = Color(group.getIntTypeColor())
         ),
         onClick = {},
         shape = RoundedCornerShape(10.dp)

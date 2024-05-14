@@ -6,18 +6,20 @@ data class FriendEntity(
     val name: String,
     val birthday: String,
     val memo: String,
-    val groupId: String,
+    val sentGiftCount: Int = 0,
+    val receivedGiftCount: Int = 0,
 ) {
     var id: String = ""
         private set
 
+    var group: FriendGroup? = null
+        private set
     fun setId(id: String) {
         this.id = id
     }
-
-//    fun getFriendGroup(): FriendGroup {
-//        return friendGroupsMock.find { it.id == groupId }!!
-//    }
+    fun setFriendGroup(group: FriendGroup) {
+        this.group = group
+    }
 
     fun displayBirthday(): String {
         return StringBuilder().append(birthday.substring(0, 2)).append("월 ").append(birthday.substring(2, 4)).append("일").toString()
@@ -27,6 +29,6 @@ data class FriendEntity(
         name = name,
         birthday = birthday,
         memo = memo,
-        groupId = groupId,
+        groupId = group!!.id,
     )
 }
