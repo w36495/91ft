@@ -1,6 +1,7 @@
 package com.w36495.senty.data.domain
 
 import com.w36495.senty.util.DateUtil
+import com.w36495.senty.view.entity.FriendEntity
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonNames
 
@@ -20,5 +21,18 @@ data class FriendEntity(
 
     fun setId(id: String) {
         this.id = id
+    }
+
+    fun toDomainEntity(): FriendEntity {
+        val friendEntity = FriendEntity(
+            name = name,
+            groupId = groupId,
+            birthday = birthday,
+            memo = memo
+        )
+
+        friendEntity.setId(this.id)
+
+        return friendEntity
     }
 }
