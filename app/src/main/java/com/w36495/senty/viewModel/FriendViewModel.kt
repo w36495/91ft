@@ -15,15 +15,6 @@ import javax.inject.Inject
 class FriendViewModel @Inject constructor(
     private val friendRepository: FriendRepository
 ) : ViewModel() {
-
-    private val friendRepository: FriendRepository = FriendRepository()
-
-    val friendList: LiveData<List<Friend>> = friendRepository.getFriendsList()
-    val friendProgress: LiveData<Double> = friendRepository.progress
-
-    private var _friendToast = MutableLiveData<String?>()
-    val friendListToast: LiveData<String?> = _friendToast
-
     fun saveFriend(friend: FriendEntity) {
         viewModelScope.launch {
             val result = friendRepository.insertFriend(friend.toDataEntity())
@@ -47,5 +38,4 @@ class FriendViewModel @Inject constructor(
             }
         }
     }
-
 }
