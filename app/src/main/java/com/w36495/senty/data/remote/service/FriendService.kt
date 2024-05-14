@@ -17,7 +17,7 @@ interface FriendService {
     ): Response<ResponseBody>
 
     @PATCH("friends/{userId}/{friendId}.json")
-    suspend fun updateFriendKey(
+    suspend fun patchFriendKey(
         @Path("userId") userId: String,
         @Path("friendId") friendId: String,
         @Body body: FriendKeyDTO

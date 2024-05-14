@@ -21,6 +21,6 @@ class FriendRepositoryImpl @Inject constructor(
     override suspend fun patchFriendId(friendId: String): Response<ResponseBody> {
         val newId = FriendKeyDTO(id = friendId)
 
-        return friendService.updateFriendKey(userId, friendId, newId)
+        return friendService.patchFriendKey(userId, friendId, newId)
     }
 }
