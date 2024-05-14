@@ -17,6 +17,7 @@ fun SentyTextField(
     hint: String,
     isError: Boolean = false,
     errorMsg: String,
+    enabled: Boolean = true,
     inputType: KeyboardType = KeyboardType.Text,
     onChangeText: (String) -> Unit,
 ) {
@@ -37,16 +38,20 @@ fun SentyTextField(
             unfocusedContainerColor = Color.White,
             unfocusedIndicatorColor = Green40,
             focusedIndicatorColor = Green40,
+            disabledContainerColor = Color.White,
+            disabledIndicatorColor = Green40,
+            disabledPlaceholderColor = Color.Unspecified,
             errorContainerColor = Color.White,
             cursorColor = Green40,
         ),
         singleLine = true,
         maxLines = 1,
         isError = isError,
+        readOnly = !enabled,
         supportingText = {
             if (isError) {
                 Text(text = errorMsg)
             }
-        }
+        },
     )
 }

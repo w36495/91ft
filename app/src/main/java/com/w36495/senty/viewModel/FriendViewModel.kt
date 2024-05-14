@@ -1,13 +1,20 @@
 package com.w36495.senty.viewModel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.w36495.senty.data.domain.Friend
-import com.w36495.senty.data.exception.StorageError
-import com.w36495.senty.data.repository.FriendRepository
+import androidx.lifecycle.viewModelScope
+import com.w36495.senty.domain.repository.FriendRepository
+import com.w36495.senty.view.entity.FriendEntity
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import javax.inject.Inject
 
-class FriendViewModel : ViewModel() {
+@HiltViewModel
+class FriendViewModel @Inject constructor(
+    private val friendRepository: FriendRepository
+) : ViewModel() {
 
     private val friendRepository: FriendRepository = FriendRepository()
 
@@ -17,44 +24,27 @@ class FriendViewModel : ViewModel() {
     private var _friendToast = MutableLiveData<String?>()
     val friendListToast: LiveData<String?> = _friendToast
 
-    /**
-     * 유저 정보 삭제
-     */
-    fun removeUser() {
-        friendRepository.deleteUser()
-    }
+    fun saveFriend(friend: FriendEntity) {
+        viewModelScope.launch {
+            val result = friendRepository.insertFriend(friend.toDataEntity())
 
-    /**
-     * 친구 정보 등록
-     */
-    fun addFriend(friend: Friend) {
-        try {
-            friendRepository.insertFriend(friend)
-        } catch (error: StorageError) {
-            _friendToast.value = error.message
-        }
+            if (result.isSuccessful) {
+                result.body()?.let {
+                    val jsonObject = Json.decodeFromString<JsonObject>(it.string())
+                    val key = jsonObject["name"].toString().replace("\"", "")
 
-    }
-
-    /**
-     * 친구 정보 수정
-     */
-    fun updateFriend(friend: Friend, oldFriendImagePath: String?) {
-        try {
-            friendRepository.updateFriend(friend, oldFriendImagePath)
-        } catch (error: StorageError) {
-            _friendToast.value = error.message
-        }
-    }
-
-    /**
-     * 친구 정보 삭제
-     */
-    fun removeFriend(friend: Friend) {
-        try {
-            friendRepository.deleteFriend(friend)
-        } catch (error: StorageError) {
-            _friendToast.value = error.message
+                    val friendKeyResult = friendRepository.patchFriendId(key)
+                    if (friendKeyResult.isSuccessful) {
+                        if (friendKeyResult.body()?.string() == it.string()) {
+                            // TODO : 등록 성공
+                        }
+                    } else {
+                        // TODO : 등록 실패
+                    }
+                }
+            } else {
+                Log.d("FriendViewModel", result.errorBody().toString())
+            }
         }
     }
 

@@ -1,7 +1,9 @@
 package com.w36495.senty.di
 
 import com.w36495.senty.data.repository.FriendGroupRepositoryImpl
-import com.w36495.senty.domain.FriendGroupRepository
+import com.w36495.senty.data.repository.FriendRepositoryImpl
+import com.w36495.senty.domain.repository.FriendGroupRepository
+import com.w36495.senty.domain.repository.FriendRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -14,4 +16,9 @@ abstract class RepositoryModule {
     abstract fun bindFriendGroupRepository(
         friendGroupRepositoryImpl: FriendGroupRepositoryImpl
     ): FriendGroupRepository
+
+    @Binds
+    abstract fun bindFriendRepository(
+        friendRepositoryImpl: FriendRepositoryImpl
+    ): FriendRepository
 }
