@@ -17,6 +17,17 @@ class FriendRepositoryImpl @Inject constructor(
     private val friendService: FriendService,
 ) : FriendRepository {
     private var userId: String = FirebaseAuth.getInstance().currentUser!!.uid
+    override suspend fun getFriend(friendId: String): Flow<FriendEntity> = flow {
+        val result = friendService.getFriend(userId, friendId)
+
+        if (result.isSuccessful) {
+            result.body()?.let {
+                val friend = Json.decodeFromString<FriendEntity>(it.string())
+
+                emit(friend)
+            }
+        } else throw IllegalArgumentException(result.errorBody().toString())
+    }
 
     override suspend fun getFriends(): Flow<List<FriendEntity>> = flow {
         val result = friendService.getFriends(userId)

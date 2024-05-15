@@ -3,9 +3,9 @@ package com.w36495.senty.view.entity
 import com.w36495.senty.data.domain.FriendEntity
 
 data class FriendEntity(
-    val name: String,
-    val birthday: String,
-    val memo: String,
+    val name: String = "",
+    val birthday: String = "",
+    val memo: String = "",
     val sentGiftCount: Int = 0,
     val receivedGiftCount: Int = 0,
 ) {

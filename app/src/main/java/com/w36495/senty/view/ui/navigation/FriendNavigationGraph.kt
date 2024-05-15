@@ -9,6 +9,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
 import com.w36495.senty.view.entity.FriendGroup
 import com.w36495.senty.view.screen.FriendAddScreen
+import com.w36495.senty.view.screen.FriendDetailScreen
 import com.w36495.senty.view.screen.FriendGroupDialogScreen
 import com.w36495.senty.view.screen.home.FriendScreen
 
@@ -59,9 +60,23 @@ fun NavGraphBuilder.nestedFriendGraph(navController: NavController) {
                 }
             )
         }
+        composable(
+            route = "${FriendNavigationItem.FRIEND_DETAIL.name}/{friendId}",
+            arguments = listOf(navArgument("friendId") {
+                nullable = false
+                type = NavType.StringType
+            })
+        ) {backStackEntry ->
+            val friendId = requireNotNull(backStackEntry.arguments).getString("friendId")
+
+            FriendDetailScreen(
+                friendId = friendId.toString()
+            )
+        }
+
     }
 }
 
 enum class FriendNavigationItem {
-    FRIEND_GROUP, FRIEND_ADD,
+    FRIEND_LIST, FRIEND_DETAIL, FRIEND_GROUP_DIALOG, FRIEND_ADD, FRIEND_GROUP_SEETING, BIRTHDAY
 }

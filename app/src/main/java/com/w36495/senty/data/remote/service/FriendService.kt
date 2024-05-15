@@ -11,6 +11,12 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface FriendService {
+    @GET("friends/{userId}/{friendId}.json")
+    suspend fun getFriend(
+        @Path("userId") userId: String,
+        @Path("friendId") friendId: String,
+    ): Response<ResponseBody>
+
     @GET("friends/{userId}.json")
     suspend fun getFriends(
         @Path("userId") userId: String,

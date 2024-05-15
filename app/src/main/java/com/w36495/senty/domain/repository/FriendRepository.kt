@@ -6,6 +6,7 @@ import okhttp3.ResponseBody
 import retrofit2.Response
 
 interface FriendRepository {
+    suspend fun getFriend(friendId: String): Flow<FriendEntity>
     suspend fun getFriends(): Flow<List<FriendEntity>>
     suspend fun insertFriend(friend: FriendEntity): Response<ResponseBody>
     suspend fun patchFriendId(friendId: String): Response<ResponseBody>

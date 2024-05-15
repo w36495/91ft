@@ -45,6 +45,7 @@ fun FriendScreen(
     vm: FriendViewModel = hiltViewModel(),
     onClickGroupSetting: () -> Unit,
     onClickAddFriend: () -> Unit,
+    onClickFriend: (String) -> Unit,
 ) {
     val friendList by vm.friends.collectAsState()
 
@@ -66,9 +67,7 @@ fun FriendScreen(
         FriendContents(
             modifier = Modifier.padding(innerPadding),
             friends = friendList,
-            onClickFriend = {
-
-            },
+            onClickFriend = { onClickFriend(it.id) },
             onClickGroupSetting = {
 
             },
@@ -103,7 +102,7 @@ private fun FriendContents(
         friends.forEachIndexed { index, friendEntity ->
             FriendItemContent(
                 friend = friendEntity,
-                onClickFriend = onClickFriend
+                onClickFriend = { onClickFriend(it) }
             )
 
             if (index < friends.lastIndex) {
