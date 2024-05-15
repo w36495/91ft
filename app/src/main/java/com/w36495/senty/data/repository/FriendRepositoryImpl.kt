@@ -28,7 +28,9 @@ class FriendRepositoryImpl @Inject constructor(
                 jsonObject.keys().forEach { key ->
                     val jsonFriend = jsonObject[key] as JSONObject
                     val friend = Json.decodeFromString<FriendEntity>(jsonFriend.toString())
-                    friend.setId(key)
+                        .apply {
+                            setId(key)
+                        }
 
                     friends.add(friend)
                 }

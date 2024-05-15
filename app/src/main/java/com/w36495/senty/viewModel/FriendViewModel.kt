@@ -31,13 +31,13 @@ class FriendViewModel @Inject constructor(
                 friendGroups, friends ->
 
                 friends.map { friend ->
-                    val group = friendGroups.filter {
-                        it.id == friend.groupId
-                    }
-
-                    friend.toDomainEntity().also {
-                        it.setFriendGroup(group[0].toDomainModel())
-                    }
+                    friendGroups.find { group ->
+                        group.id == friend.groupId
+                    }?.let { group ->
+                        friend.toDomainEntity().apply {
+                            setFriendGroup(group.toDomainModel())
+                        }
+                    } ?: throw IllegalStateException("Group not found")
                 }
             }
                 .collect {

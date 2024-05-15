@@ -28,9 +28,9 @@ data class FriendEntity(
             name = name,
             birthday = birthday,
             memo = memo
-        )
-
-        friendEntity.setId(this.id)
+        ).apply {
+            setId(this@FriendEntity.id)
+        }
 
         return friendEntity
     }
