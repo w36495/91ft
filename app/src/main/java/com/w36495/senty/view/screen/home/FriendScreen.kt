@@ -37,6 +37,7 @@ import com.w36495.senty.util.getTextColorByBackgroundColor
 import com.w36495.senty.view.entity.FriendEntity
 import com.w36495.senty.view.entity.FriendGroup
 import com.w36495.senty.view.ui.component.buttons.SentyOutlinedButtonWithIcon
+import com.w36495.senty.view.ui.component.chips.FriendGroupChip
 import com.w36495.senty.viewModel.FriendViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -128,7 +129,11 @@ fun FriendItemContent(
             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            FriendGroupChip(group = friend.group!!)
+            FriendGroupChip(
+                text = friend.group?.name,
+                chipColor = friend.group?.getIntTypeColor(),
+                textColor = friend.group?.color?.getTextColorByBackgroundColor()
+            )
             Text(
                 text = friend.displayBirthday(),
                 style = MaterialTheme.typography.labelLarge,
@@ -172,28 +177,5 @@ fun FriendItemContent(
                 modifier = Modifier.padding(horizontal = 4.dp)
             )
         }
-    }
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-fun FriendGroupChip(
-    modifier: Modifier = Modifier,
-    group: FriendGroup,
-) {
-    Chip(
-        modifier = modifier,
-        colors = ChipDefaults.chipColors(
-            backgroundColor = Color(group.getIntTypeColor())
-        ),
-        onClick = {},
-        shape = RoundedCornerShape(10.dp)
-    ) {
-        Text(
-            text = group.name,
-            modifier = Modifier.padding(4.dp),
-            style = MaterialTheme.typography.bodyMedium,
-            color = Color(group.color.getTextColorByBackgroundColor())
-        )
     }
 }
