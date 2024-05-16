@@ -15,9 +15,9 @@ fun NavigationGraph(navController: NavHostController) {
         composable(BottomNavigationItem.Home.route) {
             HomeScreen()
         }
-        composable(BottomNavigationItem.Friend.route) {
-//            FriendScreen()
-        }
+
+        nestedFriendGraph(navController)
+
         composable(BottomNavigationItem.Anniversary.route) {
 
         }

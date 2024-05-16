@@ -12,16 +12,20 @@ import com.w36495.senty.view.screen.FriendAddScreen
 import com.w36495.senty.view.screen.FriendDetailScreen
 import com.w36495.senty.view.screen.FriendGroupDialogScreen
 import com.w36495.senty.view.screen.home.FriendScreen
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 fun NavGraphBuilder.nestedFriendGraph(navController: NavController) {
     navigation(
-        startDestination = BottomNavigationItem.Friend.route,
-        route = "FriendNavigationGraph"
+        route = BottomNavigationItem.Friend.route,
+        startDestination = FriendNavigationItem.FRIEND_LIST.name,
     ) {
-        composable(BottomNavigationItem.Friend.route) {
-            FriendScreen(onClickAddFriend = {
-                navController.navigate(FriendNavigationItem.FRIEND_ADD.name)
-            },
+        composable(FriendNavigationItem.FRIEND_LIST.name) {
+            FriendScreen(
+                onClickAddFriend = {
+                    val emptyGroup = Json.encodeToString(FriendGroup())
+                    navController.navigate("${FriendNavigationItem.FRIEND_ADD.name}/$emptyGroup")
+                },
                 onClickGroupSetting = {
                     navController.navigate(FriendNavigationItem.FRIEND_GROUP_SEETING.name)
                 },
@@ -31,33 +35,47 @@ fun NavGraphBuilder.nestedFriendGraph(navController: NavController) {
             )
         }
         composable(
-            FriendNavigationItem.FRIEND_ADD.name,
+            route = "${FriendNavigationItem.FRIEND_ADD.name}/{group}",
             arguments = listOf(navArgument("group") {
-                type = NavType.ParcelableType(FriendGroup::class.java)
                 nullable = false
+                type = NavType.StringType
             })
         ) { backStackEntry ->
-            val group = (backStackEntry.arguments?.getParcelable("group") as? FriendGroup) ?: FriendGroup()
+            val group = backStackEntry.arguments?.getString("group")?.let {
+                FriendGroup.decodeToObject(it)
+            }
 
             FriendAddScreen(
-                group = group,
+                group = group!!,
                 onBackPressed = { navController.navigateUp() },
                 onFriendGroupClick = {
-                    navController.navigate(FriendNavigationItem.FRIEND_GROUP.name)
+                    navController.navigate(FriendNavigationItem.FRIEND_GROUP_DIALOG.name)
                 },
-                onSavedClick = { _, _, _, _ ->
+                onBirthdayClick = {
+                },
+                onMoveFriendList = {
+                    navController.navigate(FriendNavigationItem.FRIEND_LIST.name) {
+                        launchSingleTop = true
 
+                        popUpTo(FriendNavigationItem.FRIEND_LIST.name) {
+                            inclusive = true
+                        }
+                    }
                 }
             )
         }
-        dialog(FriendNavigationItem.FRIEND_GROUP.name) {
+        dialog(
+            route = FriendNavigationItem.FRIEND_GROUP_DIALOG.name
+        ) {
             FriendGroupDialogScreen(
                 onDismiss = {
                     navController.navigateUp()
                 },
                 onGroupSelected = { group ->
-                    navController.currentBackStackEntry?.arguments?.putParcelable("group", group)
-                    navController.navigate(FriendNavigationItem.FRIEND_ADD.name)
+                    val jsonGroup = FriendGroup.encodeToJson(group)
+                    navController.currentBackStackEntry?.arguments?.putString("group", jsonGroup)
+
+                    navController.navigate(route = "${FriendNavigationItem.FRIEND_ADD.name}/$jsonGroup")
                 },
                 onEditClick = {
 
