@@ -1,4 +1,4 @@
-package com.w36495.senty.view.screen
+package com.w36495.senty.view.screen.friend
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -56,8 +56,6 @@ fun FriendGroupDialogScreen(
             onGroupSelected = onGroupSelected,
             onEditClick = onEditClick
         )
-    } else {
-        onDismiss()
     }
 }
 

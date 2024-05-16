@@ -8,9 +8,9 @@ import androidx.navigation.compose.dialog
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
 import com.w36495.senty.view.entity.FriendGroup
-import com.w36495.senty.view.screen.FriendAddScreen
-import com.w36495.senty.view.screen.FriendDetailScreen
-import com.w36495.senty.view.screen.FriendGroupDialogScreen
+import com.w36495.senty.view.screen.friend.FriendAddScreen
+import com.w36495.senty.view.screen.friend.FriendDetailScreen
+import com.w36495.senty.view.screen.friend.FriendGroupDialogScreen
 import com.w36495.senty.view.screen.home.FriendScreen
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
