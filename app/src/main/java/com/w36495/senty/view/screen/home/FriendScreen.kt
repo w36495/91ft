@@ -8,12 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Chip
-import androidx.compose.material.ChipDefaults
 import androidx.compose.material.Divider
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Group
@@ -35,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.w36495.senty.util.getTextColorByBackgroundColor
 import com.w36495.senty.view.entity.FriendEntity
-import com.w36495.senty.view.entity.FriendGroup
 import com.w36495.senty.view.ui.component.buttons.SentyOutlinedButtonWithIcon
 import com.w36495.senty.view.ui.component.chips.FriendGroupChip
 import com.w36495.senty.viewModel.FriendViewModel
