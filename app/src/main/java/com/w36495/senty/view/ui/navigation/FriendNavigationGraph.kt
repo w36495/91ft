@@ -23,8 +23,12 @@ fun NavGraphBuilder.nestedFriendGraph(navController: NavController) {
                 navController.navigate(FriendNavigationItem.FRIEND_ADD.name)
             },
                 onClickGroupSetting = {
-                    navController.navigate(FriendNavigationItem.FRIEND_GROUP.name)
-                })
+                    navController.navigate(FriendNavigationItem.FRIEND_GROUP_SEETING.name)
+                },
+                onClickFriend = { friendId ->
+                    navController.navigate("${FriendNavigationItem.FRIEND_DETAIL.name}/$friendId")
+                }
+            )
         }
         composable(
             FriendNavigationItem.FRIEND_ADD.name,
@@ -70,7 +74,10 @@ fun NavGraphBuilder.nestedFriendGraph(navController: NavController) {
             val friendId = requireNotNull(backStackEntry.arguments).getString("friendId")
 
             FriendDetailScreen(
-                friendId = friendId.toString()
+                friendId = friendId.toString(),
+                onBackPressed = { navController.navigateUp() },
+                onClickEdit = {},
+                onClickDelete = {}
             )
         }
 

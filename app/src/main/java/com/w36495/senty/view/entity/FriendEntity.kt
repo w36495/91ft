@@ -22,7 +22,10 @@ data class FriendEntity(
     }
 
     fun displayBirthday(): String {
-        return StringBuilder().append(birthday.substring(0, 2)).append("월 ").append(birthday.substring(2, 4)).append("일").toString()
+        val month = birthday.substring(0, 2)
+        val day = birthday.substring(2, 4)
+
+        return StringBuilder().append(month).append("월 ").append(day).append("일").toString()
     }
 
     fun toDataEntity(): FriendEntity = FriendEntity(
