@@ -8,8 +8,9 @@ import com.w36495.senty.domain.repository.FriendRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.jsonObject
 import okhttp3.ResponseBody
-import org.json.JSONObject
 import retrofit2.Response
 import javax.inject.Inject
 
@@ -17,33 +18,32 @@ class FriendRepositoryImpl @Inject constructor(
     private val friendService: FriendService,
 ) : FriendRepository {
     private var userId: String = FirebaseAuth.getInstance().currentUser!!.uid
-    override suspend fun getFriend(friendId: String): Flow<FriendEntity> = flow {
+
+    override fun getFriend(friendId: String): Flow<FriendEntity> = flow {
         val result = friendService.getFriend(userId, friendId)
 
         if (result.isSuccessful) {
             result.body()?.let {
-                val friend = Json.decodeFromString<FriendEntity>(it.string())
+                val responseJson = Json.parseToJsonElement(it.string())
+                val parseFriend = Json.decodeFromJsonElement<FriendEntity>(responseJson.jsonObject)
 
-                emit(friend)
+                emit(parseFriend)
             }
         } else throw IllegalArgumentException(result.errorBody().toString())
     }
 
-    override suspend fun getFriends(): Flow<List<FriendEntity>> = flow {
+    override fun getFriends(): Flow<List<FriendEntity>> = flow {
         val result = friendService.getFriends(userId)
         val friends = mutableListOf<FriendEntity>()
 
         if (result.isSuccessful) {
-            result.body()?.let {
-                val jsonObject = JSONObject(it.string())
-                jsonObject.keys().forEach { key ->
-                    val jsonFriend = jsonObject[key] as JSONObject
-                    val friend = Json.decodeFromString<FriendEntity>(jsonFriend.toString())
-                        .apply {
-                            setId(key)
-                        }
-
-                    friends.add(friend)
+            if (result.headers()["Content-length"]?.toInt() != 4) {
+                result.body()?.let {
+                    val responseJson = Json.parseToJsonElement(it.string())
+                    responseJson.jsonObject.forEach { jsonFriend ->
+                        val parseFriend = Json.decodeFromJsonElement<FriendEntity>(jsonFriend.value)
+                        friends.add(parseFriend)
+                    }
                 }
             }
         } else throw IllegalArgumentException(result.errorBody().toString())

@@ -23,28 +23,24 @@ class FriendViewModel @Inject constructor(
     private val _friends = MutableStateFlow<List<FriendEntity>>(emptyList())
     val friends = _friends.asStateFlow()
 
-    init {
-        viewModelScope.launch {
-            friendGroupRepository.getFriendGroups().combine(
-                friendRepository.getFriends()
-            ) {
-                friendGroups, friends ->
-
-                friends.map { friend ->
-                    friendGroups.find { group ->
-                        group.id == friend.groupId
-                    }?.let { group ->
-                        friend.toDomainEntity().apply {
-                            setFriendGroup(group.toDomainModel())
-                        }
-                    } ?: throw IllegalStateException("Group not found")
+    val friends: StateFlow<List<FriendEntity>> = combine(
+        friendRepository.getFriends(),
+        friendGroupRepository.getFriendGroups()
+    ) { friends, groups ->
+        friends.map { friend ->
+            groups.find { group ->
+                group.id == friend.groupId
+            }?.let { group ->
+                friend.toDomainEntity().apply {
+                    setFriendGroup(group.toDomainModel())
                 }
-            }
-                .collect {
-                    _friends.value = it
-                }
+            } ?: throw IllegalStateException("Group not found")
         }
-    }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = emptyList()
+    )
 
     fun saveFriend(friend: FriendEntity) {
         viewModelScope.launch {

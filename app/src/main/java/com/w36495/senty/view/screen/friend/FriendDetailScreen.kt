@@ -20,13 +20,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.w36495.senty.util.getTextColorByBackgroundColor
 import com.w36495.senty.view.entity.FriendEntity
 import com.w36495.senty.view.entity.FriendGroup
@@ -46,8 +47,10 @@ fun FriendDetailScreen(
     onClickEdit: () -> Unit,
     onClickDelete: () -> Unit,
 ) {
-    val friend by vm.friend.collectAsStateWithLifecycle()
-    vm.getFriend(friendId)
+    LaunchedEffect(Unit) {
+        vm.getFriend(friendId)
+    }
+    val friend by vm.friend.collectAsState()
 
     FriendDetailContents(
         friend = friend,

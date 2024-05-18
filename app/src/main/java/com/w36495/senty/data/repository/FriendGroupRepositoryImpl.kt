@@ -15,7 +15,7 @@ class FriendGroupRepositoryImpl @Inject constructor(
 ) : FriendGroupRepository {
     private var userId: String = FirebaseAuth.getInstance().currentUser!!.uid
 
-    override suspend fun getFriendGroups(): Flow<List<FriendGroupEntity>> = flow {
+    override fun getFriendGroups(): Flow<List<FriendGroupEntity>> = flow {
         val result = friendGroupService.getFriendGroups(userId)
         val friendGroups = mutableListOf<FriendGroupEntity>()
 

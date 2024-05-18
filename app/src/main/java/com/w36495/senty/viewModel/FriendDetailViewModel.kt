@@ -7,10 +7,12 @@ import com.w36495.senty.domain.repository.FriendGroupRepository
 import com.w36495.senty.domain.repository.FriendRepository
 import com.w36495.senty.view.entity.FriendEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -19,7 +21,9 @@ class FriendDetailViewModel @Inject constructor(
     private val friendRepository: FriendRepository,
     private val friendGroupRepository: FriendGroupRepository,
 ) : ViewModel() {
-    private var _friend = MutableStateFlow(FriendEntity())
+    private var _snackMsg = MutableStateFlow("")
+    val snackMsg: StateFlow<String> = _snackMsg.asStateFlow()
+    private var _friend = MutableStateFlow(FriendEntity.emptyFriendEntity)
     val friend: StateFlow<FriendEntity> = _friend.asStateFlow()
 
     fun getFriend(friendId: String) {
@@ -27,18 +31,13 @@ class FriendDetailViewModel @Inject constructor(
             friendGroupRepository.getFriendGroups().combine(
                 friendRepository.getFriend(friendId)
             ) { groups, friend ->
-
                 val group = groups.find { it.id == friend.groupId }
-
                 friend.toDomainEntity().apply {
-                    group?.let {
-                        setFriendGroup(it.toDomainModel())
-                    } ?: throw IllegalStateException("Group not found")
+                    group?.toDomainModel()?.let { setFriendGroup(it) }
                 }
+            }.collect { friend ->
+                _friend.update { friend }
             }
-                .collect { friend ->
-                    _friend.value = friend
-                }
         }
     }
 }
