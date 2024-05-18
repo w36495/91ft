@@ -5,6 +5,7 @@ import com.w36495.senty.data.domain.FriendKeyDTO
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
@@ -34,4 +35,10 @@ interface FriendService {
         @Path("friendId") friendId: String,
         @Body body: FriendKeyDTO
     ): Response<ResponseBody>
+
+    @DELETE("friends/{userId}/{friendId}.json")
+    suspend fun deleteFriend(
+        @Path("userId") userId: String,
+        @Path("friendId") friendId: String,
+    ): Response<String>
 }

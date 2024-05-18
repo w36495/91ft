@@ -40,4 +40,20 @@ class FriendDetailViewModel @Inject constructor(
             }
         }
     }
+
+    fun removeFriend(friendId: String) {
+        viewModelScope.launch {
+            try {
+                val result = async { friendRepository.deleteFriend(friendId) }.await()
+
+                if (result) {
+                    _snackMsg.update { "성공적으로 삭제되었습니다." }
+                } else {
+                    _snackMsg.update { "오류가 발생하였습니다." }
+                }
+            } catch (e: Exception) {
+                Log.e("FriendDetailViewModel", "removeFriend: ", e)
+            }
+        }
+    }
 }

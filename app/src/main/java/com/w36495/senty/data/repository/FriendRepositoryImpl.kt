@@ -60,4 +60,12 @@ class FriendRepositoryImpl @Inject constructor(
 
         return friendService.patchFriendKey(userId, friendId, newId)
     }
+
+    override suspend fun deleteFriend(friendId: String): Boolean {
+        val result = friendService.deleteFriend(userId, friendId)
+
+        if (result.isSuccessful) {
+            return result.headers()["Content-length"]?.toInt() == 4
+        } else throw IllegalArgumentException("Failed to delete friend")
+    }
 }

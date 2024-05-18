@@ -9,6 +9,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
 import com.w36495.senty.view.entity.FriendGroup
 import com.w36495.senty.view.screen.friend.FriendAddScreen
+import com.w36495.senty.view.screen.friend.FriendDeleteDialogScreen
 import com.w36495.senty.view.screen.friend.FriendDetailScreen
 import com.w36495.senty.view.screen.friend.FriendGroupDialogScreen
 import com.w36495.senty.view.screen.home.FriendScreen
@@ -23,7 +24,7 @@ fun NavGraphBuilder.nestedFriendGraph(navController: NavController) {
         composable(FriendNavigationItem.FRIEND_LIST.name) {
             FriendScreen(
                 onClickAddFriend = {
-                    val emptyGroup = Json.encodeToString(FriendGroup())
+                    val emptyGroup = Json.encodeToString(FriendGroup.emptyFriendGroup)
                     navController.navigate("${FriendNavigationItem.FRIEND_ADD.name}/$emptyGroup")
                 },
                 onClickGroupSetting = {
@@ -88,14 +89,42 @@ fun NavGraphBuilder.nestedFriendGraph(navController: NavController) {
                 nullable = false
                 type = NavType.StringType
             })
-        ) {backStackEntry ->
+        ) { backStackEntry ->
             val friendId = requireNotNull(backStackEntry.arguments).getString("friendId")
 
             FriendDetailScreen(
                 friendId = friendId.toString(),
                 onBackPressed = { navController.navigateUp() },
                 onClickEdit = {},
-                onClickDelete = {}
+                onClickDelete = {
+                    navController.navigate("${FriendNavigationItem.FRIEND_DELETE_DIALOG.name}/$friendId")
+                }
+            )
+        }
+
+        dialog(
+            route = "${FriendNavigationItem.FRIEND_DELETE_DIALOG.name}/{friendId}",
+            arguments = listOf(navArgument("friendId") {
+                nullable = false
+                type = NavType.StringType
+            })
+        ) { backStackEntry ->
+            val friendId = requireNotNull(backStackEntry.arguments).getString("friendId")
+
+            FriendDeleteDialogScreen(
+                friendId = friendId.toString(),
+                onComplete = {
+                    navController.navigate(FriendNavigationItem.FRIEND_LIST.name) {
+                        launchSingleTop = true
+
+                        popUpTo(FriendNavigationItem.FRIEND_LIST.name) {
+                            inclusive = true
+                        }
+                    }
+                },
+                onDismiss = {
+                    navController.navigateUp()
+                }
             )
         }
 
