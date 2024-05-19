@@ -93,7 +93,7 @@ fun FriendDetailContents(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Column{
+            Column {
                 FriendInfoSection(friend = friend)
             }
 
@@ -126,8 +126,6 @@ private fun FriendInfoSection(
 
             SentyReadOnlyTextField(
                 text = friend.name,
-                showChip = false,
-                chip = {},
                 textColor = MaterialTheme.colorScheme.onSurface
             )
             Text(
@@ -138,19 +136,14 @@ private fun FriendInfoSection(
                     .padding(top = 32.dp)
             )
 
-            SentyReadOnlyTextField(
-                text = friend.group?.name ?: "",
-                showChip = true,
-                chip = {
-                    FriendGroupChip(
-                        modifier = it,
-                        text = friend.group?.name,
-                        chipColor = friend.group?.getIntTypeColor(),
-                        textColor = friend.group?.color?.getTextColorByBackgroundColor()
-                    )
-                },
-                textColor = MaterialTheme.colorScheme.onSurface
-            )
+            friend.group?.let {
+                SentyReadOnlyTextField(
+                    text = it.name,
+                    group = it,
+                    textColor = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
 
             Text(
                 text = "생일",
@@ -160,8 +153,6 @@ private fun FriendInfoSection(
 
             SentyReadOnlyTextField(
                 text = if (friend.birthday.isEmpty()) "" else friend.displayBirthday(),
-                showChip = false,
-                chip = {},
                 textColor = MaterialTheme.colorScheme.onSurface
             )
 

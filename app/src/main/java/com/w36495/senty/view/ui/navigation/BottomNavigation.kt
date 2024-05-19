@@ -45,11 +45,12 @@ fun BottomNavigation(navController: NavHostController) {
                 onClick = {
                     navController.navigate(item.route) {
                         navController.graph.startDestinationRoute?.let { route ->
+                            launchSingleTop = true
+                            restoreState = true
+
                             popUpTo(route) {
                                 saveState = true
                             }
-                            launchSingleTop = true
-                            restoreState = true
                         }
                     }
                 },

@@ -15,6 +15,8 @@ import com.w36495.senty.view.ui.theme.Green40
 fun SentyFilledButton(
     modifier: Modifier = Modifier,
     text: String,
+    buttonColor: Color = Green40,
+    textColor: Color = Color.White,
     onClick: () -> Unit,
 ) {
     Button(
@@ -22,12 +24,12 @@ fun SentyFilledButton(
         onClick = { onClick() },
         shape = RoundedCornerShape(10.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Green40
+            containerColor = buttonColor
         )
     ) {
         Text(
             text = text,
-            color = Color.White
+            color = textColor
         )
     }
 }
