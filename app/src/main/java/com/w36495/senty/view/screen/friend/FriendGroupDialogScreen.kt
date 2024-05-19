@@ -22,8 +22,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,20 +41,15 @@ fun FriendGroupDialogScreen(
 ) {
     val friendGroups by vm.friendGroups.collectAsState()
 
-    val showDialog = remember {
-        mutableStateOf(true)
-    }
-
-    if (showDialog.value) {
-        FriendGroupContents(
-            onDismiss = {
-                showDialog.value = false
-            },
-            friendGroups = friendGroups,
-            onGroupSelected = onGroupSelected,
-            onEditClick = onEditClick
-        )
-    }
+    FriendGroupContents(
+        onDismiss = { onDismiss() },
+        friendGroups = friendGroups,
+        onGroupSelected = { group ->
+            onGroupSelected(group)
+            onDismiss()
+        },
+        onEditClick = { onEditClick() }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

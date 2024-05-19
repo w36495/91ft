@@ -3,8 +3,10 @@ package com.w36495.senty.view.screen.friend
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -31,23 +33,56 @@ import com.w36495.senty.view.entity.FriendEntity
 import com.w36495.senty.view.entity.FriendGroup
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
 import com.w36495.senty.view.ui.component.textFields.SentyMultipleTextField
+import com.w36495.senty.view.ui.component.textFields.SentyReadOnlyTextField
 import com.w36495.senty.view.ui.component.textFields.SentyTextField
-import com.w36495.senty.viewModel.FriendViewModel
+import com.w36495.senty.view.ui.theme.Green40
+import com.w36495.senty.viewModel.FriendAddViewModel
+
+@Composable
+fun FriendAddScreen(
+    vm: FriendAddViewModel = hiltViewModel(),
+    onBackPressed: () -> Unit,
+    onMoveFriendList: () -> Unit,
+) {
+    var group by remember { mutableStateOf(FriendGroup.emptyFriendGroup) }
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog) {
+        FriendGroupDialogScreen(
+            onDismiss = { showDialog = false },
+            onGroupSelected = {
+                group = it
+                showDialog = false
+            },
+            onEditClick = {
+                // TODO : 그룹 편집 화면으로 이동
+            }
+        )
+    }
+
+    FriendAddContents(
+        group = group,
+        onClickFriendGroup = { showDialog = true },
+        onBackPressed = { onBackPressed() },
+        onClickSave = { friend ->
+            vm.saveFriend(friend)
+            onMoveFriendList()
+        }
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FriendAddScreen(
-    group: FriendGroup,
-    vm: FriendViewModel = hiltViewModel(),
+private fun FriendAddContents(
     onBackPressed: () -> Unit,
-    onFriendGroupClick: () -> Unit,
-    onBirthdayClick: () -> Unit,
-    onMoveFriendList: () -> Unit,
+    onClickSave: (FriendEntity) -> Unit,
+    onClickFriendGroup: () -> Unit,
+    group: FriendGroup
 ) {
     var name by remember { mutableStateOf("") }
     var memo by remember { mutableStateOf("") }
     var birthday by remember { mutableStateOf("") }
-    
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -86,26 +121,29 @@ fun FriendAddScreen(
                         name = it
                     }
                 )
-                InputSection(
-                    title = "그룹",
-                    placeHolder = "그룹을 선택해주세요.",
-                    text = group.name,
-                    onChangeText = {},
-                    modifier = Modifier
-                        .padding(vertical = 16.dp)
-                        .clickable {
-                            onFriendGroupClick()
-                        }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                GroupSection(
+                    modifier = Modifier.fillMaxWidth(),
+                    group = group,
+                    onFriendGroupClick = {
+                        onClickFriendGroup()
+                    }
                 )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
                 InputSection(
                     title = "생일",
                     placeHolder = "생일을 입력하세요. (ex. 1117)",
                     text = birthday,
                     onChangeText = { birthday = it },
                 )
+
                 Text(
                     text = "메모", style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(bottom = 8.dp, top = 16.dp)
+                    modifier = Modifier.padding(bottom = 12.dp, top = 16.dp)
                 )
                 SentyMultipleTextField(
                     text = memo,
@@ -123,12 +161,11 @@ fun FriendAddScreen(
                 onClick = {
                     val friend = FriendEntity(
                         name = name,
-                        birthday =  birthday,
+                        birthday = birthday,
                         memo = memo
                     ).apply { setFriendGroup(group) }
 
-                    vm.saveFriend(friend)
-                    onMoveFriendList()
+                    onClickSave(friend)
                 }
             )
         }
@@ -143,14 +180,13 @@ private fun InputSection(
     placeHolder: String,
     onChangeText: (String) -> Unit
 ) {
-
     Column(
         modifier = modifier
     ) {
         Text(
-            text = title.ifEmpty { "" },
+            text = title,
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(bottom = 4.dp)
+            modifier = Modifier.padding(bottom = 12.dp)
         )
         SentyTextField(
             modifier = Modifier.fillMaxWidth(),
@@ -159,8 +195,32 @@ private fun InputSection(
             errorMsg = "",
             onChangeText = {
                 onChangeText(it)
-            },
-            enabled = title != "그룹"
+            }
+        )
+    }
+}
+
+@Composable
+private fun GroupSection(
+    modifier: Modifier = Modifier,
+    group: FriendGroup,
+    onFriendGroupClick: () -> Unit
+) {
+    Column(
+        modifier = modifier.clickable { onFriendGroupClick() }
+    ) {
+        Text(
+            text = "그룹",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
+
+        SentyReadOnlyTextField(
+            text = "그룹을 선택하세요.",
+            group = group,
+            showChip = group != FriendGroup.emptyFriendGroup,
+            textColor = MaterialTheme.colorScheme.onSurface,
+            dividerColor = Green40
         )
     }
 }
