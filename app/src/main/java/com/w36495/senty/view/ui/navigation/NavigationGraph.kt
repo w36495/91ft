@@ -10,15 +10,15 @@ import com.w36495.senty.view.screen.home.HomeScreen
 fun NavigationGraph(navController: NavHostController) {
     NavHost(
         navController = navController,
-        startDestination = BottomNavigationItem.Home.route
+        startDestination = BottomNavigationItem.HOME.name,
     ) {
-        composable(BottomNavigationItem.Home.route) {
+        composable(BottomNavigationItem.HOME.name) {
             HomeScreen()
         }
 
         nestedFriendGraph(navController)
 
-        composable(BottomNavigationItem.Anniversary.route) {
+        composable(BottomNavigationItem.ANNIVERSARY.name) {
 
         }
         composable(BottomNavigationItem.Settings.route) {

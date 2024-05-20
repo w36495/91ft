@@ -14,20 +14,20 @@ import com.w36495.senty.view.ui.theme.Green40
 @Composable
 fun BottomNavigation(navController: NavHostController) {
     val bottomNavigationItem = listOf(
-        BottomNavigationItem.Home,
-        BottomNavigationItem.Friend,
-        BottomNavigationItem.Anniversary,
-        BottomNavigationItem.Settings
+        BottomNavigationItem.HOME,
+        BottomNavigationItem.FRIEND,
+        BottomNavigationItem.ANNIVERSARY,
+        BottomNavigationItem.SETTINGS
     )
 
     androidx.compose.material.BottomNavigation(
         backgroundColor = Color.White,
-        contentColor = Green40
+        contentColor = Green40,
     ) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
 
-        bottomNavigationItem.forEach { item ->
+        bottomNavigationItem.forEachIndexed { index, item ->
             BottomNavigationItem(
                 icon = {
                     Icon(
@@ -41,9 +41,9 @@ fun BottomNavigation(navController: NavHostController) {
                         style = MaterialTheme.typography.labelSmall
                     )
                 },
-                selected = currentRoute == item.route,
+                selected = currentRoute == item.name,
                 onClick = {
-                    navController.navigate(item.route) {
+                    navController.navigate(item.name) {
                         navController.graph.startDestinationRoute?.let { route ->
                             launchSingleTop = true
                             restoreState = true
