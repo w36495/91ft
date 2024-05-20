@@ -64,4 +64,12 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideFriendApi(retrofit: Retrofit): FriendService = retrofit.create(FriendService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideGiftApi(retrofit: Retrofit): GiftService = retrofit.create(GiftService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideGiftCategoryApi(retrofit: Retrofit): GiftCategoryService = retrofit.create(GiftCategoryService::class.java)
 }

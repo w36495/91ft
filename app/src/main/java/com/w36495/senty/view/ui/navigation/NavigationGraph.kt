@@ -29,5 +29,7 @@ fun NavigationGraph(navController: NavHostController) {
                 }
             )
         }
+
+        nestedGiftGraph(navController)
     }
 }
