@@ -1,6 +1,7 @@
 package com.w36495.senty.data.remote.service
 
 import com.w36495.senty.data.domain.FriendKeyDTO
+import com.w36495.senty.data.domain.GiftCategoryEntity
 import com.w36495.senty.view.entity.gift.GiftCategory
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -17,9 +18,9 @@ interface GiftCategoryService {
     ): Response<ResponseBody>
 
     @POST("giftCategories/{userId}.json")
-    suspend fun initGiftCategory(
+    suspend fun insertCategory(
         @Path("userId") userId: String,
-        @Body category: GiftCategory
+        @Body category: GiftCategoryEntity
     ): Response<ResponseBody>
 
     @PATCH("giftCategories/{userId}/{categoryKey}.json")

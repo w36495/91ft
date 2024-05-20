@@ -19,7 +19,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.w36495.senty.view.entity.gift.GiftCategory
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.viewModel.GiftCategoryViewModel
@@ -38,7 +38,7 @@ fun GiftCategoryScreen(
     vm: GiftCategoryViewModel = hiltViewModel(),
     onPressedBack: () -> Unit,
 ) {
-    val categories by vm.categories.collectAsState()
+    val categories by vm.categories.collectAsStateWithLifecycle()
     var showDialog by remember { mutableStateOf(false) }
 
     GiftCategoryContents(
@@ -50,7 +50,7 @@ fun GiftCategoryScreen(
     )
 
     if (showDialog) {
-        GiftCategoryAddDialog(
+        GiftCategoryAddDialogScreen(
             onDismiss = { showDialog = false },
         )
     }

@@ -40,11 +40,15 @@ class GiftCategoryRepositoryImpl @Inject constructor(
         emit(categories)
     }
 
-    override suspend fun initCategory(defaultCategory: GiftCategory): Response<ResponseBody> {
-        return giftCategoryService.initGiftCategory(userId, defaultCategory)
+    override suspend fun initCategory(defaultCategory: GiftCategoryEntity): Response<ResponseBody> {
+        return giftCategoryService.insertCategory(userId, defaultCategory)
     }
 
-    override suspend fun patchCategory(categoryKey: String): Response<ResponseBody> {
+    override suspend fun insertCategory(category: GiftCategoryEntity): Response<ResponseBody> {
+        return giftCategoryService.insertCategory(userId, category)
+    }
+
+    override suspend fun patchCategoryKey(categoryKey: String): Response<ResponseBody> {
         val newCategoryKey = FriendKeyDTO(categoryKey)
 
         return giftCategoryService.patchCategoryKey(userId, categoryKey, newCategoryKey)
