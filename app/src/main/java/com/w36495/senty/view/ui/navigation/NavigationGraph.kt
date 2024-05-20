@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.w36495.senty.view.screen.home.HomeScreen
+import com.w36495.senty.view.screen.home.SettingScreen
 
 @Composable
 fun NavigationGraph(navController: NavHostController) {
@@ -21,8 +22,12 @@ fun NavigationGraph(navController: NavHostController) {
         composable(BottomNavigationItem.ANNIVERSARY.name) {
 
         }
-        composable(BottomNavigationItem.Settings.route) {
-
+        composable(BottomNavigationItem.SETTINGS.name) {
+            SettingScreen(
+                onClickGiftCategorySetting = {
+                    navController.navigate(GiftNavigationItem.GIFT_CATEGORY.name)
+                }
+            )
         }
     }
 }
