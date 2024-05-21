@@ -5,6 +5,8 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.w36495.senty.BuildConfig
 import com.w36495.senty.data.remote.service.FriendGroupService
 import com.w36495.senty.data.remote.service.FriendService
+import com.w36495.senty.data.remote.service.GiftCategoryService
+import com.w36495.senty.data.remote.service.GiftService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

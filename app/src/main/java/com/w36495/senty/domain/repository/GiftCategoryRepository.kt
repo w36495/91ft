@@ -10,4 +10,5 @@ interface GiftCategoryRepository {
     suspend fun initCategory(defaultCategory: GiftCategoryEntity): Response<ResponseBody>
     suspend fun insertCategory(category: GiftCategoryEntity): Response<ResponseBody>
     suspend fun patchCategoryKey(categoryKey: String): Response<ResponseBody>
+    suspend fun deleteCategory(categoryKey: String): Boolean
 }

@@ -1,8 +1,6 @@
 package com.w36495.senty.view.screen.gift
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -26,11 +24,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.w36495.senty.view.entity.gift.GiftCategory
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
+import com.w36495.senty.view.ui.component.lists.SwipeListItem
 import com.w36495.senty.viewModel.GiftCategoryViewModel
 
 @Composable
@@ -46,7 +44,9 @@ fun GiftCategoryScreen(
         onPressedBack = { onPressedBack() },
         onClickAdd = {
             showDialog = true
-        }
+        },
+        onRemove = { vm.removeCategory(it) },
+        onEdit = { }
     )
 
     if (showDialog) {
@@ -62,6 +62,8 @@ private fun GiftCategoryContents(
     categories: List<GiftCategory>,
     onPressedBack: () -> Unit,
     onClickAdd: () -> Unit,
+    onRemove: (String) -> Unit,
+    onEdit: (String) -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -98,9 +100,10 @@ private fun GiftCategoryContents(
                 .verticalScroll(rememberScrollState())
         ) {
             categories.forEachIndexed { index, category ->
-                GiftCategoryItem(
-                    modifier = Modifier.fillMaxWidth(),
-                    category = category
+                SwipeListItem(
+                    category = category,
+                    onRemove = { onRemove(category.id) },
+                    onEdit = { onEdit(category.id) }
                 )
 
                 if (index != categories.lastIndex) Divider()
@@ -109,18 +112,7 @@ private fun GiftCategoryContents(
     }
 }
 
-@Composable
-private fun GiftCategoryItem(
-    category: GiftCategory,
-    modifier: Modifier = Modifier
-) {
-    Row(modifier = modifier) {
-        Text(
-            text = category.name,
-            modifier = Modifier.padding(16.dp)
-        )
-    }
-}
+
 
 @Preview(showBackground = true)
 @Composable
@@ -129,7 +121,9 @@ private fun GiftCategoryPreview() {
         GiftCategoryContents(
             categories = GiftCategory.DEFAULT_CATEGORY,
             onPressedBack = {},
-            onClickAdd = {}
+            onClickAdd = {},
+            onRemove = {},
+            onEdit = {}
         )
     }
 }

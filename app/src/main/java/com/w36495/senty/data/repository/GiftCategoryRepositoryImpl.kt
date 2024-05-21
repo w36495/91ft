@@ -1,12 +1,10 @@
 package com.w36495.senty.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
-import com.w36495.senty.data.domain.FriendEntity
 import com.w36495.senty.data.domain.FriendKeyDTO
 import com.w36495.senty.data.domain.GiftCategoryEntity
 import com.w36495.senty.data.remote.service.GiftCategoryService
 import com.w36495.senty.domain.repository.GiftCategoryRepository
-import com.w36495.senty.view.entity.gift.GiftCategory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.json.Json
@@ -52,5 +50,13 @@ class GiftCategoryRepositoryImpl @Inject constructor(
         val newCategoryKey = FriendKeyDTO(categoryKey)
 
         return giftCategoryService.patchCategoryKey(userId, categoryKey, newCategoryKey)
+    }
+
+    override suspend fun deleteCategory(categoryKey: String): Boolean {
+        val result = giftCategoryService.deleteCategory(userId, categoryKey)
+
+        if (result.isSuccessful) {
+            return result.headers()["Content-length"]?.toInt() == 4
+        } else throw IllegalArgumentException("Failed to delete friend")
     }
 }

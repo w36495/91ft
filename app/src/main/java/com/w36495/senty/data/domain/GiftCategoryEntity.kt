@@ -16,5 +16,5 @@ data class GiftCategoryEntity(
     @JsonNames("update_at")
     val updateAt: String = DateUtil.toTimeStamp(System.currentTimeMillis())
 ) {
-    fun toDomainEntity() = GiftCategory(name = this.name).apply { setId(this.id) }
+    fun toDomainEntity() = GiftCategory(name = this@GiftCategoryEntity.name).apply { setId(this@GiftCategoryEntity.id) }
 }

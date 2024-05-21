@@ -50,4 +50,16 @@ class GiftCategoryViewModel @Inject constructor(
             }
         }
     }
+
+    fun removeCategory(categoryKey: String) {
+        viewModelScope.launch {
+            val result = giftCategoryRepository.deleteCategory(categoryKey)
+
+            if (result) {
+                // TODO : 삭제 성공
+            } else {
+                // TODO : 삭제 실패
+            }
+        }
+    }
 }
