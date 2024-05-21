@@ -194,9 +194,10 @@ private fun InputSection(
         TextSection(
             modifier = Modifier.fillMaxWidth(),
             title = "카테고리",
+            enable = false,
             text = category.name,
             placeHolder = "카테고리를 입력해주세요.",
-            onChangeText = {  },
+            onChangeText = { },
             onClick = { showGiftCategoryDialog = true }
         )
 
@@ -207,7 +208,8 @@ private fun InputSection(
             title = "친구",
             text = friend.name,
             placeHolder = "친구를 선택해주세요.",
-            onChangeText = {  },
+            onChangeText = { },
+            enable = false,
             onClick = { showFriendsDialog = true }
         )
 
@@ -256,7 +258,7 @@ private fun InputSection(
                 memo = memo,
                 giftType = type
             )
-            
+
             onClickSave(giftEntity)
         }
     }
@@ -268,6 +270,7 @@ private fun TextSection(
     title: String,
     text: String,
     placeHolder: String,
+    enable: Boolean = true,
     onChangeText: (String) -> Unit,
     onClick: () -> Unit,
 ) {
@@ -286,7 +289,8 @@ private fun TextSection(
             errorMsg = "",
             onChangeText = {
                 onChangeText(it)
-            }
+            },
+            enabled = enable
         )
     }
 }
