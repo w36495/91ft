@@ -1,7 +1,9 @@
 package com.w36495.senty.view.entity
 
 import com.w36495.senty.data.domain.FriendEntity
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class FriendEntity(
     val name: String,
     val birthday: String,
