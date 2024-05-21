@@ -40,7 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.w36495.senty.view.entity.FriendDetail
+import com.w36495.senty.view.entity.Friend
 import com.w36495.senty.view.entity.gift.GiftCategory
 import com.w36495.senty.view.entity.gift.GiftEntity
 import com.w36495.senty.view.entity.gift.GiftType
@@ -154,7 +154,7 @@ private fun InputSection(
 
     var type by remember { mutableStateOf(GiftType.RECEIVED) }
     var category by remember { mutableStateOf(GiftCategory.emptyCategory) }
-    var friend by remember { mutableStateOf(FriendDetail.emptyFriendEntity) }
+    var friend by remember { mutableStateOf(Friend.emptyFriend) }
     var date by remember { mutableStateOf("") }
     var mood by remember { mutableStateOf("") }
     var memo by remember { mutableStateOf("") }

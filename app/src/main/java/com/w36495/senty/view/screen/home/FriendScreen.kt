@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.w36495.senty.util.getTextColorByBackgroundColor
-import com.w36495.senty.view.entity.FriendDetail
+import com.w36495.senty.view.entity.Friend
 import com.w36495.senty.view.ui.component.buttons.SentyOutlinedButtonWithIcon
 import com.w36495.senty.view.ui.component.chips.FriendGroupChip
 import com.w36495.senty.viewModel.FriendViewModel
@@ -77,8 +77,8 @@ fun FriendScreen(
 @Composable
 private fun FriendContents(
     modifier: Modifier = Modifier,
-    friends: List<FriendDetail>,
-    onClickFriend: (FriendDetail) -> Unit,
+    friends: List<Friend>,
+    onClickFriend: (Friend) -> Unit,
     onClickGroupSetting: () -> Unit,
     onClickAddFriend: () -> Unit
 ) {
@@ -111,8 +111,8 @@ private fun FriendContents(
 @Composable
 fun FriendItemContent(
     modifier: Modifier = Modifier,
-    friend: FriendDetail,
-    onClickFriend: (FriendDetail) -> Unit
+    friend: Friend,
+    onClickFriend: (Friend) -> Unit
 ) {
     Column(
         modifier = modifier

@@ -8,12 +8,9 @@ data class FriendDetail(
     val name: String,
     val birthday: String,
     val memo: String,
-    val sentGiftCount: Int = 0,
-    val receivedGiftCount: Int = 0,
 ) {
     var id: String = ""
         private set
-
     var group: FriendGroup? = null
         private set
     fun setId(id: String) {
@@ -22,7 +19,6 @@ data class FriendDetail(
     fun setFriendGroup(group: FriendGroup) {
         this.group = group
     }
-
     fun displayBirthday(): String {
         val month = birthday.substring(0, 2)
         val day = birthday.substring(2, 4)
