@@ -17,7 +17,7 @@ class GiftAddViewModel @Inject constructor(
 ) : ViewModel() {
     fun saveGift(gift: GiftEntity) {
         viewModelScope.launch {
-            val result = giftRepository.insertGift(gift)
+            val result = giftRepository.insertGift(gift.toDataEntity())
 
             if (result.isSuccessful) {
                 result.body()?.let {

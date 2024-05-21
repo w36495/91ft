@@ -1,10 +1,10 @@
 package com.w36495.senty.view.entity
 
-import com.w36495.senty.data.domain.FriendEntity
+import com.w36495.senty.data.domain.FriendDetailEntity
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class FriendEntity(
+data class FriendDetail(
     val name: String,
     val birthday: String,
     val memo: String,
@@ -30,7 +30,7 @@ data class FriendEntity(
         return StringBuilder().append(month).append("월 ").append(day).append("일").toString()
     }
 
-    fun toDataEntity(): FriendEntity = FriendEntity(
+    fun toDataEntity(): FriendDetailEntity = FriendDetailEntity(
         name = name,
         birthday = birthday,
         memo = memo,
@@ -38,6 +38,6 @@ data class FriendEntity(
     )
 
     companion object {
-        val emptyFriendEntity = FriendEntity(name = "", birthday = "", memo = "")
+        val emptyFriendEntity = FriendDetail(name = "", birthday = "", memo = "")
     }
 }

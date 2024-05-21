@@ -1,6 +1,6 @@
 package com.w36495.senty.data.remote.service
 
-import com.w36495.senty.data.domain.FriendEntity
+import com.w36495.senty.data.domain.FriendDetailEntity
 import com.w36495.senty.data.domain.FriendKeyDTO
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -26,7 +26,7 @@ interface FriendService {
     @POST("friends/{userId}.json")
     suspend fun insertFriend(
         @Path("userId") userId: String,
-        @Body friend: FriendEntity
+        @Body friend: FriendDetailEntity
     ): Response<ResponseBody>
 
     @PATCH("friends/{userId}/{friendId}.json")

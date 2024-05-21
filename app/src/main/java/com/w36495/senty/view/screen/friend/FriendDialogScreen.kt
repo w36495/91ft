@@ -28,14 +28,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.w36495.senty.view.entity.FriendEntity
+import com.w36495.senty.view.entity.FriendDetail
 import com.w36495.senty.viewModel.FriendViewModel
 
 @Composable
 fun FriendDialogScreen(
     vm: FriendViewModel = hiltViewModel(),
     onDismiss: () -> Unit,
-    onClickFriend: (FriendEntity) -> Unit,
+    onClickFriend: (FriendDetail) -> Unit,
 ) {
     val friends by vm.friends.collectAsState()
 
@@ -52,9 +52,9 @@ fun FriendDialogScreen(
 @Composable
 private fun FriendDialogContents(
     modifier: Modifier = Modifier,
-    friends: List<FriendEntity>,
+    friends: List<FriendDetail>,
     onDismiss: () -> Unit,
-    onClickFriend: (FriendEntity) -> Unit,
+    onClickFriend: (FriendDetail) -> Unit,
 ) {
     Dialog(onDismissRequest = { onDismiss() }) {
         Card(

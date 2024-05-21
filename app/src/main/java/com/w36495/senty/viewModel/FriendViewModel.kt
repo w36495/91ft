@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.w36495.senty.domain.repository.FriendGroupRepository
 import com.w36495.senty.domain.repository.FriendRepository
-import com.w36495.senty.view.entity.FriendEntity
+import com.w36495.senty.view.entity.FriendDetail
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +17,7 @@ class FriendViewModel @Inject constructor(
     private val friendRepository: FriendRepository,
     private val friendGroupRepository: FriendGroupRepository
 ) : ViewModel() {
-    val friends: StateFlow<List<FriendEntity>> = combine(
+    val friends: StateFlow<List<FriendDetail>> = combine(
         friendRepository.getFriends(),
         friendGroupRepository.getFriendGroups()
     ) { friends, groups ->

@@ -28,13 +28,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.w36495.senty.util.getTextColorByBackgroundColor
-import com.w36495.senty.view.entity.FriendEntity
+import com.w36495.senty.view.entity.FriendDetail
 import com.w36495.senty.view.entity.FriendGroup
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyElevatedButton
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
-import com.w36495.senty.view.ui.component.chips.FriendGroupChip
 import com.w36495.senty.view.ui.component.textFields.SentyMultipleTextField
 import com.w36495.senty.view.ui.component.textFields.SentyReadOnlyTextField
 import com.w36495.senty.viewModel.FriendDetailViewModel
@@ -44,7 +42,7 @@ fun FriendDetailScreen(
     friendId: String,
     vm: FriendDetailViewModel = hiltViewModel(),
     onBackPressed: () -> Unit,
-    onClickEdit: () -> Unit,
+    onClickEdit: (FriendDetail) -> Unit,
     onClickDelete: () -> Unit,
 ) {
     LaunchedEffect(Unit) {
@@ -55,7 +53,7 @@ fun FriendDetailScreen(
     FriendDetailContents(
         friend = friend,
         onBackPressed = { onBackPressed() },
-        onClickEdit = { onClickEdit() },
+        onClickEdit = { onClickEdit(it) },
         onClickDelete = { onClickDelete() },
     )
 }
@@ -64,9 +62,9 @@ fun FriendDetailScreen(
 @Composable
 fun FriendDetailContents(
     modifier: Modifier = Modifier,
-    friend: FriendEntity,
+    friend: FriendDetail,
     onBackPressed: () -> Unit,
-    onClickEdit: () -> Unit,
+    onClickEdit: (FriendDetail) -> Unit,
     onClickDelete: () -> Unit,
 ) {
     Scaffold(
@@ -98,7 +96,7 @@ fun FriendDetailContents(
             }
 
             BottomButtons(
-                onClickEdit = { onClickEdit() },
+                onClickEdit = { onClickEdit(friend) },
                 onClickDelete = { onClickDelete() }
             )
         }
@@ -108,7 +106,7 @@ fun FriendDetailContents(
 @Composable
 private fun FriendInfoSection(
     modifier: Modifier = Modifier,
-    friend: FriendEntity
+    friend: FriendDetail
 ) {
     Column(
         modifier = modifier
@@ -205,7 +203,7 @@ private fun BottomButtons(
 @Composable
 fun FriendDetailPreview() {
     SentyTheme {
-        FriendDetailContents(friend = FriendEntity(
+        FriendDetailContents(friend = FriendDetail(
             name = "김철수",
             birthday = "1117",
             memo = "",

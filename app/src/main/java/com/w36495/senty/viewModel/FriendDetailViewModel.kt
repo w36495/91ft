@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.w36495.senty.domain.repository.FriendGroupRepository
 import com.w36495.senty.domain.repository.FriendRepository
-import com.w36495.senty.view.entity.FriendEntity
+import com.w36495.senty.view.entity.FriendDetail
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,8 +23,8 @@ class FriendDetailViewModel @Inject constructor(
 ) : ViewModel() {
     private var _snackMsg = MutableStateFlow("")
     val snackMsg: StateFlow<String> = _snackMsg.asStateFlow()
-    private var _friend = MutableStateFlow(FriendEntity.emptyFriendEntity)
-    val friend: StateFlow<FriendEntity> = _friend.asStateFlow()
+    private var _friend = MutableStateFlow(FriendDetail.emptyFriendEntity)
+    val friend: StateFlow<FriendDetail> = _friend.asStateFlow()
 
     fun getFriend(friendId: String) {
         viewModelScope.launch {

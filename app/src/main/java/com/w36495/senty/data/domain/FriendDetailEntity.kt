@@ -1,14 +1,14 @@
 package com.w36495.senty.data.domain
 
 import com.w36495.senty.util.DateUtil
-import com.w36495.senty.view.entity.FriendEntity
+import com.w36495.senty.view.entity.FriendDetail
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonNames
 
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
-data class FriendEntity(
+data class FriendDetailEntity(
     val id: String = "",
     val name: String,
     val groupId: String,
@@ -19,13 +19,13 @@ data class FriendEntity(
     @JsonNames("update_at")
     val updateAt: String = DateUtil.toTimeStamp(System.currentTimeMillis())
 ) {
-    fun toDomainEntity(): FriendEntity {
-        val friendEntity = FriendEntity(
+    fun toDomainEntity(): FriendDetail {
+        val friendEntity = FriendDetail(
             name = name,
             birthday = birthday,
             memo = memo
         ).apply {
-            setId(this@FriendEntity.id)
+            setId(this@FriendDetailEntity.id)
         }
 
         return friendEntity

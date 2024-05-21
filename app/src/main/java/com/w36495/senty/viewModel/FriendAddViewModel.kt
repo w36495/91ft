@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.w36495.senty.domain.repository.FriendRepository
-import com.w36495.senty.view.entity.FriendEntity
+import com.w36495.senty.view.entity.FriendDetail
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -15,7 +15,7 @@ import javax.inject.Inject
 class FriendAddViewModel @Inject constructor(
     private val friendRepository: FriendRepository,
 ) : ViewModel() {
-    fun saveFriend(friend: FriendEntity) {
+    fun saveFriend(friend: FriendDetail) {
         viewModelScope.launch {
             val result = friendRepository.insertFriend(friend.toDataEntity())
 

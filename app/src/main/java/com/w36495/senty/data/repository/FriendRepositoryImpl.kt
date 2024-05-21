@@ -1,7 +1,7 @@
 package com.w36495.senty.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
-import com.w36495.senty.data.domain.FriendEntity
+import com.w36495.senty.data.domain.FriendDetailEntity
 import com.w36495.senty.data.domain.FriendKeyDTO
 import com.w36495.senty.data.remote.service.FriendService
 import com.w36495.senty.domain.repository.FriendRepository
@@ -19,29 +19,29 @@ class FriendRepositoryImpl @Inject constructor(
 ) : FriendRepository {
     private var userId: String = FirebaseAuth.getInstance().currentUser!!.uid
 
-    override fun getFriend(friendId: String): Flow<FriendEntity> = flow {
+    override fun getFriend(friendId: String): Flow<FriendDetailEntity> = flow {
         val result = friendService.getFriend(userId, friendId)
 
         if (result.isSuccessful) {
             result.body()?.let {
                 val responseJson = Json.parseToJsonElement(it.string())
-                val parseFriend = Json.decodeFromJsonElement<FriendEntity>(responseJson.jsonObject)
+                val parseFriend = Json.decodeFromJsonElement<FriendDetailEntity>(responseJson.jsonObject)
 
                 emit(parseFriend)
             }
         } else throw IllegalArgumentException(result.errorBody().toString())
     }
 
-    override fun getFriends(): Flow<List<FriendEntity>> = flow {
+    override fun getFriends(): Flow<List<FriendDetailEntity>> = flow {
         val result = friendService.getFriends(userId)
-        val friends = mutableListOf<FriendEntity>()
+        val friends = mutableListOf<FriendDetailEntity>()
 
         if (result.isSuccessful) {
             if (result.headers()["Content-length"]?.toInt() != 4) {
                 result.body()?.let {
                     val responseJson = Json.parseToJsonElement(it.string())
                     responseJson.jsonObject.forEach { jsonFriend ->
-                        val parseFriend = Json.decodeFromJsonElement<FriendEntity>(jsonFriend.value)
+                        val parseFriend = Json.decodeFromJsonElement<FriendDetailEntity>(jsonFriend.value)
                         friends.add(parseFriend)
                     }
                 }
@@ -51,7 +51,7 @@ class FriendRepositoryImpl @Inject constructor(
         emit(friends)
     }
 
-    override suspend fun insertFriend(friend: FriendEntity): Response<ResponseBody> {
+    override suspend fun insertFriend(friend: FriendDetailEntity): Response<ResponseBody> {
         return friendService.insertFriend(userId, friend)
     }
 

@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
+import com.w36495.senty.view.entity.FriendDetail
 import com.w36495.senty.view.screen.friend.FriendAddScreen
 import com.w36495.senty.view.screen.friend.FriendDeleteDialogScreen
 import com.w36495.senty.view.screen.friend.FriendDetailScreen
@@ -32,6 +33,7 @@ fun NavGraphBuilder.nestedFriendGraph(navController: NavController) {
         }
         composable(FriendNavigationItem.FRIEND_ADD.name) {
             FriendAddScreen(
+                friend = friendEntity,
                 onBackPressed = { navController.navigateUp() },
                 onMoveFriendList = {
                     navController.navigate(FriendNavigationItem.FRIEND_LIST.name) {
@@ -52,7 +54,11 @@ fun NavGraphBuilder.nestedFriendGraph(navController: NavController) {
             FriendDetailScreen(
                 friendId = friendId.toString(),
                 onBackPressed = { navController.navigateUp() },
-                onClickEdit = {},
+                onClickEdit = { friendEntity ->
+                    val friend = Json.encodeToString<FriendDetail>(friendEntity)
+
+                    navController.navigate(FriendNavigationItem.FRIEND_ADD.name.plus("/$friend"))
+                },
                 onClickDelete = {
                     navController.navigate("${FriendNavigationItem.FRIEND_DELETE_DIALOG.name}/$friendId")
                 }
