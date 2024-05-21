@@ -41,7 +41,7 @@ fun SwipeListItem(
     modifier: Modifier = Modifier,
     category: GiftCategory,
     onRemove: (String) -> Unit,
-    onEdit: (String) -> Unit,
+    onEdit: (GiftCategory) -> Unit,
 ) {
     val swipeState = rememberSwipeableState(initialValue = 0)
 
@@ -78,7 +78,7 @@ fun SwipeListItem(
                     .padding(horizontal = 4.dp)
             ) {
                 IconButton(
-                    onClick = { onEdit(category.id) },
+                    onClick = { onEdit(category) },
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = Color(0xFFF5A61D),
                         contentColor = Color.White

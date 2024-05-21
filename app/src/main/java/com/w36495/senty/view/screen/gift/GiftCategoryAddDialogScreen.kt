@@ -35,14 +35,21 @@ import com.w36495.senty.viewModel.GiftCategoryViewModel
 @Composable
 fun GiftCategoryAddDialogScreen(
     vm: GiftCategoryViewModel = hiltViewModel(),
+    giftCategory: GiftCategory? = null,
     onDismiss: () -> Unit,
 ) {
     GiftCategoryAddContents(
+        giftCategory = giftCategory,
         onDismiss = { onDismiss() },
-        onClickSave = {
-            val category = GiftCategory(name = it)
+        onClickSave = { inputCategory ->
+            if (giftCategory == null) {
+                val category = GiftCategory(name = inputCategory)
 
-            vm.saveCategory(category)
+                vm.saveCategory(category)
+            } else {
+                vm.updateCategory(categoryId = giftCategory.id, categoryName = inputCategory)
+            }
+
             onDismiss()
         }
     )
@@ -52,10 +59,15 @@ fun GiftCategoryAddDialogScreen(
 @Composable
 private fun GiftCategoryAddContents(
     modifier: Modifier = Modifier,
+    giftCategory: GiftCategory? = null,
     onDismiss: () -> Unit,
     onClickSave: (String) -> Unit,
 ) {
     var category by remember { mutableStateOf("") }
+
+    giftCategory?.let {
+        category = it.name
+    }
 
     Dialog(onDismissRequest = { onDismiss() }) {
         Card(
@@ -64,7 +76,7 @@ private fun GiftCategoryAddContents(
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 CenterAlignedTopAppBar(
-                    title = { Text(text = "선물 카테고리 등록") },
+                    title = { Text(text = giftCategory?.let { "선물 카테고리 수정" } ?: "선물 카테고리 등록") },
                     actions = {
                         IconButton(onClick = { onDismiss() }) {
                             Icon(imageVector = Icons.Default.Close, contentDescription = null)
@@ -93,7 +105,7 @@ private fun GiftCategoryAddContents(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .padding(bottom = 16.dp),
-                    text = "등록"
+                    text = giftCategory?.let { "수정" } ?: "등록"
                 ) { onClickSave(category) }
             }
         }

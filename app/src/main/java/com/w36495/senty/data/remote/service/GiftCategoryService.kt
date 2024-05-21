@@ -2,6 +2,7 @@ package com.w36495.senty.data.remote.service
 
 import com.w36495.senty.data.domain.FriendKeyDTO
 import com.w36495.senty.data.domain.GiftCategoryEntity
+import com.w36495.senty.data.domain.GiftCategoryPatchDTO
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -28,6 +29,13 @@ interface GiftCategoryService {
         @Path("userId") userId: String,
         @Path("categoryKey") categoryKey: String,
         @Body body: FriendKeyDTO
+    ): Response<ResponseBody>
+
+    @PATCH("giftCategories/{userId}/{categoryKey}.json")
+    suspend fun patchCategory(
+        @Path("userId") userId: String,
+        @Path("categoryKey") categoryKey: String,
+        @Body category: GiftCategoryPatchDTO
     ): Response<ResponseBody>
 
     @DELETE("giftCategories/{userId}/{categoryKey}.json")

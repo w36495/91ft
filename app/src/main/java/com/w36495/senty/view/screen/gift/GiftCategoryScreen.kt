@@ -38,6 +38,7 @@ fun GiftCategoryScreen(
 ) {
     val categories by vm.categories.collectAsStateWithLifecycle()
     var showDialog by remember { mutableStateOf(false) }
+    var editCategory by remember { mutableStateOf(GiftCategory.emptyCategory) }
 
     GiftCategoryContents(
         categories = categories,
@@ -46,12 +47,19 @@ fun GiftCategoryScreen(
             showDialog = true
         },
         onRemove = { vm.removeCategory(it) },
-        onEdit = { }
+        onEdit = {
+            editCategory = it
+            showDialog = true
+        }
     )
 
     if (showDialog) {
         GiftCategoryAddDialogScreen(
-            onDismiss = { showDialog = false },
+            giftCategory = if (editCategory == GiftCategory.emptyCategory) null else editCategory,
+            onDismiss = {
+                showDialog = false
+                editCategory = GiftCategory.emptyCategory
+            }
         )
     }
 }
@@ -63,7 +71,7 @@ private fun GiftCategoryContents(
     onPressedBack: () -> Unit,
     onClickAdd: () -> Unit,
     onRemove: (String) -> Unit,
-    onEdit: (String) -> Unit,
+    onEdit: (GiftCategory) -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -103,7 +111,7 @@ private fun GiftCategoryContents(
                 SwipeListItem(
                     category = category,
                     onRemove = { onRemove(category.id) },
-                    onEdit = { onEdit(category.id) }
+                    onEdit = { onEdit(category) }
                 )
 
                 if (index != categories.lastIndex) Divider()

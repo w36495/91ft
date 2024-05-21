@@ -3,6 +3,7 @@ package com.w36495.senty.viewModel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.w36495.senty.data.domain.GiftCategoryPatchDTO
 import com.w36495.senty.domain.repository.GiftCategoryRepository
 import com.w36495.senty.view.entity.gift.GiftCategory
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -60,6 +61,14 @@ class GiftCategoryViewModel @Inject constructor(
             } else {
                 // TODO : 삭제 실패
             }
+        }
+    }
+
+    fun updateCategory(categoryId: String, categoryName: String) {
+        viewModelScope.launch {
+            val updateCategory = GiftCategoryPatchDTO(name = categoryName)
+
+            giftCategoryRepository.patchCategory(categoryId, updateCategory)
         }
     }
 }

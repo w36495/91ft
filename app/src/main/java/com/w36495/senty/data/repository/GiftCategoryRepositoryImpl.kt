@@ -3,6 +3,7 @@ package com.w36495.senty.data.repository
 import com.google.firebase.auth.FirebaseAuth
 import com.w36495.senty.data.domain.FriendKeyDTO
 import com.w36495.senty.data.domain.GiftCategoryEntity
+import com.w36495.senty.data.domain.GiftCategoryPatchDTO
 import com.w36495.senty.data.remote.service.GiftCategoryService
 import com.w36495.senty.domain.repository.GiftCategoryRepository
 import kotlinx.coroutines.flow.Flow
@@ -50,6 +51,10 @@ class GiftCategoryRepositoryImpl @Inject constructor(
         val newCategoryKey = FriendKeyDTO(categoryKey)
 
         return giftCategoryService.patchCategoryKey(userId, categoryKey, newCategoryKey)
+    }
+
+    override suspend fun patchCategory(categoryKey: String, category: GiftCategoryPatchDTO): Response<ResponseBody> {
+        return giftCategoryService.patchCategory(userId, categoryKey, category)
     }
 
     override suspend fun deleteCategory(categoryKey: String): Boolean {
