@@ -20,7 +20,7 @@ android {
 
     defaultConfig {
         applicationId = "com.w36495.senty"
-        minSdk = 21
+        minSdk = 24
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -158,6 +158,9 @@ dependencies {
 
     // Kotlin Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+
+    // DatePicker
+    implementation("com.github.vsnappy1:ComposeDatePicker:2.2.0")
 
     // Test
     testImplementation("junit:junit:4.13.2")
