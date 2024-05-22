@@ -14,7 +14,8 @@ https://play.google.com/store/apps/details?id=com.w36495.senty
 ---
 - MVVM(Model-View-ViewModel) + Repository Pattern
 - firebase의 realtime database, storage, authentication 사용
-- AAC(livaData, databinding, viewModel) 사용
+- AAC ViewModel
+- Coroutine + Flow
 - Glide
 - View -> Compose 로 변환 작업중!
     
@@ -47,10 +48,8 @@ https://play.google.com/store/apps/details?id=com.w36495.senty
  ### 친구기능  
  |친구목록|친구등록/수정|친구조회|친구삭제|
  |-|-|-|-|
- |![친구목록(수정후)](https://user-images.githubusercontent.com/52291662/152778208-c9075d7e-2697-4319-9a7f-1fd5a137dbdd.png)|![친구등록](https://user-images.githubusercontent.com/52291662/152778202-f64fe6b9-650e-441c-9243-f8a25c5d767b.png)|![친구조회](https://user-images.githubusercontent.com/52291662/152778224-d8e4ad1e-3623-4c79-887f-d3b9c925d3ff.png)|![친구삭제](https://user-images.githubusercontent.com/52291662/152957284-a60e2e2f-4f4a-4837-8aad-bb2b576f17f4.png)|  
+ |![친구목록](https://github.com/w36495/senty/assets/52291662/e0864ce1-259e-413e-a1b7-7c2a2dd890b8)|![친구등록](https://github.com/w36495/senty/assets/52291662/ecfd04db-daa3-4248-a9f5-c15aa1e50056)|![친구조회](https://github.com/w36495/senty/assets/52291662/f0074f85-180d-4f18-85b6-4647f7585fa1)|![친구삭제](https://github.com/w36495/senty/assets/52291662/591ffccf-599d-40b2-92d9-0837e2d56d09)|
    
- ### 선물기능  
+ ### 선물기능  (수정중)
  |선물목록|선물등록/수정|선물조회|선물삭제|  
  |--|--|--|--|  
- |![선물목록](https://user-images.githubusercontent.com/52291662/152778511-ee2c219b-c65c-4b2d-ab16-d18075c0e2e1.png)|![선물등록](https://user-images.githubusercontent.com/52291662/152778523-24b0e7f1-04f9-45e9-9fe4-fc2351e4ee8e.png)|![선물조회](https://user-images.githubusercontent.com/52291662/152778537-8f2d0b5a-015c-4eb8-8151-2f1d56d9f031.png)|![선물삭제](https://user-images.githubusercontent.com/52291662/152957272-1300621e-d042-4f5b-97b1-d3a9aad292b5.png)|  
-
