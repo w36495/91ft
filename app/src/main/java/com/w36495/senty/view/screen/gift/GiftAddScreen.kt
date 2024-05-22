@@ -40,12 +40,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.w36495.senty.util.DateUtil
 import com.w36495.senty.view.entity.Friend
 import com.w36495.senty.view.entity.gift.GiftCategory
 import com.w36495.senty.view.entity.gift.GiftEntity
 import com.w36495.senty.view.entity.gift.GiftType
 import com.w36495.senty.view.screen.friend.FriendDialogScreen
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
+import com.w36495.senty.view.ui.component.dialogs.BasicCalendarDialog
 import com.w36495.senty.view.ui.component.textFields.SentyMultipleTextField
 import com.w36495.senty.view.ui.component.textFields.SentyTextField
 import com.w36495.senty.view.ui.theme.Green40
@@ -151,6 +153,7 @@ private fun InputSection(
 ) {
     var showGiftCategoryDialog by remember { mutableStateOf(false) }
     var showFriendsDialog by remember { mutableStateOf(false) }
+    var showDatePickerDialog by remember { mutableStateOf(false) }
 
     var type by remember { mutableStateOf(GiftType.RECEIVED) }
     var category by remember { mutableStateOf(GiftCategory.emptyCategory) }
@@ -173,6 +176,13 @@ private fun InputSection(
             onClickFriend = {
                 friend = it
                 showFriendsDialog = false
+            }
+        )
+    } else if (showDatePickerDialog) {
+        BasicCalendarDialog(
+            onDismiss = { showDatePickerDialog = false },
+            onSelectedDate = { year, month, day ->
+                String.format("%04d년 %02d월 %02d일", year, month+1, day).also { date = it }
             }
         )
     }
@@ -219,9 +229,10 @@ private fun InputSection(
             modifier = Modifier.fillMaxWidth(),
             title = "날짜",
             text = date,
+            enable = false,
             placeHolder = "선물을 주고받은 날짜를 입력해주세요.",
             onChangeText = { date = it },
-            onClick = {}
+            onClick = { showDatePickerDialog = true }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -253,7 +264,7 @@ private fun InputSection(
             val giftEntity = GiftEntity(
                 categoryId = category.id,
                 friendId = friend.id,
-                date = date,
+                date = DateUtil.changeDateFormatToDash(date),
                 mood = mood,
                 memo = memo,
                 giftType = type
