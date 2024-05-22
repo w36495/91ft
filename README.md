@@ -18,6 +18,9 @@ https://play.google.com/store/apps/details?id=com.w36495.senty
 - Coroutine + Flow
 - Glide
 - View -> Compose 로 변환 작업중!
+
+**사용한 외부 라이브러리**
+- [Calendar](https://github.com/vsnappy1/ComposeDatePicker)
     
 💪 기능  
 ---
