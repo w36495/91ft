@@ -11,23 +11,32 @@ class GiftImgRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
 ) : GiftImgRepository {
     private var userId: String = firebaseAuth.currentUser!!.uid
-    private val  imgName = System.currentTimeMillis().toString()
 
-    override fun insertGiftImgByBitmap(giftId: String, giftImg: ByteArray) {
+    override fun insertGiftImgByBitmap(giftId: String, giftImg: ByteArray, onSuccess: (String)-> Unit) {
+        val imgName = generateImageName()
+
         val giftPath = "images/gifts/$userId/$giftId/$imgName.jpg"
         firebaseStorage.reference.child(giftPath).putBytes(giftImg)
-            .addOnSuccessListener { }
+            .addOnSuccessListener {
+                onSuccess(it.storage.name)
+            }
             .addOnFailureListener {
                 throw IllegalArgumentException("Gift image upload Failed using Bitmap")
             }
     }
 
-    override fun insertGiftImgByUri(giftId: String, giftImg: Uri) {
+    override fun insertGiftImgByUri(giftId: String, giftImg: Uri, onSuccess: (String) -> Unit) {
+        val imgName = generateImageName()
+
         val giftPath = "images/gifts/$userId/$giftId/$imgName.jpg"
         firebaseStorage.reference.child(giftPath).putFile(giftImg)
-            .addOnSuccessListener {  }
+            .addOnSuccessListener {
+                onSuccess(it.storage.name)
+            }
             .addOnFailureListener {
                 throw IllegalArgumentException("Gift image upload Failed using Uri")
             }
     }
+
+    private fun generateImageName() = System.currentTimeMillis().toString()
 }

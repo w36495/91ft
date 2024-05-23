@@ -1,7 +1,8 @@
 package com.w36495.senty.data.remote.service
 
 import com.w36495.senty.data.domain.FriendKeyDTO
-import com.w36495.senty.view.entity.gift.GiftEntity
+import com.w36495.senty.data.domain.GiftEntity
+import com.w36495.senty.data.domain.GiftImgUriDTO
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -21,5 +22,12 @@ interface GiftService {
         @Path("userId") userId: String,
         @Path("giftKey") giftKey: String,
         @Body body: FriendKeyDTO
+    ): Response<ResponseBody>
+
+    @PATCH("gifts/{userId}/{giftKey}.json")
+    suspend fun patchGiftImgUri(
+        @Path("userId") userId: String,
+        @Path("giftKey") giftKey: String,
+        @Body body: GiftImgUriDTO
     ): Response<ResponseBody>
 }
