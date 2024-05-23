@@ -3,6 +3,8 @@ package com.w36495.senty.di
 import com.w36495.senty.data.repository.FriendGroupRepositoryImpl
 import com.w36495.senty.data.repository.FriendRepositoryImpl
 import com.w36495.senty.data.repository.GiftCategoryRepositoryImpl
+import com.w36495.senty.domain.repository.GiftImgRepository
+import com.w36495.senty.data.repository.GiftImgRepositoryImpl
 import com.w36495.senty.data.repository.GiftRepositoryImpl
 import com.w36495.senty.domain.repository.FriendGroupRepository
 import com.w36495.senty.domain.repository.FriendRepository
@@ -12,6 +14,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -36,4 +39,9 @@ abstract class RepositoryModule {
         giftCategoryRepositoryImpl: GiftCategoryRepositoryImpl
     ): GiftCategoryRepository
 
+    @Binds
+    @Singleton
+    abstract fun bindGiftImgRepository(
+        giftImgRepositoryImpl: GiftImgRepositoryImpl
+    ): GiftImgRepository
 }

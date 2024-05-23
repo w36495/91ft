@@ -1,5 +1,11 @@
 package com.w36495.senty.view.screen.gift
 
+import android.app.Activity
+import android.content.Intent
+import android.provider.MediaStore
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.launch
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -37,17 +43,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 import com.w36495.senty.util.DateUtil
 import com.w36495.senty.view.entity.Friend
 import com.w36495.senty.view.entity.gift.GiftCategory
 import com.w36495.senty.view.entity.gift.GiftEntity
 import com.w36495.senty.view.entity.gift.GiftType
 import com.w36495.senty.view.screen.friend.FriendDialogScreen
+import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
 import com.w36495.senty.view.ui.component.dialogs.BasicCalendarDialog
+import com.w36495.senty.view.ui.component.dialogs.ImageSelectionDialog
 import com.w36495.senty.view.ui.component.textFields.SentyMultipleTextField
 import com.w36495.senty.view.ui.component.textFields.SentyTextField
 import com.w36495.senty.view.ui.theme.Green40
@@ -59,20 +71,58 @@ fun GiftAddScreen(
     onPressedBack: () -> Unit,
     onComplete: () -> Unit,
 ) {
+    var showImageSelectionDialog by remember { mutableStateOf(false) }
+    var giftImg: Any? by remember { mutableStateOf(null) }
+
+    val takePhotoFromGallery =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                result.data?.data?.let { uri -> giftImg = uri }
+            }
+        }
+
+    val takePhotoFromCamera =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.TakePicturePreview()) {
+            if (it != null) { giftImg = it }
+        }
+
+    val takePhotoFromGalleryIntent =
+        Intent(Intent.ACTION_GET_CONTENT, MediaStore.Images.Media.EXTERNAL_CONTENT_URI).apply {
+            type = "image/*"
+            action = Intent.ACTION_GET_CONTENT
+            putExtra(
+                Intent.EXTRA_MIME_TYPES,
+                arrayOf("image/jpeg", "image/png", "image/bmp", "image/webp")
+            )
+            putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false)
+        }
+
+    if (showImageSelectionDialog) {
+        ImageSelectionDialog(
+            onDismiss = { showImageSelectionDialog = false },
+            onClickCamera = { takePhotoFromCamera.launch() },
+            onClickGallery = { takePhotoFromGallery.launch(takePhotoFromGalleryIntent) }
+        )
+    }
+
     GiftAddContents(
+        giftImg = giftImg,
         onPressedBack = { onPressedBack() },
         onClickSave = {
-            vm.saveGift(it)
+            vm.saveGift(it, giftImg)
             onComplete()
         },
+        onClickUploadImage = { showImageSelectionDialog = true }
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun GiftAddContents(
+    giftImg: Any? = null,
     onPressedBack: () -> Unit,
     onClickSave: (GiftEntity) -> Unit,
+    onClickUploadImage: () -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -102,8 +152,9 @@ private fun GiftAddContents(
                 .verticalScroll(rememberScrollState())
         ) {
             ImgSection(
+                giftImg = giftImg,
                 modifier = Modifier.fillMaxWidth(),
-                onClickImageUpload = {}
+                takePhotoLauncher = { onClickUploadImage() }
             )
             InputSection(
                 modifier = Modifier
@@ -117,31 +168,40 @@ private fun GiftAddContents(
     }
 }
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 private fun ImgSection(
     modifier: Modifier = Modifier,
-    onClickImageUpload: () -> Unit,
+    giftImg: Any? = null,
+    takePhotoLauncher: () -> Unit
 ) {
     Box(
         modifier = modifier
             .background(Color(0xFFF6F6F6))
             .aspectRatio(1f)
-            .clickable { onClickImageUpload() },
+            .clickable { takePhotoLauncher() },
         contentAlignment = Alignment.Center
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(imageVector = Icons.Outlined.CameraAlt, contentDescription = null)
-            Text(
-                text = "사진 등록",
-                style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.padding(top = 4.dp)
+        if (giftImg != null) {
+            GlideImage(
+                model = giftImg, contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f),
+                contentScale = ContentScale.Fit
             )
-            Text(
-                "(0/3)",
-                style = MaterialTheme.typography.labelLarge
-            )
+        } else {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(imageVector = Icons.Outlined.CameraAlt, contentDescription = null)
+                Text(
+                    text = "사진 등록",
+                    style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
         }
     }
 }
@@ -182,7 +242,7 @@ private fun InputSection(
         BasicCalendarDialog(
             onDismiss = { showDatePickerDialog = false },
             onSelectedDate = { year, month, day ->
-                String.format("%04d년 %02d월 %02d일", year, month+1, day).also { date = it }
+                String.format("%04d년 %02d월 %02d일", year, month + 1, day).also { date = it }
             }
         )
     }
@@ -355,6 +415,16 @@ private fun GiftTypeSection(
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodyMedium
             )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ImgSectionPreview() {
+    SentyTheme {
+        ImgSection {
+
         }
     }
 }
