@@ -116,6 +116,7 @@ dependencies {
     implementation("androidx.compose.material3:material3")                       // UI
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
+    implementation("androidx.compose.foundation:foundation:1.6.7")
     implementation("androidx.compose.material:material-icons-extended")          // Icon
     implementation("androidx.compose.ui:ui-tooling-preview")                     // Preview support
     debugImplementation("androidx.compose.ui:ui-tooling")                        // Preview support
