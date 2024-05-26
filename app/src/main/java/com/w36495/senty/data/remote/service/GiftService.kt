@@ -6,11 +6,17 @@ import com.w36495.senty.data.domain.GiftImgUriDTO
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface GiftService {
+    @GET("gifts/{userId}.json")
+    suspend fun getGifts(
+        @Path("userId") userId: String
+    ): Response<ResponseBody>
+
     @POST("gifts/{userId}.json")
     suspend fun insertGift(
         @Path("userId") userId: String,

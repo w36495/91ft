@@ -6,15 +6,39 @@ import com.w36495.senty.data.domain.GiftEntity
 import com.w36495.senty.data.domain.GiftImgUriDTO
 import com.w36495.senty.data.remote.service.GiftService
 import com.w36495.senty.domain.repository.GiftRepository
-import com.w36495.senty.view.entity.gift.GiftEntity
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.jsonObject
 import okhttp3.ResponseBody
 import retrofit2.Response
 import javax.inject.Inject
 
 class GiftRepositoryImpl @Inject constructor(
+    private val firebaseAuth: FirebaseAuth,
     private val giftService: GiftService
 ) : GiftRepository {
-    private var userId: String = FirebaseAuth.getInstance().currentUser!!.uid
+    private var userId = firebaseAuth.currentUser!!.uid
+
+    override fun getGifts(): Flow<List<GiftEntity>> = flow {
+        val result = giftService.getGifts(userId)
+        val gifts = mutableListOf<GiftEntity>()
+
+        if (result.isSuccessful) {
+            if (result.headers()["Content-length"]?.toInt() != 4) {
+                result.body()?.let {
+                    val responseJson = Json.parseToJsonElement(it.string())
+                    responseJson.jsonObject.forEach { jsonGift ->
+                        val parseFriend = Json.decodeFromJsonElement<GiftEntity>(jsonGift.value)
+                        gifts.add(parseFriend)
+                    }
+                }
+            }
+        } else throw IllegalArgumentException(result.errorBody().toString())
+
+        emit(gifts)
+    }
 
     override suspend fun insertGift(gift: GiftEntity): Response<ResponseBody> {
         return giftService.insertGift(userId, gift)
