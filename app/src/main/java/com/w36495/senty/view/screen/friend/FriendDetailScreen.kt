@@ -141,14 +141,14 @@ private fun FriendDetailViewPager(
 ) {
     val tabData = listOf(
         FriendDetailTabState.INFORMATION.title,
-        FriendDetailTabState.GIFT.title
+        FriendDetailTabState.GIFT.title.plus("(${gifts.size})")
     )
 
     val pagerState = rememberPagerState(
         pageCount = tabData.size,
         initialOffscreenLimit = tabData.size,
         infiniteLoop = true,
-        initialPage = FriendDetailTabState.INFORMATION.ordinal
+        initialPage = FriendDetailTabState.GIFT.ordinal
     )
     val tabIndex = pagerState.currentPage
     val coroutineScope = rememberCoroutineScope()
@@ -191,9 +191,8 @@ private fun FriendDetailViewPager(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.Top,
         ) {
-            Spacer(modifier = Modifier.height(24.dp))
-
-            if (index == FriendDetailTabState.INFORMATION.ordinal) {
+            if (index == FriendDetailTabState.GIFT.ordinal) {
+                Spacer(modifier = Modifier.height(24.dp))
                 FriendInfoSection(friend = friend)
 
                 BottomButtons(
@@ -201,6 +200,7 @@ private fun FriendDetailViewPager(
                     onClickDelete = { onClickDelete() }
                 )
             } else {
+                Spacer(modifier = Modifier.height(4.dp))
                 GiftSection(
                     gifts = gifts,
                     onClickGift = { giftId ->
@@ -285,24 +285,6 @@ private fun GiftSection(
     Column(
         modifier = modifier.fillMaxSize()
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "선물",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(start = 16.dp)
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                text = "(총 ${gifts.size}개)",
-                style = MaterialTheme.typography.bodySmall,
-            )
-        }
-        
         if (gifts.isEmpty()) {
             Box(
                 modifier = Modifier
