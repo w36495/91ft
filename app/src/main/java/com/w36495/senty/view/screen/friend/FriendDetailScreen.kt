@@ -1,75 +1,103 @@
 package com.w36495.senty.view.screen.friend
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Tab
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults.SecondaryIndicator
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.cheonjaeung.compose.grid.SimpleGridCells
+import com.cheonjaeung.compose.grid.VerticalGrid
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.rememberPagerState
 import com.w36495.senty.view.entity.FriendDetail
-import com.w36495.senty.view.entity.FriendGroup
+import com.w36495.senty.view.entity.gift.GiftDetailEntity
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyElevatedButton
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
 import com.w36495.senty.view.ui.component.textFields.SentyMultipleTextField
 import com.w36495.senty.view.ui.component.textFields.SentyReadOnlyTextField
+import com.w36495.senty.view.ui.theme.Green40
 import com.w36495.senty.viewModel.FriendDetailViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun FriendDetailScreen(
     friendId: String,
     vm: FriendDetailViewModel = hiltViewModel(),
     onBackPressed: () -> Unit,
+    onClickGiftDetail: (String) -> Unit,
     onClickEdit: (FriendDetail) -> Unit,
     onClickDelete: () -> Unit,
 ) {
     LaunchedEffect(Unit) {
         vm.getFriend(friendId)
+        vm.getGifts(friendId)
     }
+    
     val friend by vm.friend.collectAsState()
+    val gifts by vm.gifts.collectAsState()
 
     FriendDetailContents(
         friend = friend,
         onBackPressed = { onBackPressed() },
         onClickEdit = { onClickEdit(it) },
         onClickDelete = { onClickDelete() },
+        gifts = gifts,
+        onClickGiftDetail = { onClickGiftDetail(it) }
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FriendDetailContents(
-    modifier: Modifier = Modifier,
+private fun FriendDetailContents(
     friend: FriendDetail,
+    gifts: List<GiftDetailEntity>,
     onBackPressed: () -> Unit,
+    onClickGiftDetail: (String) -> Unit,
     onClickEdit: (FriendDetail) -> Unit,
     onClickDelete: () -> Unit,
 ) {
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(title = { Text(text = "친구정보") },
+            CenterAlignedTopAppBar(title = { Text(text = "친구") },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = Color.White
                 ),
@@ -85,20 +113,101 @@ fun FriendDetailContents(
         }
     ) { innerPadding ->
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
-                .verticalScroll(rememberScrollState()),
+                .padding(innerPadding),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Column {
-                FriendInfoSection(friend = friend)
-            }
-
-            BottomButtons(
-                onClickEdit = { onClickEdit(friend) },
-                onClickDelete = { onClickDelete() }
+            FriendDetailViewPager(
+                gifts = gifts,
+                friend = friend,
+                onClickGiftDetail = { onClickGiftDetail(it) },
+                onClickDelete = { onClickDelete() },
+                onClickEdit = { onClickEdit(it) },
             )
+        }
+    }
+}
+
+@OptIn(ExperimentalPagerApi::class)
+@Composable
+private fun FriendDetailViewPager(
+    modifier: Modifier = Modifier,
+    gifts: List<GiftDetailEntity>,
+    friend: FriendDetail,
+    onClickGiftDetail: (String) -> Unit,
+    onClickEdit: (FriendDetail) -> Unit,
+    onClickDelete: () -> Unit,
+) {
+    val tabData = listOf(
+        FriendDetailTabState.INFORMATION.title,
+        FriendDetailTabState.GIFT.title
+    )
+
+    val pagerState = rememberPagerState(
+        pageCount = tabData.size,
+        initialOffscreenLimit = tabData.size,
+        infiniteLoop = true,
+        initialPage = FriendDetailTabState.INFORMATION.ordinal
+    )
+    val tabIndex = pagerState.currentPage
+    val coroutineScope = rememberCoroutineScope()
+
+    TabRow(
+        selectedTabIndex = tabIndex,
+        contentColor = Color.Black,
+        containerColor = Color.White,
+        indicator = {
+            SecondaryIndicator(
+                modifier = Modifier.tabIndicatorOffset(it[tabIndex]),
+                color = Green40
+            )
+        }
+    ) {
+        tabData.forEachIndexed { index, text ->
+            Tab(
+                selected = tabIndex == index,
+                onClick = {
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(index)
+                    }
+                },
+            ) {
+                Text(
+                    text = text,
+                    modifier = Modifier.padding(vertical = 16.dp)
+                )
+            }
+        }
+    }
+
+    HorizontalPager(
+        state = pagerState,
+        modifier = modifier.fillMaxSize()
+    ) { index ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.Top,
+        ) {
+            Spacer(modifier = Modifier.height(24.dp))
+
+            if (index == FriendDetailTabState.INFORMATION.ordinal) {
+                FriendInfoSection(friend = friend)
+
+                BottomButtons(
+                    onClickEdit = { onClickEdit(friend) },
+                    onClickDelete = { onClickDelete() }
+                )
+            } else {
+                GiftSection(
+                    gifts = gifts,
+                    onClickGift = { giftId ->
+                        onClickGiftDetail(giftId)
+                    }
+                )
+            }
         }
     }
 }
@@ -142,7 +251,6 @@ private fun FriendInfoSection(
                 )
             }
 
-
             Text(
                 text = "생일",
                 style = MaterialTheme.typography.titleMedium,
@@ -169,8 +277,78 @@ private fun FriendInfoSection(
 }
 
 @Composable
-private fun GiftSection() {
+private fun GiftSection(
+    modifier: Modifier = Modifier,
+    gifts: List<GiftDetailEntity>,
+    onClickGift: (String) -> Unit,
+) {
+    Column(
+        modifier = modifier.fillMaxSize()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "선물",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = "(총 ${gifts.size}개)",
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+        
+        if (gifts.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+                    .background(Color(0xFFFBFBFB)),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally){
+                    Icon(imageVector = Icons.Default.Close, contentDescription = null)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(text = "등록된 선물이 없습니다.",
+                        textAlign = TextAlign.Center,)
+                }
+            }
+        } else {
+            VerticalGrid(
+                columns = SimpleGridCells.Fixed(3),
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                gifts.forEach { gift ->
+                    GiftItem(
+                        gift = gift,
+                        onClickGiftDetail = { onClickGift(it) }
+                    )
+                }
+            }
+        }
+    }
+}
 
+@Composable
+private fun GiftItem(
+    modifier: Modifier = Modifier,
+    gift: GiftDetailEntity,
+    onClickGiftDetail: (String) -> Unit,
+) {
+    Box(
+        modifier = modifier
+            .aspectRatio(1f)
+            .fillMaxWidth()
+            .background(Color.Gray)
+            .clickable { onClickGiftDetail(gift.id) }
+    )
 }
 
 @Composable
@@ -199,26 +377,23 @@ private fun BottomButtons(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, heightDp = 1024)
 @Composable
-fun FriendDetailPreview() {
+private fun FriendDetailPreview() {
     SentyTheme {
-        FriendDetailContents(friend = FriendDetail(
-            name = "김철수",
-            birthday = "1117",
-            memo = "",
-        ).apply {
-            setFriendGroup(
-                FriendGroup(
-                    id = "1",
-                    name = "친구"
-                )
-            )
-        },
+        FriendDetailContents(
+            gifts = emptyList(),
+            friend = FriendDetail(name = "철수", birthday = "1112", memo = ""),
+            onClickDelete = {},
             onBackPressed = {},
-            onClickEdit = {},
-            onClickDelete = {}
+            onClickEdit = {
+
+            },
+            onClickGiftDetail = {}
         )
-        GiftSection()
     }
+}
+
+enum class FriendDetailTabState(val title: String) {
+    INFORMATION("정보"), GIFT("선물")
 }
