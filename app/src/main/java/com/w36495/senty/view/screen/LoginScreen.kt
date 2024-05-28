@@ -1,7 +1,9 @@
 package com.w36495.senty.view.screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,115 +11,163 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.w36495.senty.view.LoginViewModel
+import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
 import com.w36495.senty.view.ui.component.textFields.SentyEmailTextField
 import com.w36495.senty.view.ui.component.textFields.SentyPasswordTextField
+import com.w36495.senty.view.ui.theme.Green40
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     vm: LoginViewModel = hiltViewModel(),
-    onBackPressed: () -> Unit,
     onSuccessLogin: () -> Unit,
+    onClickSignUp: () -> Unit,
 ) {
-    val hasEmailError by vm.hasEmailError.collectAsState()
-    val emailErrorMsg by vm.emailErrorMsg.collectAsState()
-    val hasPasswordError by vm.hasPasswordError.collectAsState()
-    val passwordErrorMsg by vm.passwordErrorMsg.collectAsState()
     val loginResult by vm.result.collectAsState()
 
-    var email by rememberSaveable { mutableStateOf("") }
-    var password by rememberSaveable { mutableStateOf("") }
-    var passwordVisible by rememberSaveable { mutableStateOf(false) }
+    if (loginResult) onSuccessLogin()
+
+    LoginContents(
+        onClickLogin = { email, password ->
+            vm.userLogin(email, password)
+        },
+        onClickSignUp = { onClickSignUp() }
+    )
+}
+
+@Composable
+private fun LoginContents(
+    onClickLogin: (String, String) -> Unit,
+    onClickSignUp: () -> Unit,
+) {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     var showFindPasswordDialog by remember { mutableStateOf(false) }
 
-    if (loginResult) onSuccessLogin()
     if (showFindPasswordDialog) {
-        FindPasswordDialogScreen {
-            showFindPasswordDialog = false
-        }
+        FindPasswordDialogScreen(
+            onDismiss = { showFindPasswordDialog = false }
+        )
     }
 
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text(text = "로그인") },
-                navigationIcon = {
-                    IconButton(onClick = onBackPressed) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "뒤로가기")
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.White
-                )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = "91ft",
+                style = MaterialTheme.typography.headlineLarge,
+                color = Green40,
+                fontSize = 42.sp,
+                fontWeight = FontWeight.Black,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
             )
-        },
-        containerColor = Color.White
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column {
-                EmailSection(
-                    modifier = Modifier.fillMaxWidth(),
-                    email = email,
-                    onChangeEmail = {
-                        email = it
-                    },
-                    isError = hasEmailError,
-                    errorMsg = emailErrorMsg
-                )
-                Spacer(modifier = Modifier.height(32.dp))
 
-                PasswordSection(
-                    modifier = Modifier.fillMaxWidth(),
-                    password = password,
-                    onPasswordChange = { password = it },
-                    onFindPassword = { showFindPasswordDialog = true },
-                    isError = hasPasswordError,
-                    errorMsg = passwordErrorMsg,
-                    passwordVisible = passwordVisible,
-                    onClickVisible = { passwordVisible = !passwordVisible }
-                )
-            }
+            Spacer(modifier = Modifier.height(28.dp))
 
-            SentyFilledButton(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 32.dp),
-                text = "로그인",
-                onClick = {
-                    vm.userLogin(email, password)
+                    .padding(horizontal = 32.dp),
+            ) {
+                OutlinedTextField(
+                    value = email, onValueChange = { email = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = {
+                        Text(
+                            text = "이메일을 입력하세요.",
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        unfocusedBorderColor = Color.LightGray,
+                        focusedBorderColor = Color.LightGray
+                    ),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email
+                    ),
+                    shape = RoundedCornerShape(8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = password, onValueChange = { password = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = {
+                        Text(
+                            text = "비밀번호를 입력하세요.",
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        unfocusedBorderColor = Color.LightGray,
+                        focusedBorderColor = Color.LightGray
+                    ),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    visualTransformation = PasswordVisualTransformation()
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                SentyFilledButton(text = "로그인", modifier = Modifier.fillMaxWidth()) {
+                    onClickLogin(email, password)
                 }
-            )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "비밀번호 찾기", style = MaterialTheme.typography.labelLarge,
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .clickable { showFindPasswordDialog = true })
+                    Text(text = "회원가입", style = MaterialTheme.typography.labelLarge,
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .clickable { onClickSignUp() }
+                    )
+                }
+            }
         }
     }
 }
@@ -199,5 +249,16 @@ private fun PasswordSection(
                 contentDescription = null
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun LoginPreview() {
+    SentyTheme {
+        LoginContents(
+            onClickLogin = { _, _ ->},
+            onClickSignUp = {}
+        )
     }
 }

@@ -12,7 +12,7 @@ enum class BottomNavigationItem(
     val title: String,
     val icon: ImageVector,
 ) {
-    MAIN("메인", Icons.Filled.Home),
+    LOGIN("로그인", Icons.Filled.Home),
     HOME("홈", Icons.Filled.Home),
     FRIEND("친구", Icons.Filled.PersonOutline),
     ANNIVERSARY("기념일", Icons.Filled.CalendarMonth),

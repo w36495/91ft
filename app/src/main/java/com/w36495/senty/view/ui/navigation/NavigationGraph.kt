@@ -4,7 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.w36495.senty.view.screen.MainScreen
+import com.w36495.senty.view.screen.LoginScreen
+import com.w36495.senty.view.screen.SignupScreen
 import com.w36495.senty.view.screen.home.AnniversaryScreen
 import com.w36495.senty.view.screen.home.HomeScreen
 import com.w36495.senty.view.screen.home.SettingScreen
@@ -13,16 +14,23 @@ import com.w36495.senty.view.screen.home.SettingScreen
 fun NavigationGraph(navController: NavHostController) {
     NavHost(
         navController = navController,
-        startDestination = BottomNavigationItem.MAIN.name,
+        startDestination = BottomNavigationItem.LOGIN.name,
     ) {
-        composable(BottomNavigationItem.MAIN.name) {
-            MainScreen(
-                onLoginClick = { navController.navigate(AccountNavigationItem.LOGIN.name) },
-                onSignUpClick = { navController.navigate(AccountNavigationItem.SIGNUP.name) }
+        composable(BottomNavigationItem.LOGIN.name) {
+            LoginScreen(
+                onSuccessLogin = { navController.navigate(BottomNavigationItem.HOME.name) },
+                onClickSignUp = { navController.navigate(AccountNavigationItem.SIGNUP.name) }
             )
         }
 
-        nestedAccountGraph(navController)
+        composable(AccountNavigationItem.SIGNUP.name) {
+            SignupScreen(
+                onBackPressed = { navController.navigateUp() },
+                onSuccessSignup = { navController.navigate(AccountNavigationItem.LOGIN.name) },
+            )
+        }
+
+//        nestedAccountGraph(navController)
 
         composable(BottomNavigationItem.HOME.name) {
             HomeScreen()
@@ -39,9 +47,9 @@ fun NavigationGraph(navController: NavHostController) {
                     navController.navigate(GiftNavigationItem.GIFT_CATEGORY.name)
                 },
                 onSuccessLogout = {
-                    navController.navigate(BottomNavigationItem.MAIN.name) {
+                    navController.navigate(BottomNavigationItem.LOGIN.name) {
                         launchSingleTop = true
-                        popUpTo(BottomNavigationItem.MAIN.name) {
+                        popUpTo(BottomNavigationItem.LOGIN.name) {
                             inclusive = true
                         }
                     }
