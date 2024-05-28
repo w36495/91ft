@@ -12,6 +12,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.CardGiftcard
+import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -41,10 +42,12 @@ fun SettingScreen(
     onSuccessLogout: () -> Unit,
 ) {
     val logoutResult by vm.logoutResult.collectAsState()
+    val deleteUserResult by vm.deleteUserResult.collectAsState()
 
     var showLogoutDialog by remember { mutableStateOf(false) }
+    var showDeleteUserDialog by remember { mutableStateOf(false) }
 
-    if (logoutResult) onSuccessLogout()
+    if (logoutResult || deleteUserResult) onSuccessLogout()
     if (showLogoutDialog) {
         BasicAlertDialog(
             title = "로그아웃하시겠습니까?",
@@ -55,13 +58,25 @@ fun SettingScreen(
             },
             onDismiss = { showLogoutDialog = false }
         )
+    } else if (showDeleteUserDialog) {
+        BasicAlertDialog(
+            title = "계정을 삭제하시겠습니까?",
+            discContent = {
+                Text(text = "계정을 삭제하면 복구할 수 없습니다.")
+            },
+            onComplete = {
+                vm.deleteUser()
+                showDeleteUserDialog = false
+                onSuccessLogout()
+            },
+            onDismiss = { showDeleteUserDialog = false }
+        )
     }
 
     SettingScreenContents(
         onClickGiftCategorySetting = { onClickGiftCategorySetting() },
-        onClickLogout = {
-            showLogoutDialog = true
-        }
+        onClickLogout = { showLogoutDialog = true },
+        onClickDelete = { showDeleteUserDialog = true }
     )
 }
 
@@ -71,6 +86,7 @@ private fun SettingScreenContents(
     modifier: Modifier = Modifier,
     onClickGiftCategorySetting: () -> Unit,
     onClickLogout: () -> Unit,
+    onClickDelete: () -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -98,6 +114,15 @@ private fun SettingScreenContents(
                 title = "로그아웃",
                 icon = Icons.AutoMirrored.Filled.Logout,
                 onClickItem = { onClickLogout() }
+            )
+
+            HorizontalDivider()
+
+            SettingItem(
+                modifier = Modifier.fillMaxWidth(),
+                title = "회원탈퇴",
+                icon = Icons.Default.DeleteForever,
+                onClickItem = { onClickDelete() }
             )
         }
     }
@@ -138,7 +163,8 @@ private fun SettingScreenPreview() {
     SentyTheme {
         SettingScreenContents(
             onClickGiftCategorySetting = {},
-            onClickLogout = {}
+            onClickLogout = {},
+            onClickDelete = {}
         )
     }
 }

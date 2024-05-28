@@ -13,9 +13,16 @@ class AccountViewModel @Inject constructor(
 ): ViewModel() {
     private var _logoutResult = MutableStateFlow(false)
     val logoutResult = _logoutResult.asStateFlow()
+    private var _deleteUserResult = MutableStateFlow(false)
+    val deleteUserResult = _deleteUserResult.asStateFlow()
 
     fun userLogout() {
         val result = accountRepository.userLogout()
         _logoutResult.value = result
+    }
+
+    fun deleteUser() {
+        val result = accountRepository.deleteUser()
+        _deleteUserResult.value = result
     }
 }

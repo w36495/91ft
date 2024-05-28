@@ -20,4 +20,15 @@ class AccountRepositoryImpl @Inject constructor(
 
         return result
     }
+
+    override fun deleteUser(): Boolean {
+        var result = false
+
+        authUi.delete(context)
+            .addOnCompleteListener {
+                if (it.isSuccessful) result = true
+            }
+
+        return result
+    }
 }
