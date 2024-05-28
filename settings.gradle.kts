@@ -5,6 +5,7 @@ dependencyResolutionManagement {
         mavenCentral()
         jcenter() // Warning: this repository is going to shut down soon
         maven("https://jitpack.io")
+        maven("https://repository.map.naver.com/archive/maven")
     }
 }
 rootProject.name = "Senty"
