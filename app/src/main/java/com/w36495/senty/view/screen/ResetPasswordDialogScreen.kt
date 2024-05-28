@@ -14,6 +14,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -22,6 +23,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.w36495.senty.view.ResetPasswordViewModel
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
 import com.w36495.senty.view.ui.component.buttons.SentyOutlinedButton
 import com.w36495.senty.view.ui.component.textFields.SentyEmailTextField
@@ -29,17 +32,19 @@ import com.w36495.senty.view.ui.component.textFields.SentyEmailTextField
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FindPasswordDialogScreen(
-    hasEmailError: Boolean,
-    emailErrorMsg: String,
-    onPositiveClick: (String) -> Unit,
-    onDismissClick: () -> Unit,
+    vm: ResetPasswordViewModel = hiltViewModel(),
+    onDismiss: () -> Unit,
 ) {
-    var email by rememberSaveable {
-        mutableStateOf("")
-    }
+    val hasEmailError by vm.hasEmailError.collectAsState()
+    val emailErrorMsg by vm.emailErrorMsg.collectAsState()
+    val result by vm.result.collectAsState()
+
+    if (result) onDismiss()
+
+    var email by rememberSaveable { mutableStateOf("") }
 
     BasicAlertDialog(
-        onDismissRequest = onDismissClick,
+        onDismissRequest = { onDismiss() },
     ) {
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -76,13 +81,13 @@ fun FindPasswordDialogScreen(
                 Spacer(modifier = Modifier.height(24.dp))
                 SentyFilledButton(
                     text = "확인",
-                    onClick = { onPositiveClick(email) },
+                    onClick = { vm.sendPasswordResetEmail(email) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 SentyOutlinedButton(
                     text = "취소",
-                    onClick = onDismissClick,
+                    onClick = { onDismiss() },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp)

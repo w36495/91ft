@@ -18,6 +18,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -25,6 +26,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.w36495.senty.view.SignupViewModel
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
 import com.w36495.senty.view.ui.component.textFields.SentyEmailTextField
 import com.w36495.senty.view.ui.component.textFields.SentyPasswordTextField
@@ -32,21 +35,25 @@ import com.w36495.senty.view.ui.component.textFields.SentyPasswordTextField
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignupScreen(
-    hasEmailError: Boolean,
-    hasPasswordError: Boolean,
-    hasPasswordCheckError: Boolean,
-    emailErrorMsg: String,
-    passwordErrorMsg: String,
-    passwordCheckErrorMsg: String,
+    vm: SignupViewModel = hiltViewModel(),
     onBackPressed: () -> Unit,
-    onClickSignup: (String, String, String) -> Unit,
+    onSuccessSignup: () -> Unit,
 ) {
+    val emailErrorMsg by vm.emailErrorMsg.collectAsState()
+    val passwordErrorMsg by vm.passwordErrorMsg.collectAsState()
+    val passwordCheckErrorMsg by vm.passwordCheckErrorMsg.collectAsState()
+    val hasEmailError by vm.hasEmailError.collectAsState()
+    val hasPasswordError by vm.hasPasswordError.collectAsState()
+    val hasPasswordCheckError by vm.hasPasswordCheckError.collectAsState()
+    val signupResult by vm.signupResult.collectAsState()
 
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var passwordCheck by rememberSaveable { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     var passwordCheckVisible by rememberSaveable { mutableStateOf(false) }
+
+    if (signupResult) onSuccessSignup()
 
     Scaffold(
         topBar = {
@@ -113,7 +120,7 @@ fun SignupScreen(
                     .padding(bottom = 32.dp),
                 text = "확인",
                 onClick = {
-                    onClickSignup(email, password, passwordCheck)
+                    vm.createAccount(email, password, passwordCheck)
                 }
             )
         }

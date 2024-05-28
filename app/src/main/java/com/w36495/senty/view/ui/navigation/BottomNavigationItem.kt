@@ -1,6 +1,7 @@
 package com.w36495.senty.view.ui.navigation
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.PersonOutline
@@ -11,6 +12,7 @@ enum class BottomNavigationItem(
     val title: String,
     val icon: ImageVector,
 ) {
+    MAIN("메인", Icons.Filled.Home),
     HOME("홈", Icons.Filled.Home),
     FRIEND("친구", Icons.Filled.PersonOutline),
     ANNIVERSARY("기념일", Icons.Filled.CalendarMonth),

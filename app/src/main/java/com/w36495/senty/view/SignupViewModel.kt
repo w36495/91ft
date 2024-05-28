@@ -3,13 +3,21 @@ package com.w36495.senty.view
 import android.text.TextUtils
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.w36495.senty.util.StringUtils
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SignupViewModel : ViewModel() {
+@HiltViewModel
+class SignupViewModel @Inject constructor(
+    private val firebaseAuth: FirebaseAuth,
+) : ViewModel() {
     private var _hasEmailError = MutableStateFlow(false)
     val hasEmailError = _hasEmailError.asStateFlow()
     private var _emailErrorMsg = MutableStateFlow("")
@@ -22,9 +30,39 @@ class SignupViewModel : ViewModel() {
     val hasPasswordCheckError = _hasPasswordCheckError.asStateFlow()
     private var _passwordCheckErrorMsg = MutableStateFlow("")
     val passwordCheckErrorMsg = _passwordCheckErrorMsg.asStateFlow()
+    private var _signupResult = MutableStateFlow(false)
+    val signupResult = _signupResult.asStateFlow()
 
-    fun validateForm(email: String, password: String, passwordConfirm: String): Boolean {
-        return validateEmail(email) && validatePassword(password) && validatePasswordCheck(password, passwordConfirm)
+    fun createAccount(email: String, password: String, passwordCheck: String) {
+        if (!validateForm(email, password, passwordCheck)) return
+
+        firebaseAuth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    _signupResult.value = true
+                } else {
+                    when (task.exception) {
+                        is FirebaseAuthInvalidCredentialsException -> {
+                            // TODO : toast_email_invalid_exception
+                        }
+
+                        is FirebaseAuthUserCollisionException -> {
+                            // TODO : toast_email_collision_exception
+                        }
+
+                        else -> {
+                            // TODO : msg_failed_signup
+                        }
+                    }
+                }
+            }
+    }
+
+    private fun validateForm(email: String, password: String, passwordConfirm: String): Boolean {
+        return validateEmail(email) && validatePassword(password) && validatePasswordCheck(
+            password,
+            passwordConfirm
+        )
     }
 
     private fun validateEmail(email: String): Boolean {

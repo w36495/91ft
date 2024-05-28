@@ -21,14 +21,18 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.w36495.senty.view.LoginViewModel
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
 import com.w36495.senty.view.ui.component.textFields.SentyEmailTextField
 import com.w36495.senty.view.ui.component.textFields.SentyPasswordTextField
@@ -36,17 +40,27 @@ import com.w36495.senty.view.ui.component.textFields.SentyPasswordTextField
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    hasEmailError: Boolean,
-    hasPasswordError: Boolean,
-    emailErrorMsg: String,
-    passwordErrorMsg: String,
+    vm: LoginViewModel = hiltViewModel(),
     onBackPressed: () -> Unit,
-    onClickLogin: (String, String) -> Unit,
-    onFindPassword: () -> Unit,
+    onSuccessLogin: () -> Unit,
 ) {
+    val hasEmailError by vm.hasEmailError.collectAsState()
+    val emailErrorMsg by vm.emailErrorMsg.collectAsState()
+    val hasPasswordError by vm.hasPasswordError.collectAsState()
+    val passwordErrorMsg by vm.passwordErrorMsg.collectAsState()
+    val loginResult by vm.result.collectAsState()
+
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
+    var showFindPasswordDialog by remember { mutableStateOf(false) }
+
+    if (loginResult) onSuccessLogin()
+    if (showFindPasswordDialog) {
+        FindPasswordDialogScreen {
+            showFindPasswordDialog = false
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -87,7 +101,7 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth(),
                     password = password,
                     onPasswordChange = { password = it },
-                    onFindPassword = onFindPassword,
+                    onFindPassword = { showFindPasswordDialog = true },
                     isError = hasPasswordError,
                     errorMsg = passwordErrorMsg,
                     passwordVisible = passwordVisible,
@@ -101,7 +115,7 @@ fun LoginScreen(
                     .padding(bottom = 32.dp),
                 text = "로그인",
                 onClick = {
-                    onClickLogin(email, password)
+                    vm.userLogin(email, password)
                 }
             )
         }

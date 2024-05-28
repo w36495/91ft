@@ -2,13 +2,19 @@ package com.w36495.senty.view
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.w36495.senty.util.StringUtils
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class LoginViewModel : ViewModel() {
+@HiltViewModel
+class LoginViewModel @Inject constructor(
+    private val firebaseAuth: FirebaseAuth,
+) : ViewModel() {
     private var _hasEmailError = MutableStateFlow(false)
     val hasEmailError = _hasEmailError.asStateFlow()
     private var _emailErrorMsg = MutableStateFlow("")
@@ -17,8 +23,28 @@ class LoginViewModel : ViewModel() {
     val hasPasswordError = _hasPasswordError.asStateFlow()
     private var _passwordErrorMsg = MutableStateFlow("")
     val passwordErrorMsg = _passwordErrorMsg.asStateFlow()
+    private var _result = MutableStateFlow(false)
+    val result = _result.asStateFlow()
 
-    fun isValid(email: String, password: String): Boolean {
+    fun userLogin(email: String, password: String) {
+        if (!isValid(email, password)) {
+            return
+        }
+
+        firebaseAuth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    _result.value = true
+//                    val userSharedPref = getSharedPreferences("user", Context.MODE_PRIVATE)
+//                    with(userSharedPref.edit()) {
+//                        putString("userId", FirebaseAuth.getInstance().currentUser!!.uid)
+//                        commit()
+//                    }
+                } else _result.value = false
+            }
+    }
+
+    private fun isValid(email: String, password: String): Boolean {
         return validateEmail(email) && validatePassword(password)
     }
 

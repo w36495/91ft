@@ -20,9 +20,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Senty">
-        <activity
-            android:name=".view.SplashScreesActivity"
-            android:windowSoftInputMode="adjustResize"
+        <activity android:name=".view.HomeActivity" />
+        <activity android:name=".view.AppActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
