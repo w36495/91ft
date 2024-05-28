@@ -2,7 +2,7 @@ package com.w36495.senty.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
 import com.w36495.senty.data.domain.FriendDetailEntity
-import com.w36495.senty.data.domain.FriendKeyDTO
+import com.w36495.senty.data.domain.EntityKeyDTO
 import com.w36495.senty.data.remote.service.FriendService
 import com.w36495.senty.domain.repository.FriendRepository
 import kotlinx.coroutines.flow.Flow
@@ -56,7 +56,7 @@ class FriendRepositoryImpl @Inject constructor(
     }
 
     override suspend fun patchFriendId(friendId: String): Response<ResponseBody> {
-        val newId = FriendKeyDTO(id = friendId)
+        val newId = EntityKeyDTO(id = friendId)
 
         return friendService.patchFriendKey(userId, friendId, newId)
     }

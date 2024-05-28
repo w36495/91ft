@@ -1,6 +1,6 @@
 package com.w36495.senty.data.remote.service
 
-import com.w36495.senty.data.domain.FriendKeyDTO
+import com.w36495.senty.data.domain.EntityKeyDTO
 import com.w36495.senty.data.domain.GiftCategoryEntity
 import com.w36495.senty.data.domain.GiftCategoryPatchDTO
 import okhttp3.ResponseBody
@@ -28,7 +28,7 @@ interface GiftCategoryService {
     suspend fun patchCategoryKey(
         @Path("userId") userId: String,
         @Path("categoryKey") categoryKey: String,
-        @Body body: FriendKeyDTO
+        @Body body: EntityKeyDTO
     ): Response<ResponseBody>
 
     @PATCH("giftCategories/{userId}/{categoryKey}.json")

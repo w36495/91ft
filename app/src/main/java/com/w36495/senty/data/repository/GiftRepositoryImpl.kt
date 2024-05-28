@@ -1,7 +1,7 @@
 package com.w36495.senty.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
-import com.w36495.senty.data.domain.FriendKeyDTO
+import com.w36495.senty.data.domain.EntityKeyDTO
 import com.w36495.senty.data.domain.GiftEntity
 import com.w36495.senty.data.domain.GiftImgUriDTO
 import com.w36495.senty.data.remote.service.GiftService
@@ -45,7 +45,7 @@ class GiftRepositoryImpl @Inject constructor(
     }
 
     override suspend fun patchGiftKey(giftKey: String): Response<ResponseBody> {
-        val newKey = FriendKeyDTO(giftKey)
+        val newKey = EntityKeyDTO(giftKey)
 
         return giftService.patchGiftKey(userId, giftKey, newKey)
     }
