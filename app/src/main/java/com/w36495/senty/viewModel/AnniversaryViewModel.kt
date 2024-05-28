@@ -39,4 +39,10 @@ class AnniversaryViewModel @Inject constructor(
             anniversaryRepository.insertSchedule(schedule.toDataEntity())
         }
     }
+
+    fun updateSchedule(newSchedule: Schedule) {
+        viewModelScope.launch {
+            anniversaryRepository.patchSchedule(newSchedule.toDataEntity())
+        }
+    }
 }

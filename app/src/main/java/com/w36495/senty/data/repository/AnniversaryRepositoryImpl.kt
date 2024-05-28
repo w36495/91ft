@@ -42,4 +42,8 @@ class AnniversaryRepositoryImpl @Inject constructor(
     override suspend fun insertSchedule(schedule: ScheduleEntity): Response<ResponseBody> {
         return anniversaryService.insertSchedule(userId, schedule)
     }
+
+    override suspend fun patchSchedule(schedule: ScheduleEntity): Response<ResponseBody> {
+        return anniversaryService.patchSchedule(userId, schedule.id, schedule)
+    }
 }

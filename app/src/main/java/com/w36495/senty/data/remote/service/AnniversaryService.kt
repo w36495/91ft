@@ -5,6 +5,7 @@ import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 
@@ -17,6 +18,13 @@ interface AnniversaryService {
     @POST("schedules/{userId}.json")
     suspend fun insertSchedule(
         @Path("userId") userId: String,
+        @Body schedule: ScheduleEntity
+    ): Response<ResponseBody>
+
+    @PATCH("schedules/{userId}/{scheduleId}.json")
+    suspend fun patchSchedule(
+        @Path("userId") userId: String,
+        @Path("scheduleId") scheduleId: String,
         @Body schedule: ScheduleEntity
     ): Response<ResponseBody>
 }

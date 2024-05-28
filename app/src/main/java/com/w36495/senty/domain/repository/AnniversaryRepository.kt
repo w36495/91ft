@@ -8,4 +8,5 @@ import retrofit2.Response
 interface AnniversaryRepository {
     fun getSchedules(): Flow<List<ScheduleEntity>>
     suspend fun insertSchedule(schedule: ScheduleEntity): Response<ResponseBody>
+    suspend fun patchSchedule(schedule: ScheduleEntity): Response<ResponseBody>
 }
