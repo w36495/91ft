@@ -29,7 +29,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.vsnappy1.datepicker.DatePicker
@@ -40,7 +39,6 @@ import com.w36495.senty.util.DateUtil
 import com.w36495.senty.view.entity.Schedule
 import com.w36495.senty.view.screen.anniversary.AnniversaryBottomSheetDialog
 import com.w36495.senty.view.screen.anniversary.AnniversaryDialogType
-import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyOutlinedButton
 import com.w36495.senty.view.ui.component.cards.ScheduleCard
 import com.w36495.senty.view.ui.theme.Green40
@@ -59,7 +57,8 @@ fun AnniversaryScreen(
             vm.getSchedules(year, month, day)
         },
         onClickSave = { vm.saveSchedule(it) },
-        onClickEdit = { vm.updateSchedule(it) }
+        onClickEdit = { vm.updateSchedule(it) },
+        onClickDelete = { vm.removeSchedule(it) }
     )
 }
 
@@ -70,6 +69,7 @@ private fun AnniversaryScreenContents(
     onClickDate: (Int, Int, Int) -> Unit,
     onClickSave: (Schedule) -> Unit,
     onClickEdit: (Schedule) -> Unit,
+    onClickDelete: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val scaffoldState = androidx.compose.material.rememberBottomSheetScaffoldState()
@@ -108,7 +108,7 @@ private fun AnniversaryScreenContents(
                             scaffoldState.bottomSheetState.collapse()
                         }
                     },
-                    onClickDelete = {},
+                    onClickDelete = { onClickDelete(it) },
                     onClickEdit = { onClickEdit(it) }
                 )
             }

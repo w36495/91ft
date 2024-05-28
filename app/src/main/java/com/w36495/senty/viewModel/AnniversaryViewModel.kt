@@ -45,4 +45,10 @@ class AnniversaryViewModel @Inject constructor(
             anniversaryRepository.patchSchedule(newSchedule.toDataEntity())
         }
     }
+
+    fun removeSchedule(scheduleId: String) {
+        viewModelScope.launch {
+            anniversaryRepository.deleteSchedule(scheduleId)
+        }
+    }
 }

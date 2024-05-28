@@ -1,7 +1,6 @@
 package com.w36495.senty.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase
 import com.w36495.senty.data.domain.ScheduleEntity
 import com.w36495.senty.data.remote.service.AnniversaryService
 import com.w36495.senty.domain.repository.AnniversaryRepository
@@ -45,5 +44,13 @@ class AnniversaryRepositoryImpl @Inject constructor(
 
     override suspend fun patchSchedule(schedule: ScheduleEntity): Response<ResponseBody> {
         return anniversaryService.patchSchedule(userId, schedule.id, schedule)
+    }
+
+    override suspend fun deleteSchedule(scheduleId: String): Boolean {
+        val result = anniversaryService.deleteSchedule(userId, scheduleId)
+
+        if (result.isSuccessful) {
+            return result.headers()["Content-length"]?.toInt() == 4
+        } else throw IllegalArgumentException("Failed to delete schedule")
     }
 }

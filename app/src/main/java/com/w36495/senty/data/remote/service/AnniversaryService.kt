@@ -4,6 +4,7 @@ import com.w36495.senty.data.domain.ScheduleEntity
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
@@ -27,4 +28,10 @@ interface AnniversaryService {
         @Path("scheduleId") scheduleId: String,
         @Body schedule: ScheduleEntity
     ): Response<ResponseBody>
+
+    @DELETE("schedules/{userId}/{scheduleId}.json")
+    suspend fun deleteSchedule(
+        @Path("userId") userId: String,
+        @Path("scheduleId") scheduleId: String
+    ): Response<String>
 }
