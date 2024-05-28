@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import com.w36495.senty.util.StringUtils
 import com.w36495.senty.view.entity.Schedule
 import com.w36495.senty.view.ui.component.dialogs.BasicCalendarDialog
+import com.w36495.senty.view.ui.component.dialogs.BasicDeleteDialog
 import com.w36495.senty.view.ui.component.dialogs.BasicTimePickerDialog
 import com.w36495.senty.view.ui.component.textFields.SentyMultipleTextField
 import com.w36495.senty.view.ui.component.textFields.SentyReadOnlyTextField
@@ -56,6 +57,7 @@ fun AnniversaryBottomSheetDialog(
     var showCalendar by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     var showMap by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     var selectYear by remember { mutableIntStateOf(selectDate[0]) }
     var selectMonth by remember { mutableIntStateOf(selectDate[1]) }
@@ -74,18 +76,29 @@ fun AnniversaryBottomSheetDialog(
                 selectDay = d
             }
         )
-    }
-    if (showTimePicker) {
+    } else if (showTimePicker) {
         BasicTimePickerDialog(onDismiss = { showTimePicker = false }) { hour, minute ->
             time = "${StringUtils.format2Digits(hour)}:${StringUtils.format2Digits(minute)}"
         }
-    }
-    if (showMap) {
+    } else if (showMap) {
         ScheduleMapScreen(
             onBackPressed = { showMap = false },
             onSelectLocation = { address ->
                 location = address.address
                 showMap = false
+            }
+        )
+    } else if (showDeleteDialog) {
+        BasicDeleteDialog(
+            title = "일정을 삭제하시겠습니까?",
+            discContents = {
+                Text(text = "삭제된 일정은 복구가 불가능합니다.")
+            },
+            onDismiss = { showDeleteDialog = false },
+            onClickDelete = {
+                onClickDelete?.invoke(schedule!!.id)
+                showDeleteDialog = false
+                onDismiss()
             }
         )
     }
@@ -105,9 +118,7 @@ fun AnniversaryBottomSheetDialog(
             actions = {
                 if (currentType == AnniversaryDialogType.READ) {
                     IconButton(onClick = {
-                        if (onClickDelete != null) {
-                            onClickDelete(schedule!!.id)
-                        }
+                        if (onClickDelete != null) { showDeleteDialog = true }
                     }) {
                         Icon(
                             imageVector = Icons.Default.DeleteForever,
