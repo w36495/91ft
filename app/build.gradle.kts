@@ -9,6 +9,8 @@ plugins {
     id("androidx.navigation.safeargs")
     id("com.google.dagger.hilt.android")
     id("kotlinx-serialization")
+    id("androidx.navigation.safeargs.kotlin")
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
 val localProperties = Properties()
@@ -31,6 +33,9 @@ android {
         }
 
         buildConfigField("String", "DATABASE_BASE_URL", localProperties.getProperty("DATABASE_BASE_URL"))
+        buildConfigField("String", "NAVER_GEOCODING_BASE_URI", localProperties.getProperty("NAVER_GEOCODING_BASE_URI"))
+        buildConfigField("String", "NAVER_MAP_KEY", localProperties.getProperty("NAVER_MAP_KEY"))
+        buildConfigField("String", "NAVER_MAP_SECRET_KEY", localProperties.getProperty("NAVER_MAP_SECRET_KEY"))
     }
 
     buildTypes {
@@ -162,6 +167,9 @@ dependencies {
 
     // DatePicker
     implementation("com.github.vsnappy1:ComposeDatePicker:2.2.0")
+
+    // Naver Map
+    implementation("io.github.fornewid:naver-map-compose:1.5.7")
 
     // Test
     testImplementation("junit:junit:4.13.2")

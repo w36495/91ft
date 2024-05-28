@@ -3,10 +3,12 @@ package com.w36495.senty.di
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.w36495.senty.BuildConfig
+import com.w36495.senty.data.remote.service.AnniversaryService
 import com.w36495.senty.data.remote.service.FriendGroupService
 import com.w36495.senty.data.remote.service.FriendService
 import com.w36495.senty.data.remote.service.GiftCategoryService
 import com.w36495.senty.data.remote.service.GiftService
+import com.w36495.senty.data.remote.service.MapSearchService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,12 +17,30 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
     private const val BASE_URL: String = BuildConfig.DATABASE_BASE_URL
+    private const val NAVER_BASE_URL: String = BuildConfig.NAVER_GEOCODING_BASE_URI
+
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class naver
+
+    @Provides
+    @Singleton
+    @naver
+    fun provideNaverRetrofit(
+        okHttpClient: OkHttpClient,
+        moshi: Moshi
+    ): Retrofit = Retrofit.Builder()
+        .baseUrl(NAVER_BASE_URL)
+        .addConverterFactory(MoshiConverterFactory.create(moshi))
+        .client(okHttpClient)
+        .build()
 
     @Provides
     @Singleton
@@ -74,4 +94,13 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideGiftCategoryApi(retrofit: Retrofit): GiftCategoryService = retrofit.create(GiftCategoryService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideAnniversaryApi(retrofit: Retrofit): AnniversaryService = retrofit.create(AnniversaryService::class.java)
+
+    @Provides
+    @Singleton
+    @naver
+    fun provideMapSearchService(@naver retrofit: Retrofit): MapSearchService = retrofit.create(MapSearchService::class.java)
 }
