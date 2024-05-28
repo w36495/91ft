@@ -1,5 +1,6 @@
 package com.w36495.senty.data.remote.service
 
+import com.w36495.senty.data.domain.EntityKeyDTO
 import com.w36495.senty.data.domain.ScheduleEntity
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -27,6 +28,13 @@ interface AnniversaryService {
         @Path("userId") userId: String,
         @Path("scheduleId") scheduleId: String,
         @Body schedule: ScheduleEntity
+    ): Response<ResponseBody>
+
+    @PATCH("schedules/{userId}/{scheduleId}.json")
+    suspend fun patchScheduleKey(
+        @Path("userId") userId: String,
+        @Path("scheduleId") scheduleId: String,
+        @Body body: EntityKeyDTO
     ): Response<ResponseBody>
 
     @DELETE("schedules/{userId}/{scheduleId}.json")

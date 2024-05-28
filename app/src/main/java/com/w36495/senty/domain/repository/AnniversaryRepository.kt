@@ -9,5 +9,6 @@ interface AnniversaryRepository {
     fun getSchedules(): Flow<List<ScheduleEntity>>
     suspend fun insertSchedule(schedule: ScheduleEntity): Response<ResponseBody>
     suspend fun patchSchedule(schedule: ScheduleEntity): Response<ResponseBody>
+    suspend fun patchScheduleKey(scheduleKey: String): Response<ResponseBody>
     suspend fun deleteSchedule(scheduleId: String): Boolean
 }

@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import javax.inject.Inject
 
 @HiltViewModel
@@ -36,7 +38,23 @@ class AnniversaryViewModel @Inject constructor(
 
     fun saveSchedule(schedule: Schedule) {
         viewModelScope.launch {
-            anniversaryRepository.insertSchedule(schedule.toDataEntity())
+            val result = anniversaryRepository.insertSchedule(schedule.toDataEntity())
+
+            if (result.isSuccessful) {
+                result.body()?.let {
+                    val jsonObject = Json.decodeFromString<JsonObject>(it.string())
+                    val key = jsonObject["name"].toString().replace("\"", "")
+
+                    val keyResult = anniversaryRepository.patchScheduleKey(key)
+                    if (keyResult.isSuccessful) {
+                        if (keyResult.body()?.string() == it.string()) {
+                            // TODO : 등록 성공
+                        }
+                    } else {
+                        // TODO : 등록 실패
+                    }
+                }
+            }
         }
     }
 

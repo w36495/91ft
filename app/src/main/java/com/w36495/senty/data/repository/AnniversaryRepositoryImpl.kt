@@ -1,6 +1,7 @@
 package com.w36495.senty.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
+import com.w36495.senty.data.domain.EntityKeyDTO
 import com.w36495.senty.data.domain.ScheduleEntity
 import com.w36495.senty.data.remote.service.AnniversaryService
 import com.w36495.senty.domain.repository.AnniversaryRepository
@@ -23,14 +24,16 @@ class AnniversaryRepositoryImpl @Inject constructor(
         val schedules = mutableListOf<ScheduleEntity>()
 
         if (result.isSuccessful) {
-            result.body()?.let {
-                val jsonObject = JSONObject(it.string())
+            if (result.headers()["Content-length"]?.toInt() != 4) {
+                result.body()?.let {
+                    val jsonObject = JSONObject(it.string())
 
-                jsonObject.keys().forEach { key ->
-                    val jsonSchedules = jsonObject[key] as JSONObject
-                    val entity: ScheduleEntity = Json.decodeFromString(jsonSchedules.toString())
+                    jsonObject.keys().forEach { key ->
+                        val jsonSchedules = jsonObject[key] as JSONObject
+                        val entity: ScheduleEntity = Json.decodeFromString(jsonSchedules.toString())
 
-                    schedules.add(entity)
+                        schedules.add(entity)
+                    }
                 }
             }
 
@@ -44,6 +47,12 @@ class AnniversaryRepositoryImpl @Inject constructor(
 
     override suspend fun patchSchedule(schedule: ScheduleEntity): Response<ResponseBody> {
         return anniversaryService.patchSchedule(userId, schedule.id, schedule)
+    }
+
+    override suspend fun patchScheduleKey(scheduleKey: String): Response<ResponseBody> {
+        val newKey = EntityKeyDTO(id = scheduleKey)
+
+        return anniversaryService.patchScheduleKey(userId, scheduleKey, newKey)
     }
 
     override suspend fun deleteSchedule(scheduleId: String): Boolean {
