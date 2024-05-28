@@ -31,12 +31,20 @@ fun NavigationGraph(navController: NavHostController) {
         nestedFriendGraph(navController)
 
         composable(BottomNavigationItem.ANNIVERSARY.name) {
-
+            AnniversaryScreen()
         }
         composable(BottomNavigationItem.SETTINGS.name) {
             SettingScreen(
                 onClickGiftCategorySetting = {
                     navController.navigate(GiftNavigationItem.GIFT_CATEGORY.name)
+                },
+                onSuccessLogout = {
+                    navController.navigate(BottomNavigationItem.MAIN.name) {
+                        launchSingleTop = true
+                        popUpTo(BottomNavigationItem.MAIN.name) {
+                            inclusive = true
+                        }
+                    }
                 }
             )
         }

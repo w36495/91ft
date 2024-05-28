@@ -1,5 +1,6 @@
 package com.w36495.senty.di
 
+import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
@@ -28,5 +29,11 @@ object FirebaseModule {
     @Singleton
     fun provideFirebaseAuth(): FirebaseAuth {
         return FirebaseAuth.getInstance()
+    }
+
+    @Provides
+    @Singleton
+    fun provideFirebaseAuthUI(): AuthUI {
+        return AuthUI.getInstance()
     }
 }
