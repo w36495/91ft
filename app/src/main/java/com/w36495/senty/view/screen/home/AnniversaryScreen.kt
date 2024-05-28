@@ -40,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -50,6 +51,8 @@ import com.vsnappy1.datepicker.ui.model.DatePickerConfiguration
 import com.w36495.senty.util.DateUtil
 import com.w36495.senty.util.StringUtils
 import com.w36495.senty.view.entity.Schedule
+import com.w36495.senty.view.screen.anniversary.ScheduleMapScreen
+import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyOutlinedButton
 import com.w36495.senty.view.ui.component.cards.ScheduleCard
 import com.w36495.senty.view.ui.component.dialogs.BasicCalendarDialog
@@ -62,7 +65,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun AnniversaryScreen(
-    vm: AnniversaryViewModel = hiltViewModel()
+    vm: AnniversaryViewModel = hiltViewModel(),
 ) {
     val schedules by vm.schedules.collectAsState()
 
@@ -208,6 +211,7 @@ private fun AnniversaryBottomSheetContents(
 ) {
     var showCalendar by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
+    var showMap by remember { mutableStateOf(false) }
 
     var selectYear by remember { mutableIntStateOf(selectDate[0]) }
     var selectMonth by remember { mutableIntStateOf(selectDate[1]) }
@@ -215,6 +219,7 @@ private fun AnniversaryBottomSheetContents(
     var title by remember { mutableStateOf("") }
     var time by remember { mutableStateOf("시간을 입력해주세요.") }
     var memo by remember { mutableStateOf("") }
+    var location by remember { mutableStateOf("장소를 입력해주세요.") }
 
     if (showCalendar) {
         BasicCalendarDialog(
@@ -230,6 +235,15 @@ private fun AnniversaryBottomSheetContents(
         BasicTimePickerDialog(onDismiss = { showTimePicker = false }) { hour, minute ->
             time = "${StringUtils.format2Digits(hour)}:${StringUtils.format2Digits(minute)}"
         }
+    }
+    if (showMap) {
+        ScheduleMapScreen(
+            onBackPressed = { showMap = false },
+            onSelectLocation = { address ->
+                location = address.address
+                showMap = false
+            }
+        )
     }
 
     Column(
@@ -252,10 +266,15 @@ private fun AnniversaryBottomSheetContents(
                                 title = title,
                                 date = "${selectYear}-${StringUtils.format2Digits(selectMonth)}-${StringUtils.format2Digits(selectDay)}",
                                 time = if (time == "시간을 입력해주세요.") "" else time,
-                                location = "",
+                                location = if (location == "장소를 입력해주세요.") "" else location,
                                 memo = memo
                             )
                         )
+
+                        title = ""
+                        time = "시간을 입력해주세요."
+                        memo = ""
+                        location = "장소를 입력해주세요."
 
                         onDismiss()
                     }
@@ -308,7 +327,12 @@ private fun AnniversaryBottomSheetContents(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(text = "장소", style = MaterialTheme.typography.bodyMedium)
-                Text(text = "장소를 입력해주세요.", color = Color(0xFF848484))
+                Text(
+                    text = location,
+                    modifier = Modifier.clickable {
+                        showMap = true
+                    }
+                )
             }
 
             Row(
@@ -319,8 +343,10 @@ private fun AnniversaryBottomSheetContents(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(text = "시간", style = MaterialTheme.typography.bodyMedium)
-                Text(text = time, color = Color(0xFF848484),
-                    modifier = Modifier.clickable { showTimePicker = true })
+                Text(
+                    text = time,
+                    modifier = Modifier.clickable { showTimePicker = true }
+                )
             }
             Text(
                 text = "메모", style = MaterialTheme.typography.bodyMedium,
