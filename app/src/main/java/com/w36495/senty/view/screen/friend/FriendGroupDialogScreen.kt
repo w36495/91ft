@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.w36495.senty.view.entity.FriendGroup
-import com.w36495.senty.view.ui.FriendGroupViewModel
+import com.w36495.senty.viewModel.FriendGroupViewModel
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
 
 @Composable

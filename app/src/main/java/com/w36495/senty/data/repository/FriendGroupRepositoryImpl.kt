@@ -31,12 +31,11 @@ class FriendGroupRepositoryImpl @Inject constructor(
                     jsonObject.keys().forEach { key ->
                         val group = jsonObject[key] as JSONObject
                         val entity: FriendGroupEntity = Json.decodeFromString(group.toString())
-                        entity.setId(key)
                         friendGroups.add(entity)
                     }
                 }
             }
-        } else throw IllegalArgumentException(result.errorBody().toString())
+        } else throw IllegalArgumentException("Failed to get friend groups(${result.errorBody().toString()})")
 
         emit(friendGroups)
     }
@@ -63,6 +62,10 @@ class FriendGroupRepositoryImpl @Inject constructor(
         val newKey = EntityKeyDTO(friendGroupKey)
 
         return friendGroupService.patchFriendGroupKey(userId, friendGroupKey, newKey)
+    }
+
+    override suspend fun patchFriendGroup(friendGroupEntity: FriendGroupEntity): Response<ResponseBody> {
+        return friendGroupService.patchFriendGroup(userId, friendGroupEntity.id, friendGroupEntity)
     }
 
     override suspend fun deleteFriendGroup(friendGroupKey: String): Boolean {

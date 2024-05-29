@@ -39,14 +39,20 @@ import com.w36495.senty.view.ui.component.textFields.SentyTextField
 import com.w36495.senty.viewModel.FriendGroupViewModel
 
 @Composable
-fun FriendGroupAddDialogScreen(
+fun FriendGroupAddDialog(
     vm: FriendGroupViewModel = hiltViewModel(),
+    group: FriendGroup? = null,
     onDismiss: () -> Unit
 ) {
     FriendGroupAddContents(
+        group = group,
         onDismiss = { onDismiss() },
         onClickSave = {
             vm.saveFriendGroup(it)
+            onDismiss()
+        },
+        onClickEdit = {
+            vm.updateFriendGroup(it)
             onDismiss()
         }
     )
@@ -55,10 +61,12 @@ fun FriendGroupAddDialogScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FriendGroupAddContents(
+    group: FriendGroup? = null,
     onDismiss: () -> Unit,
     onClickSave: (FriendGroup) -> Unit,
+    onClickEdit: (FriendGroup) -> Unit,
 ) {
-    var group by remember { mutableStateOf("") }
+    var inputGroup by remember { mutableStateOf(group?.name ?: "") }
 
     Dialog(onDismissRequest = { onDismiss() }) {
         Card(
@@ -70,7 +78,7 @@ private fun FriendGroupAddContents(
                     .background(Color.White)
             ) {
                 CenterAlignedTopAppBar(
-                    title = { Text(text = "그룹등록") },
+                    title = { Text(text = if (group == null) "그룹등록" else "그룹수정") },
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.White),
                     actions = {
                         IconButton(onClick = { onDismiss() }) {
@@ -95,8 +103,8 @@ private fun FriendGroupAddContents(
                     Spacer(modifier = Modifier.width(4.dp))
 
                     SentyTextField(
-                        text = group,
-                        onChangeText = { group = it },
+                        text = inputGroup,
+                        onChangeText = { inputGroup = it },
                         hint = "그룹명을 입력하세요. (최대 8자)",
                         hintSize = 14.sp,
                         errorMsg = "",
@@ -104,11 +112,17 @@ private fun FriendGroupAddContents(
                     )
                 }
 
-                SentyFilledButton(text = "등록",
+                SentyFilledButton(text = if (group == null) "등록" else "수정",
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp),
-                    onClick = { onClickSave(FriendGroup(name = group)) }
+                    onClick = {
+                        if (group == null) {
+                            onClickSave(FriendGroup(name = inputGroup))
+                        } else {
+                            onClickEdit(group.copy(name = inputGroup).apply { setId(group.id) })
+                        }
+                    }
                 )
             }
         }
@@ -121,7 +135,8 @@ private fun FriendGroupAddDialogScreenPreview() {
     SentyTheme {
         FriendGroupAddContents(
             onDismiss = {},
-            onClickSave = {}
+            onClickSave = {},
+            onClickEdit = {}
         )
     }
 }

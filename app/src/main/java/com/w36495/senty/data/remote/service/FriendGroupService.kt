@@ -31,6 +31,13 @@ interface FriendGroupService {
         @Body friendGroupKey: EntityKeyDTO
     ): Response<ResponseBody>
 
+    @PATCH("friendGroups/{userId}/{friendGroupId}.json")
+    suspend fun patchFriendGroup(
+        @Path("userId") userId: String,
+        @Path("friendGroupId") friendGroupId: String,
+        @Body friendGroup: FriendGroupEntity
+    ): Response<ResponseBody>
+
     @DELETE("friendGroups/{userId}/{friendGroupId}.json")
     suspend fun deleteFriendGroup(
         @Path("userId") userId: String,

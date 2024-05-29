@@ -20,10 +20,9 @@ data class FriendGroup(
     }
 
     fun toDataEntity() = FriendGroupEntity(
+        id = this@FriendGroup.id,
         name = name,
         color = color,
-        createAt = DateUtil.toTimeStamp(System.currentTimeMillis()),
-        updateAt = DateUtil.toTimeStamp(System.currentTimeMillis())
     )
 
     fun getIntTypeColor(): Int {
