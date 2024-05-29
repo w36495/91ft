@@ -30,10 +30,12 @@ fun NavigationGraph(navController: NavHostController) {
             )
         }
 
-//        nestedAccountGraph(navController)
-
         composable(BottomNavigationItem.HOME.name) {
-            HomeScreen()
+            HomeScreen(
+                onClickGiftButton = {
+                    navController.navigate(GiftNavigationItem.GIFT_LIST.name)
+                }
+            )
         }
 
         nestedFriendGraph(navController)
