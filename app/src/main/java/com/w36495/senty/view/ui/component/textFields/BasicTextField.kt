@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.TextUnit
 import com.w36495.senty.view.ui.theme.Green40
 
 @Composable
@@ -15,6 +16,7 @@ fun SentyTextField(
     modifier: Modifier = Modifier,
     text: String,
     hint: String,
+    hintSize: TextUnit = TextUnit.Unspecified,
     isError: Boolean = false,
     errorMsg: String,
     enabled: Boolean = true,
@@ -31,7 +33,7 @@ fun SentyTextField(
             onChangeText(it)
         },
         placeholder = {
-            Text(text = hint)
+            Text(text = hint, fontSize = hintSize)
         },
         colors = TextFieldDefaults.colors(
             focusedContainerColor = Color.White,

@@ -23,8 +23,7 @@ data class FriendGroupEntity(
     }
 
     fun toDomainModel(): FriendGroup = FriendGroup(
-        id = this.id,
         name = this.name,
         color = this.color
-    )
+    ).apply { setId(this@FriendGroupEntity.id) }
 }

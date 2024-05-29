@@ -34,4 +34,10 @@ class FriendGroupViewModel @Inject constructor(
                 }
         }
     }
+
+    fun saveFriendGroup(friendGroup: FriendGroup) {
+        viewModelScope.launch {
+            friendGroupRepository.insertFriendGroup(friendGroup.toDataEntity())
+        }
+    }
 }

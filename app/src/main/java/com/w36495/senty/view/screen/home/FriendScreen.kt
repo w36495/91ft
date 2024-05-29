@@ -64,9 +64,6 @@ fun FriendScreen(
             modifier = Modifier.padding(innerPadding),
             friends = friendList,
             onClickFriend = { onClickFriend(it.id) },
-            onClickGroupSetting = {
-
-            },
             onClickAddFriend = {
                 onClickAddFriend()
             }
@@ -79,7 +76,6 @@ private fun FriendContents(
     modifier: Modifier = Modifier,
     friends: List<Friend>,
     onClickFriend: (Friend) -> Unit,
-    onClickGroupSetting: () -> Unit,
     onClickAddFriend: () -> Unit
 ) {
     Column(

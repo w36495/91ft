@@ -9,10 +9,16 @@ import kotlinx.serialization.json.Json
 
 @Serializable
 data class FriendGroup(
-    val id: String,
     val name: String,
     val color: String = DEFAULT_COLOR
 ) {
+    var id = ""
+        private set
+
+    fun setId(id: String) {
+        this.id = id
+    }
+
     fun toDataEntity() = FriendGroupEntity(
         name = name,
         color = color,
@@ -27,7 +33,7 @@ data class FriendGroup(
 
     companion object {
         private const val DEFAULT_COLOR = "D9D9D9"
-        val emptyFriendGroup = FriendGroup(id = "", name = "")
+        val emptyFriendGroup = FriendGroup(name = "")
 
         fun encodeToJson(group: FriendGroup): String = Json.encodeToString(group)
         fun decodeToObject(jsonGroup: String): FriendGroup = Json.decodeFromString(jsonGroup)
