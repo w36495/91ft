@@ -11,6 +11,7 @@ import com.w36495.senty.view.entity.FriendDetail
 import com.w36495.senty.view.screen.friend.FriendAddScreen
 import com.w36495.senty.view.screen.friend.FriendDeleteDialogScreen
 import com.w36495.senty.view.screen.friend.FriendDetailScreen
+import com.w36495.senty.view.screen.friend.FriendGroupScreen
 import com.w36495.senty.view.screen.home.FriendScreen
 
 fun NavGraphBuilder.nestedFriendGraph(navController: NavController) {
@@ -39,7 +40,8 @@ fun NavGraphBuilder.nestedFriendGraph(navController: NavController) {
                     navController.navigate(FriendNavigationItem.FRIEND_LIST.name) {
                         launchSingleTop = true
                     }
-                }
+                },
+                onClickGroupEdit = { navController.navigate(FriendNavigationItem.FRIEND_GROUP_SETTINGS.name) }
             )
         }
         composable(
@@ -101,5 +103,5 @@ fun NavGraphBuilder.nestedFriendGraph(navController: NavController) {
 }
 
 enum class FriendNavigationItem {
-    FRIEND_LIST, FRIEND_DETAIL, FRIEND_ADD, FRIEND_GROUP_SEETING, FRIEND_DELETE_DIALOG,
+    FRIEND_LIST, FRIEND_DETAIL, FRIEND_ADD, FRIEND_GROUP_SETTINGS, FRIEND_DELETE_DIALOG,
 }

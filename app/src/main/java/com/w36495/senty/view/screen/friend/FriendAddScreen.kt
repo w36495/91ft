@@ -43,6 +43,7 @@ fun FriendAddScreen(
     vm: FriendAddViewModel = hiltViewModel(),
     onBackPressed: () -> Unit,
     onMoveFriendList: () -> Unit,
+    onClickGroupEdit: () -> Unit,
 ) {
     var group by remember { mutableStateOf(FriendGroup.emptyFriendGroup) }
     var showDialog by remember { mutableStateOf(false) }
@@ -54,9 +55,7 @@ fun FriendAddScreen(
                 group = it
                 showDialog = false
             },
-            onEditClick = {
-                // TODO : 그룹 편집 화면으로 이동
-            }
+            onEditClick = { onClickGroupEdit() }
         )
     }
 
