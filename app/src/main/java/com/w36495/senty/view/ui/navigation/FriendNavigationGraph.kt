@@ -24,7 +24,7 @@ fun NavGraphBuilder.nestedFriendGraph(navController: NavController) {
                     navController.navigate(FriendNavigationItem.FRIEND_ADD.name)
                 },
                 onClickGroupSetting = {
-                    navController.navigate(FriendNavigationItem.FRIEND_GROUP_SEETING.name)
+                    navController.navigate(FriendNavigationItem.FRIEND_GROUP_SETTINGS.name)
                 },
                 onClickFriend = { friendId ->
                     navController.navigate("${FriendNavigationItem.FRIEND_DETAIL.name}/$friendId")
@@ -88,6 +88,12 @@ fun NavGraphBuilder.nestedFriendGraph(navController: NavController) {
                 onDismiss = {
                     navController.navigateUp()
                 }
+            )
+        }
+
+        composable(FriendNavigationItem.FRIEND_GROUP_SETTINGS.name) {
+            FriendGroupScreen(
+                onBackPressed = { navController.navigateUp() },
             )
         }
 

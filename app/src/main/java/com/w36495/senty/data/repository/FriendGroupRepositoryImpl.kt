@@ -24,14 +24,16 @@ class FriendGroupRepositoryImpl @Inject constructor(
         val friendGroups = mutableListOf<FriendGroupEntity>()
 
         if (result.isSuccessful) {
-            result.body()?.let {
-                val jsonObject = JSONObject(it.string())
+            if (result.headers()["Content-length"]?.toInt() != 4) {
+                result.body()?.let {
+                    val jsonObject = JSONObject(it.string())
 
-                jsonObject.keys().forEach { key ->
-                    val group = jsonObject[key] as JSONObject
-                    val entity: FriendGroupEntity = Json.decodeFromString(group.toString())
-                    entity.setId(key)
-                    friendGroups.add(entity)
+                    jsonObject.keys().forEach { key ->
+                        val group = jsonObject[key] as JSONObject
+                        val entity: FriendGroupEntity = Json.decodeFromString(group.toString())
+                        entity.setId(key)
+                        friendGroups.add(entity)
+                    }
                 }
             }
         } else throw IllegalArgumentException(result.errorBody().toString())
