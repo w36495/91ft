@@ -5,19 +5,15 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FractionalThreshold
-import androidx.compose.material3.ListItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -31,15 +27,17 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -65,7 +63,6 @@ fun FriendGroupScreen(
 
     FriendGroupContents(
         groups = groups,
-        onClickEdit = {},
         onClickDelete = { vm.removeFriendGroup(it) },
         onBackPressed = { onBackPressed() }
     )
@@ -76,53 +73,49 @@ fun FriendGroupScreen(
 private fun FriendGroupContents(
     groups: List<FriendGroup>,
     onBackPressed: () -> Unit,
-    onClickEdit: (FriendGroup) -> Unit,
     onClickDelete: (String) -> Unit,
 ) {
     var showAddDialog by rememberSaveable { mutableStateOf(false) }
+    var selectGroup by remember { mutableStateOf(FriendGroup.emptyFriendGroup) }
 
     if (showAddDialog) {
-        FriendGroupAddDialogScreen(
+        FriendGroupAddDialog(
+            group = if (selectGroup != FriendGroup.emptyFriendGroup) selectGroup else null,
             onDismiss = { showAddDialog = false }
         )
     }
 
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(title = { Text(text = "친구그룹") },
-                navigationIcon = {
-                    IconButton(onClick = { onBackPressed() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null
-                        )
-                    }
-                }, actions = {
-                    IconButton(onClick = { showAddDialog = true }) {
-                        Icon(imageVector = Icons.Filled.Add, contentDescription = null)
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.White,
-                )
+    Column(modifier = Modifier.fillMaxSize()) {
+        CenterAlignedTopAppBar(title = { Text(text = "친구그룹") },
+            navigationIcon = {
+                IconButton(onClick = { onBackPressed() }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = null
+                    )
+                }
+            }, actions = {
+                IconButton(onClick = { showAddDialog = true }) {
+                    Icon(imageVector = Icons.Filled.Add, contentDescription = null)
+                }
+            },
+            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                containerColor = Color.White,
             )
-        },
-        containerColor = Color.White
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(it)
-        ) {
-            groups.forEachIndexed { index, group ->
-                FriendGroupItem(
-                    group = group,
-                    onClickEdit = {},
-                    onClickDelete = { onClickDelete(it) },
-                )
+        )
 
-                if (index != groups.lastIndex) HorizontalDivider()
-            }
+        groups.forEachIndexed { index, group ->
+            FriendGroupItem(
+                modifier = Modifier.fillMaxWidth(),
+                group = group,
+                onClickEdit = {
+                    selectGroup = it
+                    showAddDialog = true
+                },
+                onClickDelete = { onClickDelete(it) },
+            )
+
+            if (index != groups.lastIndex) HorizontalDivider()
         }
     }
 }
@@ -164,7 +157,6 @@ private fun FriendGroupItem(
         modifier = modifier
             .fillMaxWidth()
             .background(Color.White)
-            .height(IntrinsicSize.Min)
             .swipeable(
                 state = swipeState,
                 anchors = anchors,
@@ -174,26 +166,21 @@ private fun FriendGroupItem(
             ),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
-                .align(Alignment.CenterEnd),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .background(Color(0xFFF5A61D))
-                    .fillMaxHeight()
-                    .padding(horizontal = 4.dp)
+            Surface(
+                onClick = { onClickEdit(group) },
+                color = Color(0xFFF5A61D)
             ) {
                 IconButton(
                     onClick = { onClickEdit(group) },
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = Color(0xFFF5A61D),
                         contentColor = Color.White
-                    )
+                    ),
+                    modifier = Modifier.padding(4.dp)
                 ) {
                     androidx.compose.material.Icon(
                         imageVector = Icons.Default.Edit,
@@ -203,20 +190,18 @@ private fun FriendGroupItem(
                 }
             }
 
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .background(Color.Red)
-                    .fillMaxHeight()
-                    .padding(horizontal = 4.dp)
+            Surface(
+                onClick = { showDeleteDialog = true },
+                color = Color.Red,
             ) {
                 IconButton(
                     onClick = { showDeleteDialog = true },
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = Color.Red,
-                    )
+                    ),
+                    modifier = Modifier.padding(4.dp)
                 ) {
-                    androidx.compose.material.Icon(
+                    Icon(
                         imageVector = Icons.Default.DeleteForever,
                         contentDescription = null,
                         tint = Color.White
@@ -226,11 +211,7 @@ private fun FriendGroupItem(
         }
 
         ListItem(
-            modifier = Modifier
-                .fillMaxHeight()
-                .offset {
-                    IntOffset(swipeState.offset.value.toInt(), 0)
-                },
+            modifier = Modifier.offset { IntOffset(swipeState.offset.value.toInt(), 0) },
             headlineContent = { Text(text = group.name) },
             colors = ListItemDefaults.colors(
                 containerColor = Color.White,
@@ -254,9 +235,9 @@ private fun FriendGroupPreview() {
             groups = listOf(
                 FriendGroup(name = "친구"),
                 FriendGroup(name = "가족"),
+                FriendGroup(name = "테스트"),
                 FriendGroup(name = "기타"),
             ),
-            onClickEdit = {},
             onClickDelete = {},
             onBackPressed = {}
         )
