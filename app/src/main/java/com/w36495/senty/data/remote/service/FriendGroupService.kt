@@ -5,6 +5,7 @@ import com.w36495.senty.data.domain.FriendGroupEntity
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
@@ -29,4 +30,10 @@ interface FriendGroupService {
         @Path("friendGroupId") friendGroupId: String,
         @Body friendGroupKey: EntityKeyDTO
     ): Response<ResponseBody>
+
+    @DELETE("friendGroups/{userId}/{friendGroupId}.json")
+    suspend fun deleteFriendGroup(
+        @Path("userId") userId: String,
+        @Path("friendGroupId") friendGroupId: String,
+    ): Response<String>
 }

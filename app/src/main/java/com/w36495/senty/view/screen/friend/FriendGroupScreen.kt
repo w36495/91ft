@@ -32,6 +32,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -48,9 +49,11 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.w36495.senty.view.entity.FriendGroup
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
+import com.w36495.senty.view.ui.component.dialogs.BasicAlertDialog
 import com.w36495.senty.viewModel.FriendGroupViewModel
 
 @Composable
@@ -63,7 +66,7 @@ fun FriendGroupScreen(
     FriendGroupContents(
         groups = groups,
         onClickEdit = {},
-        onClickDelete = {},
+        onClickDelete = { vm.removeFriendGroup(it) },
         onBackPressed = { onBackPressed() }
     )
 }
@@ -101,7 +104,8 @@ private fun FriendGroupContents(
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = Color.White,
-                ))
+                )
+            )
         },
         containerColor = Color.White
     ) {
@@ -114,7 +118,7 @@ private fun FriendGroupContents(
                 FriendGroupItem(
                     group = group,
                     onClickEdit = {},
-                    onClickDelete = {},
+                    onClickDelete = { onClickDelete(it) },
                 )
 
                 if (index != groups.lastIndex) HorizontalDivider()
@@ -131,11 +135,30 @@ private fun FriendGroupItem(
     onClickEdit: (FriendGroup) -> Unit,
     onClickDelete: (String) -> Unit,
 ) {
+    var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
     val swipeState = rememberSwipeableState(initialValue = 0)
 
     val squareSize = 112.dp
     val sizePx = with(LocalDensity.current) { squareSize.toPx() }
     val anchors = mapOf(0f to 0, -sizePx to 1)
+
+    if (showDeleteDialog) {
+        BasicAlertDialog(
+            title = "그룹을 삭제하시겠습니까?",
+            discContent = {
+                Text(
+                    text = "해당 그룹으로 설정되어있는 친구들도 모두 함께 삭제됩니다. 삭제된 그룹은 복구가 불가능합니다.",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontSize = 16.sp
+                )
+            },
+            onComplete = {
+                onClickDelete(group.id)
+                showDeleteDialog = false
+            },
+            onDismiss = { showDeleteDialog = false }
+        )
+    }
 
     Box(
         modifier = modifier
@@ -188,7 +211,7 @@ private fun FriendGroupItem(
                     .padding(horizontal = 4.dp)
             ) {
                 IconButton(
-                    onClick = { onClickDelete(group.id) },
+                    onClick = { showDeleteDialog = true },
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = Color.Red,
                     )
@@ -206,8 +229,8 @@ private fun FriendGroupItem(
             modifier = Modifier
                 .fillMaxHeight()
                 .offset {
-                IntOffset(swipeState.offset.value.toInt(), 0)
-            },
+                    IntOffset(swipeState.offset.value.toInt(), 0)
+                },
             headlineContent = { Text(text = group.name) },
             colors = ListItemDefaults.colors(
                 containerColor = Color.White,

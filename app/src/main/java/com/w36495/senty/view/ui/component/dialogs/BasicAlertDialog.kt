@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -17,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
@@ -47,8 +49,10 @@ fun BasicAlertDialog(
                 )
 
                 if (discContent != null) {
-                    Box(modifier = Modifier.fillMaxWidth()) {
-
+                    Box(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)) {
+                        discContent()
                     }
                 }
 
@@ -87,7 +91,14 @@ private fun BasicAlertDialogPreview(
 
 ) {
     SentyTheme {
-        BasicAlertDialog(title = "로그아웃 하시겠습니까?", onComplete = { /*TODO*/ }) {
+        BasicAlertDialog(title = "로그아웃 하시겠습니까?",
+            discContent = {
+                Text(
+                    text = "해당 그룹으로 설정되어있는 친구들도 모두 함께 삭제됩니다. 삭제된 그룹은 복구가 불가능합니다.",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontSize = 16.sp
+                )
+            }, onComplete = { /*TODO*/ }) {
 
         }
     }

@@ -40,4 +40,10 @@ class FriendGroupViewModel @Inject constructor(
             friendGroupRepository.insertFriendGroup(friendGroup.toDataEntity())
         }
     }
+
+    fun removeFriendGroup(friendGroupId: String) {
+        viewModelScope.launch {
+            friendGroupRepository.deleteFriendGroup(friendGroupId)
+        }
+    }
 }

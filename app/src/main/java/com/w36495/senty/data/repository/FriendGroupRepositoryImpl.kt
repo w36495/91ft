@@ -64,4 +64,14 @@ class FriendGroupRepositoryImpl @Inject constructor(
 
         return friendGroupService.patchFriendGroupKey(userId, friendGroupKey, newKey)
     }
+
+    override suspend fun deleteFriendGroup(friendGroupKey: String): Boolean {
+        val result = friendGroupService.deleteFriendGroup(userId, friendGroupKey)
+
+        if (result.isSuccessful) {
+            if (result.headers()["Content-length"]?.toInt() == 4) return true
+        }
+
+        return false
+    }
 }
