@@ -26,6 +26,8 @@ fun NavGraphBuilder.nestedGiftGraph(navController: NavController) {
                 },
                 onComplete = {
                     navController.navigate(BottomNavigationItem.HOME.name) {
+                        launchSingleTop = true
+
                         popUpTo(BottomNavigationItem.HOME.name) {
                             inclusive = true
                         }
