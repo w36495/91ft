@@ -34,6 +34,9 @@ fun NavigationGraph(navController: NavHostController) {
             HomeScreen(
                 onClickGiftButton = {
                     navController.navigate(GiftNavigationItem.GIFT_LIST.name)
+                },
+                onClickGiftDetail = { giftId ->
+                    navController.navigate(GiftNavigationItem.GIFT_DETAIL.name.plus("/$giftId"))
                 }
             )
         }
