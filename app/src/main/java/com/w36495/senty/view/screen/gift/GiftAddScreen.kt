@@ -188,7 +188,7 @@ private fun ImgSection(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(1f),
-                contentScale = ContentScale.Fit
+                contentScale = ContentScale.Crop
             )
         } else {
             Column(
