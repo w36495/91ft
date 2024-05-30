@@ -6,6 +6,7 @@ import okhttp3.ResponseBody
 import retrofit2.Response
 
 interface GiftRepository {
+    fun getGift(giftId: String): Flow<GiftEntity>
     fun getGifts(): Flow<List<GiftEntity>>
     suspend fun insertGift(gift: GiftEntity): Response<ResponseBody>
     suspend fun patchGiftKey(giftKey: String): Response<ResponseBody>

@@ -20,6 +20,18 @@ class GiftRepositoryImpl @Inject constructor(
     private val giftService: GiftService
 ) : GiftRepository {
     private var userId = firebaseAuth.currentUser!!.uid
+    override fun getGift(giftId: String): Flow<GiftEntity> = flow {
+        val result = giftService.getGift(userId, giftId)
+
+        if (result.isSuccessful) {
+            result.body()?.let {
+                val responseJson = Json.parseToJsonElement(it.string())
+                val gift = Json.decodeFromJsonElement<GiftEntity>(responseJson.jsonObject)
+
+                emit(gift)
+            }
+        } else throw IllegalArgumentException(result.errorBody().toString())
+    }
 
     override fun getGifts(): Flow<List<GiftEntity>> = flow {
         val result = giftService.getGifts(userId)

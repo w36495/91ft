@@ -12,6 +12,12 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface GiftService {
+    @GET("gifts/{userId}/{giftId}.json")
+    suspend fun getGift(
+        @Path("userId") userId: String,
+        @Path("giftId") giftId: String
+    ): Response<ResponseBody>
+
     @GET("gifts/{userId}.json")
     suspend fun getGifts(
         @Path("userId") userId: String

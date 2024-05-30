@@ -44,6 +44,7 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.w36495.senty.view.entity.FriendDetail
 import com.w36495.senty.view.entity.Schedule
+import com.w36495.senty.view.entity.gift.GiftCategory
 import com.w36495.senty.view.entity.gift.GiftDetailEntity
 import com.w36495.senty.view.entity.gift.GiftEntity
 import com.w36495.senty.view.entity.gift.GiftType
@@ -57,6 +58,7 @@ import com.w36495.senty.viewModel.HomeViewModel
 fun HomeScreen(
     vm: HomeViewModel = hiltViewModel(),
     onClickGiftButton: () -> Unit,
+    onClickGiftDetail: (String) -> Unit,
 ) {
     val sentGifts by vm.sentGifts.collectAsState()
     val receivedGifts by vm.receivedGifts.collectAsState()
@@ -66,7 +68,8 @@ fun HomeScreen(
         sentGifts = sentGifts,
         receivedGifts = receivedGifts,
         schedules = schedules,
-        onClickGiftButton = { onClickGiftButton() }
+        onClickGiftButton = { onClickGiftButton() },
+        onClickGiftDetail = { onClickGiftDetail(it) },
     )
 }
 
@@ -76,6 +79,7 @@ private fun HomeContents(
     receivedGifts: List<GiftEntity>,
     schedules: List<Schedule>,
     onClickGiftButton: () -> Unit,
+    onClickGiftDetail: (String) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -145,7 +149,8 @@ private fun HomeContents(
                     if (receivedGifts.isEmpty()) EmptyGifts("받은 선물을 등록해보세요.")
                     else GiftCardSection(
                         gifts = receivedGifts,
-                        onClickAllGifts = { onClickGiftButton() }
+                        onClickAllGifts = { onClickGiftButton() },
+                        onClickGiftDetail = { onClickGiftDetail(it) },
                     )
 
                     Spacer(modifier = Modifier.height(48.dp))
@@ -162,7 +167,8 @@ private fun HomeContents(
                     if (sentGifts.isEmpty()) EmptyGifts("준 선물을 등록해보세요.")
                     else GiftCardSection(
                         gifts = sentGifts,
-                        onClickAllGifts = { onClickGiftButton() }
+                        onClickAllGifts = { onClickGiftButton() },
+                        onClickGiftDetail = { onClickGiftDetail(it) },
                     )
                 }
             }
@@ -230,15 +236,20 @@ private fun GiftCardSection(
     modifier: Modifier = Modifier,
     gifts: List<GiftEntity>,
     onClickAllGifts: () -> Unit,
+    onClickGiftDetail: (String) -> Unit,
 ) {
     LazyRow(
         modifier = modifier.fillMaxWidth(),
         contentPadding = PaddingValues(horizontal = 16.dp)
     ) {
         itemsIndexed(gifts) { index, gift ->
-            GiftCardItem(giftImg = gift.giftImg, gift = gift.gift, friend = gift.friend)
             if (index < 8) {
-                GiftCardItem(giftImg = gift.giftImg, gift = gift.gift, friend = gift.friend)
+                GiftCardItem(
+                    giftImg = gift.giftImg,
+                    gift = gift.gift,
+                    friend = gift.friend,
+                    onClickGiftDetail = { onClickGiftDetail(it) }
+                )
             }
 
             if (index == 8) {
@@ -284,12 +295,13 @@ private fun GiftCardItem(
     giftImg: String,
     gift: GiftDetailEntity,
     friend: FriendDetail,
+    onClickGiftDetail: (String) -> Unit,
 ) {
     Card(
         modifier = modifier.width(156.dp),
         shape = RoundedCornerShape(10.dp),
         elevation = 4.dp,
-        onClick = { /*TODO*/ }) {
+        onClick = { onClickGiftDetail(gift.id) }) {
         Column(modifier = Modifier.fillMaxWidth()) {
             if (giftImg.isEmpty()) {
                 Box(
