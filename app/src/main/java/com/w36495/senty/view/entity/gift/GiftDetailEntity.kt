@@ -26,4 +26,15 @@ data class GiftDetailEntity(
         imgUri = imgUri,
         giftType = giftType
     )
+
+    companion object {
+        val emptyGiftDetail = GiftDetailEntity(
+            friendId = "",
+            categoryId = "",
+            date = "",
+            mood = "",
+            memo = "",
+            imgUri = "",
+        )
+    }
 }

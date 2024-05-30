@@ -2,10 +2,13 @@ package com.w36495.senty.view.ui.navigation
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
+import androidx.navigation.navArgument
 import com.w36495.senty.view.screen.gift.GiftAddScreen
 import com.w36495.senty.view.screen.gift.GiftCategoryScreen
+import com.w36495.senty.view.screen.gift.GiftDetailScreen
 import com.w36495.senty.view.screen.gift.GiftScreen
 
 fun NavGraphBuilder.nestedGiftGraph(navController: NavController) {
@@ -41,9 +44,24 @@ fun NavGraphBuilder.nestedGiftGraph(navController: NavController) {
                 onPressedBack = { navController.navigateUp() }
             )
         }
+
+        composable(
+            route = GiftNavigationItem.GIFT_DETAIL.name.plus("/{giftId}"),
+            arguments = listOf(navArgument("giftId") {
+                nullable = true
+                type = NavType.StringType
+            })
+        ) {backStackEntry ->
+            val giftId = requireNotNull(backStackEntry.arguments).getString("giftId")!!
+
+            GiftDetailScreen(
+                giftId = giftId,
+                onBackPressed = { navController.navigateUp() },
+            )
+        }
     }
 }
 
 enum class GiftNavigationItem {
-    GIFT, GIFT_LIST, GIFT_ADD, GIFT_CATEGORY,
+    GIFT, GIFT_LIST, GIFT_ADD, GIFT_CATEGORY, GIFT_DETAIL,
 }
