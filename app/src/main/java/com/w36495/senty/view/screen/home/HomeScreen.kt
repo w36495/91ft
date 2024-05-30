@@ -2,6 +2,8 @@ package com.w36495.senty.view.screen.home
 
 import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,11 +23,17 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowCircleRight
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -38,6 +46,8 @@ import com.w36495.senty.view.entity.FriendDetail
 import com.w36495.senty.view.entity.Schedule
 import com.w36495.senty.view.entity.gift.GiftDetailEntity
 import com.w36495.senty.view.entity.gift.GiftEntity
+import com.w36495.senty.view.entity.gift.GiftType
+import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
 import com.w36495.senty.view.ui.component.cards.ScheduleWithDateList
 import com.w36495.senty.view.ui.theme.Green40
@@ -133,7 +143,10 @@ private fun HomeContents(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     if (receivedGifts.isEmpty()) EmptyGifts("받은 선물을 등록해보세요.")
-                    else GiftCardSection(gifts = receivedGifts)
+                    else GiftCardSection(
+                        gifts = receivedGifts,
+                        onClickAllGifts = { onClickGiftButton() }
+                    )
 
                     Spacer(modifier = Modifier.height(48.dp))
 
@@ -147,7 +160,10 @@ private fun HomeContents(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     if (sentGifts.isEmpty()) EmptyGifts("준 선물을 등록해보세요.")
-                    else GiftCardSection(gifts = sentGifts)
+                    else GiftCardSection(
+                        gifts = sentGifts,
+                        onClickAllGifts = { onClickGiftButton() }
+                    )
                 }
             }
         }
@@ -212,7 +228,8 @@ private fun EmptyGifts(
 @Composable
 private fun GiftCardSection(
     modifier: Modifier = Modifier,
-    gifts: List<GiftEntity>
+    gifts: List<GiftEntity>,
+    onClickAllGifts: () -> Unit,
 ) {
     LazyRow(
         modifier = modifier.fillMaxWidth(),
@@ -220,8 +237,42 @@ private fun GiftCardSection(
     ) {
         itemsIndexed(gifts) { index, gift ->
             GiftCardItem(giftImg = gift.giftImg, gift = gift.gift, friend = gift.friend)
+            if (index < 8) {
+                GiftCardItem(giftImg = gift.giftImg, gift = gift.gift, friend = gift.friend)
+            }
 
-            if (index != gifts.lastIndex) Spacer(modifier = Modifier.width(8.dp))
+            if (index == 8) {
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .clickable { onClickAllGifts() },
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    IconButton(
+                        onClick = {  },
+                        enabled = false,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            disabledContentColor = Color.Black
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.ArrowCircleRight,
+                            contentDescription = null
+                        )
+                    }
+                    Text(
+                        text = "선물\n전체보기",
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
+            } else if (index != gifts.lastIndex) {
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+
         }
     }
 }
@@ -230,7 +281,7 @@ private fun GiftCardSection(
 @Composable
 private fun GiftCardItem(
     modifier: Modifier = Modifier,
-    giftImg: List<String>,
+    giftImg: String,
     gift: GiftDetailEntity,
     friend: FriendDetail,
 ) {
@@ -245,16 +296,15 @@ private fun GiftCardItem(
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(1f)
-                        .background(Color.Gray)
+                        .background(Color(0xFFD9D9D9))
                 )
-
             } else {
                 GlideImage(
-                    model = Uri.parse(giftImg[0]),
+                    model = Uri.parse(giftImg),
                     contentDescription = null,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .aspectRatio(1f)
+                        .aspectRatio(1f),
                 )
             }
 

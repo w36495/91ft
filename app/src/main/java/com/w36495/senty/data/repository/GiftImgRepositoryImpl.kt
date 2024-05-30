@@ -11,9 +11,30 @@ class GiftImgRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
 ) : GiftImgRepository {
     private var userId: String = firebaseAuth.currentUser!!.uid
+    override suspend fun getGiftImages(giftId: String, imgPath: String): String {
+        return suspendCancellableCoroutine { continuation ->
+            val imgPath = "images/gifts/$userId/$giftId/$imgPath"
 
-    override fun insertGiftImgByBitmap(giftId: String, giftImg: ByteArray, onSuccess: (String)-> Unit) {
-        val imgName = generateImageName()
+            firebaseStorage.reference.child(imgPath).downloadUrl
+                .addOnSuccessListener {
+                    continuation.resume(it.toString())
+                }
+                .addOnFailureListener {
+                    continuation.resumeWithException(it)
+                }
+
+            continuation.invokeOnCancellation {
+                Log.d("GiftImgRepositoryImpl", "Exception: (${it?.message.toString()})")
+            }
+        }
+    }
+
+    override suspend fun insertGiftImgByBitmap(
+        giftId: String,
+        giftImg: String
+    ): String {
+        var imgName = generateImageName()
+        val decodeImg = ImgConverter.stringToByteArray(giftImg)
 
         val giftPath = "images/gifts/$userId/$giftId/$imgName.jpg"
         firebaseStorage.reference.child(giftPath).putBytes(giftImg)

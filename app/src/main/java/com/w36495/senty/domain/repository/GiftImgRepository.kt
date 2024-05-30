@@ -1,8 +1,6 @@
 package com.w36495.senty.domain.repository
 
-import android.net.Uri
-
 interface GiftImgRepository {
-    fun insertGiftImgByBitmap(giftId: String, giftImg: ByteArray, onSuccess: (String) -> Unit)
-    fun insertGiftImgByUri(giftId: String, giftImg: Uri, onSuccess: (String) -> Unit)
+    suspend fun getGiftImages(giftId: String, imgPath: String): String
+    suspend fun insertGiftImgByBitmap(giftId: String, giftImg: String): String
 }
