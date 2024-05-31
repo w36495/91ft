@@ -6,6 +6,7 @@ import com.w36495.senty.data.domain.GiftImgUriDTO
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
@@ -49,4 +50,10 @@ interface GiftService {
         @Path("giftKey") giftKey: String,
         @Body body: GiftImgUriDTO
     ): Response<ResponseBody>
+
+    @DELETE("gifts/{userId}/{giftKey}.json")
+    suspend fun deleteGift(
+        @Path("userId") userId: String,
+        @Path("giftKey") giftKey: String
+    ): Response<String>
 }

@@ -71,4 +71,14 @@ class GiftRepositoryImpl @Inject constructor(
 
         return giftService.patchGiftImgUri(userId, giftKey, uri)
     }
+
+    override suspend fun deleteGift(giftKey: String): Boolean {
+        val result = giftService.deleteGift(userId, giftKey)
+
+        if (result.isSuccessful) {
+            if (result.headers()["Content-length"]?.toInt() == 4) return true
+        }
+
+        return false
+    }
 }

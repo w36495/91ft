@@ -12,4 +12,5 @@ interface GiftRepository {
     suspend fun patchGiftKey(giftKey: String): Response<ResponseBody>
     suspend fun patchGift(gift: GiftEntity): Response<ResponseBody>
     suspend fun patchGiftImgUri(giftKey: String, giftUri: String): Response<ResponseBody>
+    suspend fun deleteGift(giftKey: String): Boolean
 }

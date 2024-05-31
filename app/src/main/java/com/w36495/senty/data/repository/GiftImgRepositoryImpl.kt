@@ -1,10 +1,14 @@
 package com.w36495.senty.data.repository
 
-import android.net.Uri
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
 import com.w36495.senty.domain.repository.GiftImgRepository
+import com.w36495.senty.util.ImgConverter
+import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 class GiftImgRepositoryImpl @Inject constructor(
     private val firebaseStorage: FirebaseStorage,
@@ -37,26 +41,29 @@ class GiftImgRepositoryImpl @Inject constructor(
         val decodeImg = ImgConverter.stringToByteArray(giftImg)
 
         val giftPath = "images/gifts/$userId/$giftId/$imgName.jpg"
-        firebaseStorage.reference.child(giftPath).putBytes(giftImg)
-            .addOnSuccessListener {
-                onSuccess(it.storage.name)
-            }
+        firebaseStorage.reference.child(giftPath).putBytes(decodeImg)
             .addOnFailureListener {
                 throw IllegalArgumentException("Gift image upload Failed using Bitmap")
             }
+            .addOnSuccessListener {
+                imgName = it.storage.name
+            }
+
+        return imgName
     }
 
-    override fun insertGiftImgByUri(giftId: String, giftImg: Uri, onSuccess: (String) -> Unit) {
-        val imgName = generateImageName()
+    override suspend fun deleteGiftImg(imgPath: String): Boolean {
+        var result = false
 
-        val giftPath = "images/gifts/$userId/$giftId/$imgName.jpg"
-        firebaseStorage.reference.child(giftPath).putFile(giftImg)
+        firebaseStorage.reference.child(imgPath).delete()
             .addOnSuccessListener {
-                onSuccess(it.storage.name)
+                result = true
             }
             .addOnFailureListener {
-                throw IllegalArgumentException("Gift image upload Failed using Uri")
+                throw IllegalArgumentException("Gift image delete Failed")
             }
+
+        return result
     }
 
     private fun generateImageName() = System.currentTimeMillis().toString()
