@@ -33,19 +33,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 import com.cheonjaeung.compose.grid.SimpleGridCells
 import com.cheonjaeung.compose.grid.VerticalGrid
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
-import com.w36495.senty.view.entity.FriendDetail
-import com.w36495.senty.view.entity.gift.GiftDetailEntity
-import com.w36495.senty.view.entity.gift.GiftType
-import com.w36495.senty.view.screen.ui.theme.SentyTheme
+import com.w36495.senty.view.entity.gift.Gift
 import com.w36495.senty.view.ui.theme.Green40
 import com.w36495.senty.viewModel.GiftViewModel
 import kotlinx.coroutines.launch
@@ -89,7 +88,7 @@ fun GiftScreen(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPagerApi::class)
 @Composable
 private fun GiftContents(
-    gifts: List<GiftDetailEntity>,
+    gifts: List<Gift>,
     tabState: List<String>,
     pagerState: PagerState,
     onBackPressed: () -> Unit,
@@ -173,7 +172,7 @@ private fun GiftTopTabLow(
 private fun GiftHorizontalViewPager(
     modifier: Modifier = Modifier,
     pagerState: PagerState,
-    gifts: List<GiftDetailEntity>,
+    gifts: List<Gift>,
     onClickGift: (String) -> Unit,
 ) {
     HorizontalPager(
@@ -196,8 +195,8 @@ private fun GiftHorizontalViewPager(
 
                 gifts.forEach { gift ->
                     GiftViewPagerItem(
-                        gift = gift,
-                        onClickGift = { onClickGift(it) }
+                        imgPath = gift.imgPath,
+                        onClickGift = { onClickGift(gift.giftDetail.id) }
                     )
                 }
             }
@@ -205,19 +204,29 @@ private fun GiftHorizontalViewPager(
     }
 }
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 private fun GiftViewPagerItem(
     modifier: Modifier = Modifier,
-    gift: GiftDetailEntity,
-    onClickGift: (String) -> Unit,
+    imgPath: String = "",
+    onClickGift: () -> Unit,
 ) {
-    Box(
-        modifier = modifier
-            .aspectRatio(1f)
-            .fillMaxWidth()
-            .background(Color.Gray)
-            .clickable { onClickGift(gift.id) }
-    )
+    if (imgPath.isEmpty()) {
+        Box(
+            modifier = modifier
+                .aspectRatio(1f)
+                .fillMaxWidth()
+                .background(Color(0xFFD9D9D9))
+                .clickable { onClickGift() }
+        )
+    } else {
+        GlideImage(model = imgPath, contentDescription = null,
+            modifier = Modifier.fillMaxWidth()
+                .aspectRatio(1f)
+                .clickable { onClickGift() },
+            contentScale = ContentScale.Crop
+        )
+    }
 }
 
 enum class GiftTabState(val title: String) {
