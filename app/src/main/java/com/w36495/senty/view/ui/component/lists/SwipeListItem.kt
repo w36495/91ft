@@ -24,7 +24,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,8 +37,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.w36495.senty.view.entity.gift.GiftCategory
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
+import com.w36495.senty.view.ui.component.dialogs.BasicAlertDialog
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -43,11 +50,30 @@ fun SwipeListItem(
     onRemove: (String) -> Unit,
     onEdit: (GiftCategory) -> Unit,
 ) {
+    var showDeleteDialog by remember { mutableStateOf(false) }
     val swipeState = rememberSwipeableState(initialValue = 0)
 
     val squareSize = 112.dp
     val sizePx = with(LocalDensity.current) { squareSize.toPx() }
     val anchors = mapOf(0f to 0, -sizePx to 1)
+
+    if (showDeleteDialog) {
+        BasicAlertDialog(
+            title = "카테고리를 삭제하시겠습니까?",
+            onComplete = {
+                onRemove(category.id)
+                showDeleteDialog = false
+            },
+            discContent = {
+                Text(
+                    text = "카테고리에 속해있는 선물들도 모두 함께 삭제됩니다. 삭제된 카테고리/선물은 복구가 불가능합니다.",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontSize = 16.sp
+                )
+            },
+            onDismiss = { showDeleteDialog = false }
+        )
+    }
 
     Box(
         modifier = modifier
@@ -100,7 +126,7 @@ fun SwipeListItem(
                     .padding(horizontal = 4.dp)
             ) {
                 IconButton(
-                    onClick = { onRemove(category.id) },
+                    onClick = { showDeleteDialog = true },
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = Color.Red,
                     )
@@ -133,7 +159,7 @@ fun DefaultPreview() {
         SwipeListItem(
             onRemove = {},
             onEdit = {},
-            category = GiftCategory("취업")
+            category = GiftCategory("취업취업")
         )
     }
 }
