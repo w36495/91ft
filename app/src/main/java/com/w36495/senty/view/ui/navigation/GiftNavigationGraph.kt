@@ -21,7 +21,8 @@ fun NavGraphBuilder.nestedGiftGraph(navController: NavController) {
     ) {
         composable(GiftNavigationItem.GIFT_LIST.name) {
             GiftScreen(
-                onBackPressed = { navController.navigateUp() }
+                onBackPressed = { navController.navigateUp() },
+                onClickGiftCategory = { navController.navigate(GiftNavigationItem.GIFT_CATEGORY.name) },
             )
         }
 

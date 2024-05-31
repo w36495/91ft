@@ -17,6 +17,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Tab
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -54,6 +55,7 @@ import kotlinx.coroutines.launch
 fun GiftScreen(
     vm: GiftViewModel = hiltViewModel(),
     onBackPressed: () -> Unit,
+    onClickGiftCategory: () -> Unit,
 ) {
     val tabState = listOf(
         GiftTabState.ALL.title,
@@ -82,6 +84,7 @@ fun GiftScreen(
         tabState = tabState,
         pagerState = pagerState,
         onBackPressed = { onBackPressed() },
+        onClickGiftCategory = { onClickGiftCategory() }
     )
 }
 
@@ -92,6 +95,7 @@ private fun GiftContents(
     tabState: List<String>,
     pagerState: PagerState,
     onBackPressed: () -> Unit,
+    onClickGiftCategory: () -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -107,7 +111,12 @@ private fun GiftContents(
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = Color.White
-                )
+                ),
+                actions = {
+                    IconButton(onClick = { onClickGiftCategory() }) {
+                        Icon(imageVector = Icons.Outlined.Settings, contentDescription = null)
+                    }
+                }
             )
         }
     ) {
