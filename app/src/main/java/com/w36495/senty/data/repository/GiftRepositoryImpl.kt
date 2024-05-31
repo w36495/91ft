@@ -62,6 +62,10 @@ class GiftRepositoryImpl @Inject constructor(
         return giftService.patchGiftKey(userId, giftKey, newKey)
     }
 
+    override suspend fun patchGift(gift: GiftEntity): Response<ResponseBody> {
+        return giftService.patchGift(userId, gift.id, gift)
+    }
+
     override suspend fun patchGiftImgUri(giftKey: String, giftUri: String): Response<ResponseBody> {
         val uri = GiftImgUriDTO(giftUri)
 

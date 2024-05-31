@@ -7,8 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.w36495.senty.domain.repository.GiftImgRepository
 import com.w36495.senty.domain.repository.GiftRepository
-import com.w36495.senty.util.toByteArray
-import com.w36495.senty.view.entity.gift.GiftEntity
+import com.w36495.senty.util.ImgConverter
+import com.w36495.senty.view.entity.gift.GiftDetailEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -19,11 +19,25 @@ import javax.inject.Inject
 @HiltViewModel
 class GiftAddViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
-    private val giftImageRepository: GiftImgRepository
+    private val giftImageRepository: GiftImgRepository,
+    @ApplicationContext private val context: Context,
 ) : ViewModel() {
-    private val giftImgJob = Job()
+    fun updateGift(giftDetail: GiftDetailEntity, giftImg: Any?) {
+        viewModelScope.launch {
+            val result = giftRepository.patchGift(giftDetail.toDataEntity())
 
-    fun saveGift(gift: GiftEntity, giftImg: Any?) {
+            if (result.isSuccessful) {
+                if (giftImg != "") {
+                    result.body()?.let {
+                        val giftImgName = saveGiftImg(giftDetail.id, giftImg)
+                        giftRepository.patchGiftImgUri(giftDetail.id, giftImgName)
+                    }
+                }
+            }
+        }
+    }
+
+    fun saveGift(gift: GiftDetailEntity, giftImg: Any?) {
         viewModelScope.launch {
             val result = giftRepository.insertGift(gift.toDataEntity())
 

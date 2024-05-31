@@ -33,6 +33,10 @@ data class FriendDetail(
         groupId = group!!.id,
     )
 
+    fun copy() = FriendDetail(name = this@FriendDetail.name, birthday = this@FriendDetail.birthday, memo = this@FriendDetail.memo).apply {
+        setId(this@FriendDetail.id)
+    }
+
     companion object {
         val emptyFriendEntity = FriendDetail(name = "", birthday = "", memo = "")
     }

@@ -10,5 +10,6 @@ interface GiftRepository {
     fun getGifts(): Flow<List<GiftEntity>>
     suspend fun insertGift(gift: GiftEntity): Response<ResponseBody>
     suspend fun patchGiftKey(giftKey: String): Response<ResponseBody>
+    suspend fun patchGift(gift: GiftEntity): Response<ResponseBody>
     suspend fun patchGiftImgUri(giftKey: String, giftUri: String): Response<ResponseBody>
 }

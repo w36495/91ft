@@ -37,6 +37,13 @@ interface GiftService {
     ): Response<ResponseBody>
 
     @PATCH("gifts/{userId}/{giftKey}.json")
+    suspend fun patchGift(
+        @Path("userId") userId: String,
+        @Path("giftKey") giftKey: String,
+        @Body body: GiftEntity
+    ): Response<ResponseBody>
+
+    @PATCH("gifts/{userId}/{giftKey}.json")
     suspend fun patchGiftImgUri(
         @Path("userId") userId: String,
         @Path("giftKey") giftKey: String,

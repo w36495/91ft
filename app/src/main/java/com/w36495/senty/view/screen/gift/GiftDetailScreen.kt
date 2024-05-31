@@ -39,6 +39,7 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.w36495.senty.view.entity.FriendDetail
 import com.w36495.senty.view.entity.gift.GiftCategory
+import com.w36495.senty.view.entity.gift.GiftDetail
 import com.w36495.senty.view.entity.gift.GiftDetailEntity
 import com.w36495.senty.view.entity.gift.GiftType
 import com.w36495.senty.view.screen.home.friendEntityMock
@@ -56,6 +57,7 @@ fun GiftDetailScreen(
     vm: GiftDetailViewModel = hiltViewModel(),
     giftId: String,
     onBackPressed: () -> Unit,
+    onClickEdit: (GiftDetail) -> Unit,
 ) {
     LaunchedEffect(Unit) {
         vm.getGiftDetail(giftId)
@@ -64,23 +66,22 @@ fun GiftDetailScreen(
     val gift by vm.giftDetail.collectAsState()
 
     GiftDetailContents(
-        gift = gift.gift,
-        category = gift.category,
-        friend = gift.friend,
+        giftDetail = giftDetail,
         onBackPressed = { onBackPressed() },
-        onClickEdit = {},
-        onClickDelete = {}
+        onClickEdit = { onClickEdit(it) },
+        onClickDelete = {
+            vm.removeGift(giftId, giftDetail.gift.imgUri)
+            onBackPressed()
+        }
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun GiftDetailContents(
-    gift: GiftDetailEntity,
-    category: GiftCategory,
-    friend: FriendDetail,
+    giftDetail: GiftDetail,
     onBackPressed: () -> Unit,
-    onClickEdit: (String) -> Unit,
+    onClickEdit: (GiftDetail) -> Unit,
     onClickDelete: (String) -> Unit,
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -126,7 +127,7 @@ private fun GiftDetailContents(
         ) {
 
             ImgSection(
-                imgUri = gift.imgUri,
+                imgUri = giftDetail.imgPath,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -136,9 +137,9 @@ private fun GiftDetailContents(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
-                category = category,
-                friend = friend,
-                giftDetail = gift,
+                category = giftDetail.category,
+                friend = giftDetail.friend,
+                giftDetail = giftDetail.gift,
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -151,7 +152,7 @@ private fun GiftDetailContents(
                 SentyFilledButton(
                     text = "수정",
                     modifier = Modifier.fillMaxWidth(),
-                    onClick = { onClickEdit(gift.id) }
+                    onClick = { onClickEdit(giftDetail) }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 SentyOutlinedButton(

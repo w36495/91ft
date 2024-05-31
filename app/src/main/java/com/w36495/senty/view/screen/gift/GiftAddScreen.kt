@@ -51,9 +51,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.w36495.senty.util.DateUtil
-import com.w36495.senty.view.entity.Friend
+import com.w36495.senty.view.entity.FriendDetail
 import com.w36495.senty.view.entity.gift.GiftCategory
-import com.w36495.senty.view.entity.gift.GiftEntity
+import com.w36495.senty.view.entity.gift.GiftDetail
+import com.w36495.senty.view.entity.gift.GiftDetailEntity
 import com.w36495.senty.view.entity.gift.GiftType
 import com.w36495.senty.view.screen.friend.FriendDialogScreen
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
@@ -68,6 +69,7 @@ import com.w36495.senty.viewModel.GiftAddViewModel
 @Composable
 fun GiftAddScreen(
     vm: GiftAddViewModel = hiltViewModel(),
+    giftDetail: GiftDetail?,
     onPressedBack: () -> Unit,
     onComplete: () -> Unit,
 ) {
@@ -106,10 +108,12 @@ fun GiftAddScreen(
     }
 
     GiftAddContents(
+        giftDetail = if (giftDetail == GiftDetail.emptyGiftDetail) null else giftDetail,
         giftImg = giftImg,
         onPressedBack = { onPressedBack() },
         onClickSave = {
-            vm.saveGift(it, giftImg)
+            if (giftDetail == null) vm.saveGift(it, giftImg)
+            else vm.updateGift(it, giftImg)
             onComplete()
         },
         onClickUploadImage = { showImageSelectionDialog = true }
@@ -119,16 +123,17 @@ fun GiftAddScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun GiftAddContents(
+    giftDetail: GiftDetail?,
     giftImg: Any? = null,
     onPressedBack: () -> Unit,
-    onClickSave: (GiftEntity) -> Unit,
+    onClickSave: (GiftDetailEntity) -> Unit,
     onClickUploadImage: () -> Unit,
 ) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-                    Text(text = "선물등록")
+                    Text(text = if (giftDetail == null) "선물등록" else "선물수정")
                 },
                 navigationIcon = {
                     IconButton(onClick = { onPressedBack() }) {
@@ -152,11 +157,12 @@ private fun GiftAddContents(
                 .verticalScroll(rememberScrollState())
         ) {
             ImgSection(
-                giftImg = giftImg,
+                giftImg = giftDetail?.imgPath ?: giftImg,
                 modifier = Modifier.fillMaxWidth(),
                 takePhotoLauncher = { onClickUploadImage() }
             )
             InputSection(
+                giftDetail = giftDetail,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
@@ -208,19 +214,20 @@ private fun ImgSection(
 
 @Composable
 private fun InputSection(
+    giftDetail: GiftDetail?,
     modifier: Modifier = Modifier,
-    onClickSave: (GiftEntity) -> Unit,
+    onClickSave: (GiftDetailEntity) -> Unit,
 ) {
     var showGiftCategoryDialog by remember { mutableStateOf(false) }
     var showFriendsDialog by remember { mutableStateOf(false) }
     var showDatePickerDialog by remember { mutableStateOf(false) }
 
-    var type by remember { mutableStateOf(GiftType.RECEIVED) }
-    var category by remember { mutableStateOf(GiftCategory.emptyCategory) }
-    var friend by remember { mutableStateOf(Friend.emptyFriend) }
-    var date by remember { mutableStateOf("") }
-    var mood by remember { mutableStateOf("") }
-    var memo by remember { mutableStateOf("") }
+    var type by remember { mutableStateOf(giftDetail?.gift?.giftType ?: GiftType.RECEIVED) }
+    var category by remember { mutableStateOf(giftDetail?.category ?: GiftCategory.emptyCategory) }
+    var friend by remember { mutableStateOf(giftDetail?.friend ?: FriendDetail.emptyFriendEntity) }
+    var date by remember { mutableStateOf(giftDetail?.gift?.date ?: "") }
+    var mood by remember { mutableStateOf(giftDetail?.gift?.mood ?: "") }
+    var memo by remember { mutableStateOf(giftDetail?.gift?.memo ?: "") }
 
     if (showGiftCategoryDialog) {
         GiftCategoryDialogScreen(
@@ -234,7 +241,7 @@ private fun InputSection(
         FriendDialogScreen(
             onDismiss = { showFriendsDialog = false },
             onClickFriend = {
-                friend = it
+                friend = it.toFriendDetail()
                 showFriendsDialog = false
             }
         )
@@ -242,7 +249,7 @@ private fun InputSection(
         BasicCalendarDialog(
             onDismiss = { showDatePickerDialog = false },
             onSelectedDate = { year, month, day ->
-                String.format("%04d년 %02d월 %02d일", year, month + 1, day).also { date = it }
+                date = "$year-${month+1}-$day"
             }
         )
     }
@@ -266,7 +273,7 @@ private fun InputSection(
             title = "카테고리",
             enable = false,
             text = category.name,
-            placeHolder = "카테고리를 입력해주세요.",
+            placeHolder = giftDetail?.category?.name ?: "카테고리를 입력해주세요.",
             onChangeText = { },
             onClick = { showGiftCategoryDialog = true }
         )
@@ -277,7 +284,7 @@ private fun InputSection(
             modifier = Modifier.fillMaxWidth(),
             title = "친구",
             text = friend.name,
-            placeHolder = "친구를 선택해주세요.",
+            placeHolder = giftDetail?.friend?.name ?: "친구를 선택해주세요.",
             onChangeText = { },
             enable = false,
             onClick = { showFriendsDialog = true }
@@ -288,9 +295,15 @@ private fun InputSection(
         TextSection(
             modifier = Modifier.fillMaxWidth(),
             title = "날짜",
-            text = date,
+            text = String.format(
+                java.util.Locale.KOREA,
+                "%04d년 %02d월 %02d일",
+                date.split("-")[0].toInt(),
+                date.split("-")[1].toInt(),
+                date.split("-")[2].toInt()
+            ),
             enable = false,
-            placeHolder = "선물을 주고받은 날짜를 입력해주세요.",
+            placeHolder = if (giftDetail == null) "날짜를 입력해주세요." else date,
             onChangeText = { date = it },
             onClick = { showDatePickerDialog = true }
         )
@@ -301,7 +314,7 @@ private fun InputSection(
             modifier = Modifier.fillMaxWidth(),
             title = "기분",
             text = mood,
-            placeHolder = "기분을 입력해주세요.",
+            placeHolder = if (giftDetail == null || giftDetail.gift.mood.isEmpty()) "기분을 입력해주세요." else mood,
             onChangeText = { mood = it },
             onClick = {}
         )
@@ -318,19 +331,21 @@ private fun InputSection(
         Spacer(modifier = Modifier.height(32.dp))
 
         SentyFilledButton(
-            text = "등록",
+            text = if (giftDetail == null) "등록" else "수정",
             modifier = Modifier.fillMaxWidth()
         ) {
-            val giftEntity = GiftEntity(
+            val giftDetailEntity = GiftDetailEntity(
                 categoryId = category.id,
                 friendId = friend.id,
-                date = DateUtil.changeDateFormatToDash(date),
+                date = if (giftDetail == null) DateUtil.changeDateFormatToDash(date) else date,
                 mood = mood,
                 memo = memo,
-                giftType = type
+                giftType = type,
             )
 
-            onClickSave(giftEntity)
+            if (giftDetail != null) giftDetailEntity.setId(giftDetail.gift.id)
+
+            onClickSave(giftDetailEntity)
         }
     }
 }

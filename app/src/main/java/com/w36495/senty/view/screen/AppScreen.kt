@@ -48,7 +48,7 @@ fun AppScreen() {
                 FloatingActionButton(
                     shape = CircleShape,
                     onClick = {
-                        navController.navigate(GiftNavigationItem.GIFT_ADD.name) {
+                        navController.navigate(GiftNavigationItem.GIFT_ADD.name.plus("/null")) {
                             launchSingleTop = true
                             restoreState = true
 

@@ -1,5 +1,8 @@
 package com.w36495.senty.view.entity.gift
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class GiftDetailEntity(
     val friendId: String,
     val categoryId: String,
@@ -25,7 +28,7 @@ data class GiftDetailEntity(
         memo = memo,
         imgUri = imgUri,
         giftType = giftType
-    )
+    ).copy(id = this@GiftDetailEntity.id)
 
     companion object {
         val emptyGiftDetail = GiftDetailEntity(

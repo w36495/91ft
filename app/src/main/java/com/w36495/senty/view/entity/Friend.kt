@@ -16,6 +16,10 @@ data class Friend(
         return StringBuilder().append(month).append("월 ").append(day).append("일").toString()
     }
 
+    fun toFriendDetail() = FriendDetail(name = this.name, birthday = this.birthday, memo = this.memo).apply {
+        setId(this@Friend.id)
+    }
+
     companion object {
         val emptyFriend = Friend(id = "", name = "", birthday = "", memo = "", group = FriendGroup.emptyFriendGroup)
     }

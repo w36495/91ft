@@ -32,32 +32,31 @@ class GiftDetailViewModel @Inject constructor(
     fun getGiftDetail(giftId: String) {
         viewModelScope.launch {
             giftRepository.getGift(giftId)
-                .map {
-                    var newGift = it
-                    if (it.imgUri.isNotEmpty()) {
-                        coroutineScope {
-                            val img = async { giftImgRepository.getGiftImages(giftId, it.imgUri) }
-                            newGift = it.copy(imgUri = img.await())
-                        }
-                    }
-
-                    newGift.toDomainEntity()
-                }
+                .map { it.toDomainEntity() }
                 .combine(giftCategoryRepository.getCategories()) { gift, categories ->
                     val category = categories.map { it.toDomainEntity() }.find { it.id == gift.categoryId }!!
 
                     GiftDetail(
                         gift = gift,
-                        category = category,
+                        category = category.copy(),
                         friend = FriendDetail.emptyFriendEntity
                     )
                 }
                 .map { gift ->
-                    var newGiftDetail = gift
+                    var newGiftDetail = gift.copy()
 
                     friendRepository.getFriend(gift.gift.friendId)
                         .map { it.toDomainEntity() }
-                        .collectLatest { newGiftDetail = gift.copy(friend = it) }
+                        .collectLatest {
+                            newGiftDetail = gift.copy(friend = it.copy())
+                        }
+
+                    if (gift.gift.imgUri.isNotEmpty()) {
+                        coroutineScope {
+                            val img = async { giftImgRepository.getGiftImages(gift.gift.id, gift.gift.imgUri) }
+                            newGiftDetail = newGiftDetail.copy(imgPath = img.await())
+                        }
+                    }
 
                     newGiftDetail
                 }.collectLatest {

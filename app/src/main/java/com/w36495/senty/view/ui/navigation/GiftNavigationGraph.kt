@@ -6,14 +6,17 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
+import com.w36495.senty.view.entity.gift.GiftDetail
 import com.w36495.senty.view.screen.gift.GiftAddScreen
 import com.w36495.senty.view.screen.gift.GiftCategoryScreen
 import com.w36495.senty.view.screen.gift.GiftDetailScreen
 import com.w36495.senty.view.screen.gift.GiftScreen
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 fun NavGraphBuilder.nestedGiftGraph(navController: NavController) {
     navigation(
-        startDestination = GiftNavigationItem.GIFT_ADD.name,
+        startDestination = GiftNavigationItem.GIFT_ADD.name.plus("/{null}"),
         route = GiftNavigationItem.GIFT.name
     ) {
         composable(GiftNavigationItem.GIFT_LIST.name) {
@@ -22,8 +25,18 @@ fun NavGraphBuilder.nestedGiftGraph(navController: NavController) {
             )
         }
 
-        composable(GiftNavigationItem.GIFT_ADD.name) {
+        composable(
+            route = GiftNavigationItem.GIFT_ADD.name.plus("/{giftDetail}"),
+            arguments = listOf(navArgument("giftDetail") {
+                nullable = true
+                type = NavType.StringType
+            })
+        ) {backStackEntry ->
+            val resultArgs = backStackEntry.arguments?.getString("giftDetail")
+            val giftDetail: GiftDetail? = resultArgs?.let { Json.decodeFromString<GiftDetail>(it) }
+
             GiftAddScreen(
+                giftDetail = giftDetail,
                 onPressedBack = {
                     navController.navigateUp()
                 },
@@ -57,6 +70,11 @@ fun NavGraphBuilder.nestedGiftGraph(navController: NavController) {
             GiftDetailScreen(
                 giftId = giftId,
                 onBackPressed = { navController.navigateUp() },
+                onClickEdit = { giftDetail ->
+                    val jsonGiftDetail = Json.encodeToString(giftDetail)
+
+                    navController.navigate(GiftNavigationItem.GIFT_ADD.name.plus("/$jsonGiftDetail"))
+                }
             )
         }
     }
