@@ -50,7 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
-import com.w36495.senty.util.DateUtil
+import com.w36495.senty.util.StringUtils
 import com.w36495.senty.view.entity.FriendDetail
 import com.w36495.senty.view.entity.gift.GiftCategory
 import com.w36495.senty.view.entity.gift.GiftDetail
@@ -249,7 +249,7 @@ private fun InputSection(
         BasicCalendarDialog(
             onDismiss = { showDatePickerDialog = false },
             onSelectedDate = { year, month, day ->
-                date = "$year-${month+1}-$day"
+                date = "$year-${StringUtils.format2Digits(month + 1)}-${StringUtils.format2Digits(day)}"
             }
         )
     }
@@ -295,17 +295,21 @@ private fun InputSection(
         TextSection(
             modifier = Modifier.fillMaxWidth(),
             title = "날짜",
-            text = String.format(
-                java.util.Locale.KOREA,
-                "%04d년 %02d월 %02d일",
-                date.split("-")[0].toInt(),
-                date.split("-")[1].toInt(),
-                date.split("-")[2].toInt()
-            ),
-            enable = false,
-            placeHolder = if (giftDetail == null) "날짜를 입력해주세요." else date,
-            onChangeText = { date = it },
-            onClick = { showDatePickerDialog = true }
+            text = if (date == "") {
+                date
+            } else {
+                String.format(
+                    java.util.Locale.KOREA,
+                    "%04d년 %02d월 %02d일",
+                    date.split("-")[0].toInt(),
+                    date.split("-")[1].toInt(),
+                    date.split("-")[2].toInt()
+                )
+            },
+        enable = false,
+        placeHolder = if (giftDetail == null) "날짜를 입력해주세요." else date,
+        onChangeText = { date = it },
+        onClick = { showDatePickerDialog = true }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -337,7 +341,7 @@ private fun InputSection(
             val giftDetailEntity = GiftDetailEntity(
                 categoryId = category.id,
                 friendId = friend.id,
-                date = if (giftDetail == null) DateUtil.changeDateFormatToDash(date) else date,
+                date = date,
                 mood = mood,
                 memo = memo,
                 giftType = type,
