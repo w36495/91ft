@@ -6,6 +6,7 @@ import com.w36495.senty.domain.repository.AnniversaryRepository
 import com.w36495.senty.domain.repository.FriendRepository
 import com.w36495.senty.domain.repository.GiftImgRepository
 import com.w36495.senty.domain.repository.GiftRepository
+import com.w36495.senty.util.DateUtil
 import com.w36495.senty.view.entity.Schedule
 import com.w36495.senty.view.entity.gift.GiftEntity
 import com.w36495.senty.view.entity.gift.GiftType
@@ -45,14 +46,16 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             anniversaryRepository.getSchedules()
                 .map { schedules ->
-                    schedules.filter { !it.isPast }
+                    schedules.filter { DateUtil.calRemainDate(it.date) > 0 }
+                        .map { it.toDomainEntity() }
                 }
-                .map { schedules ->
-                    schedules.map { it.toDomainEntity() }
-                }
-                .collectLatest {
-                    if (it.size > 2) _schedules.value = it.subList(0, 1).toList()
-                    else _schedules.value = it.toList()
+                .collectLatest { schedules ->
+                    val sortedSchedules = schedules.sortedBy { it.date }
+
+                    if (schedules.size > 2) {
+                        _schedules.value = sortedSchedules.subList(0, 1).toList()
+                    }
+                    else _schedules.value = sortedSchedules.toList()
                 }
         }
     }
