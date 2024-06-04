@@ -23,7 +23,7 @@ data class FriendDetailEntity(
         val friendEntity = FriendDetail(
             name = name,
             birthday = birthday,
-            memo = memo
+            memo = memo,
         ).apply {
             setId(this@FriendDetailEntity.id)
         }

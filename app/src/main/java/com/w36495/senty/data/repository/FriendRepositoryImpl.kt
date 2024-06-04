@@ -61,6 +61,10 @@ class FriendRepositoryImpl @Inject constructor(
         return friendService.patchFriendKey(userId, friendId, newId)
     }
 
+    override suspend fun patchFriend(friend: FriendDetailEntity): Response<ResponseBody> {
+        return friendService.patchFriend(userId, friend.id, friend)
+    }
+
     override suspend fun deleteFriend(friendId: String): Boolean {
         val result = friendService.deleteFriend(userId, friendId)
 

@@ -10,5 +10,6 @@ interface FriendRepository {
     fun getFriends(): Flow<List<FriendDetailEntity>>
     suspend fun insertFriend(friend: FriendDetailEntity): Response<ResponseBody>
     suspend fun patchFriendId(friendId: String): Response<ResponseBody>
+    suspend fun patchFriend(friend: FriendDetailEntity): Response<ResponseBody>
     suspend fun deleteFriend(friendId: String): Boolean
 }

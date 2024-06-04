@@ -5,14 +5,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Scaffold
@@ -32,7 +30,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -42,6 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cheonjaeung.compose.grid.SimpleGridCells
 import com.cheonjaeung.compose.grid.VerticalGrid
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -64,7 +62,7 @@ fun FriendDetailScreen(
     vm: FriendDetailViewModel = hiltViewModel(),
     onBackPressed: () -> Unit,
     onClickGiftDetail: (String) -> Unit,
-    onClickEdit: (FriendDetail) -> Unit,
+    onClickEdit: (String) -> Unit,
     onClickDelete: () -> Unit,
 ) {
     LaunchedEffect(Unit) {
@@ -72,13 +70,13 @@ fun FriendDetailScreen(
         vm.getGifts(friendId)
     }
     
-    val friend by vm.friend.collectAsState()
-    val gifts by vm.gifts.collectAsState()
+    val friend by vm.friend.collectAsStateWithLifecycle()
+    val gifts by vm.gifts.collectAsStateWithLifecycle()
 
     FriendDetailContents(
         friend = friend,
         onBackPressed = { onBackPressed() },
-        onClickEdit = { onClickEdit(it) },
+        onClickEdit = { onClickEdit(friendId) },
         onClickDelete = { onClickDelete() },
         gifts = gifts,
         onClickGiftDetail = { onClickGiftDetail(it) }
@@ -92,7 +90,7 @@ private fun FriendDetailContents(
     gifts: List<GiftDetailEntity>,
     onBackPressed: () -> Unit,
     onClickGiftDetail: (String) -> Unit,
-    onClickEdit: (FriendDetail) -> Unit,
+    onClickEdit: () -> Unit,
     onClickDelete: () -> Unit,
 ) {
     Scaffold(
@@ -123,7 +121,7 @@ private fun FriendDetailContents(
                 friend = friend,
                 onClickGiftDetail = { onClickGiftDetail(it) },
                 onClickDelete = { onClickDelete() },
-                onClickEdit = { onClickEdit(it) },
+                onClickEdit = onClickEdit,
             )
         }
     }
@@ -136,7 +134,7 @@ private fun FriendDetailViewPager(
     gifts: List<GiftDetailEntity>,
     friend: FriendDetail,
     onClickGiftDetail: (String) -> Unit,
-    onClickEdit: (FriendDetail) -> Unit,
+    onClickEdit: () -> Unit,
     onClickDelete: () -> Unit,
 ) {
     val tabData = listOf(
@@ -148,7 +146,7 @@ private fun FriendDetailViewPager(
         pageCount = tabData.size,
         initialOffscreenLimit = tabData.size,
         infiniteLoop = true,
-        initialPage = FriendDetailTabState.GIFT.ordinal
+        initialPage = FriendDetailTabState.INFORMATION.ordinal
     )
     val tabIndex = pagerState.currentPage
     val coroutineScope = rememberCoroutineScope()
@@ -191,12 +189,12 @@ private fun FriendDetailViewPager(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.Top,
         ) {
-            if (index == FriendDetailTabState.GIFT.ordinal) {
+            if (index == FriendDetailTabState.INFORMATION.ordinal) {
                 Spacer(modifier = Modifier.height(24.dp))
                 FriendInfoSection(friend = friend)
 
                 BottomButtons(
-                    onClickEdit = { onClickEdit(friend) },
+                    onClickEdit = onClickEdit,
                     onClickDelete = { onClickDelete() }
                 )
             } else {
@@ -243,7 +241,7 @@ private fun FriendInfoSection(
                     .padding(top = 32.dp)
             )
 
-            friend.group?.let {
+            friend.friendGroup.let {
                 SentyReadOnlyTextField(
                     text = it.name,
                     group = it,

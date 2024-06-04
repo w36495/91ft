@@ -44,6 +44,27 @@ fun NavGraphBuilder.nestedFriendGraph(navController: NavController) {
                 onClickGroupEdit = { navController.navigate(FriendNavigationItem.FRIEND_GROUP_SETTINGS.name) }
             )
         }
+        composable(FriendNavigationItem.FRIEND_EDIT.name.plus("/{friendId}"),
+            arguments = listOf(navArgument("friendId") {
+                nullable = true
+                type = NavType.StringType
+            })
+        ) {backStackEntry ->
+            val friendId = backStackEntry.arguments?.getString("friendId")
+
+            if (friendId != null) {
+                FriendEditRoute(
+                    friendId = friendId,
+                    onBackPressed = { navController.navigateUp() },
+                    onMoveFriendList = {
+                        navController.navigate(FriendNavigationItem.FRIEND_LIST.name) {
+                            launchSingleTop = true
+                        }
+                    },
+                    onClickGroupEdit = { navController.navigate(FriendNavigationItem.FRIEND_GROUP_SETTINGS.name) }
+                )
+            }
+        }
         composable(
             route = "${FriendNavigationItem.FRIEND_DETAIL.name}/{friendId}",
             arguments = listOf(navArgument("friendId") {
@@ -56,10 +77,8 @@ fun NavGraphBuilder.nestedFriendGraph(navController: NavController) {
             FriendDetailScreen(
                 friendId = friendId.toString(),
                 onBackPressed = { navController.navigateUp() },
-                onClickEdit = { friendEntity ->
-                    val friend = Json.encodeToString<FriendDetail>(friendEntity)
-
-                    navController.navigate(FriendNavigationItem.FRIEND_ADD.name.plus("/$friend"))
+                onClickEdit = { friendId ->
+                    navController.navigate(FriendNavigationItem.FRIEND_EDIT.name.plus("/${friendId}"))
                 },
                 onClickDelete = {
                     navController.navigate("${FriendNavigationItem.FRIEND_DELETE_DIALOG.name}/$friendId")

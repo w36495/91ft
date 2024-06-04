@@ -40,9 +40,9 @@ class FriendDetailViewModel @Inject constructor(
             ) { friend, groups ->
                 val group = groups.find { it.id == friend.groupId }?.toDomainModel()
 
-                friend.toDomainEntity().apply {
-                    setFriendGroup(group!!)
-                }
+                friend.toDomainEntity()
+                    .copy(friendGroup = group!!)
+                    .apply { setId(friendId) }
             }.collectLatest {
                 _friend.value = it
             }

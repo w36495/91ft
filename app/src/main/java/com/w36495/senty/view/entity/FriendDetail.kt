@@ -8,17 +8,15 @@ data class FriendDetail(
     val name: String,
     val birthday: String,
     val memo: String,
+    val friendGroup: FriendGroup = FriendGroup.emptyFriendGroup,
 ) {
     var id: String = ""
         private set
-    var group: FriendGroup? = null
-        private set
+
     fun setId(id: String) {
         this.id = id
     }
-    fun setFriendGroup(group: FriendGroup) {
-        this.group = group
-    }
+
     fun displayBirthday(): String {
         val month = birthday.substring(0, 2)
         val day = birthday.substring(2, 4)
@@ -27,17 +25,19 @@ data class FriendDetail(
     }
 
     fun toDataEntity(): FriendDetailEntity = FriendDetailEntity(
+        id = this@FriendDetail.id,
         name = name,
         birthday = birthday,
         memo = memo,
-        groupId = group!!.id,
+        groupId = friendGroup.id,
     )
 
-    fun copy() = FriendDetail(name = this@FriendDetail.name, birthday = this@FriendDetail.birthday, memo = this@FriendDetail.memo).apply {
+    fun copy() = FriendDetail(name = this@FriendDetail.name, birthday = this@FriendDetail.birthday, memo = this@FriendDetail.memo,
+        friendGroup = friendGroup).apply {
         setId(this@FriendDetail.id)
     }
 
     companion object {
-        val emptyFriendEntity = FriendDetail(name = "", birthday = "", memo = "")
+        val emptyFriendEntity = FriendDetail(name = "", birthday = "", memo = "", friendGroup = FriendGroup.emptyFriendGroup)
     }
 }
