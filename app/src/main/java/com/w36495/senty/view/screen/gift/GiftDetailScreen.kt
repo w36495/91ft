@@ -181,7 +181,8 @@ private fun ImgSection(
     } else {
         GlideImage(
             model = imgUri, contentDescription = null,
-            contentScale = ContentScale.Crop
+            contentScale = ContentScale.Crop,
+            modifier = modifier.aspectRatio(1f)
         )
     }
 }
