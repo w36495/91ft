@@ -66,7 +66,7 @@ fun NavGraphBuilder.nestedFriendGraph(navController: NavController) {
             }
         }
         composable(
-            route = "${FriendNavigationItem.FRIEND_DETAIL.name}/{friendId}",
+            route = FriendNavigationItem.FRIEND_DETAIL.name.plus("/{friendId}"),
             arguments = listOf(navArgument("friendId") {
                 nullable = false
                 type = NavType.StringType
@@ -82,6 +82,15 @@ fun NavGraphBuilder.nestedFriendGraph(navController: NavController) {
                 },
                 onClickDelete = {
                     navController.navigate("${FriendNavigationItem.FRIEND_DELETE_DIALOG.name}/$friendId")
+                },
+                onClickGiftDetail = { giftId ->
+                    navController.navigate(GiftNavigationItem.GIFT_DETAIL.name.plus("/$giftId")) {
+                        launchSingleTop = true
+
+                        popUpTo(GiftNavigationItem.GIFT_DETAIL.name) {
+                            saveState = true
+                        }
+                    }
                 }
             )
         }

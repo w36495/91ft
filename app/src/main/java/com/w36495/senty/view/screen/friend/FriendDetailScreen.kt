@@ -35,18 +35,21 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 import com.cheonjaeung.compose.grid.SimpleGridCells
 import com.cheonjaeung.compose.grid.VerticalGrid
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.w36495.senty.view.entity.FriendDetail
-import com.w36495.senty.view.entity.gift.GiftDetailEntity
+import com.w36495.senty.view.entity.gift.GiftEntity
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyElevatedButton
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
@@ -79,7 +82,7 @@ fun FriendDetailScreen(
         onClickEdit = { onClickEdit(friendId) },
         onClickDelete = { onClickDelete() },
         gifts = gifts,
-        onClickGiftDetail = { onClickGiftDetail(it) }
+        onClickGiftDetail = onClickGiftDetail
     )
 }
 
@@ -87,7 +90,7 @@ fun FriendDetailScreen(
 @Composable
 private fun FriendDetailContents(
     friend: FriendDetail,
-    gifts: List<GiftDetailEntity>,
+    gifts: List<GiftEntity>,
     onBackPressed: () -> Unit,
     onClickGiftDetail: (String) -> Unit,
     onClickEdit: () -> Unit,
@@ -108,7 +111,7 @@ private fun FriendDetailContents(
                     }
                 }
             )
-        }
+        },
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -119,7 +122,7 @@ private fun FriendDetailContents(
             FriendDetailViewPager(
                 gifts = gifts,
                 friend = friend,
-                onClickGiftDetail = { onClickGiftDetail(it) },
+                onClickGiftDetail = onClickGiftDetail,
                 onClickDelete = { onClickDelete() },
                 onClickEdit = onClickEdit,
             )
@@ -131,7 +134,7 @@ private fun FriendDetailContents(
 @Composable
 private fun FriendDetailViewPager(
     modifier: Modifier = Modifier,
-    gifts: List<GiftDetailEntity>,
+    gifts: List<GiftEntity>,
     friend: FriendDetail,
     onClickGiftDetail: (String) -> Unit,
     onClickEdit: () -> Unit,
@@ -201,9 +204,7 @@ private fun FriendDetailViewPager(
                 Spacer(modifier = Modifier.height(4.dp))
                 GiftSection(
                     gifts = gifts,
-                    onClickGift = { giftId ->
-                        onClickGiftDetail(giftId)
-                    }
+                    onClickGift = onClickGiftDetail
                 )
             }
         }
@@ -277,7 +278,7 @@ private fun FriendInfoSection(
 @Composable
 private fun GiftSection(
     modifier: Modifier = Modifier,
-    gifts: List<GiftDetailEntity>,
+    gifts: List<GiftEntity>,
     onClickGift: (String) -> Unit,
 ) {
     Column(
@@ -308,7 +309,7 @@ private fun GiftSection(
                 gifts.forEach { gift ->
                     GiftItem(
                         gift = gift,
-                        onClickGiftDetail = { onClickGift(it) }
+                        onClickGiftDetail = onClickGift
                     )
                 }
             }
@@ -316,19 +317,31 @@ private fun GiftSection(
     }
 }
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 private fun GiftItem(
     modifier: Modifier = Modifier,
-    gift: GiftDetailEntity,
+    gift: GiftEntity,
     onClickGiftDetail: (String) -> Unit,
 ) {
-    Box(
-        modifier = modifier
-            .aspectRatio(1f)
-            .fillMaxWidth()
-            .background(Color.Gray)
-            .clickable { onClickGiftDetail(gift.id) }
-    )
+    if (gift.giftImg.isEmpty()) {
+        Box(
+            modifier = modifier
+                .aspectRatio(1f)
+                .fillMaxWidth()
+                .background(Color(0xFFFBFBFB))
+                .clickable { onClickGiftDetail(gift.gift.id) }
+        )
+    } else {
+        GlideImage(
+            model = gift.giftImg,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = modifier.aspectRatio(1f)
+                .fillMaxWidth()
+                .clickable { onClickGiftDetail(gift.gift.id) }
+        )
+    }
 }
 
 @Composable
