@@ -20,7 +20,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,9 +27,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.w36495.senty.view.entity.FriendGroup
-import com.w36495.senty.viewModel.FriendGroupViewModel
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
+import com.w36495.senty.viewModel.FriendGroupViewModel
 
 @Composable
 fun FriendGroupDialogScreen(
@@ -39,7 +39,7 @@ fun FriendGroupDialogScreen(
     onGroupSelected: (FriendGroup) -> Unit,
     onEditClick: () -> Unit,
 ) {
-    val friendGroups by vm.friendGroups.collectAsState()
+    val friendGroups by vm.friendGroups.collectAsStateWithLifecycle()
 
     FriendGroupContents(
         onDismiss = { onDismiss() },
