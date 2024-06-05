@@ -1,11 +1,11 @@
 package com.w36495.senty.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
-import com.w36495.senty.data.domain.EntityKeyDTO
 import com.w36495.senty.data.domain.GiftCategoryEntity
 import com.w36495.senty.data.domain.GiftCategoryPatchDTO
 import com.w36495.senty.data.remote.service.GiftCategoryService
 import com.w36495.senty.domain.repository.GiftCategoryRepository
+import com.w36495.senty.view.entity.gift.GiftCategory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.json.Json
