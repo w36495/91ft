@@ -15,12 +15,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,38 +33,35 @@ import com.w36495.senty.view.entity.gift.GiftCategory
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.lists.SwipeListItem
 import com.w36495.senty.viewModel.GiftCategoryViewModel
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun GiftCategoryScreen(
     vm: GiftCategoryViewModel = hiltViewModel(),
     onPressedBack: () -> Unit,
+    onShowGiftCategoryDialog: () -> Unit,
+    onClickEditCategory: (GiftCategory) -> Unit,
 ) {
     val categories by vm.categories.collectAsStateWithLifecycle()
-    var showDialog by remember { mutableStateOf(false) }
-    var editCategory by remember { mutableStateOf(GiftCategory.emptyCategory) }
+    val snackBarHostState = remember { SnackbarHostState() }
+    val rememberCategories by rememberSaveable(categories) {
+        mutableStateOf(categories)
+    }
+
+    LaunchedEffect(true) {
+        vm.errorFlow.collectLatest { errorMsg ->
+            snackBarHostState.showSnackbar(errorMsg)
+        }
+    }
 
     GiftCategoryContents(
-        categories = categories,
+        categories = rememberCategories,
+        snackBarHostState = snackBarHostState,
         onPressedBack = { onPressedBack() },
-        onClickAdd = {
-            showDialog = true
-        },
+        onClickAdd = { onShowGiftCategoryDialog() },
         onRemove = { vm.removeCategory(it) },
-        onEdit = {
-            editCategory = it
-            showDialog = true
-        }
+        onEdit = { category -> onClickEditCategory(category) }
     )
-
-    if (showDialog) {
-        GiftCategoryAddDialogScreen(
-            giftCategory = if (editCategory == GiftCategory.emptyCategory) null else editCategory,
-            onDismiss = {
-                showDialog = false
-                editCategory = GiftCategory.emptyCategory
-            }
-        )
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,6 +69,7 @@ fun GiftCategoryScreen(
 private fun GiftCategoryContents(
     categories: List<GiftCategory>,
     onPressedBack: () -> Unit,
+    snackBarHostState: SnackbarHostState,
     onClickAdd: () -> Unit,
     onRemove: (String) -> Unit,
     onEdit: (GiftCategory) -> Unit,
@@ -100,6 +101,7 @@ private fun GiftCategoryContents(
                 )
             )
         },
+        snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
         containerColor = Color.White
     ) {
         Column(
@@ -121,13 +123,13 @@ private fun GiftCategoryContents(
 }
 
 
-
 @Preview(showBackground = true)
 @Composable
 private fun GiftCategoryPreview() {
     SentyTheme {
         GiftCategoryContents(
             categories = GiftCategory.DEFAULT_CATEGORY,
+            snackBarHostState = SnackbarHostState(),
             onPressedBack = {},
             onClickAdd = {},
             onRemove = {},

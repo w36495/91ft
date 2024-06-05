@@ -35,8 +35,9 @@ import com.w36495.senty.viewModel.GiftCategoryViewModel
 @Composable
 fun GiftCategoryAddDialogScreen(
     vm: GiftCategoryViewModel = hiltViewModel(),
-    giftCategory: GiftCategory? = null,
+    giftCategory: GiftCategory?,
     onDismiss: () -> Unit,
+    onComplete: () -> Unit,
 ) {
     GiftCategoryAddContents(
         giftCategory = giftCategory,
@@ -50,7 +51,7 @@ fun GiftCategoryAddDialogScreen(
                 vm.updateCategory(categoryId = giftCategory.id, categoryName = inputCategory)
             }
 
-            onDismiss()
+            onComplete()
         }
     )
 }

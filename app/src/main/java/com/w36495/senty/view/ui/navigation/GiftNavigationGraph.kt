@@ -4,10 +4,13 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.dialog
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
+import com.w36495.senty.view.entity.gift.GiftCategory
 import com.w36495.senty.view.entity.gift.GiftDetail
 import com.w36495.senty.view.screen.gift.GiftAddScreen
+import com.w36495.senty.view.screen.gift.GiftCategoryAddDialogScreen
 import com.w36495.senty.view.screen.gift.GiftCategoryScreen
 import com.w36495.senty.view.screen.gift.GiftDetailScreen
 import com.w36495.senty.view.screen.gift.GiftScreen
@@ -55,7 +58,16 @@ fun NavGraphBuilder.nestedGiftGraph(navController: NavController) {
 
         composable(GiftNavigationItem.GIFT_CATEGORY.name) {
             GiftCategoryScreen(
-                onPressedBack = { navController.navigateUp() }
+                onPressedBack = { navController.navigateUp() },
+                onShowGiftCategoryDialog = {
+                    navController.navigate(GiftNavigationItem.GIFT_CATEGORY_DIALOG.name.plus("/${null}"))
+                },
+                onClickEditCategory = { giftCategory ->
+                    val formattedJson = Json { encodeDefaults = true }
+                    val jsonGiftCategory = formattedJson.encodeToString(giftCategory)
+
+                    navController.navigate(GiftNavigationItem.GIFT_CATEGORY_DIALOG.name.plus("/$jsonGiftCategory"))
+                }
             )
         }
 
@@ -78,9 +90,34 @@ fun NavGraphBuilder.nestedGiftGraph(navController: NavController) {
                 }
             )
         }
+
+        dialog(
+            route = GiftNavigationItem.GIFT_CATEGORY_DIALOG.name.plus("/{giftCategory}"),
+            arguments = listOf(navArgument("giftCategory") {
+                nullable = true
+                type = NavType.StringType
+            })
+        ) { backStackEntry ->
+            val category = backStackEntry.arguments?.getString("giftCategory")
+            val categoryEntity = category?.let { Json.decodeFromString<GiftCategory>(it) }
+
+            GiftCategoryAddDialogScreen(
+                giftCategory = categoryEntity,
+                onDismiss = { navController.navigateUp() },
+                onComplete = {
+                    navController.navigate(GiftNavigationItem.GIFT_CATEGORY.name) {
+                        launchSingleTop = true
+
+                        popUpTo(GiftNavigationItem.GIFT_CATEGORY.name) {
+                            inclusive = true
+                        }
+                    }
+                },
+            )
+        }
     }
 }
 
 enum class GiftNavigationItem {
-    GIFT, GIFT_LIST, GIFT_ADD, GIFT_CATEGORY, GIFT_DETAIL,
+    GIFT, GIFT_LIST, GIFT_ADD, GIFT_CATEGORY, GIFT_DETAIL, GIFT_CATEGORY_DIALOG,
 }
