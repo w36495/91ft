@@ -1,16 +1,16 @@
 package com.w36495.senty.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
-import com.w36495.senty.data.domain.EntityKeyDTO
 import com.w36495.senty.data.domain.FriendGroupEntity
 import com.w36495.senty.data.remote.service.FriendGroupService
 import com.w36495.senty.domain.repository.FriendGroupRepository
+import com.w36495.senty.view.entity.FriendGroup
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.jsonObject
 import okhttp3.ResponseBody
-import org.json.JSONObject
 import retrofit2.Response
 import javax.inject.Inject
 
@@ -19,19 +19,19 @@ class FriendGroupRepositoryImpl @Inject constructor(
 ) : FriendGroupRepository {
     private var userId: String = FirebaseAuth.getInstance().currentUser!!.uid
 
-    override fun getFriendGroups(): Flow<List<FriendGroupEntity>> = flow {
+    override fun getFriendGroups(): Flow<List<FriendGroup>> = flow {
         val result = friendGroupService.getFriendGroups(userId)
-        val friendGroups = mutableListOf<FriendGroupEntity>()
+        val friendGroups = mutableListOf<FriendGroup>()
 
         if (result.isSuccessful) {
             if (result.headers()["Content-length"]?.toInt() != 4) {
                 result.body()?.let {
-                    val jsonObject = JSONObject(it.string())
+                    val responseJson = Json.parseToJsonElement(it.string())
 
-                    jsonObject.keys().forEach { key ->
-                        val group = jsonObject[key] as JSONObject
-                        val entity: FriendGroupEntity = Json.decodeFromString(group.toString())
-                        friendGroups.add(entity)
+                    responseJson.jsonObject.mapKeys { (key, jsonElement) ->
+                        val group = Json.decodeFromJsonElement<FriendGroupEntity>(jsonElement).toDomainModel()
+                            .apply { setId(key) }
+                        friendGroups.add(group)
                     }
                 }
             }
@@ -43,29 +43,11 @@ class FriendGroupRepositoryImpl @Inject constructor(
     override suspend fun insertFriendGroup(friendGroupEntity: FriendGroupEntity): Boolean {
         val result = friendGroupService.insertFriendGroup(userId, friendGroupEntity)
 
-        if (result.isSuccessful) {
-            result.body()?.let {
-                val jsonObject = Json.decodeFromString<JsonObject>(it.string())
-                val key = jsonObject["name"].toString().replace("\"", "")
-
-                val groupKeyResult = patchFriendGroupKey(key)
-                if (groupKeyResult.isSuccessful) {
-                    return true
-                }
-            }
-        }
-
-        return false
+        return result.isSuccessful
     }
 
-    override suspend fun patchFriendGroupKey(friendGroupKey: String): Response<ResponseBody> {
-        val newKey = EntityKeyDTO(friendGroupKey)
-
-        return friendGroupService.patchFriendGroupKey(userId, friendGroupKey, newKey)
-    }
-
-    override suspend fun patchFriendGroup(friendGroupEntity: FriendGroupEntity): Response<ResponseBody> {
-        return friendGroupService.patchFriendGroup(userId, friendGroupEntity.id, friendGroupEntity)
+    override suspend fun patchFriendGroup(friendKey: String, friendGroupEntity: FriendGroupEntity): Response<ResponseBody> {
+        return friendGroupService.patchFriendGroup(userId, friendKey, friendGroupEntity)
     }
 
     override suspend fun deleteFriendGroup(friendGroupKey: String): Boolean {

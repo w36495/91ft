@@ -34,10 +34,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -49,42 +50,62 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.w36495.senty.view.entity.FriendGroup
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.dialogs.BasicAlertDialog
 import com.w36495.senty.viewModel.FriendGroupViewModel
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @Composable
 fun FriendGroupScreen(
     vm: FriendGroupViewModel = hiltViewModel(),
     onBackPressed: () -> Unit,
 ) {
-    val groups by vm.friendGroups.collectAsState()
+    LaunchedEffect(true) {
+        vm.errorFlow.collectLatest { throwable -> }
+    }
+
+    val friendGroups = vm.friendGroups.collectAsStateWithLifecycle()
+
+    val rememberFriendGroups by rememberSaveable(friendGroups) {
+        mutableStateOf(friendGroups)
+    }
+    var showAddDialog by rememberSaveable { mutableStateOf(false) }
+    var selectEditGroup by remember { mutableStateOf(FriendGroup.emptyFriendGroup) }
+
+    if (showAddDialog) {
+        FriendGroupAddDialog(
+            group = if (selectEditGroup != FriendGroup.emptyFriendGroup) selectEditGroup else null,
+            onDismiss = {
+                selectEditGroup = FriendGroup.emptyFriendGroup
+                showAddDialog = false
+            }
+        )
+    }
 
     FriendGroupContents(
-        groups = groups,
+        friendGroups = rememberFriendGroups.value,
+        onBackPressed = onBackPressed,
+        onShowAddDialog = { showAddDialog = true },
+        onClickEdit = {
+            selectEditGroup = it
+            showAddDialog = true
+        },
         onClickDelete = { vm.removeFriendGroup(it) },
-        onBackPressed = { onBackPressed() }
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FriendGroupContents(
-    groups: List<FriendGroup>,
+    friendGroups: List<FriendGroup>,
     onBackPressed: () -> Unit,
+    onShowAddDialog: () -> Unit,
+    onClickEdit: (FriendGroup) -> Unit,
     onClickDelete: (String) -> Unit,
 ) {
-    var showAddDialog by rememberSaveable { mutableStateOf(false) }
-    var selectGroup by remember { mutableStateOf(FriendGroup.emptyFriendGroup) }
-
-    if (showAddDialog) {
-        FriendGroupAddDialog(
-            group = if (selectGroup != FriendGroup.emptyFriendGroup) selectGroup else null,
-            onDismiss = { showAddDialog = false }
-        )
-    }
-
     Column(modifier = Modifier.fillMaxSize()) {
         CenterAlignedTopAppBar(title = { Text(text = "친구그룹") },
             navigationIcon = {
@@ -95,7 +116,7 @@ private fun FriendGroupContents(
                     )
                 }
             }, actions = {
-                IconButton(onClick = { showAddDialog = true }) {
+                IconButton(onClick = onShowAddDialog) {
                     Icon(imageVector = Icons.Filled.Add, contentDescription = null)
                 }
             },
@@ -104,18 +125,15 @@ private fun FriendGroupContents(
             )
         )
 
-        groups.forEachIndexed { index, group ->
+        friendGroups.forEachIndexed { index, group ->
             FriendGroupItem(
                 modifier = Modifier.fillMaxWidth(),
                 group = group,
-                onClickEdit = {
-                    selectGroup = it
-                    showAddDialog = true
-                },
-                onClickDelete = { onClickDelete(it) },
+                onClickDelete = onClickDelete,
+                onClickEdit = onClickEdit,
             )
 
-            if (index != groups.lastIndex) HorizontalDivider()
+            if (index != friendGroups.lastIndex) HorizontalDivider()
         }
     }
 }
@@ -130,6 +148,7 @@ private fun FriendGroupItem(
 ) {
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
     val swipeState = rememberSwipeableState(initialValue = 0)
+    val coroutineScope = rememberCoroutineScope()
 
     val squareSize = 112.dp
     val sizePx = with(LocalDensity.current) { squareSize.toPx() }
@@ -171,11 +190,21 @@ private fun FriendGroupItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
-                onClick = { onClickEdit(group) },
+                onClick = {
+                    onClickEdit(group)
+                    coroutineScope.launch {
+                        swipeState.snapTo(0)
+                    }
+                },
                 color = Color(0xFFF5A61D)
             ) {
                 IconButton(
-                    onClick = { onClickEdit(group) },
+                    onClick = {
+                        onClickEdit(group)
+                        coroutineScope.launch {
+                            swipeState.snapTo(0)
+                        }
+                    },
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = Color(0xFFF5A61D),
                         contentColor = Color.White
@@ -191,11 +220,21 @@ private fun FriendGroupItem(
             }
 
             Surface(
-                onClick = { showDeleteDialog = true },
+                onClick = {
+                    showDeleteDialog = true
+                    coroutineScope.launch {
+                        swipeState.snapTo(0)
+                    }
+                },
                 color = Color.Red,
             ) {
                 IconButton(
-                    onClick = { showDeleteDialog = true },
+                    onClick = {
+                        showDeleteDialog = true
+                        coroutineScope.launch {
+                            swipeState.snapTo(0)
+                        }
+                    },
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = Color.Red,
                     ),
@@ -232,14 +271,16 @@ private fun FriendGroupItem(
 private fun FriendGroupPreview() {
     SentyTheme {
         FriendGroupContents(
-            groups = listOf(
+            friendGroups = listOf(
                 FriendGroup(name = "친구"),
                 FriendGroup(name = "가족"),
                 FriendGroup(name = "테스트"),
                 FriendGroup(name = "기타"),
             ),
             onClickDelete = {},
-            onBackPressed = {}
+            onBackPressed = {},
+            onShowAddDialog = {},
+            onClickEdit = {},
         )
     }
 }

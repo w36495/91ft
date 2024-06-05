@@ -20,7 +20,6 @@ data class FriendGroup(
     }
 
     fun toDataEntity() = FriendGroupEntity(
-        id = this@FriendGroup.id,
         name = name,
         color = color,
     )

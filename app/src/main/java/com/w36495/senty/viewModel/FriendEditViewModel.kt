@@ -27,7 +27,7 @@ class FriendEditViewModel @Inject constructor(
             friendRepository.getFriend(friendId).combine(
                 friendGroupRepository.getFriendGroups()
             ) { friend, groups ->
-                val group = groups.find { it.id == friend.groupId }?.toDomainModel()
+                val group = groups.find { it.id == friend.groupId }
 
                 friend.toDomainEntity()
                     .copy(friendGroup = group!!)

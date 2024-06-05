@@ -9,7 +9,6 @@ import kotlinx.serialization.json.JsonNames
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class FriendGroupEntity(
-    val id: String = "",
     val name: String,
     val color: String,
     @JsonNames("create_at")
@@ -20,5 +19,5 @@ data class FriendGroupEntity(
     fun toDomainModel(): FriendGroup = FriendGroup(
         name = this.name,
         color = this.color
-    ).apply { setId(this@FriendGroupEntity.id) }
+    )
 }

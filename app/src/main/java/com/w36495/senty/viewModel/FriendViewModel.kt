@@ -30,9 +30,13 @@ class FriendViewModel @Inject constructor(
             groups.find { group ->
                 group.id == friend.groupId
             }?.let { group ->
-                friend.toDomainEntity().apply {
-                    setFriendGroup(group.toDomainModel())
-                }
+                Friend(
+                    id = friend.id,
+                    name = friend.name,
+                    birthday = friend.birthday,
+                    memo = friend.memo,
+                    group = group,
+                )
             } ?: throw IllegalStateException("Group not found")
         }
     }.combine(giftRepository.getGifts()) {

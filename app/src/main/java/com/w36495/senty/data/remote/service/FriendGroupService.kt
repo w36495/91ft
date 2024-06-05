@@ -13,6 +13,12 @@ import retrofit2.http.Path
 
 
 interface FriendGroupService {
+    @GET("friendGroups/{userId}/{friendGroupId}.json")
+    suspend fun getFriendGroup(
+        @Path("userId") userId: String,
+        @Path("friendGroupId") friendGroupId: String,
+    ): Response<ResponseBody>
+
     @GET("friendGroups/{userId}.json")
     suspend fun getFriendGroups(
         @Path("userId") userId: String,
@@ -22,13 +28,6 @@ interface FriendGroupService {
     suspend fun insertFriendGroup(
         @Path("userId") userId: String,
         @Body friendGroup: FriendGroupEntity
-    ): Response<ResponseBody>
-
-    @PATCH("friendGroups/{userId}/{friendGroupId}.json")
-    suspend fun patchFriendGroupKey(
-        @Path("userId") userId: String,
-        @Path("friendGroupId") friendGroupId: String,
-        @Body friendGroupKey: EntityKeyDTO
     ): Response<ResponseBody>
 
     @PATCH("friendGroups/{userId}/{friendGroupId}.json")
