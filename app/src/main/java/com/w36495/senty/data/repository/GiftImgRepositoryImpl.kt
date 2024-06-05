@@ -37,19 +37,24 @@ class GiftImgRepositoryImpl @Inject constructor(
         giftId: String,
         giftImg: String
     ): String {
-        var imgName = generateImageName()
-        val decodeImg = ImgConverter.stringToByteArray(giftImg)
+        return suspendCancellableCoroutine { continuation ->
+            var imgName = generateImageName()
+            val decodeImg = ImgConverter.stringToByteArray(giftImg)
 
-        val giftPath = "images/gifts/$userId/$giftId/$imgName.jpg"
-        firebaseStorage.reference.child(giftPath).putBytes(decodeImg)
-            .addOnFailureListener {
-                throw IllegalArgumentException("Gift image upload Failed using Bitmap")
-            }
-            .addOnSuccessListener {
-                imgName = it.storage.name
-            }
+            val giftPath = "images/gifts/$userId/$giftId/$imgName.jpg"
+            firebaseStorage.reference.child(giftPath).putBytes(decodeImg)
+                .addOnSuccessListener {
+                    val path = it.storage.path.split("/")
+                    continuation.resume(path[path.lastIndex])
+                }
+                .addOnFailureListener {
+                    continuation.resumeWithException(it)
+                }
 
-        return imgName
+            continuation.invokeOnCancellation {
+                Log.d("GiftImgRepositoryImpl", "Exception: (${it?.message.toString()})")
+            }
+        }
     }
 
     override suspend fun deleteGiftImg(imgPath: String): Boolean {

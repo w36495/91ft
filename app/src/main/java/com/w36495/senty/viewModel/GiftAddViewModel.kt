@@ -51,6 +51,8 @@ class GiftAddViewModel @Inject constructor(
                         if (giftKeyResult.body()?.string() == it.string()) {
                         }
                     }
+                    val giftImgName = async { saveGiftImg(key, giftImg) }
+                    giftRepository.patchGiftImgUri(key, giftImgName.await())
 
                     saveGiftImg(key, giftImg, onSuccess = { imgName ->
                         launch(giftImgJob) {
