@@ -1,6 +1,5 @@
 package com.w36495.senty.viewModel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.w36495.senty.data.domain.GiftCategoryPatchDTO
@@ -12,8 +11,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
 import javax.inject.Inject
 
 @HiltViewModel
@@ -33,21 +30,9 @@ class GiftCategoryViewModel @Inject constructor(
             val result = giftCategoryRepository.insertCategory(category.toDataEntity())
 
             if (result.isSuccessful) {
-                result.body()?.let {
-                    val jsonObject = Json.decodeFromString<JsonObject>(it.string())
-                    val key = jsonObject["name"].toString().replace("\"", "")
 
-                    val giftCategoryKeyResult = giftCategoryRepository.patchCategoryKey(key)
-                    if (giftCategoryKeyResult.isSuccessful) {
-                        if (giftCategoryKeyResult.body()?.string() == it.string()) {
-                            // TODO : 등록 성공
-                        }
-                    } else {
-                        // TODO : 등록 실패
-                    }
-                }
             } else {
-                Log.d("GiftCategoryVM", result.errorBody().toString())
+                _errorFlow.emit("카테고리 등록 중 오류가 발생하였습니다.")
             }
         }
     }

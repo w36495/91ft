@@ -16,21 +16,24 @@ import retrofit2.Response
 import javax.inject.Inject
 
 class GiftCategoryRepositoryImpl @Inject constructor(
+    private val firebaseAuth: FirebaseAuth,
     private val giftCategoryService: GiftCategoryService
-): GiftCategoryRepository {
-    private var userId: String = FirebaseAuth.getInstance().currentUser!!.uid
+) : GiftCategoryRepository {
+    private var userId: String = firebaseAuth.currentUser!!.uid
 
-    override fun getCategories(): Flow<List<GiftCategoryEntity>> = flow {
+    override fun getCategories(): Flow<List<GiftCategory>> = flow {
         val result = giftCategoryService.getCategories(userId)
-        val categories = mutableListOf<GiftCategoryEntity>()
+        val categories = mutableListOf<GiftCategory>()
 
         if (result.isSuccessful) {
             if (result.headers()["Content-length"]?.toInt() != 4) {
                 result.body()?.let {
                     val responseJson = Json.parseToJsonElement(it.string())
-                    responseJson.jsonObject.forEach { jsonFriend ->
-                        val parseFriend = Json.decodeFromJsonElement<GiftCategoryEntity>(jsonFriend.value)
-                        categories.add(parseFriend)
+
+                    responseJson.jsonObject.mapKeys { (key, jsonElement) ->
+                        val category = Json.decodeFromJsonElement<GiftCategoryEntity>(jsonElement).toDomainEntity()
+                            .apply { setId(key) }
+                        categories.add(category)
                     }
                 }
             }
@@ -45,12 +48,6 @@ class GiftCategoryRepositoryImpl @Inject constructor(
 
     override suspend fun insertCategory(category: GiftCategoryEntity): Response<ResponseBody> {
         return giftCategoryService.insertCategory(userId, category)
-    }
-
-    override suspend fun patchCategoryKey(categoryKey: String): Response<ResponseBody> {
-        val newCategoryKey = EntityKeyDTO(categoryKey)
-
-        return giftCategoryService.patchCategoryKey(userId, categoryKey, newCategoryKey)
     }
 
     override suspend fun patchCategory(categoryKey: String, category: GiftCategoryPatchDTO): Response<ResponseBody> {

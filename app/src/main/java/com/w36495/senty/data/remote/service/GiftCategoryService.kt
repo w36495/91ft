@@ -25,13 +25,6 @@ interface GiftCategoryService {
     ): Response<ResponseBody>
 
     @PATCH("giftCategories/{userId}/{categoryKey}.json")
-    suspend fun patchCategoryKey(
-        @Path("userId") userId: String,
-        @Path("categoryKey") categoryKey: String,
-        @Body body: EntityKeyDTO
-    ): Response<ResponseBody>
-
-    @PATCH("giftCategories/{userId}/{categoryKey}.json")
     suspend fun patchCategory(
         @Path("userId") userId: String,
         @Path("categoryKey") categoryKey: String,

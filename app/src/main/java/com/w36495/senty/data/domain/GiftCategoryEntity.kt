@@ -9,12 +9,11 @@ import kotlinx.serialization.json.JsonNames
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class GiftCategoryEntity(
-    val id: String = "",
     val name: String,
     @JsonNames("create_at")
     val createAt: String = DateUtil.toTimeStamp(System.currentTimeMillis()),
     @JsonNames("update_at")
     val updateAt: String = DateUtil.toTimeStamp(System.currentTimeMillis())
 ) {
-    fun toDomainEntity() = GiftCategory(name = this@GiftCategoryEntity.name).apply { setId(this@GiftCategoryEntity.id) }
+    fun toDomainEntity() = GiftCategory(name = this@GiftCategoryEntity.name)
 }

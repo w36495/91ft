@@ -34,7 +34,7 @@ class GiftDetailViewModel @Inject constructor(
             giftRepository.getGift(giftId)
                 .map { it.toDomainEntity() }
                 .combine(giftCategoryRepository.getCategories()) { gift, categories ->
-                    val category = categories.map { it.toDomainEntity() }.find { it.id == gift.categoryId }!!
+                    val category = categories.find { it.id == gift.categoryId }!!
 
                     GiftDetail(
                         gift = gift,
