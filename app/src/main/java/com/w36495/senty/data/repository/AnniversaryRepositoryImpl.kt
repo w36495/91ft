@@ -1,15 +1,17 @@
 package com.w36495.senty.data.repository
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
-import com.w36495.senty.data.domain.EntityKeyDTO
 import com.w36495.senty.data.domain.ScheduleEntity
 import com.w36495.senty.data.remote.service.AnniversaryService
 import com.w36495.senty.domain.repository.AnniversaryRepository
+import com.w36495.senty.view.entity.Schedule
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.jsonObject
 import okhttp3.ResponseBody
-import org.json.JSONObject
 import retrofit2.Response
 import javax.inject.Inject
 
@@ -19,25 +21,23 @@ class AnniversaryRepositoryImpl @Inject constructor(
 ) : AnniversaryRepository {
     private var userId: String = firebaseAuth.currentUser!!.uid
 
-    override fun getSchedules(): Flow<List<ScheduleEntity>> = flow {
+    override fun getSchedules(): Flow<List<Schedule>> = flow {
         val result = anniversaryService.getSchedules(userId)
-        val schedules = mutableListOf<ScheduleEntity>()
 
         if (result.isSuccessful) {
             if (result.headers()["Content-length"]?.toInt() != 4) {
                 result.body()?.let {
-                    val jsonObject = JSONObject(it.string())
+                    val jsonElement = Json.parseToJsonElement(it.string())
 
-                    jsonObject.keys().forEach { key ->
-                        val jsonSchedules = jsonObject[key] as JSONObject
-                        val entity: ScheduleEntity = Json.decodeFromString(jsonSchedules.toString())
-
-                        schedules.add(entity)
+                    jsonElement.jsonObject.map { (key, jsonElement) ->
+                        Json.decodeFromJsonElement<ScheduleEntity>(jsonElement)
+                            .toDomainEntity().apply { setId(key) }
+                    }.let { schedules ->
+                        Log.d("AnniversaryRepo", schedules.toString())
+                        emit(schedules.toList())
                     }
                 }
             }
-
-            emit(schedules.toList())
         } else throw IllegalArgumentException("Failed to get schedules")
     }
 
@@ -45,14 +45,8 @@ class AnniversaryRepositoryImpl @Inject constructor(
         return anniversaryService.insertSchedule(userId, schedule)
     }
 
-    override suspend fun patchSchedule(schedule: ScheduleEntity): Response<ResponseBody> {
-        return anniversaryService.patchSchedule(userId, schedule.id, schedule)
-    }
-
-    override suspend fun patchScheduleKey(scheduleKey: String): Response<ResponseBody> {
-        val newKey = EntityKeyDTO(id = scheduleKey)
-
-        return anniversaryService.patchScheduleKey(userId, scheduleKey, newKey)
+    override suspend fun patchSchedule(scheduleId: String, schedule: ScheduleEntity): Response<ResponseBody> {
+        return anniversaryService.patchSchedule(userId, scheduleId, schedule)
     }
 
     override suspend fun deleteSchedule(scheduleId: String): Boolean {

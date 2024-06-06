@@ -1,8 +1,10 @@
 package com.w36495.senty.viewModel
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.w36495.senty.domain.repository.AnniversaryRepository
+import com.w36495.senty.util.DateUtil
 import com.w36495.senty.util.StringUtils
 import com.w36495.senty.view.entity.Schedule
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -10,28 +12,33 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
 import javax.inject.Inject
 
 @HiltViewModel
 class AnniversaryViewModel @Inject constructor(
     private val anniversaryRepository: AnniversaryRepository
 ) : ViewModel() {
+    private var selectDate = mutableStateOf(DateUtil.getDateTime())
+
     private val _schedules = MutableStateFlow<List<Schedule>>(emptyList())
     val schedules = _schedules.asStateFlow()
 
     fun getSchedules(selectYear: Int, selectMonth: Int, selectDay: Int) {
+        selectDate.value = "${selectYear}-${selectMonth}-${selectDay}"
+
         viewModelScope.launch {
             anniversaryRepository.getSchedules()
                 .map {
-                    it.map { schedule -> schedule.toDomainEntity() }.filter { schedule ->
-                        selectYear == schedule.getYear() && StringUtils.format2Digits(selectMonth).toInt() == schedule.getMonth() && StringUtils.format2Digits(selectDay).toInt() == schedule.getDay()
+                    it.filter { schedule ->
+                        selectYear == schedule.getYear()
+                                && StringUtils.format2Digits(selectMonth).toInt() == schedule.getMonth()
+                                && StringUtils.format2Digits(selectDay).toInt() == schedule.getDay()
                     }
                 }
-                .collectLatest {
-                    _schedules.value = it.toList()
+                .collectLatest { schedules ->
+                    _schedules.update { schedules.toList() }
                 }
         }
     }
@@ -39,34 +46,27 @@ class AnniversaryViewModel @Inject constructor(
     fun saveSchedule(schedule: Schedule) {
         viewModelScope.launch {
             val result = anniversaryRepository.insertSchedule(schedule.toDataEntity())
-
-            if (result.isSuccessful) {
-                result.body()?.let {
-                    val jsonObject = Json.decodeFromString<JsonObject>(it.string())
-                    val key = jsonObject["name"].toString().replace("\"", "")
-
-                    val keyResult = anniversaryRepository.patchScheduleKey(key)
-                    if (keyResult.isSuccessful) {
-                        if (keyResult.body()?.string() == it.string()) {
-                            // TODO : 등록 성공
-                        }
-                    } else {
-                        // TODO : 등록 실패
-                    }
-                }
-            }
+            if (result.isSuccessful) refreshSchedules()
         }
     }
 
     fun updateSchedule(newSchedule: Schedule) {
         viewModelScope.launch {
-            anniversaryRepository.patchSchedule(newSchedule.toDataEntity())
+            val result = anniversaryRepository.patchSchedule(newSchedule.id, newSchedule.toDataEntity())
+            if (result.isSuccessful) refreshSchedules()
         }
     }
 
     fun removeSchedule(scheduleId: String) {
         viewModelScope.launch {
-            anniversaryRepository.deleteSchedule(scheduleId)
+            val result = anniversaryRepository.deleteSchedule(scheduleId)
+            if (result) refreshSchedules()
         }
+    }
+
+    private fun refreshSchedules() {
+        val (selectYear, selectMonth, selectDay) = this.selectDate.value.split("-").map { it.toInt() }
+
+        getSchedules(selectYear, selectMonth, selectDay)
     }
 }

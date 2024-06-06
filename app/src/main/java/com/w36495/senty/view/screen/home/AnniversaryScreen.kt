@@ -20,17 +20,17 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vsnappy1.datepicker.DatePicker
 import com.vsnappy1.datepicker.data.model.DatePickerDate
 import com.vsnappy1.datepicker.data.model.SelectionLimiter
@@ -43,13 +43,12 @@ import com.w36495.senty.view.ui.component.buttons.SentyOutlinedButton
 import com.w36495.senty.view.ui.component.cards.ScheduleCard
 import com.w36495.senty.view.ui.theme.Green40
 import com.w36495.senty.viewModel.AnniversaryViewModel
-import kotlinx.coroutines.launch
 
 @Composable
 fun AnniversaryScreen(
     vm: AnniversaryViewModel = hiltViewModel(),
 ) {
-    val schedules by vm.schedules.collectAsState()
+    val schedules by vm.schedules.collectAsStateWithLifecycle()
 
     AnniversaryScreenContents(
         schedules = schedules,
@@ -71,7 +70,6 @@ private fun AnniversaryScreenContents(
     onClickEdit: (Schedule) -> Unit,
     onClickDelete: (String) -> Unit,
 ) {
-    val scope = rememberCoroutineScope()
     val scaffoldState = androidx.compose.material.rememberBottomSheetScaffoldState()
 
     var showAddDialog by remember { mutableStateOf(false) }
@@ -82,17 +80,17 @@ private fun AnniversaryScreenContents(
     var month by remember { mutableIntStateOf(currentDate[1]) }
     var day by remember { mutableIntStateOf(currentDate[2]) }
 
+    LaunchedEffect(showAddDialog || showReadDialog) {
+        if (showAddDialog || showReadDialog) scaffoldState.bottomSheetState.expand()
+        else scaffoldState.bottomSheetState.collapse()
+    }
+
     BottomSheetScaffold(
         sheetContent = {
             if (showAddDialog) {
                 AnniversaryBottomSheetDialog(
                     selectDate = listOf(year, month, day),
-                    onDismiss = {
-                        scope.launch {
-                            showAddDialog = false
-                            scaffoldState.bottomSheetState.collapse()
-                        }
-                    },
+                    onDismiss = { showAddDialog = false },
                     onClickSave = { onClickSave(it) },
                 )
             } else if (showReadDialog) {
@@ -103,10 +101,7 @@ private fun AnniversaryScreenContents(
                     schedule = savedSchedule,
                     selectDate = savedDate,
                     onDismiss = {
-                        scope.launch {
-                            showReadDialog = false
-                            scaffoldState.bottomSheetState.collapse()
-                        }
+                        showReadDialog = false
                     },
                     onClickDelete = { onClickDelete(it) },
                     onClickEdit = { onClickEdit(it) }
@@ -149,22 +144,14 @@ private fun AnniversaryScreenContents(
                     .padding(horizontal = 16.dp)
                     .padding(top = 16.dp)
                     .background(Color.White)
-            ) {
-                scope.launch {
-                    showAddDialog = true
-                    scaffoldState.bottomSheetState.expand()
-                }
-            }
+            ) { showAddDialog = true }
 
             BottomScheduleSection(
                 schedules = schedules,
                 modifier = Modifier.fillMaxWidth(),
                 onClickSchedule = { schedule ->
                     savedSchedule = schedule
-                    scope.launch {
-                        showReadDialog = true
-                        scaffoldState.bottomSheetState.expand()
-                    }
+                    showReadDialog = true
                 }
             )
         }
