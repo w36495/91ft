@@ -3,6 +3,7 @@ package com.w36495.senty.viewModel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.w36495.senty.domain.repository.FriendGroupRepository
 import com.w36495.senty.domain.repository.FriendRepository
 import com.w36495.senty.domain.repository.GiftImgRepository
 import com.w36495.senty.domain.repository.GiftRepository
@@ -27,6 +28,7 @@ import javax.inject.Inject
 @HiltViewModel
 class FriendDetailViewModel @Inject constructor(
     private val friendRepository: FriendRepository,
+    private val friendGroupRepository: FriendGroupRepository,
     private val giftRepository: GiftRepository,
     private val giftImgRepository: GiftImgRepository,
 ) : ViewModel() {
@@ -42,7 +44,10 @@ class FriendDetailViewModel @Inject constructor(
             friendRepository.getFriend(friendId)
                 .catch { _errorFlow.emit("정보를 불러오는 중 오류가 발생하였습니다.") }
                 .collectLatest { friendDetail ->
-                    _friend.update { friendDetail }
+                    friendGroupRepository.getFriendGroup(friendDetail.friendGroup.id)
+                        .collectLatest { friendGroup ->
+                            _friend.update { friendDetail.copy(friendGroup = friendGroup) }
+                        }
                 }
         }
     }

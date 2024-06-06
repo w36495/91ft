@@ -15,9 +15,24 @@ import retrofit2.Response
 import javax.inject.Inject
 
 class FriendGroupRepositoryImpl @Inject constructor(
-    private val friendGroupService: FriendGroupService
+    private val firebaseAuth: FirebaseAuth,
+    private val friendGroupService: FriendGroupService,
 ) : FriendGroupRepository {
-    private var userId: String = FirebaseAuth.getInstance().currentUser!!.uid
+    private var userId: String = firebaseAuth.currentUser!!.uid
+    override fun getFriendGroup(friendGroupId: String): Flow<FriendGroup> = flow {
+        val result = friendGroupService.getFriendGroup(userId, friendGroupId)
+
+        if (result.isSuccessful) {
+            result.body()?.let {
+                val responseJson = Json.parseToJsonElement(it.string())
+
+                Json.decodeFromJsonElement<FriendGroupEntity>(responseJson.jsonObject)
+                    .toDomainModel()
+                    .apply { setId(friendGroupId) }
+                    .let { friendGroup -> emit(friendGroup) }
+            }
+        } else throw IllegalArgumentException("Failed to get friend group(${result.errorBody().toString()})")
+    }
 
     override fun getFriendGroups(): Flow<List<FriendGroup>> = flow {
         val result = friendGroupService.getFriendGroups(userId)

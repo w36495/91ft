@@ -27,7 +27,7 @@ data class FriendGroup(
     }
 
     override fun toString(): String {
-        return "FriendGroup(id=$id name=$name, color=$color)"
+        return "FriendGroup(id=$id, name=$name, color=$color)"
     }
 
     companion object {

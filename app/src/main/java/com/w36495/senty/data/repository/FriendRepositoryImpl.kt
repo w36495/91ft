@@ -71,14 +71,8 @@ class FriendRepositoryImpl @Inject constructor(
         return friendService.insertFriend(userId, friend)
     }
 
-    override suspend fun patchFriendId(friendId: String): Response<ResponseBody> {
-        val newId = EntityKeyDTO(id = friendId)
-
-        return friendService.patchFriendKey(userId, friendId, newId)
-    }
-
-    override suspend fun patchFriend(friend: FriendDetailEntity): Response<ResponseBody> {
-        return friendService.patchFriend(userId, friend.id, friend)
+    override suspend fun patchFriend(friendId: String, friend: FriendDetailEntity): Response<ResponseBody> {
+        return friendService.patchFriend(userId, friendId, friend)
     }
 
     override suspend fun deleteFriend(friendId: String): Boolean {
