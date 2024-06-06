@@ -21,13 +21,13 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.w36495.senty.view.entity.Friend
 import com.w36495.senty.viewModel.FriendViewModel
 
@@ -37,7 +37,7 @@ fun FriendDialogScreen(
     onDismiss: () -> Unit,
     onClickFriend: (Friend) -> Unit,
 ) {
-    val friends by vm.friends.collectAsState()
+    val friends by vm.friends.collectAsStateWithLifecycle()
 
     FriendDialogContents(
         friends = friends,
@@ -78,7 +78,7 @@ private fun FriendDialogContents(
 
                 friends.forEachIndexed { index, friend ->
                     ListItem(
-                        headlineContent = { Text(text = friend.name) },
+                        headlineContent = { Text(text = friend.friendDetail.name) },
                         colors = ListItemDefaults.colors(
                             containerColor = Color.White
                         ),

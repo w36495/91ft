@@ -63,7 +63,7 @@ fun FriendScreen(
         FriendContents(
             modifier = Modifier.padding(innerPadding),
             friends = friendList,
-            onClickFriend = { onClickFriend(it.id) },
+            onClickFriend = { friend -> onClickFriend(friend.friendDetail.id) },
             onClickAddFriend = {
                 onClickAddFriend()
             }
@@ -121,9 +121,9 @@ fun FriendItemContent(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             FriendGroupChip(
-                text = friend.group?.name,
-                chipColor = friend.group?.getIntTypeColor(),
-                textColor = friend.group?.color?.getTextColorByBackgroundColor()
+                text = friend.friendDetail.friendGroup.name,
+                chipColor = friend.friendDetail.friendGroup.getIntTypeColor(),
+                textColor = friend.friendDetail.friendGroup.color.getTextColorByBackgroundColor()
             )
             Text(
                 text = friend.displayBirthday(),
@@ -131,12 +131,12 @@ fun FriendItemContent(
             )
         }
         Text(
-            text = friend.name,
+            text = friend.friendDetail.name,
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(vertical = 4.dp)
         )
         Text(
-            text = friend.memo,
+            text = friend.friendDetail.memo,
             style = MaterialTheme.typography.labelLarge,
             modifier = Modifier.padding(vertical = 4.dp)
         )

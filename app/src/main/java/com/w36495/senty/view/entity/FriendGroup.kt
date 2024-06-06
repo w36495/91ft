@@ -2,10 +2,7 @@ package com.w36495.senty.view.entity
 
 import android.graphics.Color
 import com.w36495.senty.data.domain.FriendGroupEntity
-import com.w36495.senty.util.DateUtil
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
 @Serializable
 data class FriendGroup(
@@ -29,11 +26,12 @@ data class FriendGroup(
         return Color.parseColor(formatColor)
     }
 
+    override fun toString(): String {
+        return "FriendGroup(id=$id name=$name, color=$color)"
+    }
+
     companion object {
         private const val DEFAULT_COLOR = "D9D9D9"
         val emptyFriendGroup = FriendGroup(name = "")
-
-        fun encodeToJson(group: FriendGroup): String = Json.encodeToString(group)
-        fun decodeToObject(jsonGroup: String): FriendGroup = Json.decodeFromString(jsonGroup)
     }
 }

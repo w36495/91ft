@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -24,17 +24,10 @@ class FriendEditViewModel @Inject constructor(
 
     fun getFriend(friendId: String) {
         viewModelScope.launch {
-            friendRepository.getFriend(friendId).combine(
-                friendGroupRepository.getFriendGroups()
-            ) { friend, groups ->
-                val group = groups.find { it.id == friend.groupId }
-
-                friend.toDomainEntity()
-                    .copy(friendGroup = group!!)
-                    .apply { setId(friendId) }
-            }.collectLatest { friendDetail ->
-                _friend.value = FriendEditUiState.Success(friendDetail)
-            }
+            friendRepository.getFriend(friendId)
+                .collectLatest { friendDetail ->
+                    _friend.update { FriendEditUiState.Success(friendDetail) }
+                }
         }
     }
 

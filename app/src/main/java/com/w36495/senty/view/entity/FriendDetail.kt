@@ -25,19 +25,31 @@ data class FriendDetail(
     }
 
     fun toDataEntity(): FriendDetailEntity = FriendDetailEntity(
-        id = this@FriendDetail.id,
         name = name,
         birthday = birthday,
         memo = memo,
         groupId = friendGroup.id,
     )
 
-    fun copy() = FriendDetail(name = this@FriendDetail.name, birthday = this@FriendDetail.birthday, memo = this@FriendDetail.memo,
-        friendGroup = friendGroup).apply {
+    fun copy(friendGroup: FriendGroup) = FriendDetail(
+        name = name,
+        birthday = birthday,
+        memo = memo,
+        friendGroup = friendGroup
+    ).apply {
         setId(this@FriendDetail.id)
     }
 
     companion object {
-        val emptyFriendEntity = FriendDetail(name = "", birthday = "", memo = "", friendGroup = FriendGroup.emptyFriendGroup)
+        val emptyFriendEntity = FriendDetail(
+            name = "",
+            birthday = "",
+            memo = "",
+            friendGroup = FriendGroup.emptyFriendGroup
+        )
+    }
+
+    override fun toString(): String {
+        return "FriendDetail(id=$id name=$name, birthday=$birthday, memo=$memo, friendGroup=$friendGroup)"
     }
 }
