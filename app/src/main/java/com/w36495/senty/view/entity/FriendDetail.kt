@@ -31,6 +31,13 @@ data class FriendDetail(
         groupId = friendGroup.id,
     )
 
+    fun copy() = FriendDetail(
+        name = this.name,
+        birthday = this.birthday,
+        memo = this.memo,
+        friendGroup = this.friendGroup
+    ).apply { setId(this@FriendDetail.id) }
+
     fun copy(friendGroup: FriendGroup) = FriendDetail(
         name = this.name,
         birthday = this.birthday,

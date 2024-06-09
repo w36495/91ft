@@ -1,6 +1,7 @@
 package com.w36495.senty.domain.repository
 
-import com.w36495.senty.data.domain.GiftEntity
+import com.w36495.senty.data.domain.GiftDetailEntity
+import com.w36495.senty.view.entity.gift.GiftDetail
 import kotlinx.coroutines.flow.Flow
 import okhttp3.ResponseBody
 import retrofit2.Response

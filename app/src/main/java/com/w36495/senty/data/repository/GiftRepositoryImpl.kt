@@ -1,11 +1,13 @@
 package com.w36495.senty.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
-import com.w36495.senty.data.domain.EntityKeyDTO
-import com.w36495.senty.data.domain.GiftEntity
+import com.w36495.senty.data.domain.GiftDetailEntity
 import com.w36495.senty.data.domain.GiftImgUriDTO
 import com.w36495.senty.data.remote.service.GiftService
 import com.w36495.senty.domain.repository.GiftRepository
+import com.w36495.senty.view.entity.FriendDetail
+import com.w36495.senty.view.entity.gift.GiftCategory
+import com.w36495.senty.view.entity.gift.GiftDetail
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.json.Json
@@ -20,36 +22,49 @@ class GiftRepositoryImpl @Inject constructor(
     private val giftService: GiftService
 ) : GiftRepository {
     private var userId = firebaseAuth.currentUser!!.uid
-    override fun getGift(giftId: String): Flow<GiftEntity> = flow {
+    override fun getGift(giftId: String): Flow<GiftDetail> = flow {
         val result = giftService.getGift(userId, giftId)
 
         if (result.isSuccessful) {
             result.body()?.let {
                 val responseJson = Json.parseToJsonElement(it.string())
-                val gift = Json.decodeFromJsonElement<GiftEntity>(responseJson.jsonObject)
+                val giftDetailEntity = Json.decodeFromJsonElement<GiftDetailEntity>(responseJson)
 
-                emit(gift)
+                val giftCategory = GiftCategory.emptyCategory.apply { setId(giftDetailEntity.categoryId) }
+                val friend = FriendDetail.emptyFriendEntity.apply { setId(giftDetailEntity.friendId) }
+                val giftDetail = giftDetailEntity.toDomainEntity()
+                    .apply { setId(giftId) }
+                    .copy(giftCategory = giftCategory, friendDetail = friend)
+
+                emit(giftDetail)
+
             }
         } else throw IllegalArgumentException(result.errorBody().toString())
     }
 
-    override fun getGifts(): Flow<List<GiftEntity>> = flow {
+    override fun getGifts(): Flow<List<GiftDetail>> = flow {
         val result = giftService.getGifts(userId)
-        val gifts = mutableListOf<GiftEntity>()
 
         if (result.isSuccessful) {
             if (result.headers()["Content-length"]?.toInt() != 4) {
                 result.body()?.let {
                     val responseJson = Json.parseToJsonElement(it.string())
-                    responseJson.jsonObject.forEach { jsonGift ->
-                        val parseFriend = Json.decodeFromJsonElement<GiftEntity>(jsonGift.value)
-                        gifts.add(parseFriend)
+
+                    responseJson.jsonObject.map { (key, jsonElement) ->
+                        val giftDetailEntity = Json.decodeFromJsonElement<GiftDetailEntity>(jsonElement)
+                        val giftCategory = GiftCategory.emptyCategory.apply { setId(giftDetailEntity.categoryId) }
+                        val friend = FriendDetail.emptyFriendEntity.apply { setId(giftDetailEntity.friendId) }
+
+                        giftDetailEntity.toDomainEntity()
+                            .copy(category = giftCategory.copy(), friend = friend.copy())
+                            .apply { setId(key) }
+
+                    }?.let { giftDetail ->
+                        emit(giftDetail.toList())
                     }
                 }
             }
         } else throw IllegalArgumentException(result.errorBody().toString())
-
-        emit(gifts)
     }
 
     override suspend fun insertGift(gift: GiftDetailEntity): Response<ResponseBody> {
