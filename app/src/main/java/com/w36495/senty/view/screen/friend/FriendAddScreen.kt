@@ -29,7 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.w36495.senty.view.entity.FriendEntity
+import com.w36495.senty.view.entity.FriendDetail
 import com.w36495.senty.view.entity.FriendGroup
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
 import com.w36495.senty.view.ui.component.textFields.SentyMultipleTextField
@@ -39,12 +39,46 @@ import com.w36495.senty.view.ui.theme.Green40
 import com.w36495.senty.viewModel.FriendAddViewModel
 
 @Composable
-fun FriendAddScreen(
+fun FriendAddRoute(
     vm: FriendAddViewModel = hiltViewModel(),
     onBackPressed: () -> Unit,
     onMoveFriendList: () -> Unit,
     onClickGroupEdit: () -> Unit,
 ) {
+    FriendAddScreen(
+        onBackPressed = { onBackPressed() },
+        onClickSave = {
+            vm.saveFriend(it)
+            onMoveFriendList()
+        },
+        onClickGroupEdit = { onClickGroupEdit() }
+    )
+}
+
+@Composable
+fun FriendAddScreen(
+    onBackPressed: () -> Unit,
+    onClickSave: (FriendDetail) -> Unit,
+    onClickGroupEdit: () -> Unit,
+) {
+    FriendAddContents(
+        onBackPressed = onBackPressed,
+        onClickSave = { onClickSave(it) },
+        onClickGroupEdit = onClickGroupEdit
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FriendAddContents(
+    onBackPressed: () -> Unit,
+    onClickSave: (FriendDetail) -> Unit,
+    onClickGroupEdit: () -> Unit,
+) {
+    var name by remember { mutableStateOf("") }
+    var memo by remember { mutableStateOf("") }
+    var birthday by remember { mutableStateOf("") }
+
     var group by remember { mutableStateOf(FriendGroup.emptyFriendGroup) }
     var showDialog by remember { mutableStateOf(false) }
 
@@ -58,29 +92,6 @@ fun FriendAddScreen(
             onEditClick = { onClickGroupEdit() }
         )
     }
-
-    FriendAddContents(
-        group = group,
-        onClickFriendGroup = { showDialog = true },
-        onBackPressed = { onBackPressed() },
-        onClickSave = { friend ->
-            vm.saveFriend(friend)
-            onMoveFriendList()
-        }
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun FriendAddContents(
-    onBackPressed: () -> Unit,
-    onClickSave: (FriendEntity) -> Unit,
-    onClickFriendGroup: () -> Unit,
-    group: FriendGroup
-) {
-    var name by remember { mutableStateOf("") }
-    var memo by remember { mutableStateOf("") }
-    var birthday by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -127,7 +138,7 @@ private fun FriendAddContents(
                     modifier = Modifier.fillMaxWidth(),
                     group = group,
                     onFriendGroupClick = {
-                        onClickFriendGroup()
+                        showDialog = true
                     }
                 )
 
@@ -158,11 +169,12 @@ private fun FriendAddContents(
                     .padding(top = 24.dp, bottom = 16.dp),
                 text = "등록",
                 onClick = {
-                    val friend = FriendEntity(
+                    val friend = FriendDetail(
                         name = name,
                         birthday = birthday,
-                        memo = memo
-                    ).apply { setFriendGroup(group) }
+                        memo = memo,
+                        friendGroup = group,
+                    )
 
                     onClickSave(friend)
                 }

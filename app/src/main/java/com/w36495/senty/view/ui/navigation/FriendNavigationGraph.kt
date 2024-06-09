@@ -6,9 +6,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
-import com.w36495.senty.view.entity.FriendDetail
-import com.w36495.senty.view.screen.friend.FriendAddScreen
-import com.w36495.senty.view.screen.friend.FriendDeleteDialogScreen
+import com.w36495.senty.view.screen.friend.FriendAddRoute
 import com.w36495.senty.view.screen.friend.FriendDetailScreen
 import com.w36495.senty.view.screen.friend.FriendEditRoute
 import com.w36495.senty.view.screen.friend.FriendGroupScreen
@@ -33,15 +31,22 @@ fun NavGraphBuilder.nestedFriendGraph(navController: NavController) {
             )
         }
         composable(FriendNavigationItem.FRIEND_ADD.name) {
-            FriendAddScreen(
-                friend = friendEntity,
+            FriendAddRoute(
                 onBackPressed = { navController.navigateUp() },
                 onMoveFriendList = {
                     navController.navigate(FriendNavigationItem.FRIEND_LIST.name) {
                         launchSingleTop = true
                     }
                 },
-                onClickGroupEdit = { navController.navigate(FriendNavigationItem.FRIEND_GROUP_SETTINGS.name) }
+                onClickGroupEdit = {
+                    navController.navigate(FriendNavigationItem.FRIEND_GROUP_SETTINGS.name) {
+                        launchSingleTop = true
+
+                        popUpTo(FriendNavigationItem.FRIEND_GROUP_SETTINGS.name) {
+                            saveState = true
+                        }
+                    }
+                }
             )
         }
         composable(FriendNavigationItem.FRIEND_EDIT.name.plus("/{friendId}"),

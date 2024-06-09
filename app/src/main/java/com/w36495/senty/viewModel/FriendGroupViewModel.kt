@@ -52,7 +52,7 @@ class FriendGroupViewModel @Inject constructor(
         }
     }
 
-    private fun refreshFriendGroups() {
+    fun refreshFriendGroups() {
         viewModelScope.launch {
             friendGroupRepository.getFriendGroups()
                 .catch { throwable ->

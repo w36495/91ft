@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -48,7 +49,8 @@ fun FriendGroupDialogScreen(
             onGroupSelected(group)
             onDismiss()
         },
-        onEditClick = { onEditClick() }
+        onEditClick = { onEditClick() },
+        onClickRefresh = { vm.refreshFriendGroups() }
     )
 }
 
@@ -58,6 +60,7 @@ private fun FriendGroupContents(
     onDismiss: () -> Unit,
     friendGroups: List<FriendGroup>,
     onGroupSelected: (FriendGroup) -> Unit,
+    onClickRefresh: () -> Unit,
     onEditClick: () -> Unit,
 ) {
     Dialog(onDismissRequest = { onDismiss() }) {
@@ -72,6 +75,11 @@ private fun FriendGroupContents(
                     actions = {
                         IconButton(onClick = { onDismiss() }) {
                             Icon(imageVector = Icons.Default.Close, contentDescription = null)
+                        }
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { onClickRefresh() }) {
+                            Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
                         }
                     },
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
