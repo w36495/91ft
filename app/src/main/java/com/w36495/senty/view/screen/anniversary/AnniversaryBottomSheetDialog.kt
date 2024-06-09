@@ -77,9 +77,12 @@ fun AnniversaryBottomSheetDialog(
             }
         )
     } else if (showTimePicker) {
-        BasicTimePickerDialog(onDismiss = { showTimePicker = false }) { hour, minute ->
-            time = "${StringUtils.format2Digits(hour)}:${StringUtils.format2Digits(minute)}"
-        }
+        BasicTimePickerDialog(
+            onDismiss = { showTimePicker = false },
+            onSelectTime = { hour, minute ->
+                time = "${StringUtils.format2Digits(hour)}:${StringUtils.format2Digits(minute)}"
+            }
+        )
     } else if (showMap) {
         ScheduleMapScreen(
             onBackPressed = { showMap = false },
@@ -228,7 +231,7 @@ fun AnniversaryBottomSheetDialog(
             ) {
                 Text(text = "장소", style = MaterialTheme.typography.bodyMedium)
                 Text(
-                    text = if (location == "") "장소를 입력해주세요." else location,
+                    text = if (currentType == AnniversaryDialogType.ADD && location == "") "장소를 입력해주세요." else location,
                     modifier = Modifier.clickable {
                         showMap = true
                     }
@@ -244,7 +247,7 @@ fun AnniversaryBottomSheetDialog(
             ) {
                 Text(text = "시간", style = MaterialTheme.typography.bodyMedium)
                 Text(
-                    text = if (time == "") "시간을 입력해주세요." else time,
+                    text = if (currentType == AnniversaryDialogType.ADD && time == "") "시간을 입력해주세요." else time,
                     modifier = Modifier.clickable { showTimePicker = true }
                 )
             }
