@@ -34,16 +34,15 @@ class GiftCategoryRepositoryImpl @Inject constructor(
                 result.body()?.let {
                     val responseJson = Json.parseToJsonElement(it.string())
 
-                    responseJson.jsonObject.mapKeys { (key, jsonElement) ->
-                        val category = Json.decodeFromJsonElement<GiftCategoryEntity>(jsonElement).toDomainEntity()
+                    responseJson.jsonObject.map { (key, jsonElement) ->
+                        Json.decodeFromJsonElement<GiftCategoryEntity>(jsonElement).toDomainEntity()
                             .apply { setId(key) }
-                        categories.add(category)
+                    }.let { giftCategories ->
+                        emit(giftCategories.sortedBy { category -> category.name }.toList())
                     }
                 }
-            }
+            } else emit(emptyList())
         } else throw IllegalArgumentException(result.errorBody().toString())
-
-        emit(categories)
     }
 
     override suspend fun initCategory(defaultCategory: GiftCategoryEntity): Response<ResponseBody> {

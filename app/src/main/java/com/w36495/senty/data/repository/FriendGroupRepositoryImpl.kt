@@ -40,23 +40,21 @@ class FriendGroupRepositoryImpl @Inject constructor(
 
     override fun getFriendGroups(): Flow<List<FriendGroup>> = flow {
         val result = friendGroupService.getFriendGroups(userId)
-        val friendGroups = mutableListOf<FriendGroup>()
 
         if (result.isSuccessful) {
             if (result.headers()["Content-length"]?.toInt() != 4) {
                 result.body()?.let {
                     val responseJson = Json.parseToJsonElement(it.string())
 
-                    responseJson.jsonObject.mapKeys { (key, jsonElement) ->
-                        val group = Json.decodeFromJsonElement<FriendGroupEntity>(jsonElement).toDomainModel()
+                    responseJson.jsonObject.map { (key, jsonElement) ->
+                        Json.decodeFromJsonElement<FriendGroupEntity>(jsonElement).toDomainModel()
                             .apply { setId(key) }
-                        friendGroups.add(group)
+                    }.let { friendGroups ->
+                        emit(friendGroups.sortedBy { group-> group.name }.toList())
                     }
                 }
-            }
+            } else emit(emptyList())
         } else throw IllegalArgumentException("Failed to get friend groups(${result.errorBody().toString()})")
-
-        emit(friendGroups)
     }
 
     override suspend fun insertFriendGroup(friendGroupEntity: FriendGroupEntity): Boolean {
