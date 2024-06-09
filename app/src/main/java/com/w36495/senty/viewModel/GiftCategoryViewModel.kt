@@ -56,7 +56,10 @@ class GiftCategoryViewModel @Inject constructor(
         viewModelScope.launch {
             val result = giftCategoryRepository.deleteCategory(categoryKey)
 
-            if (result) refreshCategories()
+            if (result) {
+                _errorFlow.emit("성공적으로 카테고리가 삭제되었습니다.")
+                refreshCategories()
+            }
             else _errorFlow.emit("카테고리 삭제 중 오류가 발생하였습니다.")
         }
     }

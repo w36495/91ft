@@ -5,9 +5,12 @@ import com.w36495.senty.data.domain.GiftCategoryEntity
 import com.w36495.senty.data.domain.GiftCategoryPatchDTO
 import com.w36495.senty.data.remote.service.GiftCategoryService
 import com.w36495.senty.domain.repository.GiftCategoryRepository
+import com.w36495.senty.domain.repository.GiftRepository
 import com.w36495.senty.view.entity.gift.GiftCategory
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonObject
@@ -17,6 +20,7 @@ import javax.inject.Inject
 
 class GiftCategoryRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
+    private val giftRepository: GiftRepository,
     private val giftCategoryService: GiftCategoryService
 ) : GiftCategoryRepository {
     private var userId: String = firebaseAuth.currentUser!!.uid
@@ -56,6 +60,16 @@ class GiftCategoryRepositoryImpl @Inject constructor(
 
     override suspend fun deleteCategory(categoryKey: String): Boolean {
         val result = giftCategoryService.deleteCategory(userId, categoryKey)
+
+        coroutineScope {
+            giftRepository.getGifts().map { gifts ->
+                gifts.filter { it.category.id == categoryKey }
+            }.collect { gifts ->
+                gifts.forEach { gift ->
+                    giftRepository.deleteGift(gift.id)
+                }
+            }
+        }
 
         if (result.isSuccessful) {
             return result.headers()["Content-length"]?.toInt() == 4
