@@ -25,12 +25,14 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowCircleRight
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -45,14 +47,14 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.w36495.senty.view.entity.FriendDetail
 import com.w36495.senty.view.entity.Schedule
+import com.w36495.senty.view.entity.gift.Gift
 import com.w36495.senty.view.entity.gift.GiftCategory
-import com.w36495.senty.view.entity.gift.GiftDetailEntity
-import com.w36495.senty.view.entity.gift.GiftEntity
+import com.w36495.senty.view.entity.gift.GiftDetail
 import com.w36495.senty.view.entity.gift.GiftType
-import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
 import com.w36495.senty.view.ui.component.cards.ScheduleWithDateList
 import com.w36495.senty.view.ui.theme.Green40
+import com.w36495.senty.viewModel.HomeGiftUiState
 import com.w36495.senty.viewModel.HomeViewModel
 
 @Composable
@@ -65,9 +67,13 @@ fun HomeScreen(
     val receivedGifts by vm.receivedGifts.collectAsState()
     val schedules by vm.schedules.collectAsState()
 
+    LaunchedEffect(sentGifts, receivedGifts, schedules) {
+        vm.loadAllDate()
+    }
+
     HomeContents(
-        sentGifts = sentGifts,
-        receivedGifts = receivedGifts,
+        sentGiftUiState = sentGifts,
+        receivedGiftUiState = receivedGifts,
         schedules = schedules,
         onClickGiftButton = { onClickGiftButton() },
         onClickGiftDetail = { onClickGiftDetail(it) },
@@ -76,8 +82,8 @@ fun HomeScreen(
 
 @Composable
 private fun HomeContents(
-    sentGifts: List<GiftEntity>,
-    receivedGifts: List<GiftEntity>,
+    sentGiftUiState: HomeGiftUiState,
+    receivedGiftUiState: HomeGiftUiState,
     schedules: List<Schedule>,
     onClickGiftButton: () -> Unit,
     onClickGiftDetail: (String) -> Unit,
@@ -100,8 +106,8 @@ private fun HomeContents(
         )
 
         TopGiftButtons(
-            sentGiftCount = sentGifts.size,
-            receivedGiftCount = receivedGifts.size,
+            sentGiftCount = if (sentGiftUiState is HomeGiftUiState.Success) sentGiftUiState.gifts.size else 0,
+            receivedGiftCount = if (receivedGiftUiState is HomeGiftUiState.Success) receivedGiftUiState.gifts.size else 0,
             onClickGiftButton = { onClickGiftButton() }
         )
 
@@ -147,12 +153,23 @@ private fun HomeContents(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    if (receivedGifts.isEmpty()) EmptyGifts("받은 선물을 등록해보세요.")
-                    else GiftCardSection(
-                        gifts = receivedGifts,
-                        onClickAllGifts = { onClickGiftButton() },
-                        onClickGiftDetail = { onClickGiftDetail(it) },
-                    )
+                    when (receivedGiftUiState) {
+                        HomeGiftUiState.Loading -> {
+                            LoadingGifts()
+                        }
+
+                        HomeGiftUiState.Empty -> {
+                            EmptyGifts("받은 선물을 등록해보세요.")
+                        }
+
+                        is HomeGiftUiState.Success -> {
+                            GiftCardSection(
+                                gifts = receivedGiftUiState.gifts,
+                                onClickAllGifts = { onClickGiftButton() },
+                                onClickGiftDetail = { onClickGiftDetail(it) },
+                            )
+                        }
+                    }
 
                     Spacer(modifier = Modifier.height(48.dp))
 
@@ -165,12 +182,23 @@ private fun HomeContents(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    if (sentGifts.isEmpty()) EmptyGifts("준 선물을 등록해보세요.")
-                    else GiftCardSection(
-                        gifts = sentGifts,
-                        onClickAllGifts = { onClickGiftButton() },
-                        onClickGiftDetail = { onClickGiftDetail(it) },
-                    )
+                    when (sentGiftUiState) {
+                        HomeGiftUiState.Loading -> {
+                            LoadingGifts()
+                        }
+
+                        HomeGiftUiState.Empty -> {
+                            EmptyGifts("준 선물을 등록해보세요.")
+                        }
+
+                        is HomeGiftUiState.Success -> {
+                            GiftCardSection(
+                                gifts = sentGiftUiState.gifts,
+                                onClickAllGifts = { onClickGiftButton() },
+                                onClickGiftDetail = { onClickGiftDetail(it) },
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -233,9 +261,35 @@ private fun EmptyGifts(
 }
 
 @Composable
+private fun LoadingGifts() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .background(Color(0xFFFBFBFB), RoundedCornerShape(10.dp)),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            modifier = Modifier.padding(vertical = 32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            CircularProgressIndicator(
+                color = Green40
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "선물을 불러오고 있습니다.",
+                style = MaterialTheme.typography.labelLarge
+            )
+        }
+    }
+}
+
+@Composable
 private fun GiftCardSection(
     modifier: Modifier = Modifier,
-    gifts: List<GiftEntity>,
+    gifts: List<Gift>,
     onClickAllGifts: () -> Unit,
     onClickGiftDetail: (String) -> Unit,
 ) {
@@ -247,8 +301,8 @@ private fun GiftCardSection(
             if (index < 8) {
                 GiftCardItem(
                     giftImg = gift.giftImg,
-                    gift = gift.gift,
-                    friend = gift.friend,
+                    gift = gift.giftDetail,
+                    friend = gift.giftDetail.friend,
                     onClickGiftDetail = { onClickGiftDetail(it) }
                 )
             }
@@ -264,7 +318,7 @@ private fun GiftCardSection(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     IconButton(
-                        onClick = {  },
+                        onClick = { },
                         enabled = false,
                         colors = IconButtonDefaults.iconButtonColors(
                             disabledContentColor = Color.Black
@@ -294,7 +348,7 @@ private fun GiftCardSection(
 private fun GiftCardItem(
     modifier: Modifier = Modifier,
     giftImg: String,
-    gift: GiftDetailEntity,
+    gift: GiftDetail,
     friend: FriendDetail,
     onClickGiftDetail: (String) -> Unit,
 ) {

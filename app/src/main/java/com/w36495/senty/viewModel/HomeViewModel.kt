@@ -8,7 +8,7 @@ import com.w36495.senty.domain.repository.GiftImgRepository
 import com.w36495.senty.domain.repository.GiftRepository
 import com.w36495.senty.util.DateUtil
 import com.w36495.senty.view.entity.Schedule
-import com.w36495.senty.view.entity.gift.GiftEntity
+import com.w36495.senty.view.entity.gift.Gift
 import com.w36495.senty.view.entity.gift.GiftType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -28,18 +29,18 @@ class HomeViewModel @Inject constructor(
     private val friendRepository: FriendRepository,
     private val anniversaryRepository: AnniversaryRepository,
 ) : ViewModel() {
-    private var _sentGifts = MutableStateFlow<List<GiftEntity>>(emptyList())
+    private var _sentGifts = MutableStateFlow<HomeGiftUiState>(HomeGiftUiState.Loading)
     val sentGifts = _sentGifts.asStateFlow()
 
-    private var _receivedGifts = MutableStateFlow<List<GiftEntity>>(emptyList())
+    private var _receivedGifts = MutableStateFlow<HomeGiftUiState>(HomeGiftUiState.Loading)
     val receivedGifts = _receivedGifts.asStateFlow()
     private var _schedules = MutableStateFlow<List<Schedule>>(emptyList())
     val schedules = _schedules.asStateFlow()
 
-    init {
-        getSentGift()
-        getReceivedGift()
+    fun loadAllDate() {
         getSchedules()
+        getSentGifts()
+        getReceivedGifts()
     }
 
     private fun getSchedules() {
@@ -47,76 +48,80 @@ class HomeViewModel @Inject constructor(
             anniversaryRepository.getSchedules()
                 .map { schedules ->
                     schedules.filter { DateUtil.calRemainDate(it.date) > 0 }
-                        .map { it.toDomainEntity() }
                 }
                 .collectLatest { schedules ->
                     val sortedSchedules = schedules.sortedBy { it.date }
 
                     if (schedules.size > 2) {
                         _schedules.value = sortedSchedules.subList(0, 1).toList()
-                    }
-                    else _schedules.value = sortedSchedules.toList()
+                    } else _schedules.value = sortedSchedules.toList()
                 }
         }
     }
 
-    private fun getSentGift() {
+    private fun getSentGifts() {
         viewModelScope.launch {
             giftRepository.getGifts()
                 .map { gifts -> gifts.filter { it.giftType == GiftType.SENT } }
                 .combine(friendRepository.getFriends()) { gifts, friends ->
-                    gifts.map { gift ->
-                        val friend = friends.find { it.id == gift.friendId }
-                        var giftEntity = GiftEntity(
-                            gift = gift.toDomainEntity(),
-                            friend = friend!!.toDomainEntity()
-                        )
+                    gifts.map { giftDetail ->
+                        val friend = friends.find { it.id == giftDetail.friend.id }
+                        var gift = Gift(giftDetail = giftDetail.copy(friendDetail = friend!!))
 
-                        if (gift.imgUri.isNotEmpty()) {
+                        if (giftDetail.imgUri.isNotEmpty()) {
                             coroutineScope {
-                                val img =
-                                    async { giftImgRepository.getGiftImages(gift.id, gift.imgUri) }
+                                val img = async { giftImgRepository.getGiftImages(giftDetail.id, giftDetail.imgUri) }
 
-                                giftEntity = giftEntity.copy(giftImg = img.await())
+                                gift = gift.copy(giftImg = img.await())
                             }
                         }
 
-                        giftEntity
+                        gift
                     }
                 }
-                .collectLatest {
-                    _sentGifts.value = it.toList()
+                .collectLatest { gifts ->
+                    if (gifts.isEmpty()) {
+                        _sentGifts.update { HomeGiftUiState.Empty }
+                    } else {
+                        _sentGifts.update { HomeGiftUiState.Success(gifts.toList()) }
+                    }
                 }
         }
     }
 
-    private fun getReceivedGift() {
+    private fun getReceivedGifts() {
         viewModelScope.launch {
             giftRepository.getGifts()
                 .map { gifts -> gifts.filter { it.giftType == GiftType.RECEIVED } }
                 .combine(friendRepository.getFriends()) { gifts, friends ->
-                    gifts.map { gift ->
-                        val friend = friends.find { it.id == gift.friendId }
-                        var giftEntity = GiftEntity(
-                            gift = gift.toDomainEntity(),
-                            friend = friend!!.toDomainEntity()
-                        )
+                    gifts.map { giftDetail ->
+                        val friend = friends.find { it.id == giftDetail.friend.id }
+                        var gift = Gift(giftDetail = giftDetail.copy(friendDetail = friend!!))
 
-                        if (gift.imgUri.isNotEmpty()) {
+                        if (giftDetail.imgUri.isNotEmpty()) {
                             coroutineScope {
-                                val img =
-                                    async { giftImgRepository.getGiftImages(gift.id, gift.imgUri) }
+                                val img = async { giftImgRepository.getGiftImages(giftDetail.id, giftDetail.imgUri) }
 
-                                giftEntity = giftEntity.copy(giftImg = img.await())
+                                gift = gift.copy(giftImg = img.await())
                             }
                         }
 
-                        giftEntity
+                        gift
                     }
                 }
-                .collectLatest {
-                    _receivedGifts.value = it.toList()
+                .collectLatest { gifts ->
+                    if (gifts.isEmpty()) {
+                        _receivedGifts.update { HomeGiftUiState.Empty }
+                    } else {
+                        _receivedGifts.update { HomeGiftUiState.Success(gifts.toList()) }
+                    }
                 }
         }
     }
+}
+
+sealed interface HomeGiftUiState {
+    data object Loading: HomeGiftUiState
+    data object Empty: HomeGiftUiState
+    data class Success(val gifts: List<Gift>): HomeGiftUiState
 }
