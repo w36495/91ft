@@ -55,6 +55,7 @@ import kotlinx.coroutines.launch
 fun GiftScreen(
     vm: GiftViewModel = hiltViewModel(),
     onBackPressed: () -> Unit,
+    onClickGiftDetail: (String) -> Unit,
     onClickGiftCategory: () -> Unit,
 ) {
     val tabState = listOf(
@@ -84,7 +85,8 @@ fun GiftScreen(
         tabState = tabState,
         pagerState = pagerState,
         onBackPressed = { onBackPressed() },
-        onClickGiftCategory = { onClickGiftCategory() }
+        onClickGiftCategory = { onClickGiftCategory() },
+        onClickGiftDetail = onClickGiftDetail
     )
 }
 
@@ -95,6 +97,7 @@ private fun GiftContents(
     tabState: List<String>,
     pagerState: PagerState,
     onBackPressed: () -> Unit,
+    onClickGiftDetail: (String) -> Unit,
     onClickGiftCategory: () -> Unit,
 ) {
     Scaffold(
@@ -132,7 +135,7 @@ private fun GiftContents(
                 modifier = Modifier.fillMaxWidth(),
                 pagerState = pagerState,
                 gifts = gifts,
-                onClickGift = {}
+                onClickGift = onClickGiftDetail
             )
         }
     }
@@ -204,7 +207,7 @@ private fun GiftHorizontalViewPager(
 
                 gifts.forEach { gift ->
                     GiftViewPagerItem(
-                        imgPath = gift.imgPath,
+                        imgPath = gift.giftImg,
                         onClickGift = { onClickGift(gift.giftDetail.id) }
                     )
                 }
@@ -230,7 +233,8 @@ private fun GiftViewPagerItem(
         )
     } else {
         GlideImage(model = imgPath, contentDescription = null,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .aspectRatio(1f)
                 .clickable { onClickGift() },
             contentScale = ContentScale.Crop

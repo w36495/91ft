@@ -26,6 +26,15 @@ fun NavGraphBuilder.nestedGiftGraph(navController: NavController) {
             GiftScreen(
                 onBackPressed = { navController.navigateUp() },
                 onClickGiftCategory = { navController.navigate(GiftNavigationItem.GIFT_CATEGORY.name) },
+                onClickGiftDetail = { giftId ->
+                    navController.navigate(GiftNavigationItem.GIFT_DETAIL.name.plus("/$giftId")) {
+                        launchSingleTop = true
+
+                        popUpTo(GiftNavigationItem.GIFT_DETAIL.name) {
+                            saveState = true
+                        }
+                    }
+                }
             )
         }
 
