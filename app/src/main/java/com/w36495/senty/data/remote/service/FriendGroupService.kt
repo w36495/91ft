@@ -1,6 +1,5 @@
 package com.w36495.senty.data.remote.service
 
-import com.w36495.senty.data.domain.EntityKeyDTO
 import com.w36495.senty.data.domain.FriendGroupEntity
 import okhttp3.ResponseBody
 import retrofit2.Response
