@@ -10,38 +10,12 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.w36495.senty.view.ui.component.buttons.SentyElevatedButton
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
-import com.w36495.senty.viewModel.FriendDetailViewModel
-
-@Composable
-fun FriendDeleteDialogScreen(
-    friendId: String,
-    vm: FriendDetailViewModel = hiltViewModel(),
-    onComplete: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    var showDialog by remember { mutableStateOf(true) }
-
-    if (showDialog) {
-        FriendDeleteDialogContents(
-            onClickDelete = {
-                vm.removeFriend(friendId)
-                onComplete()
-            },
-            onDismiss = { showDialog = false }
-        )
-    } else onDismiss()
-}
 
 @Composable
 fun FriendDeleteDialogContents(

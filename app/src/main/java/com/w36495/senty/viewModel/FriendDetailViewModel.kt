@@ -34,6 +34,8 @@ class FriendDetailViewModel @Inject constructor(
 ) : ViewModel() {
     private var _errorFlow = MutableSharedFlow<String>()
     val errorFlow: SharedFlow<String> get() = _errorFlow.asSharedFlow()
+    private var _deleteResult = MutableStateFlow(false)
+    val deleteResult = _deleteResult.asStateFlow()
     private var _friend = MutableStateFlow(FriendDetail.emptyFriendEntity)
     val friend: StateFlow<FriendDetail> = _friend.asStateFlow()
     private var _gifts = MutableStateFlow<List<GiftEntity>>(emptyList())
@@ -79,14 +81,13 @@ class FriendDetailViewModel @Inject constructor(
 
     fun removeFriend(friendId: String) {
         viewModelScope.launch {
-            try {
-                val result = async { friendRepository.deleteFriend(friendId) }.await()
+            val result = friendRepository.deleteFriend(friendId)
 
-                if (result) _errorFlow.emit("성공적으로 삭제되었습니다.")
-                else _errorFlow.emit("오류가 발생하였습니다.")
-            } catch (e: Exception) {
-                Log.e("FriendDetailViewModel", "removeFriend: ", e)
+            if (result) {
+                _errorFlow.emit("성공적으로 삭제되었습니다.")
+                _deleteResult.update { true }
             }
+            else _errorFlow.emit("오류가 발생하였습니다.")
         }
     }
 }

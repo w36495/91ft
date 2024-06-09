@@ -4,13 +4,13 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.dialog
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
 import com.w36495.senty.view.entity.FriendDetail
 import com.w36495.senty.view.screen.friend.FriendAddScreen
 import com.w36495.senty.view.screen.friend.FriendDeleteDialogScreen
 import com.w36495.senty.view.screen.friend.FriendDetailScreen
+import com.w36495.senty.view.screen.friend.FriendEditRoute
 import com.w36495.senty.view.screen.friend.FriendGroupScreen
 import com.w36495.senty.view.screen.home.FriendScreen
 
@@ -80,9 +80,6 @@ fun NavGraphBuilder.nestedFriendGraph(navController: NavController) {
                 onClickEdit = { friendId ->
                     navController.navigate(FriendNavigationItem.FRIEND_EDIT.name.plus("/${friendId}"))
                 },
-                onClickDelete = {
-                    navController.navigate("${FriendNavigationItem.FRIEND_DELETE_DIALOG.name}/$friendId")
-                },
                 onClickGiftDetail = { giftId ->
                     navController.navigate(GiftNavigationItem.GIFT_DETAIL.name.plus("/$giftId")) {
                         launchSingleTop = true
@@ -91,22 +88,8 @@ fun NavGraphBuilder.nestedFriendGraph(navController: NavController) {
                             saveState = true
                         }
                     }
-                }
-            )
-        }
-
-        dialog(
-            route = "${FriendNavigationItem.FRIEND_DELETE_DIALOG.name}/{friendId}",
-            arguments = listOf(navArgument("friendId") {
-                nullable = false
-                type = NavType.StringType
-            })
-        ) { backStackEntry ->
-            val friendId = requireNotNull(backStackEntry.arguments).getString("friendId")
-
-            FriendDeleteDialogScreen(
-                friendId = friendId.toString(),
-                onComplete = {
+                },
+                onCompleteDelete = {
                     navController.navigate(FriendNavigationItem.FRIEND_LIST.name) {
                         launchSingleTop = true
 
@@ -114,9 +97,6 @@ fun NavGraphBuilder.nestedFriendGraph(navController: NavController) {
                             inclusive = true
                         }
                     }
-                },
-                onDismiss = {
-                    navController.navigateUp()
                 }
             )
         }
@@ -131,5 +111,5 @@ fun NavGraphBuilder.nestedFriendGraph(navController: NavController) {
 }
 
 enum class FriendNavigationItem {
-    FRIEND_LIST, FRIEND_DETAIL, FRIEND_ADD, FRIEND_GROUP_SETTINGS, FRIEND_DELETE_DIALOG,
+    FRIEND_LIST, FRIEND_DETAIL, FRIEND_ADD, FRIEND_EDIT, FRIEND_GROUP_SETTINGS,
 }

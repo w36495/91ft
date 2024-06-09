@@ -23,6 +23,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults.SecondaryIndicator
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
@@ -31,13 +33,15 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -49,14 +53,14 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.w36495.senty.view.entity.FriendDetail
-import com.w36495.senty.view.entity.gift.GiftEntity
-import com.w36495.senty.view.screen.ui.theme.SentyTheme
+import com.w36495.senty.view.entity.gift.Gift
 import com.w36495.senty.view.ui.component.buttons.SentyElevatedButton
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
 import com.w36495.senty.view.ui.component.textFields.SentyMultipleTextField
 import com.w36495.senty.view.ui.component.textFields.SentyReadOnlyTextField
 import com.w36495.senty.view.ui.theme.Green40
 import com.w36495.senty.viewModel.FriendDetailViewModel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @Composable
@@ -66,7 +70,7 @@ fun FriendDetailScreen(
     onBackPressed: () -> Unit,
     onClickGiftDetail: (String) -> Unit,
     onClickEdit: (String) -> Unit,
-    onClickDelete: () -> Unit,
+    onCompleteDelete: () -> Unit,
 ) {
     LaunchedEffect(Unit) {
         vm.getFriend(friendId)
@@ -75,12 +79,35 @@ fun FriendDetailScreen(
     
     val friend by vm.friend.collectAsStateWithLifecycle()
     val gifts by vm.gifts.collectAsStateWithLifecycle()
+    val deleteResult by vm.deleteResult.collectAsStateWithLifecycle()
+
+    val snackBarHostState = remember { SnackbarHostState() }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(true) {
+        vm.errorFlow.collectLatest {
+            snackBarHostState.showSnackbar(it)
+        }
+    }
+
+    if (showDeleteDialog) {
+        FriendDeleteDialogContents(
+            onClickDelete = {
+                vm.removeFriend(friendId)
+                showDeleteDialog = false
+            },
+            onDismiss = { showDeleteDialog = false }
+        )
+    } else if (deleteResult) {
+        onCompleteDelete()
+    }
 
     FriendDetailContents(
         friend = friend,
+        snackBarHostState = snackBarHostState,
         onBackPressed = { onBackPressed() },
         onClickEdit = { onClickEdit(friendId) },
-        onClickDelete = { onClickDelete() },
+        onClickDelete = { showDeleteDialog = true },
         gifts = gifts,
         onClickGiftDetail = onClickGiftDetail
     )
@@ -90,7 +117,8 @@ fun FriendDetailScreen(
 @Composable
 private fun FriendDetailContents(
     friend: FriendDetail,
-    gifts: List<GiftEntity>,
+    gifts: List<Gift>,
+    snackBarHostState: SnackbarHostState,
     onBackPressed: () -> Unit,
     onClickGiftDetail: (String) -> Unit,
     onClickEdit: () -> Unit,
@@ -112,6 +140,7 @@ private fun FriendDetailContents(
                 }
             )
         },
+        snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -134,7 +163,7 @@ private fun FriendDetailContents(
 @Composable
 private fun FriendDetailViewPager(
     modifier: Modifier = Modifier,
-    gifts: List<GiftEntity>,
+    gifts: List<Gift>,
     friend: FriendDetail,
     onClickGiftDetail: (String) -> Unit,
     onClickEdit: () -> Unit,
@@ -278,7 +307,7 @@ private fun FriendInfoSection(
 @Composable
 private fun GiftSection(
     modifier: Modifier = Modifier,
-    gifts: List<GiftEntity>,
+    gifts: List<Gift>,
     onClickGift: (String) -> Unit,
 ) {
     Column(
@@ -321,7 +350,7 @@ private fun GiftSection(
 @Composable
 private fun GiftItem(
     modifier: Modifier = Modifier,
-    gift: GiftEntity,
+    gift: Gift,
     onClickGiftDetail: (String) -> Unit,
 ) {
     if (gift.giftImg.isEmpty()) {
@@ -330,16 +359,17 @@ private fun GiftItem(
                 .aspectRatio(1f)
                 .fillMaxWidth()
                 .background(Color(0xFFFBFBFB))
-                .clickable { onClickGiftDetail(gift.gift.id) }
+                .clickable { onClickGiftDetail(gift.giftDetail.id) }
         )
     } else {
         GlideImage(
             model = gift.giftImg,
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = modifier.aspectRatio(1f)
+            modifier = modifier
+                .aspectRatio(1f)
                 .fillMaxWidth()
-                .clickable { onClickGiftDetail(gift.gift.id) }
+                .clickable { onClickGiftDetail(gift.giftDetail.id) }
         )
     }
 }
@@ -367,23 +397,6 @@ private fun BottomButtons(
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 16.dp)
         ) { onClickDelete() }
-    }
-}
-
-@Preview(showBackground = true, heightDp = 1024)
-@Composable
-private fun FriendDetailPreview() {
-    SentyTheme {
-        FriendDetailContents(
-            gifts = emptyList(),
-            friend = FriendDetail(name = "철수", birthday = "1112", memo = ""),
-            onClickDelete = {},
-            onBackPressed = {},
-            onClickEdit = {
-
-            },
-            onClickGiftDetail = {}
-        )
     }
 }
 

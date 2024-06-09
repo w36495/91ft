@@ -85,9 +85,8 @@ class GiftRepositoryImpl @Inject constructor(
         val result = giftService.deleteGift(userId, giftKey)
 
         if (result.isSuccessful) {
-            if (result.headers()["Content-length"]?.toInt() == 4) return true
-        }
+            return result.headers()["Content-length"]?.toInt() == 4
+        } else throw IllegalArgumentException("Failed to delete gift")
 
-        return false
     }
 }

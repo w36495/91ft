@@ -4,10 +4,13 @@ import com.google.firebase.auth.FirebaseAuth
 import com.w36495.senty.data.domain.FriendDetailEntity
 import com.w36495.senty.data.remote.service.FriendService
 import com.w36495.senty.domain.repository.FriendRepository
+import com.w36495.senty.domain.repository.GiftRepository
 import com.w36495.senty.view.entity.FriendDetail
 import com.w36495.senty.view.entity.FriendGroup
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonObject
@@ -18,6 +21,7 @@ import javax.inject.Inject
 class FriendRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val friendService: FriendService,
+    private val giftRepository: GiftRepository,
 ) : FriendRepository {
     private var userId: String = firebaseAuth.currentUser!!.uid
 
@@ -79,6 +83,18 @@ class FriendRepositoryImpl @Inject constructor(
         val result = friendService.deleteFriend(userId, friendId)
 
         if (result.isSuccessful) {
+            coroutineScope {
+                giftRepository.getGifts()
+                    .map { gifts ->
+                        gifts.filter { it.friend.id == friendId }
+                    }
+                    .collect { gifts ->
+                        gifts.forEach {
+                            giftRepository.deleteGift(it.id)
+                        }
+                    }
+            }
+
             return result.headers()["Content-length"]?.toInt() == 4
         } else throw IllegalArgumentException("Failed to delete friend")
     }
