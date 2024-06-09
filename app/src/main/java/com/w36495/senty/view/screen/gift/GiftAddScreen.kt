@@ -131,9 +131,14 @@ private fun GiftAddContents(
 
     if (showImageSelectionDialog) {
         ImageSelectionDialog(
+            hasImagePath = if (giftImg == null) false else true,
             onDismiss = { showImageSelectionDialog = false },
             onClickCamera = { takePhotoFromCamera.launch() },
-            onClickGallery = { takePhotoFromGallery.launch(takePhotoFromGalleryIntent) }
+            onClickGallery = { takePhotoFromGallery.launch(takePhotoFromGalleryIntent) },
+            onClickDelete = {
+                giftImg = null
+                showImageSelectionDialog = false
+            }
         )
     }
 

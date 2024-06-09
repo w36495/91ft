@@ -13,7 +13,9 @@ import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,11 +28,14 @@ import com.w36495.senty.view.screen.ui.theme.SentyTheme
 
 @Composable
 fun ImageSelectionDialog(
+    hasImagePath: Boolean,
     onDismiss: () -> Unit,
     onClickCamera: () -> Unit,
     onClickGallery: () -> Unit,
+    onClickDelete: () -> Unit,
 ) {
     ImageSelectionDialogContents(
+        hasImagePath = hasImagePath,
         onDismiss = { onDismiss() },
         onClickCamera = {
             onClickCamera()
@@ -40,15 +45,18 @@ fun ImageSelectionDialog(
             onClickGallery()
             onDismiss()
         },
+        onClickDelete = onClickDelete
     )
 }
 
 @Composable
 private fun ImageSelectionDialogContents(
     modifier: Modifier = Modifier,
+    hasImagePath: Boolean,
     onDismiss: () -> Unit,
     onClickCamera: () -> Unit,
     onClickGallery: () -> Unit,
+    onClickDelete: () -> Unit,
 ) {
     Dialog(onDismissRequest = { onDismiss() }) {
         Card(
@@ -57,49 +65,64 @@ private fun ImageSelectionDialogContents(
                 containerColor = Color.White
             )
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp)
-            ) {
-                Box(
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f)
-                        .clickable { onClickCamera() }
+                        .padding(vertical = 16.dp)
                 ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .clickable { onClickCamera() }
                     ) {
-                        IconButton(onClick = { onClickCamera() }) {
-                            Icon(imageVector = Icons.Default.CameraAlt, contentDescription = null)
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            IconButton(onClick = { onClickCamera() }) {
+                                Icon(imageVector = Icons.Default.CameraAlt, contentDescription = null)
+                            }
+                            Text(
+                                text = "카메라를 통해 \n이미지 가져오기",
+                                textAlign = TextAlign.Center
+                            )
                         }
-                        Text(
-                            text = "카메라를 통해 \n이미지 가져오기",
-                            textAlign = TextAlign.Center
-                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .clickable { onClickGallery() }
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            IconButton(onClick = { onClickGallery() }) {
+                                Icon(imageVector = Icons.Default.Image, contentDescription = null)
+                            }
+                            Text(
+                                text = "갤러리를 통해\n이미지 가져오기",
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 }
+            }
 
+            if (hasImagePath) {
+                HorizontalDivider()
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .clickable { onClickGallery() }
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(vertical = 24.dp)
+                        .clickable { onClickDelete() },
+                    contentAlignment = Alignment.Center
                 ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        IconButton(onClick = { onClickGallery() }) {
-                            Icon(imageVector = Icons.Default.Image, contentDescription = null)
-                        }
-                        Text(
-                            text = "갤러리를 통해\n이미지 가져오기",
-                            textAlign = TextAlign.Center
-                        )
-                    }
+                    Text(text = "이미지 삭제하기",
+                        color = MaterialTheme.colorScheme.error)
                 }
             }
         }
@@ -111,9 +134,25 @@ private fun ImageSelectionDialogContents(
 private fun ImageSelectionDialogPreview() {
     SentyTheme {
         ImageSelectionDialogContents(
+            hasImagePath = true,
             onDismiss = {},
             onClickCamera = {},
-            onClickGallery = {}
+            onClickGallery = {},
+            onClickDelete = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ImageSelectionDialogPreview2() {
+    SentyTheme {
+        ImageSelectionDialogContents(
+            hasImagePath = false,
+            onDismiss = {},
+            onClickCamera = {},
+            onClickGallery = {},
+            onClickDelete = {},
         )
     }
 }
