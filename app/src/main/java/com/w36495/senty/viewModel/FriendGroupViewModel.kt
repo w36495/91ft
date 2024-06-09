@@ -18,7 +18,7 @@ import javax.inject.Inject
 class FriendGroupViewModel @Inject constructor(
     private val friendGroupRepository: FriendGroupRepository
 ) : ViewModel() {
-    private val _errorFlow = MutableSharedFlow<Throwable>()
+    private val _errorFlow = MutableSharedFlow<String>()
     val errorFlow get() = _errorFlow.asSharedFlow()
     private var _friendGroups = MutableStateFlow<List<FriendGroup>>(emptyList())
     val friendGroups get() = _friendGroups.asStateFlow()
@@ -45,7 +45,10 @@ class FriendGroupViewModel @Inject constructor(
     fun removeFriendGroup(friendGroupId: String) {
         viewModelScope.launch {
             val result = friendGroupRepository.deleteFriendGroup(friendGroupId)
-            if (result) refreshFriendGroups()
+            if (result) {
+                _errorFlow.emit("성공적으로 그룹이 삭제되었습니다.")
+                refreshFriendGroups()
+            }
         }
     }
 
@@ -53,7 +56,7 @@ class FriendGroupViewModel @Inject constructor(
         viewModelScope.launch {
             friendGroupRepository.getFriendGroups()
                 .catch { throwable ->
-                    _errorFlow.emit(throwable)
+                    _errorFlow.emit("그룹을 불러오는 중 오류가 발생하였습니다.")
                 }
                 .collect { refreshGroups ->
                     _friendGroups.update { refreshGroups.toList() }

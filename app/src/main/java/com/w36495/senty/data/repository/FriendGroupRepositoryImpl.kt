@@ -4,9 +4,12 @@ import com.google.firebase.auth.FirebaseAuth
 import com.w36495.senty.data.domain.FriendGroupEntity
 import com.w36495.senty.data.remote.service.FriendGroupService
 import com.w36495.senty.domain.repository.FriendGroupRepository
+import com.w36495.senty.domain.repository.FriendRepository
 import com.w36495.senty.view.entity.FriendGroup
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonObject
@@ -16,6 +19,7 @@ import javax.inject.Inject
 
 class FriendGroupRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
+    private val friendRepository: FriendRepository,
     private val friendGroupService: FriendGroupService,
 ) : FriendGroupRepository {
     private var userId: String = firebaseAuth.currentUser!!.uid
@@ -69,9 +73,19 @@ class FriendGroupRepositoryImpl @Inject constructor(
         val result = friendGroupService.deleteFriendGroup(userId, friendGroupKey)
 
         if (result.isSuccessful) {
-            if (result.headers()["Content-length"]?.toInt() == 4) return true
-        }
+            coroutineScope {
+                friendRepository.getFriends()
+                    .map { friends ->
+                        friends.filter { friend -> friend.friendGroup.id == friendGroupKey }
+                    }
+                    .collect { friends ->
+                        friends.forEach {
+                            friendRepository.deleteFriend(it.id)
+                        }
+                    }
+            }
 
-        return false
+            return result.headers()["Content-length"]?.toInt() == 4
+        } else throw IllegalArgumentException("Failed to delete friend group(${result.errorBody().toString()})")
     }
 }

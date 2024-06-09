@@ -26,6 +26,11 @@ data class FriendGroup(
         return Color.parseColor(formatColor)
     }
 
+    fun copy() = FriendGroup(
+        name = name,
+        color = color
+    ).apply { setId(this@FriendGroup.id) }
+
     override fun toString(): String {
         return "FriendGroup(id=$id, name=$name, color=$color)"
     }
