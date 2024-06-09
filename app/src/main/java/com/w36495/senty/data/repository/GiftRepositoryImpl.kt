@@ -52,18 +52,12 @@ class GiftRepositoryImpl @Inject constructor(
         emit(gifts)
     }
 
-    override suspend fun insertGift(gift: GiftEntity): Response<ResponseBody> {
+    override suspend fun insertGift(gift: GiftDetailEntity): Response<ResponseBody> {
         return giftService.insertGift(userId, gift)
     }
 
-    override suspend fun patchGiftKey(giftKey: String): Response<ResponseBody> {
-        val newKey = EntityKeyDTO(giftKey)
-
-        return giftService.patchGiftKey(userId, giftKey, newKey)
-    }
-
-    override suspend fun patchGift(gift: GiftEntity): Response<ResponseBody> {
-        return giftService.patchGift(userId, gift.id, gift)
+    override suspend fun patchGift(giftId: String, gift: GiftDetailEntity): Response<ResponseBody> {
+        return giftService.patchGift(userId, giftId, gift)
     }
 
     override suspend fun patchGiftImgUri(giftKey: String, giftUri: String): Response<ResponseBody> {

@@ -36,28 +36,28 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.w36495.senty.util.StringUtils
 import com.w36495.senty.view.entity.FriendDetail
 import com.w36495.senty.view.entity.gift.GiftCategory
 import com.w36495.senty.view.entity.gift.GiftDetail
-import com.w36495.senty.view.entity.gift.GiftDetailEntity
 import com.w36495.senty.view.entity.gift.GiftType
 import com.w36495.senty.view.screen.friend.FriendDialogScreen
-import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
 import com.w36495.senty.view.ui.component.dialogs.BasicCalendarDialog
 import com.w36495.senty.view.ui.component.dialogs.ImageSelectionDialog
@@ -69,17 +69,47 @@ import com.w36495.senty.viewModel.GiftAddViewModel
 @Composable
 fun GiftAddScreen(
     vm: GiftAddViewModel = hiltViewModel(),
-    giftDetail: GiftDetail?,
+    giftId: String?,
     onPressedBack: () -> Unit,
     onComplete: () -> Unit,
 ) {
+    if (giftId != null) {
+        LaunchedEffect(Unit) {
+            vm.getGift(giftId)
+        }
+    }
+
+    val gift by vm.gift.collectAsStateWithLifecycle()
+
+    GiftAddContents(
+        giftDetail = if (giftId == null) null else gift.giftDetail,
+        giftImg = if (giftId == null) null else gift.giftImg,
+        onPressedBack = { onPressedBack() },
+        onClickSave = { giftDetail, giftImg ->
+            giftId?.let {
+                vm.updateGift(giftDetail, giftImg)
+            } ?: vm.saveGift(giftDetail, giftImg)
+
+            onComplete()
+        },
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun GiftAddContents(
+    giftDetail: GiftDetail?,
+    giftImg: Any?,
+    onPressedBack: () -> Unit,
+    onClickSave: (GiftDetail, Any?) -> Unit,
+) {
     var showImageSelectionDialog by remember { mutableStateOf(false) }
-    var giftImg: Any? by remember { mutableStateOf(null) }
+    var giftImg: Any? by rememberSaveable(giftDetail?.id) { mutableStateOf(giftImg) }
 
     val takePhotoFromGallery =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
-                result.data?.data?.let { uri -> giftImg = uri }
+                result.data?.data?.let { uri -> giftImg = uri.toString() }
             }
         }
 
@@ -107,33 +137,11 @@ fun GiftAddScreen(
         )
     }
 
-    GiftAddContents(
-        giftDetail = if (giftDetail == GiftDetail.emptyGiftDetail) null else giftDetail,
-        giftImg = giftImg,
-        onPressedBack = { onPressedBack() },
-        onClickSave = {
-            if (giftDetail == null) vm.saveGift(it, giftImg)
-            else vm.updateGift(it, giftImg)
-            onComplete()
-        },
-        onClickUploadImage = { showImageSelectionDialog = true }
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun GiftAddContents(
-    giftDetail: GiftDetail?,
-    giftImg: Any? = null,
-    onPressedBack: () -> Unit,
-    onClickSave: (GiftDetailEntity) -> Unit,
-    onClickUploadImage: () -> Unit,
-) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-                    Text(text = if (giftDetail == null) "선물등록" else "선물수정")
+                    Text(text = giftDetail?.let { "선물수정" } ?: "선물등록")
                 },
                 navigationIcon = {
                     IconButton(onClick = { onPressedBack() }) {
@@ -157,17 +165,17 @@ private fun GiftAddContents(
                 .verticalScroll(rememberScrollState())
         ) {
             ImgSection(
-                giftImg = giftDetail?.imgPath ?: giftImg,
+                giftImg = giftImg,
                 modifier = Modifier.fillMaxWidth(),
-                takePhotoLauncher = { onClickUploadImage() }
+                takePhotoLauncher = { showImageSelectionDialog = true }
             )
             InputSection(
                 giftDetail = giftDetail,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
-                onClickSave = {
-                    onClickSave(it)
+                onClickSave = { detail ->
+                    onClickSave(detail, giftImg)
                 },
             )
         }
@@ -178,7 +186,7 @@ private fun GiftAddContents(
 @Composable
 private fun ImgSection(
     modifier: Modifier = Modifier,
-    giftImg: Any? = null,
+    giftImg: Any?,
     takePhotoLauncher: () -> Unit
 ) {
     Box(
@@ -190,7 +198,8 @@ private fun ImgSection(
     ) {
         if (giftImg != null) {
             GlideImage(
-                model = giftImg, contentDescription = null,
+                model = giftImg,
+                contentDescription = null,
                 modifier = Modifier.aspectRatio(1f),
                 contentScale = ContentScale.Crop
             )
@@ -214,18 +223,18 @@ private fun ImgSection(
 private fun InputSection(
     giftDetail: GiftDetail?,
     modifier: Modifier = Modifier,
-    onClickSave: (GiftDetailEntity) -> Unit,
+    onClickSave: (GiftDetail) -> Unit,
 ) {
     var showGiftCategoryDialog by remember { mutableStateOf(false) }
     var showFriendsDialog by remember { mutableStateOf(false) }
     var showDatePickerDialog by remember { mutableStateOf(false) }
 
-    var type by remember { mutableStateOf(giftDetail?.gift?.giftType ?: GiftType.RECEIVED) }
-    var category by remember { mutableStateOf(giftDetail?.category ?: GiftCategory.emptyCategory) }
-    var friend by remember { mutableStateOf(giftDetail?.friend ?: FriendDetail.emptyFriendEntity) }
-    var date by remember { mutableStateOf(giftDetail?.gift?.date ?: "") }
-    var mood by remember { mutableStateOf(giftDetail?.gift?.mood ?: "") }
-    var memo by remember { mutableStateOf(giftDetail?.gift?.memo ?: "") }
+    var type by remember(giftDetail?.id) { mutableStateOf(giftDetail?.giftType ?: GiftType.RECEIVED) }
+    var category by remember(giftDetail?.id) { mutableStateOf(giftDetail?.category ?: GiftCategory.emptyCategory) }
+    var friend by remember(giftDetail?.id) { mutableStateOf(giftDetail?.friend ?: FriendDetail.emptyFriendEntity) }
+    var date by rememberSaveable(giftDetail?.id) { mutableStateOf(giftDetail?.date ?: "") }
+    var mood by rememberSaveable(giftDetail?.id) { mutableStateOf(giftDetail?.mood ?: "") }
+    var memo by rememberSaveable(giftDetail?.id) { mutableStateOf(giftDetail?.memo ?: "") }
 
     if (showGiftCategoryDialog) {
         GiftCategoryDialogScreen(
@@ -239,7 +248,7 @@ private fun InputSection(
         FriendDialogScreen(
             onDismiss = { showFriendsDialog = false },
             onClickFriend = {
-                friend = it.toFriendDetail()
+                friend = it.friendDetail
                 showFriendsDialog = false
             }
         )
@@ -293,16 +302,10 @@ private fun InputSection(
         TextSection(
             modifier = Modifier.fillMaxWidth(),
             title = "날짜",
-            text = if (date == "") {
-                date
-            } else {
-                String.format(
-                    java.util.Locale.KOREA,
-                    "%04d년 %02d월 %02d일",
-                    date.split("-")[0].toInt(),
-                    date.split("-")[1].toInt(),
-                    date.split("-")[2].toInt()
-                )
+            text = if (date.isEmpty()) "날짜를 입력해주세요."
+                else {
+                val (year, month, day) = date.split("-").map { it.toInt() }
+                "${year}년 ${StringUtils.format2Digits(month)}월 ${StringUtils.format2Digits(day)}일"
             },
         enable = false,
         placeHolder = if (giftDetail == null) "날짜를 입력해주세요." else date,
@@ -316,7 +319,7 @@ private fun InputSection(
             modifier = Modifier.fillMaxWidth(),
             title = "기분",
             text = mood,
-            placeHolder = if (giftDetail == null || giftDetail.gift.mood.isEmpty()) "기분을 입력해주세요." else mood,
+            placeHolder = if (giftDetail == null || giftDetail.mood.isEmpty()) "기분을 입력해주세요." else mood,
             onChangeText = { mood = it },
             onClick = {}
         )
@@ -336,18 +339,19 @@ private fun InputSection(
             text = if (giftDetail == null) "등록" else "수정",
             modifier = Modifier.fillMaxWidth()
         ) {
-            val giftDetailEntity = GiftDetailEntity(
-                categoryId = category.id,
-                friendId = friend.id,
+            val gift = GiftDetail(
+                category = category,
+                friend = friend,
                 date = date,
                 mood = mood,
                 memo = memo,
                 giftType = type,
+                imgUri = giftDetail?.imgUri ?: ""
             )
 
-            if (giftDetail != null) giftDetailEntity.setId(giftDetail.gift.id)
+            if (giftDetail != null) gift.apply { setId(giftDetail.id) }
 
-            onClickSave(giftDetailEntity)
+            onClickSave(gift)
         }
     }
 }
@@ -375,9 +379,7 @@ private fun TextSection(
             text = text,
             hint = placeHolder,
             errorMsg = "",
-            onChangeText = {
-                onChangeText(it)
-            },
+            onChangeText = { onChangeText(it) },
             enabled = enable
         )
     }
@@ -432,16 +434,6 @@ private fun GiftTypeSection(
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodyMedium
             )
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun ImgSectionPreview() {
-    SentyTheme {
-        ImgSection {
-
         }
     }
 }

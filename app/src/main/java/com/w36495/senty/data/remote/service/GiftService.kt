@@ -27,7 +27,7 @@ interface GiftService {
     @POST("gifts/{userId}.json")
     suspend fun insertGift(
         @Path("userId") userId: String,
-        @Body gift: GiftEntity
+        @Body gift: GiftDetailEntity
     ): Response<ResponseBody>
 
     @PATCH("gifts/{userId}/{giftKey}.json")
@@ -41,7 +41,7 @@ interface GiftService {
     suspend fun patchGift(
         @Path("userId") userId: String,
         @Path("giftKey") giftKey: String,
-        @Body body: GiftEntity
+        @Body body: GiftDetailEntity
     ): Response<ResponseBody>
 
     @PATCH("gifts/{userId}/{giftKey}.json")
