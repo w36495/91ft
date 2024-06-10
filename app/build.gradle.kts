@@ -92,6 +92,8 @@ dependencies {
 
     implementation("androidx.viewpager2:viewpager2:1.0.0")  // viewpager2
 
+    implementation("androidx.datastore:datastore-preferences:1.1.1")            // DataStore
+
     // Firebase
     val firebaseBom = platform("com.google.firebase:firebase-bom:32.3.1")
     implementation(firebaseBom)
