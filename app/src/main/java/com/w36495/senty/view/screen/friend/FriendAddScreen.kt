@@ -3,6 +3,7 @@ package com.w36495.senty.view.screen.friend
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +14,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -25,13 +28,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.w36495.senty.util.StringUtils
 import com.w36495.senty.view.entity.FriendDetail
 import com.w36495.senty.view.entity.FriendGroup
+import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
+import com.w36495.senty.view.ui.component.dialogs.BasicCalendarDialog
 import com.w36495.senty.view.ui.component.textFields.SentyMultipleTextField
 import com.w36495.senty.view.ui.component.textFields.SentyReadOnlyTextField
 import com.w36495.senty.view.ui.component.textFields.SentyTextField
@@ -81,6 +90,8 @@ private fun FriendAddContents(
 
     var group by remember { mutableStateOf(FriendGroup.emptyFriendGroup) }
     var showDialog by remember { mutableStateOf(false) }
+    var showCalendarDialog by remember { mutableStateOf(false) }
+    var isCheckedBirthday by remember { mutableStateOf(false) }
 
     if (showDialog) {
         FriendGroupDialogScreen(
@@ -90,6 +101,13 @@ private fun FriendAddContents(
                 showDialog = false
             },
             onEditClick = { onClickGroupEdit() }
+        )
+    } else if (showCalendarDialog) {
+        BasicCalendarDialog(
+            onDismiss = { showCalendarDialog = false },
+            onSelectedDate = { year, month, day ->
+                birthday= "$year-${StringUtils.format2Digits(month + 1)}-${StringUtils.format2Digits(day)}"
+            }
         )
     }
 
@@ -144,11 +162,24 @@ private fun FriendAddContents(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                InputSection(
+                BirthdayInputSection(
                     title = "생일",
-                    placeHolder = "생일을 입력하세요. (ex. 1117)",
-                    text = birthday,
-                    onChangeText = { birthday = it },
+                    placeHolder = if (birthday.isEmpty()) {
+                        if (isCheckedBirthday) "" else "생일을 입력하세요."
+                    } else birthday,
+                    text = if (birthday.isEmpty()) birthday
+                    else {
+                        val (year, month, day) = birthday.split("-").map { it.toInt() }
+                        "${year}년 ${StringUtils.format2Digits(month)}월 ${StringUtils.format2Digits(day)}일"
+                    },
+                    onChangeText = {birthday = it },
+                    enable = false,
+                    onClick = { showCalendarDialog = true },
+                    isCheckedBirthday = isCheckedBirthday,
+                    onChangeCheckState = {
+                        isCheckedBirthday = !isCheckedBirthday
+                        birthday = ""
+                    }
                 )
 
                 Text(
@@ -206,7 +237,59 @@ private fun InputSection(
             errorMsg = "",
             onChangeText = {
                 onChangeText(it)
+            },
+        )
+    }
+}
+
+@Composable
+private fun BirthdayInputSection(
+    modifier: Modifier = Modifier,
+    isCheckedBirthday: Boolean,
+    title: String,
+    text: String,
+    placeHolder: String,
+    enable: Boolean = false,
+    onChangeCheckState: () -> Unit,
+    onChangeText: (String) -> Unit,
+    onClick: () -> Unit,
+) {
+
+    Column(
+        modifier = modifier.clickable { if (!isCheckedBirthday) onClick() }
+    ) {
+        Row(modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+
+            Row(verticalAlignment = Alignment.CenterVertically,) {
+                Checkbox(
+                    checked = isCheckedBirthday,
+                    onCheckedChange = { onChangeCheckState() },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = Green40
+                    )
+                )
+                Text(
+                    text = "입력 안함",
+                    fontSize = 14.sp
+                )
             }
+        }
+
+        SentyTextField(
+            modifier = Modifier.fillMaxWidth(),
+            text = text,
+            hint = placeHolder,
+            errorMsg = "",
+            onChangeText = onChangeText,
+            enabled = enable
         )
     }
 }
@@ -232,6 +315,34 @@ private fun GroupSection(
             showChip = group != FriendGroup.emptyFriendGroup,
             textColor = MaterialTheme.colorScheme.onSurface,
             dividerColor = Green40
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun CalendarPreview() {
+    SentyTheme {
+        var isCheckedBirthday by remember { mutableStateOf(false) }
+        var birthday by remember { mutableStateOf("") }
+
+
+        BirthdayInputSection(
+            title = "생일",
+            placeHolder = if (birthday.isEmpty()) "생일을 입력하세요." else birthday,
+            text = if (birthday.isEmpty()) birthday
+            else {
+                val (year, month, day) = birthday.split("-").map { it.toInt() }
+                "${year}년 ${StringUtils.format2Digits(month)}월 ${StringUtils.format2Digits(day)}일"
+            },
+            onChangeText = {
+                if (isCheckedBirthday) birthday = ""
+                else birthday = it
+            },
+            enable = isCheckedBirthday,
+            onClick = {  true },
+            isCheckedBirthday = isCheckedBirthday,
+            onChangeCheckState = { isCheckedBirthday = !isCheckedBirthday }
         )
     }
 }
