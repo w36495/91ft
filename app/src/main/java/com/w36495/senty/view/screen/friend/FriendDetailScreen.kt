@@ -286,7 +286,7 @@ private fun FriendInfoSection(
             )
 
             SentyReadOnlyTextField(
-                text = if (friend.birthday.isEmpty()) "" else friend.displayBirthday(),
+                text = if (friend.birthday.isEmpty()) "" else friend.displayBirthdayWithYear(),
                 textColor = MaterialTheme.colorScheme.onSurface
             )
 

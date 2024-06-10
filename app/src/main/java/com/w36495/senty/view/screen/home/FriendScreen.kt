@@ -126,7 +126,7 @@ fun FriendItemContent(
                 textColor = friend.friendDetail.friendGroup.color.getTextColorByBackgroundColor()
             )
             Text(
-                text = friend.displayBirthday(),
+                text = if (friend.friendDetail.birthday.isEmpty()) "" else friend.friendDetail.displayBirthdayOnlyDate(),
                 style = MaterialTheme.typography.labelLarge,
             )
         }
