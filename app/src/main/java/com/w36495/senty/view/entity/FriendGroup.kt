@@ -1,13 +1,13 @@
 package com.w36495.senty.view.entity
 
-import android.graphics.Color
+import androidx.compose.ui.graphics.Color
 import com.w36495.senty.data.domain.FriendGroupEntity
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class FriendGroup(
     val name: String,
-    val color: String = DEFAULT_COLOR
+    val color: String = DEFAULT_COLOR.toString()
 ) {
     var id = ""
         private set
@@ -21,9 +21,8 @@ data class FriendGroup(
         color = color,
     )
 
-    fun getIntTypeColor(): Int {
-        val formatColor = StringBuilder().append("#").append(this.color).toString()
-        return Color.parseColor(formatColor)
+    fun getIntTypeColor(): Color {
+        return Color(color.toULong())
     }
 
     fun copy() = FriendGroup(
@@ -36,7 +35,7 @@ data class FriendGroup(
     }
 
     companion object {
-        private const val DEFAULT_COLOR = "D9D9D9"
+        private val DEFAULT_COLOR = Color(0xFFCED4DA).value
         val emptyFriendGroup = FriendGroup(name = "")
     }
 }

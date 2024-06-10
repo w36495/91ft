@@ -19,15 +19,15 @@ import androidx.compose.ui.unit.dp
 fun FriendGroupChip(
     modifier: Modifier = Modifier,
     text: String? = null,
-    chipColor: Int? = null,
+    chipColor: String? = null,
     textColor: Int? = null,
 ) {
     Chip(onClick = { },
         enabled = false,
         shape = RoundedCornerShape(10.dp),
         colors = ChipDefaults.chipColors(
-            backgroundColor = chipColor?.let { Color(it) } ?: Color.Unspecified,
-            disabledBackgroundColor = chipColor?.let { Color(it) } ?: Color.Unspecified,
+            backgroundColor = chipColor?.let { Color(it.toULong()) } ?: Color.Unspecified,
+            disabledBackgroundColor = chipColor?.let { Color(it.toULong()) } ?: Color.Unspecified,
         )
 
     ) {

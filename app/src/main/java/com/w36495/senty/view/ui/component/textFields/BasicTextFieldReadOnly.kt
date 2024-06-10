@@ -34,7 +34,7 @@ fun SentyReadOnlyTextField(
             if (showChip) {
                 FriendGroupChip(
                     text = group?.name,
-                    chipColor = group?.getIntTypeColor(),
+                    chipColor = group?.color,
                     textColor = group?.color?.getTextColorByBackgroundColor()
                 )
             } else {

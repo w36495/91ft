@@ -122,7 +122,7 @@ fun FriendItemContent(
         ) {
             FriendGroupChip(
                 text = friend.friendDetail.friendGroup.name,
-                chipColor = friend.friendDetail.friendGroup.getIntTypeColor(),
+                chipColor = friend.friendDetail.friendGroup.color,
                 textColor = friend.friendDetail.friendGroup.color.getTextColorByBackgroundColor()
             )
             Text(

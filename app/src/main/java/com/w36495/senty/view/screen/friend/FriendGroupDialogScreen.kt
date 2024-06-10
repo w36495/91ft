@@ -143,9 +143,10 @@ private fun FriendGroupItem(
         IconButton(
             onClick = { },
             modifier = Modifier.background(
-                color = Color(group.getIntTypeColor()),
-                RoundedCornerShape(10.dp)
-            )
+                color = group.getIntTypeColor(),
+                shape = RoundedCornerShape(10.dp)
+            ),
+            enabled = false
         ) { }
     }
 }

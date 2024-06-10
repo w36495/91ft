@@ -35,6 +35,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.w36495.senty.view.entity.FriendGroup
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
+import com.w36495.senty.view.ui.component.dialogs.BasicColorPickerDialog
 import com.w36495.senty.view.ui.component.textFields.SentyTextField
 import com.w36495.senty.viewModel.FriendGroupViewModel
 
@@ -67,6 +68,17 @@ private fun FriendGroupAddContents(
     onClickEdit: (FriendGroup) -> Unit,
 ) {
     var inputGroup by remember { mutableStateOf(group?.name ?: "") }
+    var showColorPicker by remember { mutableStateOf(false) }
+    var selectedColor by remember { mutableStateOf(group?.getIntTypeColor() ?: Color(0xFFCED4DA)) }
+
+    if (showColorPicker) {
+        BasicColorPickerDialog(
+            onDismiss = { showColorPicker = false }
+        ) { color ->
+            selectedColor = color
+            showColorPicker = false
+        }
+    }
 
     Dialog(onDismissRequest = { onDismiss() }) {
         Card(
@@ -96,8 +108,8 @@ private fun FriendGroupAddContents(
                     Box(
                         modifier = Modifier
                             .size(40.dp)
-                            .background(Color(0xFFD9D9D9), RoundedCornerShape(8.dp))
-                            .clickable { }
+                            .background(selectedColor, RoundedCornerShape(8.dp))
+                            .clickable { showColorPicker = true }
                     )
 
                     Spacer(modifier = Modifier.width(4.dp))
@@ -118,9 +130,13 @@ private fun FriendGroupAddContents(
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                     onClick = {
                         if (group == null) {
-                            onClickSave(FriendGroup(name = inputGroup))
+                            val newGroup = FriendGroup(name = inputGroup, color = selectedColor.value.toString())
+                            onClickSave(newGroup)
                         } else {
-                            onClickEdit(group.copy(name = inputGroup).apply { setId(group.id) })
+                            val editGroup = group.copy(name = inputGroup, color = selectedColor.value.toString())
+                                .apply { setId(group.id) }
+
+                            onClickEdit(editGroup)
                         }
                     }
                 )

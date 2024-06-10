@@ -259,7 +259,7 @@ private fun FriendGroupItem(
                 Box(
                     modifier = Modifier
                         .size(40.dp)
-                        .background(Color(group.getIntTypeColor()), RoundedCornerShape(8.dp))
+                        .background(group.getIntTypeColor(), RoundedCornerShape(8.dp))
                 )
             }
         )
