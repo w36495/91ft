@@ -65,18 +65,19 @@ class HomeViewModel @Inject constructor(
                 .map { gifts -> gifts.filter { it.giftType == GiftType.SENT } }
                 .combine(friendRepository.getFriends()) { gifts, friends ->
                     gifts.map { giftDetail ->
-                        val friend = friends.find { it.id == giftDetail.friend.id }
-                        var gift = Gift(giftDetail = giftDetail.copy(friendDetail = friend!!))
+                        val friend = friends.find { friend -> friend.id == giftDetail.friend.id }
+                        val gift = giftDetail.copy(friend = friend!!)
+                        var giftImg = ""
 
                         if (giftDetail.imgUri.isNotEmpty()) {
                             coroutineScope {
                                 val img = async { giftImgRepository.getGiftImages(giftDetail.id, giftDetail.imgUri) }
 
-                                gift = gift.copy(giftImg = img.await())
+                                giftImg = img.await()
                             }
                         }
 
-                        gift
+                        Gift(giftDetail = gift, giftImg = giftImg)
                     }
                 }
                 .collectLatest { gifts ->
@@ -95,18 +96,19 @@ class HomeViewModel @Inject constructor(
                 .map { gifts -> gifts.filter { it.giftType == GiftType.RECEIVED } }
                 .combine(friendRepository.getFriends()) { gifts, friends ->
                     gifts.map { giftDetail ->
-                        val friend = friends.find { it.id == giftDetail.friend.id }
-                        var gift = Gift(giftDetail = giftDetail.copy(friendDetail = friend!!))
+                        val friend = friends.find { friend -> friend.id == giftDetail.friend.id }
+                        val gift = giftDetail.copy(friend = friend!!)
+                        var giftImg = ""
 
                         if (giftDetail.imgUri.isNotEmpty()) {
                             coroutineScope {
                                 val img = async { giftImgRepository.getGiftImages(giftDetail.id, giftDetail.imgUri) }
 
-                                gift = gift.copy(giftImg = img.await())
+                                giftImg = img.await()
                             }
                         }
 
-                        gift
+                        Gift(giftDetail = gift, giftImg = giftImg)
                     }
                 }
                 .collectLatest { gifts ->

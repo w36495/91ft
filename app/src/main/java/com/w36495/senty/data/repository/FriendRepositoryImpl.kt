@@ -46,7 +46,6 @@ class FriendRepositoryImpl @Inject constructor(
 
     override fun getFriends(): Flow<List<FriendDetail>> = flow {
         val result = friendService.getFriends(userId)
-        val friends = mutableListOf<FriendDetail>()
 
         if (result.isSuccessful) {
             if (result.headers()["Content-length"]?.toInt() != 4) {
@@ -55,20 +54,18 @@ class FriendRepositoryImpl @Inject constructor(
 
                     responseJson.jsonObject.map { (key, jsonFriend) ->
                         val friendDetailEntity = Json.decodeFromJsonElement<FriendDetailEntity>(jsonFriend)
-                        val friendGroup = FriendGroup.emptyFriendGroup.copy().apply { setId(friendDetailEntity.groupId) }
+                        val friendGroup = FriendGroup.emptyFriendGroup.apply { setId(friendDetailEntity.groupId) }
 
                         friendDetailEntity
                             .toDomainEntity()
+                            .copy(friendGroup = friendGroup.copy())
                             .apply { setId(key) }
-                            .copy(friendGroup = friendGroup)
                     }.let { friendDetails ->
-                        friends.addAll(friendDetails)
+                        emit(friendDetails.toList())
                     }
                 }
-            }
+            } else emit(emptyList())
         } else throw IllegalArgumentException(result.errorBody().toString())
-
-        emit(friends)
     }
 
     override suspend fun insertFriend(friend: FriendDetailEntity): Response<ResponseBody> {

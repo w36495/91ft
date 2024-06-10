@@ -4,6 +4,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.w36495.senty.data.domain.GiftDetailEntity
 import com.w36495.senty.data.domain.GiftImgUriDTO
 import com.w36495.senty.data.remote.service.GiftService
+import com.w36495.senty.domain.repository.GiftImgRepository
 import com.w36495.senty.domain.repository.GiftRepository
 import com.w36495.senty.view.entity.FriendDetail
 import com.w36495.senty.view.entity.gift.GiftCategory
@@ -19,7 +20,8 @@ import javax.inject.Inject
 
 class GiftRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
-    private val giftService: GiftService
+    private val giftService: GiftService,
+    private val giftImgRepository: GiftImgRepository,
 ) : GiftRepository {
     private var userId = firebaseAuth.currentUser!!.uid
     override fun getGift(giftId: String): Flow<GiftDetail> = flow {
@@ -34,7 +36,7 @@ class GiftRepositoryImpl @Inject constructor(
                 val friend = FriendDetail.emptyFriendEntity.apply { setId(giftDetailEntity.friendId) }
                 val giftDetail = giftDetailEntity.toDomainEntity()
                     .apply { setId(giftId) }
-                    .copy(giftCategory = giftCategory, friendDetail = friend)
+                    .copy(category = giftCategory.copy(), friend = friend.copy())
 
                 emit(giftDetail)
 
@@ -52,18 +54,17 @@ class GiftRepositoryImpl @Inject constructor(
 
                     responseJson.jsonObject.map { (key, jsonElement) ->
                         val giftDetailEntity = Json.decodeFromJsonElement<GiftDetailEntity>(jsonElement)
-                        val giftCategory = GiftCategory.emptyCategory.apply { setId(giftDetailEntity.categoryId) }
-                        val friend = FriendDetail.emptyFriendEntity.apply { setId(giftDetailEntity.friendId) }
+                        val tempGiftCategory = GiftCategory.emptyCategory.apply { setId(giftDetailEntity.categoryId) }
+                        val tempFriend = FriendDetail.emptyFriendEntity.apply { setId(giftDetailEntity.friendId) }
 
                         giftDetailEntity.toDomainEntity()
-                            .copy(category = giftCategory.copy(), friend = friend.copy())
                             .apply { setId(key) }
-
-                    }?.let { giftDetail ->
+                            .copy(category = tempGiftCategory.copy(), friend = tempFriend.copy())
+                    }.let { giftDetail ->
                         emit(giftDetail.toList())
                     }
                 }
-            }
+            } else emit(emptyList())
         } else throw IllegalArgumentException(result.errorBody().toString())
     }
 
