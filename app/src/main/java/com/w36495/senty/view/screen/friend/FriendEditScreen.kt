@@ -26,6 +26,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -69,13 +71,23 @@ fun FriendEditRoute(
     }
 
     val uiState by vm.friend.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
 
+    LaunchedEffect(true) {
+        vm.snackbarMsg.collect {
+            snackbarHostState.showSnackbar(it)
+        }
+    }
+    
     FriendEditScreen(
         uiState = uiState,
+        snackbarHostState = snackbarHostState,
         onBackPressed = onBackPressed,
-        onClickSave = { friend ->
-            vm.updateFriend(friend)
-            onMoveFriendList()
+        onClickSave = { friendDetail, isCheckedBirthday ->
+            if (vm.validateFriend(friendDetail, isCheckedBirthday)) {
+                vm.updateFriend(friendDetail)
+                onMoveFriendList()
+            }
         },
         onClickGroupEdit = onClickGroupEdit
     )
@@ -85,8 +97,9 @@ fun FriendEditRoute(
 @Composable
 fun FriendEditScreen(
     uiState: FriendEditUiState,
+    snackbarHostState: SnackbarHostState,
     onBackPressed: () -> Unit,
-    onClickSave: (FriendDetail) -> Unit,
+    onClickSave: (FriendDetail, Boolean) -> Unit,
     onClickGroupEdit: () -> Unit,
 ) {
     Scaffold(
@@ -106,6 +119,7 @@ fun FriendEditScreen(
                 }
             )
         },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         containerColor = Color.White,
     ) { innerPadding ->
         Box(
@@ -166,7 +180,7 @@ private fun FriendEditLoading(
 private fun FriendEditContents(
     modifier: Modifier = Modifier,
     friendDetail: FriendDetail,
-    onClickSave: (FriendDetail) -> Unit,
+    onClickSave: (FriendDetail, Boolean) -> Unit,
     onClickGroupEdit: () -> Unit,
 ) {
     var name by rememberSaveable { mutableStateOf(friendDetail.name) }
@@ -269,7 +283,7 @@ private fun FriendEditContents(
                     friendGroup = group
                 ).apply { setId(friendDetail.id) }
 
-                onClickSave(friend)
+                onClickSave(friend, isCheckedBirthday)
             }
         )
     }
@@ -387,8 +401,9 @@ private fun FriendEditScreenPreview() {
                 FriendDetail.emptyFriendEntity
             ),
             onBackPressed = { /*TODO*/ },
-            onClickSave = {},
-            onClickGroupEdit = {}
+            onClickSave = { _, _ ->},
+            onClickGroupEdit = {},
+            snackbarHostState = SnackbarHostState()
         )
     }
 }

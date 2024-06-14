@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.w36495.senty.domain.repository.FriendGroupRepository
 import com.w36495.senty.domain.repository.FriendRepository
 import com.w36495.senty.view.entity.FriendDetail
+import com.w36495.senty.view.entity.FriendGroup
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,15 +24,15 @@ class FriendEditViewModel @Inject constructor(
     private val friendRepository: FriendRepository,
     private val friendGroupRepository: FriendGroupRepository,
 ) : ViewModel() {
-    private var _errorFlow = MutableSharedFlow<String>()
-    val errorFlow: SharedFlow<String> get() = _errorFlow.asSharedFlow()
+    private var _snackbarMsg = MutableSharedFlow<String>()
+    val snackbarMsg: SharedFlow<String> get() = _snackbarMsg.asSharedFlow()
     private var _friend = MutableStateFlow<FriendEditUiState>(FriendEditUiState.Loading)
     val friend: StateFlow<FriendEditUiState> = _friend.asStateFlow()
 
     fun getFriend(friendId: String) {
         viewModelScope.launch {
             friendRepository.getFriend(friendId)
-                .catch { _errorFlow.emit("정보를 불러오는 중 오류가 발생하였습니다.") }
+                .catch { _snackbarMsg.emit("정보를 불러오는 중 오류가 발생하였습니다.") }
                 .collectLatest { friendDetail ->
                     friendGroupRepository.getFriendGroup(friendDetail.friendGroup.id)
                         .collectLatest { friendGroup ->
@@ -43,8 +44,40 @@ class FriendEditViewModel @Inject constructor(
 
     fun updateFriend(friend: FriendDetail) {
         viewModelScope.launch {
-            friendRepository.patchFriend(friend.id, friend.toDataEntity())
+            val result = friendRepository.patchFriend(friend.id, friend.toDataEntity())
+
+            if (result.isSuccessful) {
+                _snackbarMsg.emit("친구 정보를 수정하였습니다.")
+            } else {
+                _snackbarMsg.emit("친구 정보를 수정하는 중 오류가 발생하였습니다.")
+            }
         }
+    }
+
+    fun validateFriend(friend: FriendDetail, isCheckedBirthday: Boolean): Boolean {
+        var isValid = true
+
+        if (friend.name.isEmpty()) {
+            isValid = false
+
+            viewModelScope.launch {
+                _snackbarMsg.emit("이름을 입력해주세요.")
+            }
+        } else if (friend.friendGroup == FriendGroup.emptyFriendGroup) {
+            isValid = false
+
+            viewModelScope.launch {
+                _snackbarMsg.emit("친구 그룹을 선택해주세요.")
+            }
+        } else if (!isCheckedBirthday && friend.birthday.trim().isNullOrEmpty()) {
+            isValid = false
+
+            viewModelScope.launch {
+                _snackbarMsg.emit("생일을 입력해주세요.")
+            }
+        }
+
+        return isValid
     }
 }
 
