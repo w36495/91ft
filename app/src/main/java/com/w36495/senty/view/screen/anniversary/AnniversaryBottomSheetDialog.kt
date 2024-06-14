@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.w36495.senty.util.StringUtils
 import com.w36495.senty.view.entity.Schedule
 import com.w36495.senty.view.ui.component.dialogs.BasicCalendarDialog
@@ -41,10 +42,12 @@ import com.w36495.senty.view.ui.component.dialogs.BasicTimePickerDialog
 import com.w36495.senty.view.ui.component.textFields.SentyMultipleTextField
 import com.w36495.senty.view.ui.component.textFields.SentyReadOnlyTextField
 import com.w36495.senty.view.ui.component.textFields.SentyTextField
+import com.w36495.senty.viewModel.AnniversaryViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AnniversaryBottomSheetDialog(
+    vm: AnniversaryViewModel = hiltViewModel(),
     type: AnniversaryDialogType = AnniversaryDialogType.ADD,
     schedule: Schedule? = null,
     selectDate: List<Int>,
@@ -150,21 +153,28 @@ fun AnniversaryBottomSheetDialog(
 
                             if (schedule == null) {
                                 if (onClickSave != null) {
-                                    onClickSave(newSchedule)
+                                    if (vm.validateSchedule(newSchedule)) {
+                                        onClickSave(newSchedule)
+
+                                        title = ""
+                                        time = "시간을 입력해주세요."
+                                        memo = ""
+                                        location = "장소를 입력해주세요."
+                                    }
                                 }
                             } else {
                                 newSchedule.setId(schedule.id)
                                 if (onClickEdit != null) {
-                                    onClickEdit(newSchedule)
+                                    if (vm.validateSchedule(newSchedule)) {
+                                        onClickEdit(newSchedule)
+
+                                        title = ""
+                                        time = "시간을 입력해주세요."
+                                        memo = ""
+                                        location = "장소를 입력해주세요."
+                                    }
                                 }
                             }
-
-                            title = ""
-                            time = "시간을 입력해주세요."
-                            memo = ""
-                            location = "장소를 입력해주세요."
-
-                            onDismiss()
                         }
                     }
                 ) {

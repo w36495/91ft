@@ -17,6 +17,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -49,9 +51,17 @@ fun AnniversaryScreen(
     vm: AnniversaryViewModel = hiltViewModel(),
 ) {
     val schedules by vm.schedules.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(true) {
+        vm.snackMsg.collect{
+            snackbarHostState.showSnackbar(it)
+        }
+    }
 
     AnniversaryScreenContents(
         schedules = schedules,
+        snackbarHostState = snackbarHostState,
         onClickDate = { year, month, day ->
             vm.getSchedules(year, month, day)
         },
@@ -65,6 +75,7 @@ fun AnniversaryScreen(
 @Composable
 private fun AnniversaryScreenContents(
     schedules: List<Schedule>,
+    snackbarHostState: SnackbarHostState,
     onClickDate: (Int, Int, Int) -> Unit,
     onClickSave: (Schedule) -> Unit,
     onClickEdit: (Schedule) -> Unit,
@@ -91,7 +102,10 @@ private fun AnniversaryScreenContents(
                 AnniversaryBottomSheetDialog(
                     selectDate = listOf(year, month, day),
                     onDismiss = { showAddDialog = false },
-                    onClickSave = { onClickSave(it) },
+                    onClickSave = {
+                        onClickSave(it)
+                        showAddDialog = false
+                                  },
                 )
             } else if (showReadDialog) {
                 val savedDate = savedSchedule.date.split("-").map { it.toInt() }
@@ -108,6 +122,7 @@ private fun AnniversaryScreenContents(
                 )
             }
         },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         scaffoldState = scaffoldState,
         sheetPeekHeight = 0.dp,
         sheetShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
