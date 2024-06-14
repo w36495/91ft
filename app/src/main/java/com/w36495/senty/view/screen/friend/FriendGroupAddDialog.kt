@@ -31,31 +31,24 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.w36495.senty.view.entity.FriendGroup
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
 import com.w36495.senty.view.ui.component.dialogs.BasicColorPickerDialog
 import com.w36495.senty.view.ui.component.textFields.SentyTextField
-import com.w36495.senty.viewModel.FriendGroupViewModel
 
 @Composable
 fun FriendGroupAddDialog(
-    vm: FriendGroupViewModel = hiltViewModel(),
     group: FriendGroup? = null,
+    onClickSave: (FriendGroup) -> Unit,
+    onClickEdit: (FriendGroup) -> Unit,
     onDismiss: () -> Unit
 ) {
     FriendGroupAddContents(
         group = group,
         onDismiss = { onDismiss() },
-        onClickSave = {
-            vm.saveFriendGroup(it)
-            onDismiss()
-        },
-        onClickEdit = {
-            vm.updateFriendGroup(it)
-            onDismiss()
-        }
+        onClickSave = { onClickSave(it) },
+        onClickEdit = { onClickEdit(it) }
     )
 }
 

@@ -30,15 +30,35 @@ class FriendGroupViewModel @Inject constructor(
     fun saveFriendGroup(friendGroup: FriendGroup) {
         viewModelScope.launch {
             val result = friendGroupRepository.insertFriendGroup(friendGroup.toDataEntity())
-            if (result) refreshFriendGroups()
+            if (result) {
+                refreshFriendGroups()
+                _errorFlow.emit("성공적으로 그룹이 추가되었습니다.")
+            }
         }
+    }
+
+    fun validateFriendGroup(friendGroup: FriendGroup): Boolean {
+        var isValid = true
+
+        if (friendGroup.name.trim().isEmpty()) {
+            isValid = false
+
+            viewModelScope.launch {
+                _errorFlow.emit("그룹명을 입력해주세요.")
+            }
+        }
+
+        return isValid
     }
 
     fun updateFriendGroup(friendGroup: FriendGroup) {
         viewModelScope.launch {
-            val result =
-                friendGroupRepository.patchFriendGroup(friendGroup.id, friendGroup.toDataEntity())
-            if (result.isSuccessful) refreshFriendGroups()
+            val result = friendGroupRepository.patchFriendGroup(friendGroup.id, friendGroup.toDataEntity())
+            if (result.isSuccessful) {
+                refreshFriendGroups()
+
+                _errorFlow.emit("성공적으로 그룹이 수정되었습니다.")
+            }
         }
     }
 

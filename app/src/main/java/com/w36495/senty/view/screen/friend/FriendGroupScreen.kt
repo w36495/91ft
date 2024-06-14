@@ -30,6 +30,9 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -63,21 +66,34 @@ fun FriendGroupScreen(
     vm: FriendGroupViewModel = hiltViewModel(),
     onBackPressed: () -> Unit,
 ) {
-    LaunchedEffect(true) {
-        vm.errorFlow.collectLatest { throwable -> }
-    }
-
     val friendGroups = vm.friendGroups.collectAsStateWithLifecycle()
 
-    val rememberFriendGroups by rememberSaveable(friendGroups) {
-        mutableStateOf(friendGroups)
-    }
+    val rememberFriendGroups by rememberSaveable(friendGroups) { mutableStateOf(friendGroups) }
     var showAddDialog by rememberSaveable { mutableStateOf(false) }
     var selectEditGroup by remember { mutableStateOf(FriendGroup.emptyFriendGroup) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(true) {
+        vm.errorFlow.collectLatest {
+            snackbarHostState.showSnackbar(it)
+        }
+    }
 
     if (showAddDialog) {
         FriendGroupAddDialog(
             group = if (selectEditGroup != FriendGroup.emptyFriendGroup) selectEditGroup else null,
+            onClickSave = {
+                if (vm.validateFriendGroup(it)) {
+                    vm.saveFriendGroup(it)
+                    showAddDialog = false
+                }
+            },
+            onClickEdit = {
+                if (vm.validateFriendGroup(it)) {
+                    vm.updateFriendGroup(it)
+                    showAddDialog = false
+                }
+            },
             onDismiss = {
                 selectEditGroup = FriendGroup.emptyFriendGroup
                 showAddDialog = false
@@ -87,6 +103,7 @@ fun FriendGroupScreen(
 
     FriendGroupContents(
         friendGroups = rememberFriendGroups.value,
+        snackbarHostState = snackbarHostState,
         onBackPressed = onBackPressed,
         onShowAddDialog = { showAddDialog = true },
         onClickEdit = {
@@ -101,39 +118,46 @@ fun FriendGroupScreen(
 @Composable
 private fun FriendGroupContents(
     friendGroups: List<FriendGroup>,
+    snackbarHostState: SnackbarHostState,
     onBackPressed: () -> Unit,
     onShowAddDialog: () -> Unit,
     onClickEdit: (FriendGroup) -> Unit,
     onClickDelete: (String) -> Unit,
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        CenterAlignedTopAppBar(title = { Text(text = "친구그룹") },
-            navigationIcon = {
-                IconButton(onClick = { onBackPressed() }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = null
-                    )
-                }
-            }, actions = {
-                IconButton(onClick = onShowAddDialog) {
-                    Icon(imageVector = Icons.Filled.Add, contentDescription = null)
-                }
-            },
-            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                containerColor = Color.White,
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(title = { Text(text = "친구그룹") },
+                navigationIcon = {
+                    IconButton(onClick = { onBackPressed() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = null
+                        )
+                    }
+                }, actions = {
+                    IconButton(onClick = onShowAddDialog) {
+                        Icon(imageVector = Icons.Filled.Add, contentDescription = null)
+                    }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Color.White,
+                )
             )
-        )
+        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        containerColor = Color.White,
+    ) {
+        Column(modifier = Modifier.fillMaxSize().padding(it)) {
+            friendGroups.forEachIndexed { index, group ->
+                FriendGroupItem(
+                    modifier = Modifier.fillMaxWidth(),
+                    group = group,
+                    onClickDelete = onClickDelete,
+                    onClickEdit = onClickEdit,
+                )
 
-        friendGroups.forEachIndexed { index, group ->
-            FriendGroupItem(
-                modifier = Modifier.fillMaxWidth(),
-                group = group,
-                onClickDelete = onClickDelete,
-                onClickEdit = onClickEdit,
-            )
-
-            if (index != friendGroups.lastIndex) HorizontalDivider()
+                if (index != friendGroups.lastIndex) HorizontalDivider()
+            }
         }
     }
 }
@@ -277,6 +301,7 @@ private fun FriendGroupPreview() {
                 FriendGroup(name = "테스트"),
                 FriendGroup(name = "기타"),
             ),
+            snackbarHostState = SnackbarHostState(),
             onClickDelete = {},
             onBackPressed = {},
             onShowAddDialog = {},
