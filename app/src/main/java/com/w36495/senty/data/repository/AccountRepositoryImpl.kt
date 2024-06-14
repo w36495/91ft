@@ -16,7 +16,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
+import kotlin.coroutines.resumeWithException
 
 class AccountRepositoryImpl @Inject constructor(
     private val authUi: AuthUI,
@@ -24,14 +26,20 @@ class AccountRepositoryImpl @Inject constructor(
 ): AccountRepository {
     private val Context.accountDataStore: DataStore<Preferences> by preferencesDataStore(name = "AccountPreferences")
 
-    override fun userLogout(): Boolean {
-        var result = false
-        authUi.signOut(context)
-            .addOnCompleteListener {
-                if (it.isSuccessful) result = true
-            }
+    override suspend fun userLogout(): Boolean {
+        return suspendCancellableCoroutine { continuation ->
+            authUi.signOut(context)
+                .addOnCompleteListener {
+                    continuation.resumeWith(Result.success(it.isSuccessful))
+                }
+                .addOnFailureListener {
+                    continuation.resumeWithException(it)
+                }
 
-        return result
+            continuation.invokeOnCancellation {
+                throw IllegalArgumentException(it?.message.toString())
+            }
+        }
     }
 
     override fun deleteUser(): Boolean {
@@ -73,7 +81,14 @@ class AccountRepositoryImpl @Inject constructor(
 
     override suspend fun clearUserIdPreference() {
         context.accountDataStore.edit { preferences ->
-            preferences.clear()
+            preferences.remove(PREFERENCE_KEY_USER_ID)
+            preferences.remove(PREFERENCE_KEY_USER_PASSWORD)
+        }
+    }
+
+    override suspend fun hasSavedUserIdPreference(): Flow<Boolean> {
+        return context.accountDataStore.data.map {
+            it.contains(PREFERENCE_KEY_USER_ID)
         }
     }
 

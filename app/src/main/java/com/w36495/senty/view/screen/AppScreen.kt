@@ -85,7 +85,7 @@ fun rememberBottomNavigationState(
 class BottomNavigationState(
     val navHostController: NavHostController
 ) {
-    private val bottomNavRoutes = BottomNavigationItem.entries.filter { it.name != BottomNavigationItem.LOGIN.name }.map { it.name }
+    private val bottomNavRoutes = BottomNavigationItem.entries.map { it.name }
 
     val shouldShowBottomBar: Boolean
         @Composable get() = navHostController.currentBackStackEntryAsState().value?.destination?.route in bottomNavRoutes

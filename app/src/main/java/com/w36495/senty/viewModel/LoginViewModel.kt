@@ -35,12 +35,16 @@ class LoginViewModel @Inject constructor(
 
     private fun checkSavedUserId() {
         viewModelScope.launch {
-            accountRepository.getUserIdPreference()
-                .collect {
-                    if (it.userId != AccountRepositoryImpl.PREFERENCE_DEFAULT && it.userPassword != AccountRepositoryImpl.PREFERENCE_DEFAULT) {
-                        _autoLogin.update { true }
-                    }
+            accountRepository.hasSavedUserIdPreference().collect { hasUserId ->
+                if (hasUserId) {
+                    accountRepository.getUserIdPreference()
+                        .collect {
+                            if (it.userId != AccountRepositoryImpl.PREFERENCE_DEFAULT && it.userPassword != AccountRepositoryImpl.PREFERENCE_DEFAULT) {
+                                _autoLogin.update { true }
+                            }
+                        }
                 }
+            }
         }
     }
 
