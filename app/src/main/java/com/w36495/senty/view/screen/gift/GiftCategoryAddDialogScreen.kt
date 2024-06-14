@@ -26,6 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.w36495.senty.view.entity.gift.GiftCategory
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
@@ -39,19 +40,30 @@ fun GiftCategoryAddDialogScreen(
     onDismiss: () -> Unit,
     onComplete: () -> Unit,
 ) {
+    val errorMsg by vm.errorMsg.collectAsStateWithLifecycle()
+
     GiftCategoryAddContents(
         giftCategory = giftCategory,
+        errorMsg = errorMsg,
         onDismiss = { onDismiss() },
         onClickSave = { inputCategory ->
             if (giftCategory == null) {
                 val category = GiftCategory(name = inputCategory)
 
-                vm.saveCategory(category)
-            } else {
-                vm.updateCategory(categoryId = giftCategory.id, categoryName = inputCategory)
-            }
+                if (vm.validateGiftCategory(category)) {
+                    vm.saveCategory(category)
 
-            onComplete()
+                    onComplete()
+                }
+            } else {
+                val editCategory = giftCategory.copy(name = inputCategory)
+
+                if (vm.validateGiftCategory(editCategory)) {
+                    vm.updateCategory(categoryId = giftCategory.id, categoryName = inputCategory)
+
+                    onComplete()
+                }
+            }
         }
     )
 }
@@ -61,6 +73,7 @@ fun GiftCategoryAddDialogScreen(
 private fun GiftCategoryAddContents(
     modifier: Modifier = Modifier,
     giftCategory: GiftCategory? = null,
+    errorMsg: String = "",
     onDismiss: () -> Unit,
     onClickSave: (String) -> Unit,
 ) {
@@ -94,7 +107,10 @@ private fun GiftCategoryAddContents(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 32.dp),
-                    text = category, hint = "카테고리명을 입력하세요.", errorMsg = ""
+                    text = category,
+                    hint = "카테고리명을 입력하세요.",
+                    errorMsg = errorMsg,
+                    isError = errorMsg.isNotEmpty(),
                 ) {
                     category = it
                 }

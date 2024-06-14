@@ -49,7 +49,7 @@ fun GiftCategoryScreen(
     }
 
     LaunchedEffect(true) {
-        vm.errorFlow.collectLatest { errorMsg ->
+        vm.snackbarMsg.collectLatest { errorMsg ->
             snackBarHostState.showSnackbar(errorMsg)
         }
     }

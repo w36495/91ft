@@ -21,8 +21,10 @@ import javax.inject.Inject
 class GiftCategoryViewModel @Inject constructor(
     private val giftCategoryRepository: GiftCategoryRepository
 ) : ViewModel() {
-    private var _errorFlow = MutableSharedFlow<String>()
-    val errorFlow get() = _errorFlow.asSharedFlow()
+    private var _snackbarMsg = MutableSharedFlow<String>()
+    val snackbarMsg get() = _snackbarMsg.asSharedFlow()
+    private var _errorMsg = MutableStateFlow("")
+    val errorMsg = _errorMsg.asStateFlow()
     private val _categories = MutableStateFlow<List<GiftCategory>>(emptyList())
     val categories: StateFlow<List<GiftCategory>> = _categories.asStateFlow()
 
@@ -33,7 +35,7 @@ class GiftCategoryViewModel @Inject constructor(
     private fun refreshCategories() {
         viewModelScope.launch {
             giftCategoryRepository.getCategories()
-                .catch { _errorFlow.emit("카테고리를 불러오는 중 실패하였습니다.") }
+                .catch { _snackbarMsg.emit("카테고리를 불러오는 중 실패하였습니다.") }
                 .collectLatest { giftCategories ->
                     _categories.update { giftCategories.toList() }
                 }
@@ -45,9 +47,9 @@ class GiftCategoryViewModel @Inject constructor(
             val result = giftCategoryRepository.insertCategory(category.toDataEntity())
 
             if (result.isSuccessful) {
-
+                _snackbarMsg.emit("성공적으로 카테고리가 등록되었습니다.")
             } else {
-                _errorFlow.emit("카테고리 등록 중 오류가 발생하였습니다.")
+                _snackbarMsg.emit("카테고리 등록 중 오류가 발생하였습니다.")
             }
         }
     }
@@ -57,10 +59,10 @@ class GiftCategoryViewModel @Inject constructor(
             val result = giftCategoryRepository.deleteCategory(categoryKey)
 
             if (result) {
-                _errorFlow.emit("성공적으로 카테고리가 삭제되었습니다.")
+                _snackbarMsg.emit("성공적으로 카테고리가 삭제되었습니다.")
                 refreshCategories()
             }
-            else _errorFlow.emit("카테고리 삭제 중 오류가 발생하였습니다.")
+            else _snackbarMsg.emit("카테고리 삭제 중 오류가 발생하였습니다.")
         }
     }
 
@@ -70,5 +72,19 @@ class GiftCategoryViewModel @Inject constructor(
 
             giftCategoryRepository.patchCategory(categoryId, updateCategory)
         }
+    }
+
+    fun validateGiftCategory(category: GiftCategory): Boolean {
+        var isValid = true
+
+        if (category.name.trim().isEmpty()) {
+            isValid = false
+
+            viewModelScope.launch {
+                _errorMsg.emit("카테고리명을 입력해주세요.")
+            }
+        }
+
+        return isValid
     }
 }
