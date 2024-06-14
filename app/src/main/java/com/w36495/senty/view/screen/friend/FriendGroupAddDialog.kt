@@ -125,7 +125,12 @@ private fun FriendGroupAddContents(
 
                     SentyTextField(
                         text = inputGroup,
-                        onChangeText = { inputGroup = it },
+                        onChangeText = {
+                            inputGroup = when {
+                                it.length <= 8 -> it
+                                else -> inputGroup.substring(0, 8)
+                            }
+                        },
                         hint = "그룹명을 입력하세요. (최대 8자)",
                         hintSize = 14.sp,
                         errorMsg = errorMsg,
