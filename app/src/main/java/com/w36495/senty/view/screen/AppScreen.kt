@@ -1,6 +1,7 @@
 package com.w36495.senty.view.screen
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.BottomAppBar
@@ -15,6 +16,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -34,8 +36,9 @@ fun AppScreen() {
         bottomBar = {
             if (bottomNavState.shouldShowBottomBar) {
                 BottomAppBar(
+                    contentPadding = PaddingValues(horizontal = 0.dp),
                     cutoutShape = CircleShape,
-                    backgroundColor = Color.White
+                    backgroundColor = Color.Transparent
                 ) {
                     BottomNavigation(navController = navController)
                 }
