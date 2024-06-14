@@ -15,12 +15,15 @@ import com.w36495.senty.domain.repository.GiftImgRepository
 import com.w36495.senty.domain.repository.GiftRepository
 import com.w36495.senty.util.ImgConverter
 import com.w36495.senty.view.entity.gift.Gift
+import com.w36495.senty.view.entity.gift.GiftCategory
 import com.w36495.senty.view.entity.gift.GiftDetail
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
@@ -41,6 +44,8 @@ class GiftAddViewModel @Inject constructor(
     private val friendRepository: FriendRepository,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
+    private val _snackbarMsg = MutableSharedFlow<String>()
+    val snackbarMsg = _snackbarMsg.asSharedFlow()
     private var _gift = MutableStateFlow(Gift.emptyGift)
     val gift = _gift.asStateFlow()
 
@@ -70,8 +75,8 @@ class GiftAddViewModel @Inject constructor(
 
                         gift.copy(
                             giftDetail = gift.giftDetail.copy(
-                                friendDetail = friend,
-                                giftCategory = category
+                                friend = friend,
+                                category = category
                             ),
                             giftImg = gift.giftImg
                         )
@@ -92,7 +97,13 @@ class GiftAddViewModel @Inject constructor(
                     if (!giftImg.toString().contains(giftDetail.imgUri)) {
                         result.body()?.let {
                             val giftImgName = saveGiftImg(giftDetail.id, giftImg)
-                            giftRepository.patchGiftImgUri(giftDetail.id, giftImgName)
+                            val finalResult = giftRepository.patchGiftImgUri(giftDetail.id, giftImgName)
+
+                            if (finalResult.isSuccessful) {
+                                _snackbarMsg.emit("성공적으로 수정되었습니다")
+                            } else {
+                                _snackbarMsg.emit("수정에 실패하였습니다.")
+                            }
                         }
                     }
                 }
@@ -116,6 +127,32 @@ class GiftAddViewModel @Inject constructor(
                 Log.d("GiftAddVM", "saveGift(Failed) : ${result.errorBody().toString()}")
             }
         }
+    }
+
+    fun validateGift(gift: GiftDetail): Boolean {
+        var isValid = true
+
+        if (gift.category == GiftCategory.emptyCategory) {
+            isValid = false
+
+            viewModelScope.launch {
+                _snackbarMsg.emit("카테고리를 선택해주세요")
+            }
+        } else if (gift.friend.name.trim().isNullOrEmpty()) {
+            isValid = false
+
+            viewModelScope.launch {
+                _snackbarMsg.emit("친구를 입력해주세요")
+            }
+        } else if (gift.date.isNullOrEmpty()) {
+            isValid = false
+
+            viewModelScope.launch {
+                _snackbarMsg.emit("날짜를 입력해주세요")
+            }
+        }
+
+        return isValid
     }
 
     private suspend fun saveGiftImg(giftId: String, giftImg: Any?): String = when (giftImg) {

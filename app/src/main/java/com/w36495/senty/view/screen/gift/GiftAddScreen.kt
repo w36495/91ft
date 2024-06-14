@@ -33,6 +33,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -80,17 +82,33 @@ fun GiftAddScreen(
     }
 
     val gift by vm.gift.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(true) {
+        vm.snackbarMsg.collect {
+            snackbarHostState.showSnackbar(it)
+        }
+    }
 
     GiftAddContents(
         giftDetail = if (giftId == null) null else gift.giftDetail,
         giftImg = if (giftId == null) null else gift.giftImg,
+        snackbarHostState = snackbarHostState,
         onPressedBack = { onPressedBack() },
         onClickSave = { giftDetail, giftImg ->
-            giftId?.let {
-                vm.updateGift(giftDetail, giftImg)
-            } ?: vm.saveGift(giftDetail, giftImg)
+            if (giftId == null) {
+                if (vm.validateGift(giftDetail)) {
+                    vm.saveGift(giftDetail, giftImg)
 
-            onComplete()
+                    onComplete()
+                }
+            } else {
+                if (vm.validateGift(giftDetail)) {
+                    vm.updateGift(giftDetail, giftImg)
+
+                    onComplete()
+                }
+            }
         },
     )
 }
@@ -100,6 +118,7 @@ fun GiftAddScreen(
 private fun GiftAddContents(
     giftDetail: GiftDetail?,
     giftImg: Any?,
+    snackbarHostState: SnackbarHostState,
     onPressedBack: () -> Unit,
     onClickSave: (GiftDetail, Any?) -> Unit,
 ) {
@@ -161,6 +180,7 @@ private fun GiftAddContents(
                 )
             )
         },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         backgroundColor = Color.White
     ) { innerPadding ->
         Column(
