@@ -128,7 +128,7 @@ private fun GiftAddContents(
     val takePhotoFromGallery =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
-                result.data?.data?.let { uri -> giftImg = uri.toString() }
+                result.data?.data?.let { uri -> giftImg = uri }
             }
         }
 
@@ -153,7 +153,7 @@ private fun GiftAddContents(
             hasImagePath = if (giftImg == null) false else true,
             onDismiss = { showImageSelectionDialog = false },
             onClickCamera = { takePhotoFromCamera.launch() },
-            onClickGallery = { takePhotoFromGallery.launch(takePhotoFromGalleryIntent) },
+            onClickGallery = { takePhotoFromGallery.launch(Intent.createChooser(takePhotoFromGalleryIntent, "Select Picture")) },
             onClickDelete = {
                 giftImg = null
                 showImageSelectionDialog = false

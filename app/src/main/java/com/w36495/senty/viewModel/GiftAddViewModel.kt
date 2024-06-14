@@ -162,9 +162,7 @@ class GiftAddViewModel @Inject constructor(
         }
 
         is Uri -> {
-            var bitmap: Bitmap? = null
-
-            bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 ImageDecoder.decodeBitmap(
                     ImageDecoder.createSource(context.contentResolver, giftImg)
                 )
@@ -172,9 +170,7 @@ class GiftAddViewModel @Inject constructor(
                 MediaStore.Images.Media.getBitmap(context.contentResolver, giftImg)
             }
 
-            bitmap?.let {
-                requestGiftImg(giftId, ImgConverter.bitmapToString(it))
-            } ?: ""
+            requestGiftImg(giftId, ImgConverter.bitmapToString(bitmap))
         }
 
         else -> ""
