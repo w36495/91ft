@@ -61,7 +61,9 @@ class GiftRepositoryImpl @Inject constructor(
                             .apply { setId(key) }
                             .copy(category = tempGiftCategory.copy(), friend = tempFriend.copy())
                     }.let { giftDetail ->
-                        emit(giftDetail.toList())
+                        val sortedGiftDetail = giftDetail.sortedByDescending { gift -> gift.date }
+
+                        emit(sortedGiftDetail.toList())
                     }
                 }
             } else emit(emptyList())
