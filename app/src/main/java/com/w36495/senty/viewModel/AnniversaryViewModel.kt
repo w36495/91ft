@@ -8,7 +8,9 @@ import com.w36495.senty.util.DateUtil
 import com.w36495.senty.util.StringUtils
 import com.w36495.senty.view.entity.Schedule
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
@@ -20,6 +22,9 @@ import javax.inject.Inject
 class AnniversaryViewModel @Inject constructor(
     private val anniversaryRepository: AnniversaryRepository
 ) : ViewModel() {
+    private val _snackMsg = MutableSharedFlow<String>()
+    val snackMsg = _snackMsg.asSharedFlow()
+
     private var selectDate = mutableStateOf(DateUtil.getDateTime())
 
     private val _schedules = MutableStateFlow<List<Schedule>>(emptyList())
@@ -46,7 +51,11 @@ class AnniversaryViewModel @Inject constructor(
     fun saveSchedule(schedule: Schedule) {
         viewModelScope.launch {
             val result = anniversaryRepository.insertSchedule(schedule.toDataEntity())
-            if (result.isSuccessful) refreshSchedules()
+            if (result.isSuccessful) {
+                refreshSchedules()
+
+                _snackMsg.emit("성공적으로 일정이 등록되었습니다.")
+            }
         }
     }
 
@@ -62,6 +71,20 @@ class AnniversaryViewModel @Inject constructor(
             val result = anniversaryRepository.deleteSchedule(scheduleId)
             if (result) refreshSchedules()
         }
+    }
+
+    fun validateSchedule(schedule: Schedule): Boolean {
+        var validateResult = true
+
+        if (schedule.title.trim().isEmpty()) {
+            viewModelScope.launch {
+                _snackMsg.emit("제목을 입력해주세요.")
+            }
+
+            validateResult = false
+        }
+
+        return validateResult
     }
 
     private fun refreshSchedules() {
