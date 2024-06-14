@@ -1,6 +1,5 @@
 package com.w36495.senty.data.repository
 
-import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.w36495.senty.data.domain.ScheduleEntity
 import com.w36495.senty.data.remote.service.AnniversaryService
@@ -33,7 +32,6 @@ class AnniversaryRepositoryImpl @Inject constructor(
                         Json.decodeFromJsonElement<ScheduleEntity>(jsonElement)
                             .toDomainEntity().apply { setId(key) }
                     }.let { schedules ->
-                        Log.d("AnniversaryRepo", schedules.toString())
                         emit(schedules.toList())
                     }
                 }

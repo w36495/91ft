@@ -47,7 +47,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             anniversaryRepository.getSchedules()
                 .map { schedules ->
-                    schedules.filter { DateUtil.calRemainDate(it.date) > 0 }
+                    schedules.filter { DateUtil.calRemainDate(it.date) >= 0 }
                 }
                 .collectLatest { schedules ->
                     val sortedSchedules = schedules.sortedBy { it.date }
