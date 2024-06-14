@@ -52,8 +52,7 @@ fun AnniversaryBottomSheetDialog(
     schedule: Schedule? = null,
     selectDate: List<Int>,
     onDismiss: () -> Unit,
-    onClickEdit: ((Schedule) -> Unit)? = null,
-    onClickSave: ((Schedule) -> Unit)? = null,
+    onComplete: () -> Unit,
     onClickDelete: ((String) -> Unit)? = null,
 ) {
     var currentType by remember { mutableStateOf(type) }
@@ -152,27 +151,27 @@ fun AnniversaryBottomSheetDialog(
                             )
 
                             if (schedule == null) {
-                                if (onClickSave != null) {
-                                    if (vm.validateSchedule(newSchedule)) {
-                                        onClickSave(newSchedule)
+                                if (vm.validateSchedule(newSchedule)) {
+                                    vm.saveSchedule(newSchedule)
 
-                                        title = ""
-                                        time = "시간을 입력해주세요."
-                                        memo = ""
-                                        location = "장소를 입력해주세요."
-                                    }
+                                    title = ""
+                                    time = "시간을 입력해주세요."
+                                    memo = ""
+                                    location = "장소를 입력해주세요."
+
+                                    onComplete()
                                 }
                             } else {
                                 newSchedule.setId(schedule.id)
-                                if (onClickEdit != null) {
-                                    if (vm.validateSchedule(newSchedule)) {
-                                        onClickEdit(newSchedule)
+                                if (vm.validateSchedule(newSchedule)) {
+                                    vm.updateSchedule(newSchedule)
 
-                                        title = ""
-                                        time = "시간을 입력해주세요."
-                                        memo = ""
-                                        location = "장소를 입력해주세요."
-                                    }
+                                    title = ""
+                                    time = "시간을 입력해주세요."
+                                    memo = ""
+                                    location = "장소를 입력해주세요."
+
+                                    onComplete()
                                 }
                             }
                         }

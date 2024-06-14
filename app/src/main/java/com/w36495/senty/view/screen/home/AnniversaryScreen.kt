@@ -102,10 +102,7 @@ private fun AnniversaryScreenContents(
                 AnniversaryBottomSheetDialog(
                     selectDate = listOf(year, month, day),
                     onDismiss = { showAddDialog = false },
-                    onClickSave = {
-                        onClickSave(it)
-                        showAddDialog = false
-                                  },
+                    onComplete = { showAddDialog = false },
                 )
             } else if (showReadDialog) {
                 val savedDate = savedSchedule.date.split("-").map { it.toInt() }
@@ -118,7 +115,7 @@ private fun AnniversaryScreenContents(
                         showReadDialog = false
                     },
                     onClickDelete = { onClickDelete(it) },
-                    onClickEdit = { onClickEdit(it) }
+                    onComplete = { showReadDialog = false }
                 )
             }
         },
