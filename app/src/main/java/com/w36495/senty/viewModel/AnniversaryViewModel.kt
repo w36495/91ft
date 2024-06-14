@@ -62,14 +62,22 @@ class AnniversaryViewModel @Inject constructor(
     fun updateSchedule(newSchedule: Schedule) {
         viewModelScope.launch {
             val result = anniversaryRepository.patchSchedule(newSchedule.id, newSchedule.toDataEntity())
-            if (result.isSuccessful) refreshSchedules()
+            if (result.isSuccessful) {
+                refreshSchedules()
+
+                _snackMsg.emit("성공적으로 일정이 수정되었습니다.")
+            }
         }
     }
 
     fun removeSchedule(scheduleId: String) {
         viewModelScope.launch {
             val result = anniversaryRepository.deleteSchedule(scheduleId)
-            if (result) refreshSchedules()
+            if (result) {
+                refreshSchedules()
+
+                _snackMsg.emit("성공적으로 일정이 삭제되었습니다.")
+            }
         }
     }
 
