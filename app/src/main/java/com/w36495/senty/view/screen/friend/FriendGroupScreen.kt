@@ -74,7 +74,7 @@ fun FriendGroupScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(true) {
-        vm.errorFlow.collectLatest {
+        vm.snackbarMsg.collectLatest {
             snackbarHostState.showSnackbar(it)
         }
     }

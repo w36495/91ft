@@ -18,8 +18,10 @@ import javax.inject.Inject
 class FriendGroupViewModel @Inject constructor(
     private val friendGroupRepository: FriendGroupRepository
 ) : ViewModel() {
-    private val _errorFlow = MutableSharedFlow<String>()
-    val errorFlow get() = _errorFlow.asSharedFlow()
+    private val _snackbarMsg = MutableSharedFlow<String>()
+    val snackbarMsg get() = _snackbarMsg.asSharedFlow()
+    private var _errorMsg = MutableStateFlow("")
+    val errorMsg = _errorMsg.asStateFlow()
     private var _friendGroups = MutableStateFlow<List<FriendGroup>>(emptyList())
     val friendGroups get() = _friendGroups.asStateFlow()
 
@@ -32,7 +34,7 @@ class FriendGroupViewModel @Inject constructor(
             val result = friendGroupRepository.insertFriendGroup(friendGroup.toDataEntity())
             if (result) {
                 refreshFriendGroups()
-                _errorFlow.emit("성공적으로 그룹이 추가되었습니다.")
+                _snackbarMsg.emit("성공적으로 그룹이 추가되었습니다.")
             }
         }
     }
@@ -42,13 +44,18 @@ class FriendGroupViewModel @Inject constructor(
 
         if (friendGroup.name.trim().isEmpty()) {
             isValid = false
-
             viewModelScope.launch {
-                _errorFlow.emit("그룹명을 입력해주세요.")
+                _errorMsg.update { "그룹 이름을 입력해주세요." }
             }
         }
 
         return isValid
+    }
+
+    fun resetErrorMsg() {
+        viewModelScope.launch {
+            _errorMsg.update { "" }
+        }
     }
 
     fun updateFriendGroup(friendGroup: FriendGroup) {
@@ -57,7 +64,7 @@ class FriendGroupViewModel @Inject constructor(
             if (result.isSuccessful) {
                 refreshFriendGroups()
 
-                _errorFlow.emit("성공적으로 그룹이 수정되었습니다.")
+                _snackbarMsg.emit("성공적으로 그룹이 수정되었습니다.")
             }
         }
     }
@@ -66,7 +73,7 @@ class FriendGroupViewModel @Inject constructor(
         viewModelScope.launch {
             val result = friendGroupRepository.deleteFriendGroup(friendGroupId)
             if (result) {
-                _errorFlow.emit("성공적으로 그룹이 삭제되었습니다.")
+                _snackbarMsg.emit("성공적으로 그룹이 삭제되었습니다.")
                 refreshFriendGroups()
             }
         }
@@ -76,7 +83,7 @@ class FriendGroupViewModel @Inject constructor(
         viewModelScope.launch {
             friendGroupRepository.getFriendGroups()
                 .catch { throwable ->
-                    _errorFlow.emit("그룹을 불러오는 중 오류가 발생하였습니다.")
+                    _snackbarMsg.emit("그룹을 불러오는 중 오류가 발생하였습니다.")
                 }
                 .collect { refreshGroups ->
                     _friendGroups.update { refreshGroups.toList() }
