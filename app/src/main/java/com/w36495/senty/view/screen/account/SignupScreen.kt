@@ -1,4 +1,4 @@
-package com.w36495.senty.view.screen
+package com.w36495.senty.view.screen.account
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

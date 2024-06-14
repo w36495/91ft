@@ -1,4 +1,4 @@
-package com.w36495.senty.view.screen
+package com.w36495.senty.view.screen.account
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
