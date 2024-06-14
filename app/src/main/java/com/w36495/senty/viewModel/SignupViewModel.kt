@@ -1,4 +1,4 @@
-package com.w36495.senty.view
+package com.w36495.senty.viewModel
 
 import android.text.TextUtils
 import androidx.lifecycle.ViewModel

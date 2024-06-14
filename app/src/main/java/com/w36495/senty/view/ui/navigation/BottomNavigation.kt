@@ -27,7 +27,7 @@ fun BottomNavigation(navController: NavHostController) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
 
-        bottomNavigationItem.forEachIndexed { index, item ->
+        bottomNavigationItem.forEachIndexed { _, item ->
             BottomNavigationItem(
                 icon = {
                     Icon(

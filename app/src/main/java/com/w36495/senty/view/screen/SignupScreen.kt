@@ -27,7 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.w36495.senty.view.SignupViewModel
+import com.w36495.senty.viewModel.SignupViewModel
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
 import com.w36495.senty.view.ui.component.textFields.SentyEmailTextField
 import com.w36495.senty.view.ui.component.textFields.SentyPasswordTextField
