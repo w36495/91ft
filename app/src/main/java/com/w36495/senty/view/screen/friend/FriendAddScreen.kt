@@ -21,9 +21,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,11 +57,21 @@ fun FriendAddRoute(
     onMoveFriendList: () -> Unit,
     onClickGroupEdit: () -> Unit,
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(true) {
+        vm.snackbarMsg.collect {
+            snackbarHostState.showSnackbar(it)
+        }
+    }
+
     FriendAddScreen(
+        snackbarHostState = snackbarHostState,
         onBackPressed = { onBackPressed() },
-        onClickSave = {
-            vm.saveFriend(it)
-            onMoveFriendList()
+        onClickSave = { friendDetail, isCheckedBirthday ->
+            if (vm.validateFriend(friendDetail, isCheckedBirthday)) {
+                vm.saveFriend(friendDetail)
+                onMoveFriendList()
+            }
         },
         onClickGroupEdit = { onClickGroupEdit() }
     )
@@ -66,13 +79,15 @@ fun FriendAddRoute(
 
 @Composable
 fun FriendAddScreen(
+    snackbarHostState: SnackbarHostState,
     onBackPressed: () -> Unit,
-    onClickSave: (FriendDetail) -> Unit,
+    onClickSave: (FriendDetail, Boolean) -> Unit,
     onClickGroupEdit: () -> Unit,
 ) {
     FriendAddContents(
+        snackbarHostState = snackbarHostState,
         onBackPressed = onBackPressed,
-        onClickSave = { onClickSave(it) },
+        onClickSave = onClickSave,
         onClickGroupEdit = onClickGroupEdit
     )
 }
@@ -80,8 +95,9 @@ fun FriendAddScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FriendAddContents(
+    snackbarHostState: SnackbarHostState,
     onBackPressed: () -> Unit,
-    onClickSave: (FriendDetail) -> Unit,
+    onClickSave: (FriendDetail, Boolean) -> Unit,
     onClickGroupEdit: () -> Unit,
 ) {
     var name by remember { mutableStateOf("") }
@@ -128,6 +144,7 @@ private fun FriendAddContents(
                 }
             )
         },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         containerColor = Color.White,
     ) { innerPadding ->
         Column(
@@ -207,7 +224,7 @@ private fun FriendAddContents(
                         friendGroup = group,
                     )
 
-                    onClickSave(friend)
+                    onClickSave(friend, isCheckedBirthday)
                 }
             )
         }
