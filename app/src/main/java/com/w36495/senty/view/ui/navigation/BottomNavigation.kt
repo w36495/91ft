@@ -16,6 +16,7 @@ fun BottomNavigation(navController: NavHostController) {
     val bottomNavigationItem = listOf(
         BottomNavigationItem.HOME,
         BottomNavigationItem.FRIEND,
+        BottomNavigationItem.GIFT_ADD,
         BottomNavigationItem.ANNIVERSARY,
         BottomNavigationItem.SETTINGS
     )
@@ -36,14 +37,19 @@ fun BottomNavigation(navController: NavHostController) {
                     )
                 },
                 label = {
-                    Text(
-                        text = item.title,
-                        style = MaterialTheme.typography.labelSmall
-                    )
+                    if (item.name != BottomNavigationItem.GIFT_ADD.name) {
+                        Text(
+                            text = item.title,
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
                 },
                 selected = currentRoute == item.name,
                 onClick = {
-                    navController.navigate(item.name) {
+                    navController.navigate(
+                        if (item.name == BottomNavigationItem.GIFT_ADD.name) GiftNavigationItem.GIFT_ADD.name.plus("/null")
+                        else item.name
+                    ) {
                         navController.graph.startDestinationRoute?.let { route ->
                             launchSingleTop = true
                             restoreState = true
@@ -56,7 +62,7 @@ fun BottomNavigation(navController: NavHostController) {
                 },
                 selectedContentColor = Green40,
                 unselectedContentColor = Color.Gray,
-                alwaysShowLabel = true
+                alwaysShowLabel = false
             )
         }
     }

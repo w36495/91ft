@@ -4,8 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.w36495.senty.view.screen.LoginScreen
-import com.w36495.senty.view.screen.SignupScreen
+import com.w36495.senty.view.screen.account.LoginScreen
+import com.w36495.senty.view.screen.account.SignupScreen
 import com.w36495.senty.view.screen.home.AnniversaryScreen
 import com.w36495.senty.view.screen.home.HomeScreen
 import com.w36495.senty.view.screen.home.SettingScreen
@@ -14,9 +14,9 @@ import com.w36495.senty.view.screen.home.SettingScreen
 fun NavigationGraph(navController: NavHostController) {
     NavHost(
         navController = navController,
-        startDestination = BottomNavigationItem.LOGIN.name,
+        startDestination = AccountNavigationItem.LOGIN.name,
     ) {
-        composable(BottomNavigationItem.LOGIN.name) {
+        composable(AccountNavigationItem.LOGIN.name) {
             LoginScreen(
                 onSuccessLogin = { navController.navigate(BottomNavigationItem.HOME.name) },
                 onClickSignUp = { navController.navigate(AccountNavigationItem.SIGNUP.name) }
@@ -52,9 +52,10 @@ fun NavigationGraph(navController: NavHostController) {
                     navController.navigate(GiftNavigationItem.GIFT_CATEGORY.name)
                 },
                 onSuccessLogout = {
-                    navController.navigate(BottomNavigationItem.LOGIN.name) {
+                    navController.navigate(AccountNavigationItem.LOGIN.name) {
                         launchSingleTop = true
-                        popUpTo(BottomNavigationItem.LOGIN.name) {
+
+                        popUpTo(AccountNavigationItem.LOGIN.name) {
                             inclusive = true
                         }
                     }
@@ -64,4 +65,8 @@ fun NavigationGraph(navController: NavHostController) {
 
         nestedGiftGraph(navController)
     }
+}
+
+enum class AccountNavigationItem {
+    LOGIN, SIGNUP,
 }

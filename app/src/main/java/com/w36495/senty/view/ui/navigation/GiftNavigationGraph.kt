@@ -8,7 +8,6 @@ import androidx.navigation.compose.dialog
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
 import com.w36495.senty.view.entity.gift.GiftCategory
-import com.w36495.senty.view.entity.gift.GiftDetail
 import com.w36495.senty.view.screen.gift.GiftAddScreen
 import com.w36495.senty.view.screen.gift.GiftCategoryAddDialogScreen
 import com.w36495.senty.view.screen.gift.GiftCategoryScreen
@@ -19,7 +18,7 @@ import kotlinx.serialization.json.Json
 
 fun NavGraphBuilder.nestedGiftGraph(navController: NavController) {
     navigation(
-        startDestination = GiftNavigationItem.GIFT_ADD.name.plus("/{null}"),
+        startDestination = BottomNavigationItem.GIFT_ADD.name.plus("/${null}"),
         route = GiftNavigationItem.GIFT.name
     ) {
         composable(GiftNavigationItem.GIFT_LIST.name) {
@@ -39,17 +38,16 @@ fun NavGraphBuilder.nestedGiftGraph(navController: NavController) {
         }
 
         composable(
-            route = GiftNavigationItem.GIFT_ADD.name.plus("/{giftDetail}"),
-            arguments = listOf(navArgument("giftDetail") {
+            route = BottomNavigationItem.GIFT_ADD.name.plus("/{giftId}"),
+            arguments = listOf(navArgument("giftId") {
                 nullable = true
                 type = NavType.StringType
             })
         ) {backStackEntry ->
-            val resultArgs = backStackEntry.arguments?.getString("giftDetail")
-            val giftDetail: GiftDetail? = resultArgs?.let { Json.decodeFromString<GiftDetail>(it) }
+            val giftId = backStackEntry.arguments?.getString("giftId")
 
             GiftAddScreen(
-                giftDetail = giftDetail,
+                giftId = giftId,
                 onPressedBack = {
                     navController.navigateUp()
                 },
@@ -86,16 +84,21 @@ fun NavGraphBuilder.nestedGiftGraph(navController: NavController) {
                 nullable = true
                 type = NavType.StringType
             })
-        ) {backStackEntry ->
+        ) { backStackEntry ->
             val giftId = requireNotNull(backStackEntry.arguments).getString("giftId")!!
 
             GiftDetailScreen(
                 giftId = giftId,
                 onBackPressed = { navController.navigateUp() },
-                onClickEdit = { giftDetail ->
-                    val jsonGiftDetail = Json.encodeToString(giftDetail)
+                onClickEdit = { editGiftId ->
 
-                    navController.navigate(GiftNavigationItem.GIFT_ADD.name.plus("/$jsonGiftDetail"))
+                    navController.navigate(BottomNavigationItem.GIFT_ADD.name.plus("/$editGiftId")) {
+                        launchSingleTop = true
+
+                        popUpTo(BottomNavigationItem.GIFT_ADD.name) {
+                            saveState = true
+                        }
+                    }
                 }
             )
         }
