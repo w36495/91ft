@@ -2,6 +2,8 @@ package com.w36495.senty.view.ui.navigation
 
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,13 +30,17 @@ fun BottomNavigation(navController: NavHostController) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
 
-        bottomNavigationItem.forEachIndexed { _, item ->
+        bottomNavigationItem.forEachIndexed { index, item ->
             BottomNavigationItem(
                 icon = {
-                    Icon(
-                        imageVector = item.icon,
-                        contentDescription = item.title
-                    )
+                    if (index == 1 && currentRoute == item.name) {
+                        Icon(imageVector = Icons.Filled.Person, contentDescription = null)
+                    } else {
+                        Icon(
+                            imageVector = item.icon,
+                            contentDescription = item.title
+                        )
+                    }
                 },
                 label = {
                     if (item.name != BottomNavigationItem.GIFT_ADD.name) {
