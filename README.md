@@ -1,3 +1,5 @@
+![Frame 12](https://github.com/w36495/senty/assets/52291662/cbe7cd8b-2f90-4fbc-bdc4-33b4c83aca91)
+
 # 🎁 Senty
 소중한 사람들과 정성스럽게 주고받은 선물을 기록할 수 있는 어플리케이션  
 
@@ -6,13 +8,13 @@
 ⏳ 개발 기간
 ---
 2022.01. ~ 2022.03. (v1)  
-2024.05. ~ ing (v2)  
+2024.05. ~ 2024.06. (v2)  
 
 </br>
 
 🚀 PlayStore
 ---
-https://play.google.com/store/apps/details?id=com.w36495.senty
+[PlayStore 이동](https://play.google.com/store/apps/details?id=com.w36495.senty)
 
 </br>
 
@@ -39,7 +41,6 @@ https://play.google.com/store/apps/details?id=com.w36495.senty
 |이메일로 로그인|이메일로 회원가입|비밀번호 재설정|  
 |--|--|--|
 |![로그인](https://github.com/w36495/Senty/assets/52291662/abe361c2-4cac-4995-a0a7-76580076816b)|![회원가입](https://github.com/w36495/Senty/assets/52291662/e6a209ed-2e37-4e1d-99b3-8ecebd23e23c)|![비밀번호재설정](https://github.com/w36495/Senty/assets/52291662/a18337aa-6b61-451e-821e-29404a238af1)|  
-
    
 ### 2️⃣ 친구  
 |친구 목록|친구 등록/수정|친구 조회|친구 삭제|
