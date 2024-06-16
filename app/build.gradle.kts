@@ -11,6 +11,7 @@ plugins {
     id("kotlinx-serialization")
     id("androidx.navigation.safeargs.kotlin")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id("com.google.firebase.crashlytics")
 }
 
 val localProperties = Properties()
@@ -98,18 +99,13 @@ dependencies {
     val firebaseBom = platform("com.google.firebase:firebase-bom:32.3.1")
     implementation(firebaseBom)
 
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation("com.google.firebase:firebase-auth-ktx")
-    implementation("com.firebaseui:firebase-ui-auth:7.2.0")      // firebase - Authentication
-    implementation("com.google.android.gms:play-services-auth:20.6.0")
-    implementation("com.google.firebase:firebase-database")      // firebase - Realtime Database
-    implementation("com.google.firebase:firebase-storage-ktx")   // firebase - Cloud Storage
-    implementation("com.firebaseui:firebase-ui-storage:7.2.0")   // firebase - StorageUI
-
-//    implementation 'com.google.android.gms:play-services-ads:21.5.0'
-
-    implementation("androidx.activity:activity-ktx:1.5.0")
-    implementation("androidx.fragment:fragment-ktx:1.5.3")
+    implementation("com.google.firebase:firebase-crashlytics-ktx")
+    implementation("com.google.firebase:firebase-storage-ktx")
+    implementation("com.firebaseui:firebase-ui-auth:7.2.0")
+    implementation("com.firebaseui:firebase-ui-storage:7.2.0")
 
     // Compose
     val composeBom = platform("androidx.compose:compose-bom:2024.05.00")
