@@ -37,22 +37,21 @@ import com.w36495.senty.viewModel.AccountViewModel
 
 @Composable
 fun SettingScreen(
-    vm: AccountViewModel = hiltViewModel(),
+    accountVM: AccountViewModel = hiltViewModel(),
     onClickGiftCategorySetting: () -> Unit,
     onSuccessLogout: () -> Unit,
 ) {
-    val logoutResult by vm.logoutResult.collectAsState()
-    val deleteUserResult by vm.deleteUserResult.collectAsState()
+    val deleteUserResult by accountVM.deleteUserResult.collectAsState()
 
     var showLogoutDialog by remember { mutableStateOf(false) }
     var showDeleteUserDialog by remember { mutableStateOf(false) }
 
-    if (logoutResult || deleteUserResult) onSuccessLogout()
+    if (accountVM.logoutResult.value || deleteUserResult) onSuccessLogout()
     if (showLogoutDialog) {
         BasicAlertDialog(
             title = "로그아웃하시겠습니까?",
             onComplete = {
-                vm.userLogout()
+                accountVM.userLogout()
                 showLogoutDialog = false
                 onSuccessLogout()
             },
@@ -65,7 +64,7 @@ fun SettingScreen(
                 Text(text = "계정을 삭제하면 복구할 수 없습니다.")
             },
             onComplete = {
-                vm.deleteUser()
+                accountVM.deleteUser()
                 showDeleteUserDialog = false
                 onSuccessLogout()
             },

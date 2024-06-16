@@ -1,5 +1,6 @@
 package com.w36495.senty.viewModel
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -11,7 +12,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -22,12 +23,10 @@ class LoginViewModel @Inject constructor(
 ) : ViewModel() {
     private val _errorFlow = MutableSharedFlow<String>()
     val errorFlow get() = _errorFlow.asSharedFlow()
-
-    private val _autoLogin = MutableStateFlow(false)
-    val autoLogin = _autoLogin.asStateFlow()
-
     private var _result = MutableStateFlow(false)
     val result = _result.asStateFlow()
+    var autoLogin = mutableStateOf(false)
+        private set
 
     init {
         checkSavedUserId()
@@ -38,9 +37,9 @@ class LoginViewModel @Inject constructor(
             accountRepository.hasSavedUserIdPreference().collect { hasUserId ->
                 if (hasUserId) {
                     accountRepository.getUserIdPreference()
-                        .collect {
+                        .collectLatest {
                             if (it.userId != AccountRepositoryImpl.PREFERENCE_DEFAULT && it.userPassword != AccountRepositoryImpl.PREFERENCE_DEFAULT) {
-                                _autoLogin.update { true }
+                                autoLogin.value = true
                             }
                         }
                 }

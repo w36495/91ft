@@ -99,7 +99,7 @@ dependencies {
     val firebaseBom = platform("com.google.firebase:firebase-bom:32.3.1")
     implementation(firebaseBom)
 
-    implementation("com.google.android.gms:play-services-auth:21.2.0")
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-crashlytics-ktx")

@@ -51,7 +51,6 @@ fun LoginScreen(
     onClickSignUp: () -> Unit,
 ) {
     val loginResult by vm.result.collectAsStateWithLifecycle()
-    val resultAutoLogin by vm.autoLogin.collectAsStateWithLifecycle()
     val snackBarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(true) {
@@ -62,7 +61,7 @@ fun LoginScreen(
         }
     }
 
-    if (loginResult || resultAutoLogin) onSuccessLogin()
+    if (loginResult || vm.autoLogin.value) onSuccessLogin()
 
     LoginContents(
         snackBarHostState = snackBarHostState,
