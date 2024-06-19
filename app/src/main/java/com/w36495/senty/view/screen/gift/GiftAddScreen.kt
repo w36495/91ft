@@ -1,11 +1,12 @@
 package com.w36495.senty.view.screen.gift
 
+import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.launch
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -48,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -55,7 +57,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.w36495.senty.util.StringUtils
+import com.w36495.senty.util.checkCameraPermission
+import com.w36495.senty.util.getUriFile
 import com.w36495.senty.view.entity.FriendDetail
+import com.w36495.senty.view.entity.gift.Gift
 import com.w36495.senty.view.entity.gift.GiftCategory
 import com.w36495.senty.view.entity.gift.GiftDetail
 import com.w36495.senty.view.entity.gift.GiftType
@@ -90,21 +95,50 @@ fun GiftAddScreen(
         }
     }
 
+    val context = LocalContext.current
+    var tempImageUri by remember { mutableStateOf(Uri.EMPTY) }
+
+    val takePhotoFromCamera =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.TakePicture()) { isSuccess ->
+            if (isSuccess) { vm.setGiftImg(tempImageUri) }
+        }
+
+    val launcherCameraPermission = rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) { isGranted ->
+        if (isGranted) {
+            tempImageUri = context.getUriFile()
+            takePhotoFromCamera.launch(tempImageUri)
+        } else {
+            vm.writeSnackMsg("카메라 권한이 거부되어있습니다.")
+        }
+    }
+
     GiftAddContents(
-        giftDetail = if (giftId == null) null else gift.giftDetail,
-        giftImg = if (giftId == null) null else gift.giftImg,
+        gift = if (giftId == null) null else gift,
+        selectGiftImg = vm.giftImg.value,
+        setGiftImg = { vm.setGiftImg(it) },
+        deleteGiftImg = { vm.resetGiftImg() },
         snackbarHostState = snackbarHostState,
         onPressedBack = { onPressedBack() },
-        onClickSave = { giftDetail, giftImg ->
+        onClickCamera = {
+            val hasPermission = context.checkCameraPermission(arrayOf(Manifest.permission.CAMERA))
+
+            if (!hasPermission) {
+                launcherCameraPermission.launch(Manifest.permission.CAMERA)
+            } else {
+                tempImageUri = context.getUriFile()
+                takePhotoFromCamera.launch(tempImageUri)
+            }
+        },
+        onClickSave = { giftDetail ->
             if (giftId == null) {
                 if (vm.validateGift(giftDetail)) {
-                    vm.saveGift(giftDetail, giftImg)
+                    vm.saveGift(giftDetail)
 
                     onComplete()
                 }
             } else {
                 if (vm.validateGift(giftDetail)) {
-                    vm.updateGift(giftDetail, giftImg)
+                    vm.updateGift(giftDetail)
 
                     onComplete()
                 }
@@ -116,25 +150,22 @@ fun GiftAddScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun GiftAddContents(
-    giftDetail: GiftDetail?,
-    giftImg: Any?,
+    gift: Gift?,
+    selectGiftImg: Any?,
+    setGiftImg: (Any) -> Unit,
+    deleteGiftImg: () -> Unit,
     snackbarHostState: SnackbarHostState,
     onPressedBack: () -> Unit,
-    onClickSave: (GiftDetail, Any?) -> Unit,
+    onClickCamera: () -> Unit,
+    onClickSave: (GiftDetail) -> Unit,
 ) {
     var showImageSelectionDialog by remember { mutableStateOf(false) }
-    var giftImg: Any? by rememberSaveable(giftDetail?.id) { mutableStateOf(giftImg) }
 
     val takePhotoFromGallery =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
-                result.data?.data?.let { uri -> giftImg = uri }
+                result.data?.data?.let { uri -> setGiftImg(uri) }
             }
-        }
-
-    val takePhotoFromCamera =
-        rememberLauncherForActivityResult(contract = ActivityResultContracts.TakePicturePreview()) {
-            if (it != null) { giftImg = it }
         }
 
     val takePhotoFromGalleryIntent =
@@ -150,12 +181,12 @@ private fun GiftAddContents(
 
     if (showImageSelectionDialog) {
         ImageSelectionDialog(
-            hasImagePath = if (giftImg == null) false else true,
+            hasImagePath = gift?.giftImg != null,
             onDismiss = { showImageSelectionDialog = false },
-            onClickCamera = { takePhotoFromCamera.launch() },
+            onClickCamera = onClickCamera,
             onClickGallery = { takePhotoFromGallery.launch(Intent.createChooser(takePhotoFromGalleryIntent, "Select Picture")) },
             onClickDelete = {
-                giftImg = null
+                deleteGiftImg()
                 showImageSelectionDialog = false
             }
         )
@@ -165,7 +196,7 @@ private fun GiftAddContents(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-                    Text(text = giftDetail?.let { "선물수정" } ?: "선물등록")
+                    Text(text = gift?.giftDetail?.let { "선물수정" } ?: "선물등록")
                 },
                 navigationIcon = {
                     IconButton(onClick = { onPressedBack() }) {
@@ -190,17 +221,17 @@ private fun GiftAddContents(
                 .verticalScroll(rememberScrollState())
         ) {
             ImgSection(
-                giftImg = giftImg,
+                giftImg = gift?.giftImg ?: selectGiftImg,
                 modifier = Modifier.fillMaxWidth(),
                 takePhotoLauncher = { showImageSelectionDialog = true }
             )
             InputSection(
-                giftDetail = giftDetail,
+                giftDetail = gift?.giftDetail,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
                 onClickSave = { detail ->
-                    onClickSave(detail, giftImg)
+                    onClickSave(detail)
                 },
             )
         }

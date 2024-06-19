@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.w36495.senty.domain.repository.FriendRepository
@@ -44,10 +45,34 @@ class GiftAddViewModel @Inject constructor(
     private val friendRepository: FriendRepository,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
+    var giftImg = mutableStateOf<ByteArray?>(null)
+        private set
     private val _snackbarMsg = MutableSharedFlow<String>()
     val snackbarMsg = _snackbarMsg.asSharedFlow()
     private var _gift = MutableStateFlow(Gift.emptyGift)
     val gift = _gift.asStateFlow()
+
+    fun setGiftImg(img: Any) {
+        if (img is Uri) {
+            val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                ImageDecoder.decodeBitmap(
+                    ImageDecoder.createSource(context.contentResolver, img)
+                )
+            } else {
+                MediaStore.Images.Media.getBitmap(context.contentResolver, img)
+            }
+
+            val formattedGiftImg = ImgConverter.bitmapToByteArray(bitmap)
+            giftImg.value = formattedGiftImg
+        } else if (img is Bitmap) {
+            val formattedGiftImg = ImgConverter.bitmapToByteArray(img)
+            giftImg.value = formattedGiftImg
+        }
+    }
+
+    fun resetGiftImg() {
+        giftImg.value = null
+    }
 
     fun getGift(giftId: String) {
         viewModelScope.launch {
@@ -57,7 +82,9 @@ class GiftAddViewModel @Inject constructor(
 
                     if (giftDetail.imgUri.isNotEmpty()) {
                         coroutineScope {
-                            val img = async { giftImgRepository.getGiftImages(giftDetail.id, giftDetail.imgUri) }
+                            val img = async {
+                                giftImgRepository.getGiftImages(giftDetail.id, giftDetail.imgUri)
+                            }
 
                             imgPath = img.await()
                         }
@@ -69,9 +96,10 @@ class GiftAddViewModel @Inject constructor(
                     )
                 }
                 .collectLatest { gift ->
-                    combine(friendRepository.getFriend(gift.giftDetail.friend.id),
-                        giftCategoryRepository.getCategory(gift.giftDetail.category.id)) {
-                            friend, category ->
+                    combine(
+                        friendRepository.getFriend(gift.giftDetail.friend.id),
+                        giftCategoryRepository.getCategory(gift.giftDetail.category.id)
+                    ) { friend, category ->
 
                         gift.copy(
                             giftDetail = gift.giftDetail.copy(
@@ -88,15 +116,15 @@ class GiftAddViewModel @Inject constructor(
         }
     }
 
-    fun updateGift(giftDetail: GiftDetail, giftImg: Any?) {
+    fun updateGift(giftDetail: GiftDetail) {
         viewModelScope.launch {
             val result = giftRepository.patchGift(giftDetail.id, giftDetail.toDataEntity())
 
             if (result.isSuccessful) {
-                if (giftImg != "") {
+                if (giftImg.value != null) {
                     if (!giftImg.toString().contains(giftDetail.imgUri)) {
                         result.body()?.let {
-                            val giftImgName = saveGiftImg(giftDetail.id, giftImg)
+                            val giftImgName = requestGiftImg(giftDetail.id, ImgConverter.byteArrayToString(giftImg.value!!))
                             val finalResult = giftRepository.patchGiftImgUri(giftDetail.id, giftImgName)
 
                             if (finalResult.isSuccessful) {
@@ -111,7 +139,7 @@ class GiftAddViewModel @Inject constructor(
         }
     }
 
-    fun saveGift(gift: GiftDetail, giftImg: Any?) {
+    fun saveGift(gift: GiftDetail) {
         viewModelScope.launch {
             val result = giftRepository.insertGift(gift.toDataEntity())
 
@@ -120,8 +148,10 @@ class GiftAddViewModel @Inject constructor(
                     val jsonObject = Json.decodeFromString<JsonObject>(it.string())
                     val key = jsonObject["name"].toString().replace("\"", "")
 
-                    val giftImgName = async { saveGiftImg(key, giftImg) }
-                    giftRepository.patchGiftImgUri(key, giftImgName.await())
+                    if (giftImg.value != null) {
+                        val giftImgName = async { requestGiftImg(key, ImgConverter.byteArrayToString(giftImg.value!!)) }
+                        giftRepository.patchGiftImgUri(key, giftImgName.await())
+                    }
                 }
             } else {
                 Log.d("GiftAddVM", "saveGift(Failed) : ${result.errorBody().toString()}")
@@ -155,25 +185,10 @@ class GiftAddViewModel @Inject constructor(
         return isValid
     }
 
-    private suspend fun saveGiftImg(giftId: String, giftImg: Any?): String = when (giftImg) {
-        is Bitmap -> {
-            val byteGiftImg = ImgConverter.bitmapToString(giftImg)
-            requestGiftImg(giftId, byteGiftImg)
+    fun writeSnackMsg(msg: String) {
+        viewModelScope.launch {
+            _snackbarMsg.emit(msg)
         }
-
-        is Uri -> {
-            val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                ImageDecoder.decodeBitmap(
-                    ImageDecoder.createSource(context.contentResolver, giftImg)
-                )
-            } else {
-                MediaStore.Images.Media.getBitmap(context.contentResolver, giftImg)
-            }
-
-            requestGiftImg(giftId, ImgConverter.bitmapToString(bitmap))
-        }
-
-        else -> ""
     }
 
     private suspend fun requestGiftImg(giftId: String, bitmap: String): String {
