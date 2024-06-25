@@ -4,6 +4,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.w36495.senty.BuildConfig
 import com.w36495.senty.data.remote.service.AnniversaryService
+import com.w36495.senty.data.remote.service.AuthService
 import com.w36495.senty.data.remote.service.FriendGroupService
 import com.w36495.senty.data.remote.service.FriendService
 import com.w36495.senty.data.remote.service.GiftCategoryService
@@ -98,6 +99,10 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideAnniversaryApi(retrofit: Retrofit): AnniversaryService = retrofit.create(AnniversaryService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideAuthApi(retrofit: Retrofit): AuthService = retrofit.create(AuthService::class.java)
 
     @Provides
     @Singleton

@@ -11,17 +11,22 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.firebase.ui.auth.AuthUI
 import com.w36495.senty.data.domain.AccountPreference
+import com.w36495.senty.data.domain.UserEntity
+import com.w36495.senty.data.remote.service.AuthService
 import com.w36495.senty.domain.repository.AccountRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.suspendCancellableCoroutine
+import okhttp3.ResponseBody
+import retrofit2.Response
 import javax.inject.Inject
 import kotlin.coroutines.resumeWithException
 
 class AccountRepositoryImpl @Inject constructor(
     private val authUi: AuthUI,
+    private val authService: AuthService,
     @ApplicationContext private val context: Context
 ): AccountRepository {
     private val Context.accountDataStore: DataStore<Preferences> by preferencesDataStore(name = "AccountPreferences")
@@ -51,6 +56,10 @@ class AccountRepositoryImpl @Inject constructor(
             }
 
         return result
+    }
+
+    override suspend fun insertUser(uid: String, user: UserEntity): Response<ResponseBody> {
+        return authService.insertUser(uid, user)
     }
 
     override suspend fun setUserIdPreference(id: String, password: String) {

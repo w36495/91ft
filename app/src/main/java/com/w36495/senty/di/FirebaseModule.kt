@@ -1,24 +1,23 @@
 package com.w36495.senty.di
 
+import android.content.Context
 import com.firebase.ui.auth.AuthUI
+import com.google.android.gms.auth.api.identity.BeginSignInRequest
+import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
+import com.w36495.senty.BuildConfig
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object FirebaseModule {
-    @Provides
-    @Singleton
-    fun provideFirebaseRTDB(): FirebaseDatabase {
-        return FirebaseDatabase.getInstance()
-    }
-
     @Provides
     @Singleton
     fun provideFirebaseStorage(): FirebaseStorage {
@@ -35,5 +34,26 @@ object FirebaseModule {
     @Singleton
     fun provideFirebaseAuthUI(): AuthUI {
         return AuthUI.getInstance()
+    }
+
+    @Provides
+    fun provideSingInClient(
+        @ApplicationContext context: Context,
+    ): SignInClient {
+        return Identity.getSignInClient(context)
+    }
+
+    @Provides
+    fun provideSignInRequest(): BeginSignInRequest {
+        return BeginSignInRequest.builder()
+            .setGoogleIdTokenRequestOptions(
+                BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                    .setSupported(true)
+                    .setServerClientId(BuildConfig.GOOGLE_CLOUD_WEB_CLIENT_ID)
+                    .setFilterByAuthorizedAccounts(true)
+                    .build()
+            )
+            .setAutoSelectEnabled(true)
+            .build()
     }
 }
