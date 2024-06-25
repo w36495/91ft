@@ -328,7 +328,7 @@ private fun SocialLogins(
         ) {
             Image(
                 painter = painterResource(
-                    id = R.drawable.android_neutral_rd_na
+                    id = R.drawable.login_symbol_google
                 ),
                 contentDescription = "Google Login Button",
                 modifier = Modifier
