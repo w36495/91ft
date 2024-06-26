@@ -88,31 +88,15 @@ class LoginViewModel @Inject constructor(
     fun signInWithGoogle(googleIdToken: String) {
         loading.value = true
 
-        viewModelScope.launch {
-            try {
-                val googleCredential = GoogleAuthProvider.getCredential(googleIdToken, null)
-
-                signInWithCredential(googleCredential)
-            } catch (firebaseAuthException: FirebaseAuthInvalidUserException) {
-                sendSnackbarMessage("계정이 비활성화 되어있습니다.")
-            } catch (firebaseAuthInvalidCredentialsException: FirebaseAuthInvalidCredentialsException) {
-                // 자격 증명이 만료된 경우
-            }
-        }
+        val googleCredential = GoogleAuthProvider.getCredential(googleIdToken, null)
+        signInWithCredential(googleCredential)
     }
 
     fun signInWithFacebook(facebookToken: String) {
         loading.value = true
 
-        viewModelScope.launch {
-            try {
-                val credential = FacebookAuthProvider.getCredential(facebookToken)
-
-                signInWithCredential(credential)
-            } catch (exception: Exception) {
-                sendSnackbarMessage("로그인 중 오류가 발생하였습니다.")
-            }
-        }
+        val credential = FacebookAuthProvider.getCredential(facebookToken)
+        signInWithCredential(credential)
     }
 
     fun sendSnackbarMessage(msg: String) {
@@ -123,29 +107,35 @@ class LoginViewModel @Inject constructor(
 
     private fun signInWithCredential(credential: AuthCredential) {
         viewModelScope.launch {
-            val authResult = firebaseAuth.signInWithCredential(credential).await()
-            val isNewUser = authResult.additionalUserInfo?.isNewUser ?: false
+            try {
+                val authResult = firebaseAuth.signInWithCredential(credential).await()
+                val isNewUser = authResult.additionalUserInfo?.isNewUser ?: false
 
-            if (isNewUser) {
-                firebaseAuth.currentUser?.apply {
-                    val user = UserEntity(
-                        uid = uid,
-                    )
+                if (isNewUser) {
+                    firebaseAuth.currentUser?.apply {
+                        val user = UserEntity(
+                            uid = uid,
+                        )
 
-                    coroutineScope {
-                        val result = async { accountRepository.insertUser(uid, user) }.await()
+                        coroutineScope {
+                            val result = async { accountRepository.insertUser(uid, user) }.await()
 
-                        if (result.isSuccessful) {
-                            loading.value = false
-                            _result.value = true
-                        } else {
-                            sendSnackbarMessage("로그인에 실패하였습니다.")
+                            if (result.isSuccessful) {
+                                loading.value = false
+                                _result.value = true
+                            } else {
+                                sendSnackbarMessage("로그인에 실패하였습니다.")
+                            }
                         }
                     }
+                } else {
+                    loading.value = false
+                    _result.value = true
                 }
-            } else {
-                loading.value = false
-                _result.value = true
+            } catch (firebaseAuthException: FirebaseAuthInvalidUserException) {
+                sendSnackbarMessage("계정이 비활성화 되어있습니다.")
+            } catch (firebaseAuthInvalidCredentialsException: FirebaseAuthInvalidCredentialsException) {
+                // 자격 증명이 만료된 경우
             }
         }
     }
