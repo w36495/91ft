@@ -106,6 +106,7 @@ dependencies {
     implementation("com.google.firebase:firebase-storage-ktx")
     implementation("com.firebaseui:firebase-ui-auth:7.2.0")
     implementation("com.firebaseui:firebase-ui-storage:7.2.0")
+    implementation("com.facebook.android:facebook-login:latest.release")
 
     // Compose
     val composeBom = platform("androidx.compose:compose-bom:2024.05.00")

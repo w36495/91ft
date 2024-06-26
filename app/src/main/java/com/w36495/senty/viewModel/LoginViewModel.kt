@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.SignInClient
+import com.google.firebase.auth.AuthCredential
+import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
@@ -89,30 +91,8 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val googleCredential = GoogleAuthProvider.getCredential(googleIdToken, null)
-                val authResult = firebaseAuth.signInWithCredential(googleCredential).await()
-                val isNewUser = authResult.additionalUserInfo?.isNewUser ?: false
 
-                if (isNewUser) {
-                    firebaseAuth.currentUser?.apply {
-                        val user = UserEntity(
-                            uid = uid,
-                        )
-
-                        coroutineScope {
-                            val result = async { accountRepository.insertUser(uid, user) }.await()
-
-                            if (result.isSuccessful) {
-                                loading.value = false
-                                _result.value = true
-                            } else {
-                                sendSnackbarMessage("로그인에 실패하였습니다.")
-                            }
-                        }
-                    }
-                } else {
-                    loading.value = false
-                    _result.value = true
-                }
+                signInWithCredential(googleCredential)
             } catch (firebaseAuthException: FirebaseAuthInvalidUserException) {
                 sendSnackbarMessage("계정이 비활성화 되어있습니다.")
             } catch (firebaseAuthInvalidCredentialsException: FirebaseAuthInvalidCredentialsException) {
@@ -121,9 +101,52 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    fun signInWithFacebook(facebookToken: String) {
+        loading.value = true
+
+        viewModelScope.launch {
+            try {
+                val credential = FacebookAuthProvider.getCredential(facebookToken)
+
+                signInWithCredential(credential)
+            } catch (exception: Exception) {
+                sendSnackbarMessage("로그인 중 오류가 발생하였습니다.")
+            }
+        }
+    }
+
     fun sendSnackbarMessage(msg: String) {
         viewModelScope.launch {
             _errorFlow.emit(msg)
+        }
+    }
+
+    private fun signInWithCredential(credential: AuthCredential) {
+        viewModelScope.launch {
+            val authResult = firebaseAuth.signInWithCredential(credential).await()
+            val isNewUser = authResult.additionalUserInfo?.isNewUser ?: false
+
+            if (isNewUser) {
+                firebaseAuth.currentUser?.apply {
+                    val user = UserEntity(
+                        uid = uid,
+                    )
+
+                    coroutineScope {
+                        val result = async { accountRepository.insertUser(uid, user) }.await()
+
+                        if (result.isSuccessful) {
+                            loading.value = false
+                            _result.value = true
+                        } else {
+                            sendSnackbarMessage("로그인에 실패하였습니다.")
+                        }
+                    }
+                }
+            } else {
+                loading.value = false
+                _result.value = true
+            }
         }
     }
 

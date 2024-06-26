@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -33,6 +35,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,6 +55,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.facebook.CallbackManager
+import com.facebook.FacebookCallback
+import com.facebook.FacebookException
+import com.facebook.login.LoginManager
+import com.facebook.login.LoginResult
 import com.w36495.senty.R
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
@@ -68,8 +76,9 @@ fun LoginScreen(
     val loginResult by vm.result.collectAsStateWithLifecycle()
     val snackBarHostState = remember { SnackbarHostState() }
 
-    val googleAuthLauncher =
-        rememberLauncherForActivityResult(contract = ActivityResultContracts.StartIntentSenderForResult()) { result ->
+    val googleAuthLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
             when (result.resultCode) {
                 Activity.RESULT_OK -> {
                     val credentials = vm.signInClient.getSignInCredentialFromIntent(result.data)
@@ -78,10 +87,6 @@ fun LoginScreen(
                     googleIdToken?.let { token ->
                         vm.signInWithGoogle(token)
                     }
-                }
-
-                Activity.RESULT_CANCELED -> {
-                    vm.sendSnackbarMessage("Google 로그인에 실패하였습니다.")
                 }
             }
         }
@@ -98,17 +103,20 @@ fun LoginScreen(
 
     LoginContents(
         loading = vm.loading.value,
+        sendSnackbarMessage = { vm.sendSnackbarMessage(it) },
         snackBarHostState = snackBarHostState,
         onClickLogin = { email, password, checkedAutoLogin ->
             vm.userLogin(email, password, checkedAutoLogin)
         },
         onClickSignUp = { onClickSignUp() },
+        onFacebookLoginClick = { vm.signInWithFacebook(it) },
         onGoogleLoginClick = {
             vm.signInClient.signOut()
             vm.signInClient.beginSignIn(vm.signInRequest)
                 .addOnSuccessListener { result ->
-                    val intentSenderRequest =
-                        IntentSenderRequest.Builder(result.pendingIntent.intentSender).build()
+                    val intentSenderRequest = IntentSenderRequest
+                        .Builder(result.pendingIntent.intentSender)
+                        .build()
                     googleAuthLauncher.launch(intentSenderRequest)
                 }
         }
@@ -119,6 +127,8 @@ fun LoginScreen(
 private fun LoginContents(
     loading: Boolean,
     snackBarHostState: SnackbarHostState,
+    sendSnackbarMessage: (String) -> Unit,
+    onFacebookLoginClick: (String) -> Unit,
     onGoogleLoginClick: () -> Unit,
     onClickLogin: (String, String, Boolean) -> Unit,
     onClickSignUp: () -> Unit,
@@ -254,7 +264,9 @@ private fun LoginContents(
 
                 SocialLogins(
                     modifier = Modifier.fillMaxWidth(),
-                    onGoogleLoginClick = onGoogleLoginClick
+                    sendSnackbarMessage = sendSnackbarMessage,
+                    onGoogleLoginClick = onGoogleLoginClick,
+                    onFacebookLoginClick = onFacebookLoginClick,
                 )
             }
 
@@ -301,8 +313,34 @@ private fun LoadingProgressIndicator(
 @Composable
 private fun SocialLogins(
     modifier: Modifier = Modifier,
+    sendSnackbarMessage: (String) -> Unit,
+    onFacebookLoginClick: (String) -> Unit,
     onGoogleLoginClick: () -> Unit,
 ) {
+    val facebookLoginManager = LoginManager.getInstance()
+    val callbackManager = remember { CallbackManager.Factory.create() }
+    val launcher = rememberLauncherForActivityResult(
+        facebookLoginManager.createLogInActivityResultContract(callbackManager, null)) {
+    }
+
+    DisposableEffect(Unit) {
+        facebookLoginManager.registerCallback(callbackManager, object : FacebookCallback<LoginResult> {
+            override fun onCancel() {}
+
+            override fun onError(error: FacebookException) {
+                sendSnackbarMessage(error.stackTraceToString())
+            }
+
+            override fun onSuccess(result: LoginResult) {
+                val token = result.accessToken.token
+                onFacebookLoginClick(token)
+            }
+        })
+        onDispose {
+            facebookLoginManager.unregisterCallback(callbackManager)
+        }
+    }
+
     Column(modifier = modifier) {
         Row(
             modifier = Modifier
@@ -328,6 +366,19 @@ private fun SocialLogins(
         ) {
             Image(
                 painter = painterResource(
+                    id = R.drawable.login_symbol_facebook
+                ),
+                contentDescription = "Facebook Login Button",
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .clickable { launcher.launch(listOf("email", "public_profile")) }
+            )
+
+            Spacer(modifier = Modifier.width(32.dp))
+
+            Image(
+                painter = painterResource(
                     id = R.drawable.login_symbol_google
                 ),
                 contentDescription = "Google Login Button",
@@ -336,5 +387,17 @@ private fun SocialLogins(
                     .clickable { onGoogleLoginClick() }
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SocialLoginsPreview() {
+    SentyTheme {
+        SocialLogins(
+            sendSnackbarMessage = {},
+            onFacebookLoginClick = {},
+            onGoogleLoginClick = {}
+        )
     }
 }
