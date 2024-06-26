@@ -185,7 +185,7 @@ private fun LoginContents(
                         },
                         colors = OutlinedTextFieldDefaults.colors(
                             unfocusedBorderColor = Color.LightGray,
-                            focusedBorderColor = Color.LightGray
+                            focusedBorderColor = Green40
                         ),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
@@ -207,7 +207,7 @@ private fun LoginContents(
                         },
                         colors = OutlinedTextFieldDefaults.colors(
                             unfocusedBorderColor = Color.LightGray,
-                            focusedBorderColor = Color.LightGray
+                            focusedBorderColor = Green40
                         ),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
