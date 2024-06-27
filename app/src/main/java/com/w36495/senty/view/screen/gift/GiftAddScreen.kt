@@ -8,18 +8,24 @@ import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Chip
@@ -29,6 +35,9 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.CameraAlt
+import androidx.compose.material.icons.rounded.RemoveCircle
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -47,7 +56,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
@@ -80,6 +94,8 @@ fun GiftAddScreen(
     onPressedBack: () -> Unit,
     onComplete: () -> Unit,
 ) {
+    val context = LocalContext.current
+
     if (giftId != null) {
         LaunchedEffect(Unit) {
             vm.getGift(giftId)
@@ -94,8 +110,6 @@ fun GiftAddScreen(
             snackbarHostState.showSnackbar(it)
         }
     }
-
-    val context = LocalContext.current
     var tempImageUri by remember { mutableStateOf(Uri.EMPTY) }
 
     val takePhotoFromCamera =
@@ -114,9 +128,9 @@ fun GiftAddScreen(
 
     GiftAddContents(
         gift = if (giftId == null) null else gift,
-        selectGiftImg = vm.giftImg.value,
+        selectGiftImages = vm.giftImages.value,
         setGiftImg = { vm.setGiftImg(it) },
-        deleteGiftImg = { vm.resetGiftImg() },
+        onRemoveImageClick = { vm.removeGiftImage(it) },
         snackbarHostState = snackbarHostState,
         onPressedBack = { onPressedBack() },
         onClickCamera = {
@@ -151,10 +165,10 @@ fun GiftAddScreen(
 @Composable
 private fun GiftAddContents(
     gift: Gift?,
-    selectGiftImg: Any?,
+    selectGiftImages: List<ByteArray>,
     setGiftImg: (Any) -> Unit,
-    deleteGiftImg: () -> Unit,
     snackbarHostState: SnackbarHostState,
+    onRemoveImageClick: (Int) -> Unit,
     onPressedBack: () -> Unit,
     onClickCamera: () -> Unit,
     onClickSave: (GiftDetail) -> Unit,
@@ -181,14 +195,9 @@ private fun GiftAddContents(
 
     if (showImageSelectionDialog) {
         ImageSelectionDialog(
-            hasImagePath = gift?.giftImg != null,
             onDismiss = { showImageSelectionDialog = false },
             onClickCamera = onClickCamera,
             onClickGallery = { takePhotoFromGallery.launch(Intent.createChooser(takePhotoFromGalleryIntent, "Select Picture")) },
-            onClickDelete = {
-                deleteGiftImg()
-                showImageSelectionDialog = false
-            }
         )
     }
 
@@ -221,9 +230,10 @@ private fun GiftAddContents(
                 .verticalScroll(rememberScrollState())
         ) {
             ImgSection(
-                giftImg = gift?.giftImg ?: selectGiftImg,
                 modifier = Modifier.fillMaxWidth(),
-                takePhotoLauncher = { showImageSelectionDialog = true }
+                giftImages = selectGiftImages,
+                onRemoveImageClick = onRemoveImageClick,
+                onAddImageClick = { showImageSelectionDialog = true }
             )
             InputSection(
                 giftDetail = gift?.giftDetail,
@@ -238,39 +248,125 @@ private fun GiftAddContents(
     }
 }
 
-@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 private fun ImgSection(
     modifier: Modifier = Modifier,
-    giftImg: Any?,
-    takePhotoLauncher: () -> Unit
+    giftImages: List<ByteArray>,
+    onRemoveImageClick: (Int) -> Unit,
+    onAddImageClick: () -> Unit,
+) {
+    LazyRow(
+        modifier = modifier
+            .aspectRatio(1f),
+        contentPadding = PaddingValues(32.dp)
+    ) {
+        if (giftImages.isNotEmpty()) {
+            itemsIndexed(giftImages) { index, image ->
+                DisplayGiftImage(
+                    modifier = Modifier.fillMaxWidth(),
+                    giftImage = image,
+                    onRemoveImageClick = {
+                        onRemoveImageClick(index)
+                    }
+                )
+
+                if (index < giftImages.lastIndex) {
+                    Spacer(modifier = Modifier.width(4.dp))
+                }
+
+                if (index == giftImages.lastIndex && index < 2) {
+                    AddGiftImage(
+                        currentIndex = index + 1,
+                        onAddImageClick = onAddImageClick
+                    )
+                }
+            }
+        } else {
+            items(1) {
+                AddGiftImage(
+                    currentIndex = 0,
+                    onAddImageClick = onAddImageClick
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalGlideComposeApi::class)
+@Composable
+private fun DisplayGiftImage(
+    modifier: Modifier = Modifier,
+    giftImage: ByteArray,
+    onRemoveImageClick: () -> Unit,
 ) {
     Box(
-        modifier = modifier
-            .background(Color(0xFFF6F6F6))
-            .aspectRatio(1f)
-            .clickable { takePhotoLauncher() },
-        contentAlignment = Alignment.Center
+        modifier = modifier.aspectRatio(1f)
     ) {
-        if (giftImg != null) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(1f)
+                .padding(8.dp)
+        ) {
             GlideImage(
-                model = giftImg,
-                contentDescription = null,
+                model = giftImage,
+                contentDescription = "Gift Image",
                 modifier = Modifier.aspectRatio(1f),
                 contentScale = ContentScale.Crop
             )
-        } else {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(imageVector = Icons.Outlined.CameraAlt, contentDescription = null)
-                Text(
-                    text = "사진 등록",
-                    style = MaterialTheme.typography.labelLarge,
-                    modifier = Modifier.padding(top = 4.dp)
+        }
+
+        Icon(
+            imageVector = Icons.Rounded.RemoveCircle,
+            contentDescription = "Gift Image Remove",
+            modifier = Modifier
+                .size(32.dp)
+                .align(Alignment.TopEnd)
+                .clip(CircleShape)
+                .clickable { onRemoveImageClick() },
+            tint = MaterialTheme.colorScheme.error
+        )
+    }
+}
+
+@Composable
+private fun AddGiftImage(
+    modifier: Modifier = Modifier,
+    currentIndex: Int,
+    onAddImageClick: () -> Unit,
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .aspectRatio(1f)
+            .padding(8.dp)
+            .drawBehind {
+                drawRoundRect(
+                    color = Color.LightGray, style = Stroke(
+                        width = 8f,
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+                    ),
+                    cornerRadius = CornerRadius(25f, 25f)
                 )
             }
+            .clip(RoundedCornerShape(12.dp))
+            .clickable { onAddImageClick() },
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        )
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Icon(imageVector = Icons.Outlined.CameraAlt, contentDescription = null)
+            Text(
+                text = "사진 등록\n(${currentIndex}/3)",
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.padding(top = 4.dp)
+            )
         }
     }
 }

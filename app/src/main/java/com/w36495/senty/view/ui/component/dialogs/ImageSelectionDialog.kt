@@ -13,9 +13,7 @@ import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,14 +26,11 @@ import com.w36495.senty.view.screen.ui.theme.SentyTheme
 
 @Composable
 fun ImageSelectionDialog(
-    hasImagePath: Boolean,
     onDismiss: () -> Unit,
     onClickCamera: () -> Unit,
     onClickGallery: () -> Unit,
-    onClickDelete: () -> Unit,
 ) {
     ImageSelectionDialogContents(
-        hasImagePath = hasImagePath,
         onDismiss = { onDismiss() },
         onClickCamera = {
             onClickCamera()
@@ -45,18 +40,15 @@ fun ImageSelectionDialog(
             onClickGallery()
             onDismiss()
         },
-        onClickDelete = onClickDelete
     )
 }
 
 @Composable
 private fun ImageSelectionDialogContents(
     modifier: Modifier = Modifier,
-    hasImagePath: Boolean,
     onDismiss: () -> Unit,
     onClickCamera: () -> Unit,
     onClickGallery: () -> Unit,
-    onClickDelete: () -> Unit,
 ) {
     Dialog(onDismissRequest = { onDismiss() }) {
         Card(
@@ -112,19 +104,6 @@ private fun ImageSelectionDialogContents(
                     }
                 }
             }
-
-            if (hasImagePath) {
-                HorizontalDivider()
-                Box(
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(vertical = 24.dp)
-                        .clickable { onClickDelete() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = "이미지 삭제하기",
-                        color = MaterialTheme.colorScheme.error)
-                }
-            }
         }
     }
 }
@@ -134,25 +113,9 @@ private fun ImageSelectionDialogContents(
 private fun ImageSelectionDialogPreview() {
     SentyTheme {
         ImageSelectionDialogContents(
-            hasImagePath = true,
             onDismiss = {},
             onClickCamera = {},
             onClickGallery = {},
-            onClickDelete = {},
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun ImageSelectionDialogPreview2() {
-    SentyTheme {
-        ImageSelectionDialogContents(
-            hasImagePath = false,
-            onDismiss = {},
-            onClickCamera = {},
-            onClickGallery = {},
-            onClickDelete = {},
         )
     }
 }
