@@ -67,17 +67,20 @@ class HomeViewModel @Inject constructor(
                     gifts.map { giftDetail ->
                         val friend = friends.find { friend -> friend.id == giftDetail.friend.id }
                         val gift = giftDetail.copy(friend = friend!!)
-                        var giftImg = ""
+                        var giftImg = emptyList<String>()
 
-                        if (giftDetail.imgUri.isNotEmpty()) {
-                            coroutineScope {
-                                val img = async { giftImgRepository.getGiftImages(giftDetail.id, giftDetail.imgUri) }
+                        coroutineScope {
+                            val imgPath = async { giftImgRepository.getGiftImages(giftDetail.id) }.await()
 
-                                giftImg = img.await()
-                            }
+                            giftImg = imgPath.toList()
                         }
 
-                        Gift(giftDetail = gift, giftImg = giftImg)
+                        val sortedGiftImg = giftImg.sortedBy {
+                            it.split("/").run {
+                                this[lastIndex].split("?")[0]
+                            }.split("%2F")[1]
+                        }
+                        Gift(giftDetail = gift, giftImages = sortedGiftImg)
                     }
                 }
                 .collectLatest { gifts ->
@@ -98,17 +101,20 @@ class HomeViewModel @Inject constructor(
                     gifts.map { giftDetail ->
                         val friend = friends.find { friend -> friend.id == giftDetail.friend.id }
                         val gift = giftDetail.copy(friend = friend!!)
-                        var giftImg = ""
+                        var giftImg = emptyList<String>()
 
-                        if (giftDetail.imgUri.isNotEmpty()) {
-                            coroutineScope {
-                                val img = async { giftImgRepository.getGiftImages(giftDetail.id, giftDetail.imgUri) }
+                        coroutineScope {
+                            val imgPath = async { giftImgRepository.getGiftImages(giftDetail.id) }.await()
 
-                                giftImg = img.await()
-                            }
+                            giftImg = imgPath.toList()
                         }
 
-                        Gift(giftDetail = gift, giftImg = giftImg)
+                        val sortedGiftImg = giftImg.sortedBy {
+                            it.split("/").run {
+                                this[lastIndex].split("?")[0]
+                            }.split("%2F")[1]
+                        }
+                        Gift(giftDetail = gift, giftImages = sortedGiftImg)
                     }
                 }
                 .collectLatest { gifts ->

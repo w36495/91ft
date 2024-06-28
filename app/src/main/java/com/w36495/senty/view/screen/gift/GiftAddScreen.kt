@@ -74,7 +74,6 @@ import com.w36495.senty.util.StringUtils
 import com.w36495.senty.util.checkCameraPermission
 import com.w36495.senty.util.getUriFile
 import com.w36495.senty.view.entity.FriendDetail
-import com.w36495.senty.view.entity.gift.Gift
 import com.w36495.senty.view.entity.gift.GiftCategory
 import com.w36495.senty.view.entity.gift.GiftDetail
 import com.w36495.senty.view.entity.gift.GiftType
@@ -102,7 +101,7 @@ fun GiftAddScreen(
         }
     }
 
-    val gift by vm.gift.collectAsStateWithLifecycle()
+    val giftDetail by vm.giftDetail.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(true) {
@@ -127,7 +126,7 @@ fun GiftAddScreen(
     }
 
     GiftAddContents(
-        gift = if (giftId == null) null else gift,
+        giftDetail = if (giftId == null) null else giftDetail,
         selectGiftImages = vm.giftImages.value,
         setGiftImg = { vm.setGiftImg(it) },
         onRemoveImageClick = { vm.removeGiftImage(it) },
@@ -164,8 +163,8 @@ fun GiftAddScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun GiftAddContents(
-    gift: Gift?,
-    selectGiftImages: List<ByteArray>,
+    giftDetail: GiftDetail?,
+    selectGiftImages: List<Any>,
     setGiftImg: (Any) -> Unit,
     snackbarHostState: SnackbarHostState,
     onRemoveImageClick: (Int) -> Unit,
@@ -205,7 +204,7 @@ private fun GiftAddContents(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-                    Text(text = gift?.giftDetail?.let { "선물수정" } ?: "선물등록")
+                    Text(text = giftDetail?.let { "선물수정" } ?: "선물등록")
                 },
                 navigationIcon = {
                     IconButton(onClick = { onPressedBack() }) {
@@ -236,7 +235,7 @@ private fun GiftAddContents(
                 onAddImageClick = { showImageSelectionDialog = true }
             )
             InputSection(
-                giftDetail = gift?.giftDetail,
+                giftDetail = giftDetail,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
@@ -251,7 +250,7 @@ private fun GiftAddContents(
 @Composable
 private fun ImgSection(
     modifier: Modifier = Modifier,
-    giftImages: List<ByteArray>,
+    giftImages: List<Any>,
     onRemoveImageClick: (Int) -> Unit,
     onAddImageClick: () -> Unit,
 ) {
@@ -296,7 +295,7 @@ private fun ImgSection(
 @Composable
 private fun DisplayGiftImage(
     modifier: Modifier = Modifier,
-    giftImage: ByteArray,
+    giftImage: Any,
     onRemoveImageClick: () -> Unit,
 ) {
     Box(
@@ -498,7 +497,6 @@ private fun InputSection(
                 mood = mood,
                 memo = memo,
                 giftType = type,
-                imgUri = giftDetail?.imgUri ?: ""
             )
 
             if (giftDetail != null) gift.apply { setId(giftDetail.id) }

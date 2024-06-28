@@ -18,10 +18,12 @@ import androidx.compose.material.Tab
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.rounded.NoPhotography
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
@@ -32,9 +34,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
@@ -45,6 +49,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
+import com.w36495.senty.R
 import com.w36495.senty.view.entity.gift.Gift
 import com.w36495.senty.view.ui.theme.Green40
 import com.w36495.senty.viewModel.GiftViewModel
@@ -207,7 +212,7 @@ private fun GiftHorizontalViewPager(
 
                 gifts.forEach { gift ->
                     GiftViewPagerItem(
-                        imgPath = gift.giftImg,
+                        giftImages = gift.giftImages,
                         onClickGift = { onClickGift(gift.giftDetail.id) }
                     )
                 }
@@ -220,25 +225,59 @@ private fun GiftHorizontalViewPager(
 @Composable
 private fun GiftViewPagerItem(
     modifier: Modifier = Modifier,
-    imgPath: String = "",
+    giftImages: List<Any>,
     onClickGift: () -> Unit,
 ) {
-    if (imgPath.isEmpty()) {
+    if (giftImages.isEmpty()) {
         Box(
             modifier = modifier
-                .aspectRatio(1f)
                 .fillMaxWidth()
+                .aspectRatio(1f)
                 .background(Color(0xFFD9D9D9))
-                .clickable { onClickGift() }
-        )
+                .clickable { onClickGift() },
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.NoPhotography,
+                contentDescription = "Gift Image Empty",
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+            )
+        }
     } else {
-        GlideImage(model = imgPath, contentDescription = null,
-            modifier = Modifier
+        Box(
+            modifier = modifier
                 .fillMaxWidth()
                 .aspectRatio(1f)
                 .clickable { onClickGift() },
-            contentScale = ContentScale.Crop
-        )
+        ) {
+            GlideImage(
+                model = giftImages[0],
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f),
+                contentScale = ContentScale.Crop,
+            ) {
+                it.override(200)
+            }
+
+            if (giftImages.size > 1) {
+                Icon(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(top = 4.dp, end = 4.dp),
+                    painter = painterResource(
+                        id = if (giftImages.size == 2) {
+                            R.drawable.ic_baseline_counter_2
+                        } else {
+                            R.drawable.ic_baseline_counter_3
+                        }
+                    ),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
     }
 }
 

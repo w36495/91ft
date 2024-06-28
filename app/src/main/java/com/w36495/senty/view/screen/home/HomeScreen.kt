@@ -1,6 +1,5 @@
 package com.w36495.senty.view.screen.home
 
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +24,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowCircleRight
+import androidx.compose.material.icons.rounded.NoPhotography
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,18 +39,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import com.w36495.senty.R
 import com.w36495.senty.view.entity.FriendDetail
 import com.w36495.senty.view.entity.Schedule
 import com.w36495.senty.view.entity.gift.Gift
-import com.w36495.senty.view.entity.gift.GiftCategory
 import com.w36495.senty.view.entity.gift.GiftDetail
-import com.w36495.senty.view.entity.gift.GiftType
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
 import com.w36495.senty.view.ui.component.cards.ScheduleWithDateList
 import com.w36495.senty.view.ui.theme.Green40
@@ -300,7 +300,7 @@ private fun GiftCardSection(
         itemsIndexed(gifts) { index, gift ->
             if (index < 8) {
                 GiftCardItem(
-                    giftImg = gift.giftImg,
+                    giftImages = gift.giftImages,
                     gift = gift.giftDetail,
                     friend = gift.giftDetail.friend,
                     onClickGiftDetail = { onClickGiftDetail(it) }
@@ -347,7 +347,7 @@ private fun GiftCardSection(
 @Composable
 private fun GiftCardItem(
     modifier: Modifier = Modifier,
-    giftImg: String,
+    giftImages: List<Any>,
     gift: GiftDetail,
     friend: FriendDetail,
     onClickGiftDetail: (String) -> Unit,
@@ -358,22 +358,54 @@ private fun GiftCardItem(
         elevation = 4.dp,
         onClick = { onClickGiftDetail(gift.id) }) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            if (giftImg.isEmpty()) {
+            if (giftImages.isEmpty()) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(1f)
-                        .background(Color(0xFFD9D9D9))
-                )
+                        .background(Color(0xFFD9D9D9)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.NoPhotography,
+                        contentDescription = "Gift Image Empty",
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    )
+                }
             } else {
-                GlideImage(
-                    model = Uri.parse(giftImg),
-                    contentDescription = null,
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(1f),
-                    contentScale = ContentScale.Crop,
-                )
+                ) {
+                    GlideImage(
+                        model = giftImages[0],
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1f),
+                        contentScale = ContentScale.Crop,
+                    ) {
+                        it.override(200)
+                    }
+
+                    if (giftImages.size > 1) {
+                        Icon(
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(top = 4.dp, end = 4.dp),
+                            painter = painterResource(
+                                id = if (giftImages.size == 2) {
+                                    R.drawable.ic_baseline_counter_2
+                                } else {
+                                    R.drawable.ic_baseline_counter_3
+                                }
+                            ),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
             }
 
             Column(

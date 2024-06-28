@@ -1,6 +1,5 @@
 package com.w36495.senty.viewModel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.w36495.senty.domain.repository.FriendGroupRepository
@@ -8,7 +7,7 @@ import com.w36495.senty.domain.repository.FriendRepository
 import com.w36495.senty.domain.repository.GiftImgRepository
 import com.w36495.senty.domain.repository.GiftRepository
 import com.w36495.senty.view.entity.FriendDetail
-import com.w36495.senty.view.entity.gift.GiftEntity
+import com.w36495.senty.view.entity.gift.Gift
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -38,8 +37,8 @@ class FriendDetailViewModel @Inject constructor(
     val deleteResult = _deleteResult.asStateFlow()
     private var _friend = MutableStateFlow(FriendDetail.emptyFriendEntity)
     val friend: StateFlow<FriendDetail> = _friend.asStateFlow()
-    private var _gifts = MutableStateFlow<List<GiftEntity>>(emptyList())
-    val gifts: StateFlow<List<GiftEntity>> = _gifts.asStateFlow()
+    private var _gifts = MutableStateFlow<List<Gift>>(emptyList())
+    val gifts: StateFlow<List<Gift>> = _gifts.asStateFlow()
 
     fun getFriend(friendId: String) {
         viewModelScope.launch {
@@ -58,20 +57,23 @@ class FriendDetailViewModel @Inject constructor(
         viewModelScope.launch {
             giftRepository.getGifts()
                 .map { gifts ->
-                    gifts.filter { it.friendId == friendId }.map {
-                        var giftEntity = GiftEntity(
-                            gift = it.toDomainEntity(),
-                            friend = FriendDetail.emptyFriendEntity
-                        )
+                    gifts.filter { it.friend.id == friendId }.map { giftDetail ->
+                        var gift = Gift(giftDetail = giftDetail)
+                        var giftImg = emptyList<String>()
 
-                        if (it.imgUri.isNotEmpty()) {
-                            coroutineScope {
-                                val img = async { giftImgRepository.getGiftImages(it.id, it.imgUri) }
-                                giftEntity = giftEntity.copy(giftImg = img.await())
-                            }
+                        coroutineScope {
+                            val imgPath = async { giftImgRepository.getGiftImages(giftDetail.id) }.await()
+
+                            giftImg = imgPath.toList()
                         }
 
-                        giftEntity
+                        val sortedGiftImg = giftImg.sortedBy {
+                            it.split("/").run {
+                                this[lastIndex].split("?")[0]
+                            }.split("%2F")[1]
+                        }
+
+                        gift.copy(giftImages = sortedGiftImg.toList())
                     }
                 }.collectLatest {
                     _gifts.value = it.toList()

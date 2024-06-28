@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -28,41 +29,22 @@ class GiftViewModel @Inject constructor(
         viewModelScope.launch {
             giftRepository.getGifts()
                 .map { gifts ->
-                    gifts.map {
-                        var gift = Gift(giftDetail = it.toDomainEntity())
-                        if (it.imgUri.isNotEmpty()) {
-                            coroutineScope {
-                                val img = async { giftImgRepository.getGiftImages(it.id, it.imgUri) }
-                                gift = gift.copy(imgPath = img.await())
-                            }
+                    gifts.map { giftDetail ->
+                        val gift = Gift(giftDetail = giftDetail)
+                        var giftImg = emptyList<String>()
+
+                        coroutineScope {
+                            val imgPath = async { giftImgRepository.getGiftImages(giftDetail.id) }.await()
+
+                            giftImg = imgPath.toList()
                         }
 
-                        gift
-                    }
-                }
-                .collectLatest {
-                    _gifts.value = it.toList()
-                }
-        }
-    }
-
-    fun getReceivedGifts() {
-        viewModelScope.launch {
-            giftRepository.getGifts()
-                .map { gifts ->
-                    gifts.filter { it.giftType == GiftType.RECEIVED }
-                }
-                .map { gifts ->
-                    gifts.map {
-                        var gift = Gift(giftDetail = it.toDomainEntity())
-                        if (it.imgUri.isNotEmpty()) {
-                            coroutineScope {
-                                val img = async { giftImgRepository.getGiftImages(it.id, it.imgUri) }
-                                gift = gift.copy(imgPath = img.await())
-                            }
+                        val sortedGiftImg = giftImg.sortedBy {
+                            it.split("/").run {
+                                this[lastIndex].split("?")[0]
+                            }.split("%2F")[1]
                         }
-
-                        gift
+                        gift.copy(giftImages = sortedGiftImg.toList())
                     }
                 }
                 .collectLatest {
@@ -76,22 +58,55 @@ class GiftViewModel @Inject constructor(
             giftRepository.getGifts()
                 .map { gifts ->
                     gifts.filter { it.giftType == GiftType.SENT }
-                }
-                .map { gifts ->
-                    gifts.map {
-                        var gift = Gift(giftDetail = it.toDomainEntity())
-                        if (it.imgUri.isNotEmpty()) {
-                            coroutineScope {
-                                val img = async { giftImgRepository.getGiftImages(it.id, it.imgUri) }
-                                gift = gift.copy(imgPath = img.await())
-                            }
-                        }
+                        .map { giftDetail ->
+                            var gift = Gift(giftDetail = giftDetail)
+                            var giftImg = emptyList<String>()
 
-                        gift
-                    }
+                            coroutineScope {
+                                val imgPath = async { giftImgRepository.getGiftImages(giftDetail.id) }.await()
+
+                                giftImg = imgPath.toList()
+                            }
+
+                            val sortedGiftImg = giftImg.sortedBy {
+                                it.split("/").run {
+                                    this[lastIndex].split("?")[0]
+                                }.split("%2F")[1]
+                            }
+                            gift.copy(giftImages = sortedGiftImg.toList())
+                        }
                 }
-                .collectLatest {
-                    _gifts.value = it.toList()
+                .collectLatest { gifts ->
+                    _gifts.update { gifts.toList() }
+                }
+        }
+    }
+
+    fun getReceivedGifts() {
+        viewModelScope.launch {
+            giftRepository.getGifts()
+                .map { gifts ->
+                    gifts.filter { it.giftType == GiftType.RECEIVED }
+                        .map { giftDetail ->
+                            var gift = Gift(giftDetail = giftDetail)
+                            var giftImg = emptyList<String>()
+
+                            coroutineScope {
+                                val imgPath = async { giftImgRepository.getGiftImages(giftDetail.id) }.await()
+
+                                giftImg = imgPath.toList()
+                            }
+
+                            val sortedGiftImg = giftImg.sortedBy {
+                                it.split("/").run {
+                                    this[lastIndex].split("?")[0]
+                                }.split("%2F")[1]
+                            }
+                            gift.copy(giftImages = sortedGiftImg.toList())
+                        }
+                }
+                .collectLatest { gifts ->
+                    _gifts.update { gifts.toList() }
                 }
         }
     }

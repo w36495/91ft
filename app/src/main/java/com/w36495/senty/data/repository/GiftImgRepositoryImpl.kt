@@ -4,69 +4,62 @@ import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
 import com.w36495.senty.domain.repository.GiftImgRepository
-import com.w36495.senty.util.ImgConverter
-import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 class GiftImgRepositoryImpl @Inject constructor(
     private val firebaseStorage: FirebaseStorage,
     private val firebaseAuth: FirebaseAuth,
 ) : GiftImgRepository {
     private var userId: String = firebaseAuth.currentUser!!.uid
-    override suspend fun getGiftImages(giftId: String, imgPath: String): String {
-        return suspendCancellableCoroutine { continuation ->
-            val imgPath = "images/gifts/$userId/$giftId/$imgPath"
+    override suspend fun getGiftImages(giftId: String): List<String> {
+        var giftImages = mutableListOf<String>()
+        val imgPath = "images/gifts/$userId/$giftId"
 
-            firebaseStorage.reference.child(imgPath).downloadUrl
-                .addOnSuccessListener {
-                    continuation.resume(it.toString())
-                }
+        coroutineScope {
+            firebaseStorage.reference.child(imgPath).listAll()
                 .addOnFailureListener {
-                    continuation.resumeWithException(it)
+                    Log.d("GiftImgRepositoryImpl", "Exception: (${it.message.toString()})")
                 }
-
-            continuation.invokeOnCancellation {
-                Log.d("GiftImgRepositoryImpl", "Exception: (${it?.message.toString()})")
-            }
+                .addOnSuccessListener {
+                    it.items.forEach { storageReference ->
+                        launch {
+                            val downloadUrl = storageReference.downloadUrl.await()
+                            giftImages.add(downloadUrl.toString())
+                        }
+                    }
+                }.await()
         }
+
+        return giftImages.toList()
     }
 
     override suspend fun insertGiftImgByBitmap(
         giftId: String,
-        giftImg: String
-    ): String {
-        return suspendCancellableCoroutine { continuation ->
-            var imgName = generateImageName()
-            val decodeImg = ImgConverter.stringToByteArray(giftImg)
+        giftImage: ByteArray
+    ) {
+        val imgName = generateImageName()
+        val giftImagePath = "images/gifts/$userId/$giftId/$imgName.jpg"
 
-            val giftPath = "images/gifts/$userId/$giftId/$imgName.jpg"
-            firebaseStorage.reference.child(giftPath).putBytes(decodeImg)
-                .addOnSuccessListener {
-                    val path = it.storage.path.split("/")
-                    continuation.resume(path[path.lastIndex])
-                }
-                .addOnFailureListener {
-                    continuation.resumeWithException(it)
-                }
-
-            continuation.invokeOnCancellation {
-                Log.d("GiftImgRepositoryImpl", "Exception: (${it?.message.toString()})")
+        firebaseStorage.reference.child(giftImagePath).putBytes(giftImage)
+            .addOnFailureListener {
+                Log.d("GiftImgRepositoryImpl", "Exception: (${it.message.toString()})")
             }
-        }
     }
 
-    override suspend fun deleteGiftImg(imgPath: String): Boolean {
+    override suspend fun deleteGiftImg(giftId: String, imgPath: String): Boolean {
         var result = false
+        val imagePath = "images/gifts/$userId/$giftId/$imgPath"
 
-        firebaseStorage.reference.child(imgPath).delete()
-            .addOnSuccessListener {
-                result = true
-            }
+        firebaseStorage.reference.child(imagePath).delete()
             .addOnFailureListener {
                 throw IllegalArgumentException("Gift image delete Failed")
             }
+            .addOnSuccessListener {
+                result = true
+            }.await()
 
         return result
     }

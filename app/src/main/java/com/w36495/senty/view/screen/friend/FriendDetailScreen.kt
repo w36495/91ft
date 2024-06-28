@@ -18,6 +18,7 @@ import androidx.compose.material.Tab
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.rounded.NoPhotography
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -41,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -52,6 +54,7 @@ import com.cheonjaeung.compose.grid.VerticalGrid
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
+import com.w36495.senty.R
 import com.w36495.senty.view.entity.FriendDetail
 import com.w36495.senty.view.entity.gift.Gift
 import com.w36495.senty.view.ui.component.buttons.SentyElevatedButton
@@ -353,24 +356,56 @@ private fun GiftItem(
     gift: Gift,
     onClickGiftDetail: (String) -> Unit,
 ) {
-    if (gift.giftImg.isEmpty()) {
+    if (gift.giftImages.isEmpty()) {
         Box(
             modifier = modifier
-                .aspectRatio(1f)
                 .fillMaxWidth()
-                .background(Color(0xFFFBFBFB))
-                .clickable { onClickGiftDetail(gift.giftDetail.id) }
-        )
+                .aspectRatio(1f)
+                .background(Color(0xFFD9D9D9))
+                .clickable { onClickGiftDetail(gift.giftDetail.id) },
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.NoPhotography,
+                contentDescription = "Gift Image Empty",
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+            )
+        }
     } else {
-        GlideImage(
-            model = gift.giftImg,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
+        Box(
             modifier = modifier
-                .aspectRatio(1f)
                 .fillMaxWidth()
-                .clickable { onClickGiftDetail(gift.giftDetail.id) }
-        )
+                .aspectRatio(1f)
+                .clickable { onClickGiftDetail(gift.giftDetail.id) },
+        ) {
+            GlideImage(
+                model = gift.giftImages[0],
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f),
+                contentScale = ContentScale.Crop,
+            ) {
+                it.override(200)
+            }
+
+            if (gift.giftImages.size > 1) {
+                Icon(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(top = 4.dp, end = 4.dp),
+                    painter = painterResource(
+                        id = if (gift.giftImages.size == 2) {
+                            R.drawable.ic_baseline_counter_2
+                        } else {
+                            R.drawable.ic_baseline_counter_3
+                        }
+                    ),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
     }
 }
 
