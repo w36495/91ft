@@ -49,7 +49,7 @@
 
 |`카메라/앨범 선택`|`선물 카테고리 선택`|`친구 선택`|`날짜 선택`|
 |--|--|--|--|
-|![선물등록(카메라:앨범)](https://github.com/w36495/senty/assets/52291662/e4e0c0e8-cb31-455a-b12b-ba5f6c923f90)|![선물등록(카테고리)](https://github.com/w36495/senty/assets/52291662/404f07ff-4ee3-4241-a56d-d02f06cf2531)|![선물등록(친구)](https://github.com/w36495/senty/assets/52291662/d49b80e6-0ece-4e69-ba75-7d412dc9c6b9)|![선물등록(날짜)](https://github.com/w36495/senty/assets/52291662/a96b451d-4894-4b8a-b101-f6db004f467c)|
+|![선물등록(카메라:앨범)](https://github.com/w36495/senty/assets/52291662/269d8dbb-bcd6-4535-b818-c412a7763708)|![선물등록(카테고리)](https://github.com/w36495/senty/assets/52291662/404f07ff-4ee3-4241-a56d-d02f06cf2531)|![선물등록(친구)](https://github.com/w36495/senty/assets/52291662/d49b80e6-0ece-4e69-ba75-7d412dc9c6b9)|![선물등록(날짜)](https://github.com/w36495/senty/assets/52291662/a96b451d-4894-4b8a-b101-f6db004f467c)|
 
 </br>
 
@@ -57,7 +57,7 @@
 
 |`전체 선물 목록`|`받은 선물 목록`|`준 선물 목록`|
 |--|--|--|
-|![선물목록](https://github.com/w36495/senty/assets/52291662/01608f8a-2741-43ae-80c1-e7fa9e64374a)|![받은선물목록](https://github.com/w36495/senty/assets/52291662/7c58b3c1-c721-4e09-bbbc-56660c2a52fb)|![준선물목록](https://github.com/w36495/senty/assets/52291662/8c5aface-843f-42ba-afd9-861d26af9b2b)|
+|![선물조회(전체)](https://github.com/w36495/senty/assets/52291662/255e26eb-3f0d-4e2d-b871-50d4b617d33e)|![선물조회(받은)](https://github.com/w36495/senty/assets/52291662/40cc7ad1-edd5-4b84-b0f7-fe07218d7c29)|![선물조회(준)](https://github.com/w36495/senty/assets/52291662/cf71f2fd-9c25-44a1-bef0-feef107a838e)|
 
 </br>
 
@@ -65,7 +65,7 @@
 
 |`선물 조회`|`선물 수정`|`선물 삭제`|  
 |--|--|--|
-|![선물조회](https://github.com/w36495/senty/assets/52291662/5caf8f69-adea-4b66-9d70-01fa342a7147)|![선물수정](https://github.com/w36495/senty/assets/52291662/0a2949ac-aa9c-4e24-9292-2172b6cddb48)|![선물삭제](https://github.com/w36495/senty/assets/52291662/0eefc509-991d-4793-976c-9d3787eb0ef6)|
+|![선물조회](https://github.com/w36495/senty/assets/52291662/0a98c270-1e1d-431b-b8bb-d0c577fbd0dc)|![선물수정](https://github.com/w36495/senty/assets/52291662/caa9a479-7436-4d01-b675-8b3cd502d341)|![선물삭제](https://github.com/w36495/senty/assets/52291662/0eefc509-991d-4793-976c-9d3787eb0ef6)|
 
 </br>
 
