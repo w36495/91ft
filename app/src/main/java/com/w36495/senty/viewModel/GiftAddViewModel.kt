@@ -10,6 +10,7 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.w36495.senty.data.exception.NetworkConnectionException
 import com.w36495.senty.domain.repository.FriendRepository
 import com.w36495.senty.domain.repository.GiftCategoryRepository
 import com.w36495.senty.domain.repository.GiftImgRepository
@@ -42,6 +43,8 @@ class GiftAddViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
     private val originalGiftImages = mutableListOf<String>()
+    var isSaved = mutableStateOf(false)
+        private set
     var giftImages = mutableStateOf<List<Any>>(emptyList())
         private set
     private val _snackbarMsg = MutableSharedFlow<String>()
@@ -137,29 +140,36 @@ class GiftAddViewModel @Inject constructor(
                         }
                     }
                 }
+
+                isSaved.value = true
             }
         }
     }
 
     fun saveGift(gift: GiftDetail) {
         viewModelScope.launch {
-            val result = giftRepository.insertGift(gift.toDataEntity())
+            try {
+                val result = giftRepository.insertGift(gift.toDataEntity())
 
-            if (result.isSuccessful) {
-                result.body()?.let {
-                    val jsonObject = Json.decodeFromString<JsonObject>(it.string())
-                    val key = jsonObject["name"].toString().replace("\"", "")
+                if (result.isSuccessful) {
+                    result.body()?.let {
+                        val jsonObject = Json.decodeFromString<JsonObject>(it.string())
+                        val key = jsonObject["name"].toString().replace("\"", "")
 
-                    if (giftImages.value.isNotEmpty()) {
-                        giftImages.value.forEach { giftImage ->
-                            if (giftImage is ByteArray) {
-                                async { giftImgRepository.insertGiftImgByBitmap(key, giftImage) }.await()
+                        if (giftImages.value.isNotEmpty()) {
+                            giftImages.value.forEach { giftImage ->
+                                if (giftImage is ByteArray) {
+                                    giftImgRepository.insertGiftImgByBitmap(key, giftImage)
+                                }
                             }
                         }
                     }
+                    isSaved.value = true
                 }
-            } else {
-                Log.d("GiftAddVM", "saveGift(Failed) : ${result.errorBody().toString()}")
+            } catch (networkConnectionException: NetworkConnectionException) {
+                _snackbarMsg.emit(networkConnectionException.message)
+            } catch (exception: Exception) {
+                Log.d("GiftAddVM(exception)", exception.message.toString())
             }
         }
     }
