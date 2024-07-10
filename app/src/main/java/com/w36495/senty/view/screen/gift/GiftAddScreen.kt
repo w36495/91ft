@@ -125,6 +125,8 @@ fun GiftAddScreen(
         }
     }
 
+    if (vm.isSaved.value) onComplete()
+
     GiftAddContents(
         giftDetail = if (giftId == null) null else giftDetail,
         selectGiftImages = vm.giftImages.value,
@@ -146,14 +148,10 @@ fun GiftAddScreen(
             if (giftId == null) {
                 if (vm.validateGift(giftDetail)) {
                     vm.saveGift(giftDetail)
-
-                    onComplete()
                 }
             } else {
                 if (vm.validateGift(giftDetail)) {
                     vm.updateGift(giftDetail)
-
-                    onComplete()
                 }
             }
         },

@@ -1,8 +1,10 @@
 package com.w36495.senty.di
 
+import android.content.Context
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.w36495.senty.BuildConfig
+import com.w36495.senty.data.interceptor.NetworkConnectionInterceptor
 import com.w36495.senty.data.remote.service.AnniversaryService
 import com.w36495.senty.data.remote.service.AuthService
 import com.w36495.senty.data.remote.service.FriendGroupService
@@ -13,6 +15,7 @@ import com.w36495.senty.data.remote.service.MapSearchService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -59,10 +62,12 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideOkhttpClient(
-        logger: HttpLoggingInterceptor
+        logger: HttpLoggingInterceptor,
+        @ApplicationContext context: Context,
     ): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(logger)
+            .addInterceptor(NetworkConnectionInterceptor(context))
             .build()
     }
 
