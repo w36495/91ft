@@ -10,10 +10,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
-@Preview(showBackground = true)
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun FriendGroupChip(
@@ -22,14 +20,15 @@ fun FriendGroupChip(
     chipColor: String? = null,
     textColor: Int? = null,
 ) {
-    Chip(onClick = { },
+    Chip(
+        modifier = modifier,
+        onClick = { },
         enabled = false,
         shape = RoundedCornerShape(10.dp),
         colors = ChipDefaults.chipColors(
             backgroundColor = chipColor?.let { Color(it.toULong()) } ?: Color.Unspecified,
             disabledBackgroundColor = chipColor?.let { Color(it.toULong()) } ?: Color.Unspecified,
-        )
-
+        ),
     ) {
         Text(
             text = text ?: "",

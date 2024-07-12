@@ -37,5 +37,6 @@ data class FriendGroup(
     companion object {
         private val DEFAULT_COLOR = Color(0xFFCED4DA).value
         val emptyFriendGroup = FriendGroup(name = "")
+        val allFriendGroup = FriendGroup(name = "전체")
     }
 }
