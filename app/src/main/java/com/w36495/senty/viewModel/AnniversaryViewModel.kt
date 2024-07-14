@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.threeten.bp.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
@@ -29,23 +30,31 @@ class AnniversaryViewModel @Inject constructor(
 
     private val _schedules = MutableStateFlow<List<Schedule>>(emptyList())
     val schedules = _schedules.asStateFlow()
+    private var _schedulesOfSelectionDate = MutableStateFlow<List<Schedule>>(emptyList())
+    val schedulesOfSelectionDate = _schedulesOfSelectionDate.asStateFlow()
 
     fun getSchedules(selectYear: Int, selectMonth: Int, selectDay: Int) {
         selectDate.value = "${selectYear}-${selectMonth}-${selectDay}"
 
         viewModelScope.launch {
-            anniversaryRepository.getSchedules()
-                .map {
-                    it.filter { schedule ->
-                        selectYear == schedule.getYear()
-                                && StringUtils.format2Digits(selectMonth).toInt() == schedule.getMonth()
-                                && StringUtils.format2Digits(selectDay).toInt() == schedule.getDay()
-                    }
+            schedules.map {
+                it.filter { schedule ->
+                    selectYear == schedule.getYear()
+                            && StringUtils.format2Digits(selectMonth).toInt() == schedule.getMonth()
+                            && StringUtils.format2Digits(selectDay).toInt() == schedule.getDay()
                 }
+            }
                 .collectLatest { schedules ->
-                    _schedules.update { schedules.toList() }
+                    _schedulesOfSelectionDate.update { schedules.toList() }
                 }
         }
+    }
+
+    init {
+        val currentDate = LocalDate.now()
+
+        loadSchedules()
+        getSchedules(currentDate.year, currentDate.monthValue, currentDate.dayOfMonth)
     }
 
     fun saveSchedule(schedule: Schedule) {
@@ -95,7 +104,17 @@ class AnniversaryViewModel @Inject constructor(
         return validateResult
     }
 
+    private fun loadSchedules() {
+        viewModelScope.launch {
+            anniversaryRepository.getSchedules()
+                .collectLatest { schedules ->
+                    _schedules.update { schedules.toList() }
+                }
+        }
+    }
+
     private fun refreshSchedules() {
+        loadSchedules()
         val (selectYear, selectMonth, selectDay) = this.selectDate.value.split("-").map { it.toInt() }
 
         getSchedules(selectYear, selectMonth, selectDay)

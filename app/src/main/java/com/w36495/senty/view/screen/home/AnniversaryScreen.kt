@@ -17,6 +17,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -30,20 +31,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.vsnappy1.datepicker.DatePicker
-import com.vsnappy1.datepicker.data.model.DatePickerDate
-import com.vsnappy1.datepicker.data.model.SelectionLimiter
-import com.vsnappy1.datepicker.ui.model.DatePickerConfiguration
 import com.w36495.senty.util.DateUtil
 import com.w36495.senty.view.entity.Schedule
 import com.w36495.senty.view.screen.anniversary.AnniversaryBottomSheetDialog
+import com.w36495.senty.view.screen.anniversary.AnniversaryCalendar
 import com.w36495.senty.view.screen.anniversary.AnniversaryDialogType
 import com.w36495.senty.view.ui.component.buttons.SentyOutlinedButton
 import com.w36495.senty.view.ui.component.cards.ScheduleCard
-import com.w36495.senty.view.ui.theme.Green40
 import com.w36495.senty.viewModel.AnniversaryViewModel
 
 @Composable
@@ -51,6 +49,7 @@ fun AnniversaryScreen(
     vm: AnniversaryViewModel = hiltViewModel(),
 ) {
     val schedules by vm.schedules.collectAsStateWithLifecycle()
+    val schedulesOfSelectionDate by vm.schedulesOfSelectionDate.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(true) {
@@ -61,12 +60,11 @@ fun AnniversaryScreen(
 
     AnniversaryScreenContents(
         schedules = schedules,
+        schedulesOfSelectionDate = schedulesOfSelectionDate,
         snackbarHostState = snackbarHostState,
         onClickDate = { year, month, day ->
             vm.getSchedules(year, month, day)
         },
-        onClickSave = { vm.saveSchedule(it) },
-        onClickEdit = { vm.updateSchedule(it) },
         onClickDelete = { vm.removeSchedule(it) }
     )
 }
@@ -75,10 +73,9 @@ fun AnniversaryScreen(
 @Composable
 private fun AnniversaryScreenContents(
     schedules: List<Schedule>,
+    schedulesOfSelectionDate: List<Schedule>,
     snackbarHostState: SnackbarHostState,
     onClickDate: (Int, Int, Int) -> Unit,
-    onClickSave: (Schedule) -> Unit,
-    onClickEdit: (Schedule) -> Unit,
     onClickDelete: (String) -> Unit,
 ) {
     val scaffoldState = androidx.compose.material.rememberBottomSheetScaffoldState()
@@ -140,6 +137,7 @@ private fun AnniversaryScreenContents(
         ) {
             TopCalendarSection(
                 modifier = Modifier.fillMaxWidth(),
+                schedules = schedules,
                 onClickDate = { y, m, d ->
                     year = y
                     month = m
@@ -150,7 +148,7 @@ private fun AnniversaryScreenContents(
             )
 
             SentyOutlinedButton(
-                text = "기념일 등록하기",
+                text = "새로운 기념일 등록하기",
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
@@ -159,8 +157,11 @@ private fun AnniversaryScreenContents(
             ) { showAddDialog = true }
 
             BottomScheduleSection(
-                schedules = schedules,
+                schedules = schedulesOfSelectionDate,
                 modifier = Modifier.fillMaxWidth(),
+                year = year,
+                month = month,
+                day = day,
                 onClickSchedule = { schedule ->
                     savedSchedule = schedule
                     showReadDialog = true
@@ -173,30 +174,25 @@ private fun AnniversaryScreenContents(
 @Composable
 private fun TopCalendarSection(
     modifier: Modifier = Modifier,
+    schedules: List<Schedule>,
     onClickDate: (Int, Int, Int) -> Unit,
 ) {
-    val (year, month, day) = DateUtil.getCurrentDate().map { it.toInt() }
-
-    Box(modifier = modifier.background(Color.White)) {
+    Box(
+        modifier = modifier
+            .padding(bottom = 8.dp)
+            .background(Color.White)
+    ) {
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
                 containerColor = Color.White
             )
         ) {
-            DatePicker(
-                onDateSelected = { year, month, day ->
-                    onClickDate(year, month + 1, day)
-                },
-                selectionLimiter = SelectionLimiter(
-                    fromDate = DatePickerDate(2000, 1, 1)
-                ),
-                date = DatePickerDate(year, month - 1, day),
-                configuration = DatePickerConfiguration.Builder()
-                    .selectedDateBackgroundColor(Green40)
-                    .build()
+            AnniversaryCalendar(
+                schedules = schedules,
+                onSelectedDate = { year, month, day ->
+                    onClickDate(year, month, day)
+                }
             )
         }
     }
@@ -205,6 +201,9 @@ private fun TopCalendarSection(
 @Composable
 private fun BottomScheduleSection(
     modifier: Modifier = Modifier,
+    year: Int,
+    month: Int,
+    day: Int,
     schedules: List<Schedule>,
     onClickSchedule: (Schedule) -> Unit,
 ) {
@@ -213,6 +212,15 @@ private fun BottomScheduleSection(
             .padding(horizontal = 16.dp)
             .padding(top = 16.dp)
     ) {
+        Text(
+            text = "${year}년 ${month}월 ${day}일",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurface.copy(0.8f),
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         schedules.forEachIndexed { index, schedule ->
             ScheduleCard(
                 schedule = schedule,

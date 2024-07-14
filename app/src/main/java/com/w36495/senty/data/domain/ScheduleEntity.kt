@@ -2,12 +2,13 @@ package com.w36495.senty.data.domain
 
 import com.w36495.senty.util.DateUtil
 import com.w36495.senty.view.entity.Schedule
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonNames
 
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class ScheduleEntity(
-    val id: String = "",
     val title: String,
     val date: String,
     val location: String,
@@ -26,7 +27,5 @@ data class ScheduleEntity(
         time = time,
         memo = memo,
         isPast = isPast
-    ).apply {
-        setId(this@ScheduleEntity.id)
-    }
+    )
 }

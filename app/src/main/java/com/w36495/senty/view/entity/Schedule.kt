@@ -38,7 +38,6 @@ data class Schedule(
     }
 
     fun toDataEntity() = ScheduleEntity(
-        id = this@Schedule.id,
         title = title,
         date = date,
         location = location,
@@ -46,6 +45,10 @@ data class Schedule(
         memo = memo,
         isPast = isPast,
     )
+
+    override fun toString(): String {
+        return "Schedule(id=$id, title=$title, date=$date, location=$location, time=$time, memo=$memo, isPast=$isPast)"
+    }
 
     companion object {
         val emptySchedule = Schedule(title = "", date = "")
