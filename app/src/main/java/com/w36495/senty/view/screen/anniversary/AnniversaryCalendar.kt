@@ -42,6 +42,7 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
 import com.w36495.senty.view.entity.Schedule
+import com.w36495.senty.view.ui.component.dialogs.DateWheelPickerDialog
 import com.w36495.senty.view.ui.theme.Green40
 import org.threeten.bp.DayOfWeek
 import org.threeten.bp.LocalDate
@@ -88,8 +89,8 @@ fun AnniversaryCalendar(
                 val changeMonth = currentDate.minusMonths(1)
                 currentDate = changeMonth
             },
-            onClickMoreMonth = {
-                // TODO : 년/월 선택 다이얼로그
+            onChangeCurrentDate = { year, month ->
+                currentDate = LocalDate.of(year, month, currentDate.dayOfMonth)
             }
         )
 
@@ -115,11 +116,24 @@ fun AnniversaryCalendar(
 private fun CalendarHeader(
     modifier: Modifier = Modifier,
     currentDate: LocalDate,
-    onClickMoreMonth: () -> Unit,
+    onChangeCurrentDate: (Int, Int) -> Unit,
     onClickPreviousMonth: () -> Unit,
     onClickNextMonth: () -> Unit,
 ) {
     val formattedDate = currentDate.format(DateTimeFormatter.ofPattern("yyyy년 MM월"))
+    var showDateWheelPicker by remember { mutableStateOf(false) }
+
+    if (showDateWheelPicker) {
+        DateWheelPickerDialog(
+            initialYear = currentDate.year,
+            initialMonth = currentDate.monthValue,
+            onDismiss = { showDateWheelPicker = false },
+            onSelectedDate = { year, month ->
+                onChangeCurrentDate(year, month)
+                showDateWheelPicker = false
+            }
+        )
+    }
 
     Row(
         modifier = modifier,
@@ -146,7 +160,7 @@ private fun CalendarHeader(
                 contentDescription = null,
                 modifier = Modifier
                     .clip(CircleShape)
-                    .clickable { onClickMoreMonth() }
+                    .clickable { showDateWheelPicker = true }
             )
         }
 
@@ -254,7 +268,8 @@ private fun DayBox(
             .border(
                 border = BorderStroke(
                     width = 1.dp,
-                    color = if (hasSchedule) MaterialTheme.colorScheme.onSurface.copy(0.3f) else Color.Transparent),
+                    color = if (hasSchedule) MaterialTheme.colorScheme.onSurface.copy(0.3f) else Color.Transparent
+                ),
                 shape = CircleShape
             )
             .clip(CircleShape)
@@ -280,6 +295,8 @@ private fun EmptyDayBox(
 }
 
 object CalendarRange {
-    const val START_YEAR = 1070
+    const val START_YEAR = 1970
     const val LAST_YEAR = 2100
+    const val START_MONTH = 1
+    const val LAST_MONTH = 12
 }
