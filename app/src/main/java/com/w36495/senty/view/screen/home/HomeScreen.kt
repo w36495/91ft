@@ -33,7 +33,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,6 +43,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.w36495.senty.R
@@ -63,12 +63,20 @@ fun HomeScreen(
     onClickGiftButton: () -> Unit,
     onClickGiftDetail: (String) -> Unit,
 ) {
-    val sentGifts by vm.sentGifts.collectAsState()
-    val receivedGifts by vm.receivedGifts.collectAsState()
-    val schedules by vm.schedules.collectAsState()
+    val sentGifts by vm.sentGifts.collectAsStateWithLifecycle()
+    val receivedGifts by vm.receivedGifts.collectAsStateWithLifecycle()
+    val schedules by vm.schedules.collectAsStateWithLifecycle()
 
-    LaunchedEffect(sentGifts, receivedGifts, schedules) {
-        vm.loadAllDate()
+    LaunchedEffect(key1 = sentGifts) {
+        vm.getSentGifts()
+    }
+
+    LaunchedEffect(key1 = receivedGifts) {
+        vm.getReceivedGifts()
+    }
+
+    LaunchedEffect(key1 = schedules) {
+        vm.getSchedules()
     }
 
     HomeContents(
