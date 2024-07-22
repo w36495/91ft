@@ -106,7 +106,8 @@ private fun HomeContents(
                 Text(
                     text = "Senty",
                     color = Color.White,
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
                 )
             },
             elevation = 0.dp,
