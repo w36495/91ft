@@ -11,14 +11,12 @@ import com.w36495.senty.view.entity.Schedule
 import com.w36495.senty.view.entity.gift.Gift
 import com.w36495.senty.view.entity.gift.GiftType
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.zip
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -37,13 +35,13 @@ class HomeViewModel @Inject constructor(
     private var _schedules = MutableStateFlow<List<Schedule>>(emptyList())
     val schedules = _schedules.asStateFlow()
 
-    fun loadAllDate() {
+    init {
         getSchedules()
         getSentGifts()
         getReceivedGifts()
     }
 
-    private fun getSchedules() {
+    fun getSchedules() {
         viewModelScope.launch {
             anniversaryRepository.getSchedules()
                 .map { schedules ->
@@ -59,30 +57,9 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun getSentGifts() {
+    fun getSentGifts() {
         viewModelScope.launch {
-            giftRepository.getGifts()
-                .map { gifts -> gifts.filter { it.giftType == GiftType.SENT } }
-                .combine(friendRepository.getFriends()) { gifts, friends ->
-                    gifts.map { giftDetail ->
-                        val friend = friends.find { friend -> friend.id == giftDetail.friend.id }
-                        val gift = giftDetail.copy(friend = friend!!)
-                        var giftImg = emptyList<String>()
-
-                        coroutineScope {
-                            val imgPath = async { giftImgRepository.getGiftImages(giftDetail.id) }.await()
-
-                            giftImg = imgPath.toList()
-                        }
-
-                        val sortedGiftImg = giftImg.sortedBy {
-                            it.split("/").run {
-                                this[lastIndex].split("?")[0]
-                            }.split("%2F")[1]
-                        }
-                        Gift(giftDetail = gift, giftImages = sortedGiftImg)
-                    }
-                }
+            fetchGiftsByType(giftType = GiftType.SENT)
                 .collectLatest { gifts ->
                     if (gifts.isEmpty()) {
                         _sentGifts.update { HomeGiftUiState.Empty }
@@ -93,30 +70,9 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun getReceivedGifts() {
+    fun getReceivedGifts() {
         viewModelScope.launch {
-            giftRepository.getGifts()
-                .map { gifts -> gifts.filter { it.giftType == GiftType.RECEIVED } }
-                .combine(friendRepository.getFriends()) { gifts, friends ->
-                    gifts.map { giftDetail ->
-                        val friend = friends.find { friend -> friend.id == giftDetail.friend.id }
-                        val gift = giftDetail.copy(friend = friend!!)
-                        var giftImg = emptyList<String>()
-
-                        coroutineScope {
-                            val imgPath = async { giftImgRepository.getGiftImages(giftDetail.id) }.await()
-
-                            giftImg = imgPath.toList()
-                        }
-
-                        val sortedGiftImg = giftImg.sortedBy {
-                            it.split("/").run {
-                                this[lastIndex].split("?")[0]
-                            }.split("%2F")[1]
-                        }
-                        Gift(giftDetail = gift, giftImages = sortedGiftImg)
-                    }
-                }
+            fetchGiftsByType(giftType = GiftType.RECEIVED)
                 .collectLatest { gifts ->
                     if (gifts.isEmpty()) {
                         _receivedGifts.update { HomeGiftUiState.Empty }
@@ -126,6 +82,24 @@ class HomeViewModel @Inject constructor(
                 }
         }
     }
+
+    private fun fetchGiftsByType(giftType: GiftType) =
+        giftRepository.getGifts()
+            .map { gifts -> gifts.filter { it.giftType == giftType } }
+            .zip(friendRepository.getFriends()) { gifts, friends ->
+                gifts.map { giftDetail ->
+                    val friend = friends.find { friend -> friend.id == giftDetail.friend.id }
+                    val gift = giftDetail.copy(friend = friend!!)
+                    val giftImg = giftImgRepository.getGiftImages(giftDetail.id)
+
+                    val sortedGiftImg = giftImg.sortedBy {
+                        it.split("/").run {
+                            this[lastIndex].split("?")[0]
+                        }.split("%2F")[1]
+                    }
+                    Gift(giftDetail = gift, giftImages = sortedGiftImg)
+                }
+            }
 }
 
 sealed interface HomeGiftUiState {
