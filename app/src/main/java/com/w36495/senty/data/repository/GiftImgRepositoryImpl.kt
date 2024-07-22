@@ -4,8 +4,6 @@ import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
 import com.w36495.senty.domain.repository.GiftImgRepository
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -15,25 +13,14 @@ class GiftImgRepositoryImpl @Inject constructor(
 ) : GiftImgRepository {
     private var userId: String = firebaseAuth.currentUser!!.uid
     override suspend fun getGiftImages(giftId: String): List<String> {
-        var giftImages = mutableListOf<String>()
         val imgPath = "images/gifts/$userId/$giftId"
 
-        coroutineScope {
-            firebaseStorage.reference.child(imgPath).listAll()
-                .addOnFailureListener {
-                    Log.d("GiftImgRepositoryImpl", "Exception: (${it.message.toString()})")
-                }
-                .addOnSuccessListener {
-                    it.items.forEach { storageReference ->
-                        launch {
-                            val downloadUrl = storageReference.downloadUrl.await()
-                            giftImages.add(downloadUrl.toString())
-                        }
-                    }
-                }.await()
+        val imgResult = firebaseStorage.reference.child(imgPath).listAll().await()
+        val downloadUrls = imgResult.items.map { storageReference ->
+            storageReference.downloadUrl.await().toString()
         }
 
-        return giftImages.toList()
+        return downloadUrls.toList()
     }
 
     override suspend fun insertGiftImgByBitmap(
