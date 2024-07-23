@@ -45,8 +45,19 @@ class GiftCategoryRepositoryImpl @Inject constructor(
         } else throw IllegalArgumentException(result.errorBody().toString())
     }
 
-    override suspend fun initCategory(defaultCategory: GiftCategoryEntity): Response<ResponseBody> {
-        return giftCategoryService.insertCategory(userId, defaultCategory)
+    override suspend fun setDefaultCategories(): Boolean {
+        var isComplete = false
+        val defaultCategories = getDefaultCategories()
+
+        defaultCategories.forEachIndexed { index, giftCategory ->
+            insertCategory(giftCategory.toDataEntity())
+
+            if (index == defaultCategories.lastIndex) {
+                isComplete = true
+            }
+        }
+
+        return isComplete
     }
 
     override suspend fun insertCategory(category: GiftCategoryEntity): Response<ResponseBody> {
@@ -73,5 +84,24 @@ class GiftCategoryRepositoryImpl @Inject constructor(
         if (result.isSuccessful) {
             return result.headers()["Content-length"]?.toInt() == 4
         } else throw IllegalArgumentException("Failed to delete friend")
+    }
+
+    private suspend fun getDefaultCategories(): List<GiftCategory> {
+        val result = giftCategoryService.getDefaultCategories()
+
+        if (result.isSuccessful) {
+            result.body()?.let {
+                val responseJson = Json.parseToJsonElement(it.string())
+
+                responseJson.jsonObject.map { (key, jsonElement) ->
+                    Json.decodeFromJsonElement<GiftCategoryEntity>(jsonElement).toDomainEntity()
+                        .apply { setId(key) }
+                }.let { giftCategories ->
+                    return giftCategories.toList()
+                }
+            }
+        }
+
+        return emptyList()
     }
 }

@@ -6,6 +6,7 @@ import com.w36495.senty.data.domain.ProfileDTO
 import com.w36495.senty.domain.repository.AnniversaryRepository
 import com.w36495.senty.domain.repository.FriendGroupRepository
 import com.w36495.senty.domain.repository.FriendRepository
+import com.w36495.senty.domain.repository.GiftCategoryRepository
 import com.w36495.senty.domain.repository.GiftImgRepository
 import com.w36495.senty.domain.repository.GiftRepository
 import com.w36495.senty.domain.repository.ProfileRepository
@@ -29,6 +30,7 @@ class HomeViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val giftRepository: GiftRepository,
     private val giftImgRepository: GiftImgRepository,
+    private val giftCategoryRepository: GiftCategoryRepository,
     private val friendRepository: FriendRepository,
     private val friendGroupRepository: FriendGroupRepository,
     private val anniversaryRepository: AnniversaryRepository,
@@ -126,6 +128,7 @@ class HomeViewModel @Inject constructor(
     private fun setDefaultValues() {
         viewModelScope.launch {
             friendGroupRepository.setDefaultFriendGroups()
+            giftCategoryRepository.setDefaultCategories()
         }
     }
 }

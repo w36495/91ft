@@ -17,6 +17,9 @@ interface GiftCategoryService {
         @Path("userId") userId: String
     ): Response<ResponseBody>
 
+    @GET("default/giftCategories.json")
+    suspend fun getDefaultCategories(): Response<ResponseBody>
+
     @POST("giftCategories/{userId}.json")
     suspend fun insertCategory(
         @Path("userId") userId: String,
