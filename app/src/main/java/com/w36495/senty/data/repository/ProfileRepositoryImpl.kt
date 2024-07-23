@@ -1,6 +1,7 @@
 package com.w36495.senty.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
+import com.w36495.senty.data.domain.ProfileDTO
 import com.w36495.senty.data.remote.service.ProfileService
 import com.w36495.senty.domain.repository.ProfileRepository
 import okhttp3.ResponseBody
@@ -15,5 +16,9 @@ class ProfileRepositoryImpl @Inject constructor(
 
     override suspend fun isInitialized(): Response<ResponseBody> {
         return profileService.isInitialized(userId)
+    }
+
+    override suspend fun patchInitialized(): Response<ResponseBody> {
+        return profileService.patchInitialized(userId, ProfileDTO(isInitialized = true))
     }
 }

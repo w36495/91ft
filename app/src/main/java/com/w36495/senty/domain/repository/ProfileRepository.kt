@@ -5,4 +5,5 @@ import retrofit2.Response
 
 interface ProfileRepository {
     suspend fun isInitialized(): Response<ResponseBody>
+    suspend fun patchInitialized(): Response<ResponseBody>
 }

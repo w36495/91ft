@@ -18,7 +18,11 @@ fun NavigationGraph(navController: NavHostController) {
     ) {
         composable(AccountNavigationItem.LOGIN.name) {
             LoginScreen(
-                onSuccessLogin = { navController.navigate(BottomNavigationItem.HOME.name) },
+                onSuccessLogin = {
+                    navController.navigate(BottomNavigationItem.HOME.name) {
+                        launchSingleTop = true
+                    }
+                },
                 onClickSignUp = { navController.navigate(AccountNavigationItem.SIGNUP.name) }
             )
         }

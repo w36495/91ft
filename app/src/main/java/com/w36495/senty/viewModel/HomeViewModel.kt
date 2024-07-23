@@ -1,5 +1,6 @@
 package com.w36495.senty.viewModel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.w36495.senty.data.domain.ProfileDTO
@@ -15,6 +16,7 @@ import com.w36495.senty.view.entity.Schedule
 import com.w36495.senty.view.entity.gift.Gift
 import com.w36495.senty.view.entity.gift.GiftType
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -127,8 +129,16 @@ class HomeViewModel @Inject constructor(
 
     private fun setDefaultValues() {
         viewModelScope.launch {
-            friendGroupRepository.setDefaultFriendGroups()
-            giftCategoryRepository.setDefaultCategories()
+            val resultOfFriendGroup = async { friendGroupRepository.setDefaultFriendGroups() }.await()
+            val resultOfGiftCategory = async { giftCategoryRepository.setDefaultCategories() }.await()
+
+            if (resultOfFriendGroup && resultOfGiftCategory) {
+                val result = profileRepository.patchInitialized()
+
+                if (!result.isSuccessful) {
+                    Log.d("HomeVM", "setDefaultValues() Exception")
+                }
+            }
         }
     }
 }
