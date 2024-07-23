@@ -12,6 +12,7 @@ import com.w36495.senty.data.remote.service.FriendService
 import com.w36495.senty.data.remote.service.GiftCategoryService
 import com.w36495.senty.data.remote.service.GiftService
 import com.w36495.senty.data.remote.service.MapSearchService
+import com.w36495.senty.data.remote.service.ProfileService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -108,6 +109,10 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideAuthApi(retrofit: Retrofit): AuthService = retrofit.create(AuthService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideProfileApi(retrofit: Retrofit): ProfileService = retrofit.create(ProfileService::class.java)
 
     @Provides
     @Singleton

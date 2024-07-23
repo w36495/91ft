@@ -9,7 +9,7 @@ import retrofit2.Response
 
 interface GiftCategoryRepository {
     fun getCategories(): Flow<List<GiftCategory>>
-    suspend fun initCategory(defaultCategory: GiftCategoryEntity): Response<ResponseBody>
+    suspend fun setDefaultCategories(): Boolean
     suspend fun insertCategory(category: GiftCategoryEntity): Response<ResponseBody>
     suspend fun patchCategory(categoryKey: String, category: GiftCategoryPatchDTO): Response<ResponseBody>
     suspend fun deleteCategory(categoryKey: String): Boolean
