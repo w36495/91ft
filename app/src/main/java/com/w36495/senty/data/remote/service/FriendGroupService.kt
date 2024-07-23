@@ -23,6 +23,9 @@ interface FriendGroupService {
         @Path("userId") userId: String,
     ): Response<ResponseBody>
 
+    @GET("default/friendGroups.json")
+    suspend fun getDefaultFriendGroups(): Response<ResponseBody>
+
     @POST("friendGroups/{userId}.json")
     suspend fun insertFriendGroup(
         @Path("userId") userId: String,

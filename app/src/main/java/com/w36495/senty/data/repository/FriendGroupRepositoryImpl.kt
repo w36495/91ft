@@ -57,6 +57,21 @@ class FriendGroupRepositoryImpl @Inject constructor(
         } else throw IllegalArgumentException("Failed to get friend groups(${result.errorBody().toString()})")
     }
 
+    override suspend fun setDefaultFriendGroups(): Boolean {
+        var isComplete = false
+        val defaultFriendGroups = getDefaultFriendGroups()
+
+        defaultFriendGroups.forEachIndexed { index, friendGroup ->
+            insertFriendGroup(friendGroup.toDataEntity())
+
+            if (index == defaultFriendGroups.lastIndex) {
+                isComplete = true
+            }
+        }
+
+        return isComplete
+    }
+
     override suspend fun insertFriendGroup(friendGroupEntity: FriendGroupEntity): Boolean {
         val result = friendGroupService.insertFriendGroup(userId, friendGroupEntity)
 
@@ -85,5 +100,24 @@ class FriendGroupRepositoryImpl @Inject constructor(
 
             return result.headers()["Content-length"]?.toInt() == 4
         } else throw IllegalArgumentException("Failed to delete friend group(${result.errorBody().toString()})")
+    }
+
+    private suspend fun getDefaultFriendGroups(): List<FriendGroup> {
+        val result = friendGroupService.getDefaultFriendGroups()
+
+        if (result.isSuccessful) {
+            result.body()?.let {
+                val response = Json.parseToJsonElement(it.string())
+
+                response.jsonObject.map { (key, jsonElement) ->
+                    Json.decodeFromJsonElement<FriendGroupEntity>(jsonElement).toDomainModel()
+                        .apply { setId(key) }
+                }.let { friendGroups ->
+                    return friendGroups.toList()
+                }
+            }
+        }
+
+        return emptyList()
     }
 }

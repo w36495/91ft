@@ -9,6 +9,7 @@ import retrofit2.Response
 interface FriendGroupRepository {
     fun getFriendGroup(friendGroupId: String): Flow<FriendGroup>
     fun getFriendGroups(): Flow<List<FriendGroup>>
+    suspend fun setDefaultFriendGroups(): Boolean
     suspend fun insertFriendGroup(friendGroupEntity: FriendGroupEntity): Boolean
     suspend fun patchFriendGroup(friendKey: String, friendGroupEntity: FriendGroupEntity): Response<ResponseBody>
     suspend fun deleteFriendGroup(friendGroupKey: String): Boolean
