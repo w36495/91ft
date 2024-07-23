@@ -9,6 +9,7 @@ import com.w36495.senty.domain.repository.GiftImgRepository
 import com.w36495.senty.data.repository.GiftImgRepositoryImpl
 import com.w36495.senty.data.repository.GiftRepositoryImpl
 import com.w36495.senty.data.repository.MapSearchRepositoryImpl
+import com.w36495.senty.data.repository.ProfileRepositoryImpl
 import com.w36495.senty.domain.repository.AccountRepository
 import com.w36495.senty.domain.repository.AnniversaryRepository
 import com.w36495.senty.domain.repository.FriendGroupRepository
@@ -16,6 +17,7 @@ import com.w36495.senty.domain.repository.FriendRepository
 import com.w36495.senty.domain.repository.GiftCategoryRepository
 import com.w36495.senty.domain.repository.GiftRepository
 import com.w36495.senty.domain.repository.MapSearchRepository
+import com.w36495.senty.domain.repository.ProfileRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -70,4 +72,9 @@ abstract class RepositoryModule {
         accountRepositoryImpl: AccountRepositoryImpl
     ): AccountRepository
 
+    @Binds
+    @Singleton
+    abstract fun bindProfileRepository(
+        profileRepositoryImpl: ProfileRepositoryImpl
+    ): ProfileRepository
 }
