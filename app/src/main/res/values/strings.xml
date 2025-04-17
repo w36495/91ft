@@ -86,4 +86,32 @@
     <string name="error_input_password">영문자, 숫자로 입력해주세요.</string>
     <string name="error_input_password_length">8자 이상 입력해주세요.</string>
     <string name="error_input_password_check">비밀번호와 일치하지 않습니다.</string>
+
+    <!-- 회원가입 -->
+    <string name="signup_title">회원가입</string>
+
+    <string name="signup_email_title">이메일</string>
+    <string name="signup_email_title_sub1">비밀번호를 재설정할 때 사용되는 이메일입니다.</string>
+    <string name="signup_email_title_sub2">실제 사용하시는 이메일을 입력해주세요.</string>
+    <string name="signup_email_hint_text">이메일을 입력해주세요.</string>
+
+    <string name="signup_password_title">비밀번호</string>
+    <string name="signup_password_title_sub1">영문자/숫자로 입력해주세요. (8자 이상)</string>
+    <string name="signup_password_hint_text">비밀번호를 입력해주세요.</string>
+    <string name="signup_password_confirm_hint_text">비밀번호를 다시 입력해주세요.</string>
+
+    <string name="signup_error1">필수입력입니다.</string>
+    <string name="signup_error_email">이메일 형식으로 입력해주세요.</string>
+    <string name="signup_error_password">8자 이상의 영문자, 숫자로 입력해주세요.</string>
+    <string name="signup_error_password_confirm">비밀번호와 일치하지 않습니다.</string>
+    <string name="signup_error_check_email">이미 존재하는 이메일입니다.</string>
+
+    <string name="signup_msg_complete">회원가입이 완료되었습니다.</string>
+
+    <!-- 공통 -->
+    <string name="common_confirm">확인</string>
+    <string name="common_cancel">취소</string>
+    <string name="common_save">저장</string>
+
+    <string name="common_error1">오류가 발생했습니다.</string>
 </resources>

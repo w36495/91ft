@@ -63,3 +63,44 @@ fun Context.checkCameraPermission(
         ) == PackageManager.PERMISSION_GRANTED
     }
 }
+
+/**
+ * 색상의 밝기를 줄여서 더 어두운 색상을 만듭니다.
+ */
+fun androidx.compose.ui.graphics.Color.darken(factor: Float = 0.2f): androidx.compose.ui.graphics.Color {
+    return Color(
+        red = (red * (1 - factor)).coerceIn(0f, 1f),
+        green = (green * (1 - factor)).coerceIn(0f, 1f),
+        blue = (blue * (1 - factor)).coerceIn(0f, 1f),
+        alpha = alpha
+    )
+}
+
+fun Modifier.dropShadow(
+    shape: Shape,
+    color: Color = Color(0x29000000),
+    blur: Dp = 4.dp,
+    offsetY: Dp = 4.dp,
+    offsetX: Dp = 0.dp,
+    spread: Dp = 0.dp
+) = this.drawBehind {
+    val shadowSize = Size(size.width + spread.toPx(), size.height + spread.toPx())
+    val shadowOutline = shape.createOutline(shadowSize, layoutDirection, this)
+
+    val paint = Paint().apply {
+        this.color = color
+    }
+
+    if (blur.toPx() > 0) {
+        paint.asFrameworkPaint().apply {
+            maskFilter = BlurMaskFilter(blur.toPx(), BlurMaskFilter.Blur.NORMAL)
+        }
+    }
+
+    drawIntoCanvas { canvas ->
+        canvas.save()
+        canvas.translate(offsetX.toPx(), offsetY.toPx())
+        canvas.drawOutline(shadowOutline, paint)
+        canvas.restore()
+    }
+}

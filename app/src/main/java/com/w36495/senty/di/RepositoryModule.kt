@@ -2,6 +2,7 @@ package com.w36495.senty.di
 
 import com.w36495.senty.data.repository.AccountRepositoryImpl
 import com.w36495.senty.data.repository.AnniversaryRepositoryImpl
+import com.w36495.senty.data.repository.AuthRepositoryImpl
 import com.w36495.senty.data.repository.FriendGroupRepositoryImpl
 import com.w36495.senty.data.repository.FriendRepositoryImpl
 import com.w36495.senty.data.repository.GiftCategoryRepositoryImpl
@@ -11,6 +12,7 @@ import com.w36495.senty.data.repository.GiftRepositoryImpl
 import com.w36495.senty.data.repository.MapSearchRepositoryImpl
 import com.w36495.senty.domain.repository.AccountRepository
 import com.w36495.senty.domain.repository.AnniversaryRepository
+import com.w36495.senty.domain.repository.AuthRepository
 import com.w36495.senty.domain.repository.FriendGroupRepository
 import com.w36495.senty.domain.repository.FriendRepository
 import com.w36495.senty.domain.repository.GiftCategoryRepository
@@ -69,5 +71,11 @@ abstract class RepositoryModule {
     abstract fun bindAccountRepository(
         accountRepositoryImpl: AccountRepositoryImpl
     ): AccountRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAuthRepository(
+        authRepositoryImpl: AuthRepositoryImpl,
+    ): AuthRepository
 
 }

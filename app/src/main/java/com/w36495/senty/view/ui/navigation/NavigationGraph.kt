@@ -1,11 +1,13 @@
 package com.w36495.senty.view.ui.navigation
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.w36495.senty.view.screen.account.LoginScreen
-import com.w36495.senty.view.screen.account.SignupScreen
+import com.w36495.senty.view.screen.signup.SignUpRoute
 import com.w36495.senty.view.screen.home.AnniversaryScreen
 import com.w36495.senty.view.screen.home.HomeScreen
 import com.w36495.senty.view.screen.home.SettingScreen
@@ -24,9 +26,10 @@ fun NavigationGraph(navController: NavHostController) {
         }
 
         composable(AccountNavigationItem.SIGNUP.name) {
-            SignupScreen(
+            SignUpRoute(
+                padding = PaddingValues(0.dp),
+                moveToLogin = { navController.navigate(AccountNavigationItem.LOGIN.name) },
                 onBackPressed = { navController.navigateUp() },
-                onSuccessSignup = { navController.navigate(AccountNavigationItem.LOGIN.name) },
             )
         }
 
