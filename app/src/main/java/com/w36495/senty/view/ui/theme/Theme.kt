@@ -1,24 +1,26 @@
 package com.w36495.senty.view.screen.ui.theme
 
 import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
-import androidx.core.view.WindowCompat
-import com.w36495.senty.view.ui.theme.Green40
-import com.w36495.senty.view.ui.theme.Pink40
+import com.w36495.senty.view.ui.theme.LocalSentyTypography
 import com.w36495.senty.view.ui.theme.Pink80
 import com.w36495.senty.view.ui.theme.Purple80
-import com.w36495.senty.view.ui.theme.PurpleGrey40
 import com.w36495.senty.view.ui.theme.PurpleGrey80
+import com.w36495.senty.view.ui.theme.SentyBlack
+import com.w36495.senty.view.ui.theme.SentyGray30
+import com.w36495.senty.view.ui.theme.SentyGray60
+import com.w36495.senty.view.ui.theme.SentyGreen60
+import com.w36495.senty.view.ui.theme.SentyTypography
+import com.w36495.senty.view.ui.theme.SentyWhite
+import com.w36495.senty.view.ui.theme.SentyYellow60
 import com.w36495.senty.view.ui.theme.Typography
 
 private val DarkColorScheme = darkColorScheme(
@@ -28,19 +30,22 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Green40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = SentyGreen60,
+    onPrimary = SentyWhite,
 
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    secondary = SentyGray60,
+    onSecondary = SentyWhite,
+
+    tertiary = SentyYellow60, // 핑크 계열 포인트 컬러 예시
+    onTertiary = SentyBlack,
+
+    background = SentyWhite,
+    onBackground = SentyBlack,
+
+    surface = SentyWhite,
+    onSurface = SentyBlack,
+
+    outline = SentyGray30,
 )
 
 @Composable
@@ -50,27 +55,23 @@ fun SentyTheme(
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-//            window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
+            window.navigationBarColor = SentyWhite.toArgb()
         }
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+    CompositionLocalProvider(LocalSentyTypography provides Typography) {
+        MaterialTheme(
+            colorScheme = LightColorScheme,
+            content = content
+        )
+    }
+}
+
+object SentyTheme {
+    val typography: SentyTypography
+        @Composable get() = LocalSentyTypography.current
 }
