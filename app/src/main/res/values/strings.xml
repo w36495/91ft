@@ -108,6 +108,15 @@
 
     <string name="signup_msg_complete">회원가입이 완료되었습니다.</string>
 
+    <!-- 로그인 -->
+    <string name="login_title">로그인</string>
+
+    <string name="login_email_hint_text">이메일</string>
+    <string name="login_password_hint_text">비밀번호</string>
+    <string name="login_auto_text">자동 로그인</string>
+    <string name="login_find_passowrd_text">비밀번호 재설정</string>
+    <string name="login_error1">아이디 혹은 비밀번호가 일치하지 않습니다.</string>
+
     <!-- 공통 -->
     <string name="common_confirm">확인</string>
     <string name="common_cancel">취소</string>
