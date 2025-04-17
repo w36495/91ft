@@ -10,6 +10,7 @@ import com.w36495.senty.domain.repository.GiftImgRepository
 import com.w36495.senty.data.repository.GiftImgRepositoryImpl
 import com.w36495.senty.data.repository.GiftRepositoryImpl
 import com.w36495.senty.data.repository.MapSearchRepositoryImpl
+import com.w36495.senty.data.repository.UserRepositoryImpl
 import com.w36495.senty.domain.repository.AccountRepository
 import com.w36495.senty.domain.repository.AnniversaryRepository
 import com.w36495.senty.domain.repository.AuthRepository
@@ -18,6 +19,7 @@ import com.w36495.senty.domain.repository.FriendRepository
 import com.w36495.senty.domain.repository.GiftCategoryRepository
 import com.w36495.senty.domain.repository.GiftRepository
 import com.w36495.senty.domain.repository.MapSearchRepository
+import com.w36495.senty.domain.repository.UserRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
