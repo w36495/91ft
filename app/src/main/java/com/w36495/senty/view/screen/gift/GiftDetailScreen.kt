@@ -45,11 +45,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
-import com.bumptech.glide.integration.compose.GlideImage
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.rememberPagerState
+import coil3.compose.AsyncImage
 import com.w36495.senty.util.StringUtils
 import com.w36495.senty.view.entity.FriendDetail
 import com.w36495.senty.view.entity.gift.Gift
@@ -208,7 +204,6 @@ private fun ImgSection(
     }
 }
 
-@OptIn(ExperimentalPagerApi::class, ExperimentalGlideComposeApi::class)
 @Composable
 private fun ImagePager(
     modifier: Modifier = Modifier,
@@ -218,7 +213,7 @@ private fun ImagePager(
 
     Column(modifier = modifier) {
         HorizontalPager(state = pagerState) {page ->
-            GlideImage(
+            AsyncImage(
                 model = imgUri[page],
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
@@ -226,13 +221,13 @@ private fun ImagePager(
                     .aspectRatio(1f)
                     .graphicsLayer {
                         val pageOffset = (
-                                (pagerState.currentPage - page) + pagerState.currentPageOffset
+                                (pagerState.currentPage - page) + pagerState.currentPage
                                 ).absoluteValue
 
                         alpha = lerp(
                             start = 0.5f,
                             stop = 1f,
-                            fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                            fraction = 1f - pageOffset.coerceIn(0, 1)
                         )
                     }
             )

@@ -47,8 +47,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
-import com.bumptech.glide.integration.compose.GlideImage
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
 import com.cheonjaeung.compose.grid.SimpleGridCells
 import com.cheonjaeung.compose.grid.VerticalGrid
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -356,6 +356,8 @@ private fun GiftItem(
     gift: Gift,
     onClickGiftDetail: (String) -> Unit,
 ) {
+    val context = LocalContext.current
+
     if (gift.giftImages.isEmpty()) {
         Box(
             modifier = modifier
@@ -378,16 +380,17 @@ private fun GiftItem(
                 .aspectRatio(1f)
                 .clickable { onClickGiftDetail(gift.giftDetail.id) },
         ) {
-            GlideImage(
-                model = gift.giftImages[0],
+            AsyncImage(
+                model = ImageRequest.Builder(context)
+                    .data(gift.giftImages[0])
+                    .size(200) // ✅ override(200)과 유사한 효과
+                    .build(),
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(1f),
                 contentScale = ContentScale.Crop,
-            ) {
-                it.override(200)
-            }
+            )
 
             if (gift.giftImages.size > 1) {
                 Icon(

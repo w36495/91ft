@@ -44,8 +44,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
-import com.bumptech.glide.integration.compose.GlideImage
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
 import com.w36495.senty.R
 import com.w36495.senty.view.entity.FriendDetail
 import com.w36495.senty.view.entity.Schedule
@@ -352,7 +352,6 @@ private fun GiftCardSection(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalGlideComposeApi::class)
 @Composable
 private fun GiftCardItem(
     modifier: Modifier = Modifier,
@@ -366,6 +365,8 @@ private fun GiftCardItem(
         shape = RoundedCornerShape(10.dp),
         elevation = 4.dp,
         onClick = { onClickGiftDetail(gift.id) }) {
+    val context = LocalContext.current
+
         Column(modifier = Modifier.fillMaxWidth()) {
             if (giftImages.isEmpty()) {
                 Box(
@@ -387,16 +388,17 @@ private fun GiftCardItem(
                         .fillMaxWidth()
                         .aspectRatio(1f),
                 ) {
-                    GlideImage(
-                        model = giftImages[0],
+                    AsyncImage(
+                        model = ImageRequest.Builder(context)
+                            .data(giftImages[0])
+                            .size(200)
+                            .build(),
                         contentDescription = null,
                         modifier = Modifier
                             .fillMaxWidth()
                             .aspectRatio(1f),
                         contentScale = ContentScale.Crop,
-                    ) {
-                        it.override(200)
-                    }
+                    )
 
                     if (giftImages.size > 1) {
                         Icon(

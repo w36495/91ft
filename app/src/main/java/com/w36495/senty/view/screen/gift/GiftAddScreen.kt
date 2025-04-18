@@ -68,8 +68,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
-import com.bumptech.glide.integration.compose.GlideImage
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
 import com.w36495.senty.util.StringUtils
 import com.w36495.senty.util.checkCameraPermission
 import com.w36495.senty.util.getUriFile
@@ -289,13 +289,14 @@ private fun ImgSection(
     }
 }
 
-@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 private fun DisplayGiftImage(
     modifier: Modifier = Modifier,
     giftImage: Any,
     onRemoveImageClick: () -> Unit,
 ) {
+    val context = LocalContext.current
+
     Box(
         modifier = modifier.aspectRatio(1f)
     ) {
@@ -305,8 +306,11 @@ private fun DisplayGiftImage(
                 .aspectRatio(1f)
                 .padding(8.dp)
         ) {
-            GlideImage(
-                model = giftImage,
+            AsyncImage(
+                model = ImageRequest.Builder(context)
+                    .data(giftImage)
+                    .size(200) // ✅ override(200)과 유사한 효과
+                    .build(),
                 contentDescription = "Gift Image",
                 modifier = Modifier.aspectRatio(1f),
                 contentScale = ContentScale.Crop

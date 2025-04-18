@@ -41,8 +41,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
-import com.bumptech.glide.integration.compose.GlideImage
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
 import com.cheonjaeung.compose.grid.SimpleGridCells
 import com.cheonjaeung.compose.grid.VerticalGrid
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -221,13 +221,14 @@ private fun GiftHorizontalViewPager(
     }
 }
 
-@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 private fun GiftViewPagerItem(
     modifier: Modifier = Modifier,
     giftImages: List<Any>,
     onClickGift: () -> Unit,
 ) {
+    val context = LocalContext.current
+
     if (giftImages.isEmpty()) {
         Box(
             modifier = modifier
@@ -250,16 +251,17 @@ private fun GiftViewPagerItem(
                 .aspectRatio(1f)
                 .clickable { onClickGift() },
         ) {
-            GlideImage(
-                model = giftImages[0],
+            AsyncImage(
+                model = ImageRequest.Builder(context)
+                    .data(giftImages)
+                    .size(200) // ✅ override(200)과 유사한 효과
+                    .build(),
                 contentDescription = null,
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(1f),
-                contentScale = ContentScale.Crop,
-            ) {
-                it.override(200)
-            }
+                    .aspectRatio(1f)
+            )
 
             if (giftImages.size > 1) {
                 Icon(
