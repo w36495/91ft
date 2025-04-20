@@ -46,9 +46,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.w36495.senty.util.StringUtils
-import com.w36495.senty.view.entity.FriendDetail
-import com.w36495.senty.view.entity.FriendGroup
+import com.w36495.senty.view.screen.friend.model.FriendUiModel
 import com.w36495.senty.view.screen.friendgroup.FriendGroupSelectionDialog
+import com.w36495.senty.view.screen.friendgroup.model.FriendGroupUiModel
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
 import com.w36495.senty.view.ui.component.dialogs.BasicCalendarDialog
@@ -65,7 +65,7 @@ fun FriendEditRoute(
     friendId: String,
     onBackPressed: () -> Unit,
     onMoveFriendList: () -> Unit,
-    onClickGroupEdit: () -> Unit,
+    moveToFriendGroups: () -> Unit,
 ) {
     LaunchedEffect(Unit) {
         vm.getFriend(friendId)
@@ -90,7 +90,7 @@ fun FriendEditRoute(
                 onMoveFriendList()
             }
         },
-        onClickGroupEdit = onClickGroupEdit
+        onClickFriendGroupEdit = moveToFriendGroups,
     )
 }
 
@@ -102,6 +102,7 @@ fun FriendEditScreen(
     onBackPressed: () -> Unit,
     onClickSave: (FriendDetail, Boolean) -> Unit,
     onClickGroupEdit: () -> Unit,
+    onClickFriendGroupEdit: () -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -140,7 +141,7 @@ fun FriendEditScreen(
                         modifier = Modifier.fillMaxSize(),
                         friendDetail = uiState.friend,
                         onClickSave = onClickSave,
-                        onClickGroupEdit = onClickGroupEdit
+                        onClickFriendGroupEdit = onClickFriendGroupEdit,
                     )
                 }
             }
@@ -183,6 +184,7 @@ private fun FriendEditContents(
     friendDetail: FriendDetail,
     onClickSave: (FriendDetail, Boolean) -> Unit,
     onClickGroupEdit: () -> Unit,
+    onClickFriendGroupEdit: () -> Unit,
 ) {
     var name by rememberSaveable { mutableStateOf(friendDetail.name) }
     var memo by rememberSaveable { mutableStateOf(friendDetail.memo) }
@@ -196,11 +198,14 @@ private fun FriendEditContents(
     if (openFriendGroupSelectionDialog) {
         FriendGroupSelectionDialog(
             onDismiss = { openFriendGroupSelectionDialog = false },
-            onGroupSelected = {
+            onSelectFriendGroup = {
                 group = it
                 openFriendGroupSelectionDialog = false
             },
-            onClickFriendGroupEdit = { onClickGroupEdit() }
+            onClickFriendGroupEdit = {
+                openFriendGroupSelectionDialog = false
+                onClickFriendGroupEdit()
+            },
         )
     } else if (showCalendarDialog) {
         BasicCalendarDialog(
@@ -401,7 +406,7 @@ private fun FriendEditScreenPreview() {
             ),
             onBackPressed = { /*TODO*/ },
             onClickSave = { _, _ ->},
-            onClickGroupEdit = {},
+            onClickFriendGroupEdit = {},
             snackbarHostState = SnackbarHostState()
         )
     }

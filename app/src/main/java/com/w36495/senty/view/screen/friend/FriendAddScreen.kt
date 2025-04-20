@@ -54,6 +54,7 @@ import com.w36495.senty.viewModel.FriendAddViewModel
 @Composable
 fun FriendAddRoute(
     vm: FriendAddViewModel = hiltViewModel(),
+    moveToFriendGroups: () -> Unit,
     onBackPressed: () -> Unit,
     onMoveFriendList: () -> Unit,
     onClickGroupEdit: () -> Unit,
@@ -74,7 +75,7 @@ fun FriendAddRoute(
                 onMoveFriendList()
             }
         },
-        onClickGroupEdit = { onClickGroupEdit() }
+        onClickFriendGroupEdit = moveToFriendGroups,
     )
 }
 
@@ -84,12 +85,13 @@ fun FriendAddScreen(
     onBackPressed: () -> Unit,
     onClickSave: (FriendDetail, Boolean) -> Unit,
     onClickGroupEdit: () -> Unit,
+    onClickFriendGroupEdit: () -> Unit,
 ) {
     FriendAddContents(
         snackbarHostState = snackbarHostState,
         onBackPressed = onBackPressed,
         onClickSave = onClickSave,
-        onClickGroupEdit = onClickGroupEdit
+        onClickFriendGroupEdit = onClickFriendGroupEdit,
     )
 }
 
@@ -100,6 +102,7 @@ private fun FriendAddContents(
     onBackPressed: () -> Unit,
     onClickSave: (FriendDetail, Boolean) -> Unit,
     onClickGroupEdit: () -> Unit,
+    onClickFriendGroupEdit: () -> Unit,
 ) {
     var name by remember { mutableStateOf("") }
     var memo by remember { mutableStateOf("") }
@@ -117,13 +120,13 @@ private fun FriendAddContents(
     if (openFriendGroupSelectionDialog) {
         FriendGroupSelectionDialog(
             onDismiss = { openFriendGroupSelectionDialog = false },
-            onGroupSelected = {
+            onSelectFriendGroup = {
                 group = it
                 openFriendGroupSelectionDialog = false
             },
-            onEditClick = {
+            onClickFriendGroupEdit = {
                 openFriendGroupSelectionDialog = false
-                onClickGroupEdit()
+                onClickFriendGroupEdit()
             }
         )
     } else if (showCalendarDialog) {

@@ -14,7 +14,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -45,32 +44,27 @@ import com.w36495.senty.viewModel.FriendGroupViewModel
 @Composable
 fun FriendGroupSelectionDialog(
     vm: FriendGroupViewModel = hiltViewModel(),
+    onSelectFriendGroup: (FriendGroupUiModel) -> Unit,
+    onClickFriendGroupEdit: () -> Unit,
     onDismiss: () -> Unit,
-    onGroupSelected: (FriendGroupUiModel) -> Unit,
-    onEditClick: () -> Unit,
 ) {
     val friendGroups by vm.friendGroups.collectAsStateWithLifecycle()
 
-    FriendGroupContents(
+    FriendGroupSelectionContent(
         onDismiss = { onDismiss() },
         friendGroups = friendGroups,
-        onGroupSelected = { group ->
-            onGroupSelected(group)
-            onDismiss()
-        },
-        onEditClick = { onEditClick() },
-        onClickRefresh = {  }
+        onSelectFriendGroup = onSelectFriendGroup,
+        onClickFriendGroupEdit = onClickFriendGroupEdit,
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun FriendGroupContents(
+private fun FriendGroupSelectionContent(
     onDismiss: () -> Unit,
     friendGroups: List<FriendGroupUiModel>,
-    onGroupSelected: (FriendGroupUiModel) -> Unit,
-    onClickRefresh: () -> Unit,
-    onEditClick: () -> Unit,
+    onSelectFriendGroup: (FriendGroupUiModel) -> Unit,
+    onClickFriendGroupEdit: () -> Unit,
 ) {
     Dialog(onDismissRequest = { onDismiss() }) {
         Card(
@@ -88,12 +82,10 @@ private fun FriendGroupContents(
                             },
                     actions = {
                         IconButton(onClick = { onDismiss() }) {
-                            Icon(imageVector = Icons.Default.Close, contentDescription = null)
-                        }
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = { onClickRefresh() }) {
-                            Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "친구 그룹 선택 다이얼로그 닫기 아이콘",
+                            )
                         }
                     },
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -111,9 +103,7 @@ private fun FriendGroupContents(
                     friendGroups.forEachIndexed { index, group ->
                         FriendGroupItem(
                             group = group,
-                            onClick = {
-                                onGroupSelected(it)
-                            }
+                            onClick = onSelectFriendGroup,
                         )
 
                         if (index < friendGroups.lastIndex) {
@@ -127,13 +117,11 @@ private fun FriendGroupContents(
                 }
 
                 SentyFilledButton(
-                    text = "그룹 편집",
+                    text = stringResource(id = R.string.friend_group_selection_edit_button_text),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    onClick = {
-                        onEditClick()
-                    }
+                    onClick = onClickFriendGroupEdit,
                 )
             }
         }
@@ -178,14 +166,13 @@ private fun FriendGroupItem(
 @Composable
 private fun FriendGroupContentsPreview() {
     SentyTheme {
-        FriendGroupContents(
+        FriendGroupSelectionContent(
             onDismiss = {},
             friendGroups = List(5) {
                 FriendGroupUiModel.allFriendGroup
             },
-            onGroupSelected = {},
-            onClickRefresh = {},
-            onEditClick = {}
+            onSelectFriendGroup = {},
+            onClickFriendGroupEdit = {},
         )
     }
 }

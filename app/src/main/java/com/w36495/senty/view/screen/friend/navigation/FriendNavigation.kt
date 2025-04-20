@@ -38,7 +38,7 @@ fun NavGraphBuilder.friendNavGraph(
 
     composable<Route.FriendAdd> {
         FriendAddRoute(
-            moveToFriendGroup = { navController.navigateToFriendGroups() },
+            moveToFriendGroups = { navController.navigateToFriendGroups() },
             onBackPressed = { navController.navigateUp() },
         )
     }
