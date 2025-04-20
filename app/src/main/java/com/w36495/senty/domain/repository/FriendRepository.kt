@@ -1,15 +1,17 @@
 package com.w36495.senty.domain.repository
 
-import com.w36495.senty.data.domain.FriendDetailEntity
-import com.w36495.senty.view.entity.FriendDetail
+import com.w36495.senty.domain.entity.Friend
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import okhttp3.ResponseBody
 import retrofit2.Response
 
 interface FriendRepository {
-    fun getFriend(friendId: String): Flow<FriendDetail>
-    fun getFriends(): Flow<List<FriendDetail>>
-    suspend fun insertFriend(friend: FriendDetailEntity): Response<ResponseBody>
-    suspend fun patchFriend(friendId: String, friend: FriendDetailEntity): Response<ResponseBody>
+    val friends: StateFlow<List<Friend>>
+
+    fun getFriend(friendId: String): Flow<Friend>
+    suspend fun fetchFriends(): Result<Unit>
+    suspend fun insertFriend(friend: Friend): Response<ResponseBody>
+    suspend fun patchFriend(friendId: String, friend: Friend): Response<ResponseBody>
     suspend fun deleteFriend(friendId: String): Boolean
 }

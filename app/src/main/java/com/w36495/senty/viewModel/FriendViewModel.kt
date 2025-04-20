@@ -1,18 +1,24 @@
 package com.w36495.senty.viewModel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.w36495.senty.data.mapper.toUiModel
 import com.w36495.senty.domain.repository.FriendGroupRepository
 import com.w36495.senty.domain.repository.FriendRepository
-import com.w36495.senty.domain.repository.GiftRepository
-import com.w36495.senty.view.entity.Friend
-import com.w36495.senty.view.entity.FriendGroup
-import com.w36495.senty.view.entity.gift.GiftType
+import com.w36495.senty.view.screen.friend.contact.FriendContact
+import com.w36495.senty.view.screen.friendgroup.model.FriendGroupUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,62 +27,67 @@ import javax.inject.Inject
 class FriendViewModel @Inject constructor(
     private val friendRepository: FriendRepository,
     private val friendGroupRepository: FriendGroupRepository,
-    private val giftRepository: GiftRepository,
 ) : ViewModel() {
-    private var _friends = MutableStateFlow<List<Friend>>(emptyList())
-    val friends = _friends.asStateFlow()
-    private var _friendGroups = MutableStateFlow(listOf(FriendGroup.allFriendGroup))
-    val friendGroups = _friendGroups.asStateFlow()
+    private val _selectedFriendGroup = MutableStateFlow<FriendGroupUiModel?>(null)
+    private val selectedFriendGroup get() = _selectedFriendGroup.asStateFlow()
+
+    private val _effect = Channel<FriendContact.Effect>()
+    val effect = _effect.receiveAsFlow()
+
+    val uiState: StateFlow<FriendContact.State> = combine(
+        friendRepository.friends,
+        friendGroupRepository.friendGroups,
+        selectedFriendGroup
+    ) { friends, friendGroups, selectedGroup ->
+        val allFriendGroups = listOf(FriendGroupUiModel.allFriendGroup) +
+                friendGroups.map { it.toUiModel() }
+
+        val filteredFriends = selectedGroup
+            ?.let { sel -> friends.filter { it.groupId == sel.id } }
+            ?: friends
+
+        FriendContact.State.Success(
+            friends = filteredFriends.map { it.toUiModel() },
+            friendGroups = allFriendGroups,
+        )
+    }
+        .stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = FriendContact.State.Idle,
+    )
 
     init {
-        loadFriendGroups()
-        loadFriends(groupFilter = null)
-    }
-
-    fun getFriendsByFriendGroup(friendGroup: FriendGroup?) {
-        loadFriends(friendGroup)
-    }
-
-    private fun loadFriends(groupFilter: FriendGroup?) {
         viewModelScope.launch {
-            combine(
-                friendRepository.getFriends(),
-                friendGroupRepository.getFriendGroups(),
-                giftRepository.getGifts()
-            ) { friends, groups, gifts ->
-                friends.map { friend ->
-                    val group = groups.find { group -> group.id == friend.friendGroup.id }
-                    val sentGiftCount = gifts.filter { it.friend.id == friend.id }.count { it.giftType == GiftType.SENT }
-                    val receivedGiftCount = gifts.filter { it.friend.id == friend.id }.count { it.giftType == GiftType.RECEIVED }
-
-                    Friend(
-                        friendDetail = friend.copy(friendGroup = group!!),
-                        sentGiftCount = sentGiftCount,
-                        receivedGiftCount = receivedGiftCount
-                    )
-                }
+            runCatching {
+                friendRepository.fetchFriends()
+                friendGroupRepository.getFriendGroups()
+            }.onFailure { e ->
+                Log.e("FriendVM", "fetch 중 에러", e)
             }
-                .map {
-                    if (groupFilter != null) {
-                        it.filter { friend ->
-                            friend.friendDetail.friendGroup.id == groupFilter.id
-                        }
-                    } else it
-                }
-                .collect { collectFriends ->
-                    _friends.update { collectFriends.toList() }
-                }
         }
     }
 
-    private fun loadFriendGroups() {
-        viewModelScope.launch {
-            friendGroupRepository.getFriendGroups()
-                .collect {
-                    _friendGroups.update { oldFriendGroups ->
-                        oldFriendGroups.plus(it.toList())
-                    }
+    fun handleEvent(event: FriendContact.Event) {
+        when (event) {
+            FriendContact.Event.OnClickFriendAdd -> {
+                viewModelScope.launch {
+                    _effect.send(FriendContact.Effect.NavigateToFriendAdd)
                 }
+            }
+            FriendContact.Event.OnClickFriendGroups -> {
+                viewModelScope.launch {
+                    _effect.send(FriendContact.Effect.NavigateToFriendGroups)
+                }
+            }
+            is FriendContact.Event.OnClickFriendDetail -> {
+                viewModelScope.launch {
+                    _effect.send(FriendContact.Effect.NavigateToFriendDetail(event.friendId))
+                }
+            }
+            is FriendContact.Event.OnSelectFriendGroup -> {
+                _selectedFriendGroup.update { event.friendGroup }
+            }
         }
     }
 }

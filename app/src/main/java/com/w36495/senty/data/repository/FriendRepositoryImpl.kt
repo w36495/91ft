@@ -1,16 +1,22 @@
 package com.w36495.senty.data.repository
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
-import com.w36495.senty.data.domain.FriendDetailEntity
+import com.w36495.senty.data.domain.FriendEntity
+import com.w36495.senty.data.mapper.toDomain
+import com.w36495.senty.data.mapper.toEntity
 import com.w36495.senty.data.remote.service.FriendService
+import com.w36495.senty.domain.entity.Friend
 import com.w36495.senty.domain.repository.FriendRepository
 import com.w36495.senty.domain.repository.GiftRepository
-import com.w36495.senty.view.entity.FriendDetail
-import com.w36495.senty.view.entity.FriendGroup
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonObject
@@ -25,55 +31,57 @@ class FriendRepositoryImpl @Inject constructor(
 ) : FriendRepository {
     private var userId: String = firebaseAuth.currentUser!!.uid
 
-    override fun getFriend(friendId: String): Flow<FriendDetail> = flow {
+    private val _friends = MutableStateFlow<List<Friend>>(emptyList())
+    override val friends: StateFlow<List<Friend>>
+        get() = _friends.asStateFlow()
+
+    override fun getFriend(friendId: String): Flow<Friend> = flow {
         val result = friendService.getFriend(userId, friendId)
 
         if (result.isSuccessful) {
-            result.body()?.let {
-                val jsonElement = Json.parseToJsonElement(it.string())
-                val friendDetailEntity = Json.decodeFromJsonElement<FriendDetailEntity>(jsonElement.jsonObject)
+            val body = result.body()?.string()
 
-                val friendGroup = FriendGroup.emptyFriendGroup.copy().apply { setId(friendDetailEntity.groupId) }
-                val friendDetail = friendDetailEntity
-                    .toDomainEntity()
-                    .apply { setId(friendId) }
-                    .copy(friendGroup = friendGroup)
+            if (body != null) {
+                val jsonElement = Json.parseToJsonElement(body)
+                val friend = jsonElement.jsonObject.map { (key, jsonFriend) ->
+                    Json.decodeFromJsonElement<FriendEntity>(jsonFriend).toDomain(key)
+                }.first()
 
-                emit(friendDetail)
+                emit(friend)
             }
         } else throw IllegalArgumentException(result.errorBody().toString())
     }
 
-    override fun getFriends(): Flow<List<FriendDetail>> = flow {
-        val result = friendService.getFriends(userId)
+    override suspend fun fetchFriends(): Result<Unit> {
+        return try {
+            val result = friendService.getFriends(userId)
 
-        if (result.isSuccessful) {
-            if (result.headers()["Content-length"]?.toInt() != 4) {
-                result.body()?.let {
-                    val responseJson = Json.parseToJsonElement(it.string())
+            if (result.isSuccessful) {
+                val body = result.body()?.string()
 
-                    responseJson.jsonObject.map { (key, jsonFriend) ->
-                        val friendDetailEntity = Json.decodeFromJsonElement<FriendDetailEntity>(jsonFriend)
-                        val friendGroup = FriendGroup.emptyFriendGroup.apply { setId(friendDetailEntity.groupId) }
+                if (body != null && result.headers()["Content-length"]?.toInt() != 4) {
+                    val responseJson = Json.parseToJsonElement(body)
 
-                        friendDetailEntity
-                            .toDomainEntity()
-                            .copy(friendGroup = friendGroup.copy())
-                            .apply { setId(key) }
-                    }.let { friendDetails ->
-                        emit(friendDetails.toList())
-                    }
-                }
-            } else emit(emptyList())
-        } else throw IllegalArgumentException(result.errorBody().toString())
+                    val friends = responseJson.jsonObject.map { (key, jsonFriend) ->
+                        Json.decodeFromJsonElement<FriendEntity>(jsonFriend).toDomain(key)
+                    }.toList()
+
+                    Log.d("FriendRepository", "친구 목록 조회 완료")
+                    _friends.update { friends }
+                    Result.success(Unit)
+                } else Result.success(Unit)
+            } else Result.failure(Exception(result.errorBody().toString()))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
-    override suspend fun insertFriend(friend: FriendDetailEntity): Response<ResponseBody> {
-        return friendService.insertFriend(userId, friend)
+    override suspend fun insertFriend(friend: Friend): Response<ResponseBody> {
+        return friendService.insertFriend(userId, friend.toEntity())
     }
 
-    override suspend fun patchFriend(friendId: String, friend: FriendDetailEntity): Response<ResponseBody> {
-        return friendService.patchFriend(userId, friendId, friend)
+    override suspend fun patchFriend(friendId: String, friend: Friend): Response<ResponseBody> {
+        return friendService.patchFriend(userId, friendId, friend.toEntity())
     }
 
     override suspend fun deleteFriend(friendId: String): Boolean {
