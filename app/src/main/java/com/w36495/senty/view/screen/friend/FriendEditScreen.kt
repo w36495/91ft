@@ -48,6 +48,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.w36495.senty.util.StringUtils
 import com.w36495.senty.view.entity.FriendDetail
 import com.w36495.senty.view.entity.FriendGroup
+import com.w36495.senty.view.screen.friendgroup.FriendGroupSelectionDialog
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
 import com.w36495.senty.view.ui.component.dialogs.BasicCalendarDialog
@@ -188,18 +189,18 @@ private fun FriendEditContents(
     var birthday by rememberSaveable { mutableStateOf(friendDetail.birthday) }
     var group by remember { mutableStateOf(friendDetail.friendGroup) }
 
-    var showDialog by remember { mutableStateOf(false) }
+    var openFriendGroupSelectionDialog by remember { mutableStateOf(false) }
     var showCalendarDialog by remember { mutableStateOf(false) }
     var isCheckedBirthday by remember { mutableStateOf(birthday.isEmpty()) }
 
-    if (showDialog) {
-        FriendGroupDialogScreen(
-            onDismiss = { showDialog = false },
+    if (openFriendGroupSelectionDialog) {
+        FriendGroupSelectionDialog(
+            onDismiss = { openFriendGroupSelectionDialog = false },
             onGroupSelected = {
                 group = it
-                showDialog = false
+                openFriendGroupSelectionDialog = false
             },
-            onEditClick = { onClickGroupEdit() }
+            onClickFriendGroupEdit = { onClickGroupEdit() }
         )
     } else if (showCalendarDialog) {
         BasicCalendarDialog(
@@ -233,9 +234,7 @@ private fun FriendEditContents(
             GroupSection(
                 modifier = Modifier.fillMaxWidth(),
                 group = group,
-                onFriendGroupClick = {
-                    showDialog = true
-                }
+                onFriendGroupClick = { openFriendGroupSelectionDialog = true },
             )
 
             Spacer(modifier = Modifier.height(16.dp))
