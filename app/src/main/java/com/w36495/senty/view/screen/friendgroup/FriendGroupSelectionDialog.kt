@@ -43,7 +43,7 @@ import com.w36495.senty.view.ui.theme.SentyGray20
 import com.w36495.senty.viewModel.FriendGroupViewModel
 
 @Composable
-fun FriendGroupDialogScreen(
+fun FriendGroupSelectionDialog(
     vm: FriendGroupViewModel = hiltViewModel(),
     onDismiss: () -> Unit,
     onGroupSelected: (FriendGroupUiModel) -> Unit,
