@@ -1,15 +1,14 @@
 package com.w36495.senty.domain.repository
 
-import com.w36495.senty.data.domain.FriendGroupEntity
-import com.w36495.senty.view.entity.FriendGroup
-import kotlinx.coroutines.flow.Flow
-import okhttp3.ResponseBody
-import retrofit2.Response
+import com.w36495.senty.domain.entity.FriendGroup
+import kotlinx.coroutines.flow.StateFlow
 
 interface FriendGroupRepository {
-    fun getFriendGroup(friendGroupId: String): Flow<FriendGroup>
-    fun getFriendGroups(): Flow<List<FriendGroup>>
-    suspend fun insertFriendGroup(friendGroupEntity: FriendGroupEntity): Boolean
-    suspend fun patchFriendGroup(friendKey: String, friendGroupEntity: FriendGroupEntity): Response<ResponseBody>
-    suspend fun deleteFriendGroup(friendGroupKey: String): Boolean
+    val friendGroups: StateFlow<List<FriendGroup>>
+
+    suspend fun getFriendGroup(friendGroupId: String): Result<FriendGroup>
+    suspend fun getFriendGroups(): Result<Unit>
+    suspend fun insertFriendGroup(newFriendGroup: FriendGroup): Result<String>
+    suspend fun patchFriendGroup(friendGroup: FriendGroup): Result<Unit>
+    suspend fun deleteFriendGroup(friendGroupKey: String): Result<Unit>
 }

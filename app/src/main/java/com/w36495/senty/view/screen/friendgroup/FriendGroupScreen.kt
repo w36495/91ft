@@ -1,21 +1,23 @@
-package com.w36495.senty.view.screen.friend
+package com.w36495.senty.view.screen.friendgroup
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FractionalThreshold
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Edit
@@ -29,7 +31,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -48,15 +49,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.w36495.senty.view.entity.FriendGroup
+import com.w36495.senty.R
+import com.w36495.senty.util.darken
+import com.w36495.senty.view.screen.friendgroup.model.FriendGroupUiModel
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.dialogs.BasicAlertDialog
+import com.w36495.senty.view.ui.theme.SentyGray20
 import com.w36495.senty.viewModel.FriendGroupViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -66,44 +70,34 @@ fun FriendGroupScreen(
     vm: FriendGroupViewModel = hiltViewModel(),
     onBackPressed: () -> Unit,
 ) {
-    val friendGroups = vm.friendGroups.collectAsStateWithLifecycle()
+    val friendGroups by vm.friendGroups.collectAsStateWithLifecycle()
 
-    val rememberFriendGroups by rememberSaveable(friendGroups) { mutableStateOf(friendGroups) }
     var showAddDialog by rememberSaveable { mutableStateOf(false) }
-    var selectEditGroup by remember { mutableStateOf(FriendGroup.emptyFriendGroup) }
-    val snackbarHostState = remember { SnackbarHostState() }
+    var selectEditGroup by remember { mutableStateOf<FriendGroupUiModel?>(null) }
+    val snackBarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(true) {
         vm.snackbarMsg.collectLatest {
-            snackbarHostState.showSnackbar(it)
+            snackBarHostState.showSnackbar(it)
         }
     }
 
     if (showAddDialog) {
-        FriendGroupAddDialog(
-            group = if (selectEditGroup != FriendGroup.emptyFriendGroup) selectEditGroup else null,
-            onClickSave = {
-                if (vm.validateFriendGroup(it)) {
-                    vm.saveFriendGroup(it)
-                    showAddDialog = false
-                }
-            },
-            onClickEdit = {
-                if (vm.validateFriendGroup(it)) {
-                    vm.updateFriendGroup(it)
-                    showAddDialog = false
-                }
+        EditFriendGroupDialog(
+            group = selectEditGroup,
+            onShowSnackBar = {
+                vm.sendSnackBar(it)
             },
             onDismiss = {
-                selectEditGroup = FriendGroup.emptyFriendGroup
+                selectEditGroup = null
                 showAddDialog = false
             }
         )
     }
 
     FriendGroupContents(
-        friendGroups = rememberFriendGroups.value,
-        snackbarHostState = snackbarHostState,
+        friendGroups = friendGroups,
+        snackbarHostState = snackBarHostState,
         onBackPressed = onBackPressed,
         onShowAddDialog = { showAddDialog = true },
         onClickEdit = {
@@ -117,26 +111,35 @@ fun FriendGroupScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FriendGroupContents(
-    friendGroups: List<FriendGroup>,
+    friendGroups: List<FriendGroupUiModel>,
     snackbarHostState: SnackbarHostState,
     onBackPressed: () -> Unit,
     onShowAddDialog: () -> Unit,
-    onClickEdit: (FriendGroup) -> Unit,
+    onClickEdit: (FriendGroupUiModel) -> Unit,
     onClickDelete: (String) -> Unit,
 ) {
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(title = { Text(text = "친구그룹") },
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = stringResource(id = R.string.friend_group_title),
+                        style = SentyTheme.typography.headlineSmall,
+                    )
+                        },
                 navigationIcon = {
                     IconButton(onClick = { onBackPressed() }) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = "뒤로가기 아이콘",
                         )
                     }
                 }, actions = {
                     IconButton(onClick = onShowAddDialog) {
-                        Icon(imageVector = Icons.Filled.Add, contentDescription = null)
+                        Icon(
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = "친구 그룹 추가 아이콘",
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -146,17 +149,28 @@ private fun FriendGroupContents(
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         containerColor = Color.White,
-    ) {
-        Column(modifier = Modifier.fillMaxSize().padding(it)) {
-            friendGroups.forEachIndexed { index, group ->
+    ) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize(),
+        ) {
+            items(
+                items = friendGroups,
+                key = { it.id },
+            ) {friendGroup ->
                 FriendGroupItem(
                     modifier = Modifier.fillMaxWidth(),
-                    group = group,
+                    group = friendGroup,
                     onClickDelete = onClickDelete,
                     onClickEdit = onClickEdit,
                 )
 
-                if (index != friendGroups.lastIndex) HorizontalDivider()
+                HorizontalDivider(
+                    color = SentyGray20,
+                    thickness = 0.5.dp,
+                    modifier = Modifier.padding(horizontal = 4.dp),
+                )
             }
         }
     }
@@ -166,8 +180,8 @@ private fun FriendGroupContents(
 @Composable
 private fun FriendGroupItem(
     modifier: Modifier = Modifier,
-    group: FriendGroup,
-    onClickEdit: (FriendGroup) -> Unit,
+    group: FriendGroupUiModel,
+    onClickEdit: (FriendGroupUiModel) -> Unit,
     onClickDelete: (String) -> Unit,
 ) {
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
@@ -180,14 +194,8 @@ private fun FriendGroupItem(
 
     if (showDeleteDialog) {
         BasicAlertDialog(
-            title = "그룹을 삭제하시겠습니까?",
-            discContent = {
-                Text(
-                    text = "해당 그룹으로 설정되어있는 친구들도 모두 함께 삭제됩니다. 삭제된 그룹은 복구가 불가능합니다.",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontSize = 16.sp
-                )
-            },
+            title = stringResource(id = R.string.friend_group_delete_title),
+            message = stringResource(id = R.string.friend_group_delete_text),
             onComplete = {
                 onClickDelete(group.id)
                 showDeleteDialog = false
@@ -237,7 +245,7 @@ private fun FriendGroupItem(
                 ) {
                     androidx.compose.material.Icon(
                         imageVector = Icons.Default.Edit,
-                        contentDescription = null,
+                        contentDescription = "친구 그룹 편집 아이콘",
                         tint = Color.White
                     )
                 }
@@ -266,7 +274,7 @@ private fun FriendGroupItem(
                 ) {
                     Icon(
                         imageVector = Icons.Default.DeleteForever,
-                        contentDescription = null,
+                        contentDescription = "친구 그룹 삭제 아이콘",
                         tint = Color.White
                     )
                 }
@@ -275,7 +283,12 @@ private fun FriendGroupItem(
 
         ListItem(
             modifier = Modifier.offset { IntOffset(swipeState.offset.value.toInt(), 0) },
-            headlineContent = { Text(text = group.name) },
+            headlineContent = {
+                Text(
+                    text = group.name,
+                    style = SentyTheme.typography.bodyMedium,
+                )
+            },
             colors = ListItemDefaults.colors(
                 containerColor = Color.White,
             ),
@@ -283,7 +296,12 @@ private fun FriendGroupItem(
                 Box(
                     modifier = Modifier
                         .size(40.dp)
-                        .background(group.getIntTypeColor(), RoundedCornerShape(8.dp))
+                        .background(group.color, RoundedCornerShape(10.dp))
+                        .border(
+                            width = 1.dp,
+                            color = group.color.darken(0.1f),
+                            shape = RoundedCornerShape(10.dp),
+                        )
                 )
             }
         )
@@ -296,10 +314,10 @@ private fun FriendGroupPreview() {
     SentyTheme {
         FriendGroupContents(
             friendGroups = listOf(
-                FriendGroup(name = "친구"),
-                FriendGroup(name = "가족"),
-                FriendGroup(name = "테스트"),
-                FriendGroup(name = "기타"),
+                FriendGroupUiModel(id = "1", name = "친구", Color(0xFFAAEEEE)),
+                FriendGroupUiModel(id = "1", name = "가족", Color(0xFFAAEEEE)),
+                FriendGroupUiModel(id = "1", name = "테스트", Color(0xFFAAEEEE)),
+                FriendGroupUiModel(id = "1", name = "전체", Color(0xFFAAEEEE)),
             ),
             snackbarHostState = SnackbarHostState(),
             onClickDelete = {},

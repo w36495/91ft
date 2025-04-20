@@ -117,6 +117,26 @@
     <string name="login_find_passowrd_text">비밀번호 재설정</string>
     <string name="login_error1">아이디 혹은 비밀번호가 일치하지 않습니다.</string>
 
+    <!-- 친구 목록 -->
+    <string name="friend_title">친구 목록</string>
+
+    <string name="friend_empty_group_all_text">등록된 친구가 존재하지 않습니다.\n새로운 친구를 등록해보세요.</string>
+    <string name="friend_empty_group_text"> 그룹에 등록된 친구가 없어요.\n새로운 친구를 추가해보세요!</string>
+
+    <!-- 친구 그룹 -->
+    <string name="friend_group_title">친구 그룹</string>
+    <string name="friend_group_title_save">친구 그룹 등록</string>
+    <string name="friend_group_title_edit">친구 그룹 수정</string>
+    <string name="friend_group_title_read">친구 그룹 선택</string>
+
+    <string name="friend_group_name_hint_text">그룹명 입력 (최대 8자)</string>
+    <string name="friend_group_error">그룹명을 입력해주세요.</string>
+    <string name="friend_group_complete_save_text">등록이 완료되었습니다.</string>
+    <string name="friend_group_complete_edit_text">수정이 완료되었습니다.</string>
+
+    <string name="friend_group_delete_title">그룹을 삭제하시겠습니까?</string>
+    <string name="friend_group_delete_text">해당 그룹의 친구도 모두 함께 삭제되며, 삭제된 그룹은 복구가 불가능합니다.</string>
+
     <!-- 공통 -->
     <string name="common_confirm">확인</string>
     <string name="common_cancel">취소</string>

@@ -1,6 +1,7 @@
 package com.w36495.senty.data.remote.service
 
 import com.w36495.senty.data.domain.FriendGroupEntity
+import com.w36495.senty.data.response.FirebasePostResponse
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -27,7 +28,7 @@ interface FriendGroupService {
     suspend fun insertFriendGroup(
         @Path("userId") userId: String,
         @Body friendGroup: FriendGroupEntity
-    ): Response<ResponseBody>
+    ): Response<FirebasePostResponse>
 
     @PATCH("friendGroups/{userId}/{friendGroupId}.json")
     suspend fun patchFriendGroup(

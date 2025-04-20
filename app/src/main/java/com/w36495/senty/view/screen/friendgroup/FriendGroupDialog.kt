@@ -1,13 +1,17 @@
-package com.w36495.senty.view.screen.friend
+package com.w36495.senty.view.screen.friendgroup
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Refresh
@@ -25,19 +29,24 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.w36495.senty.view.entity.FriendGroup
+import com.w36495.senty.R
+import com.w36495.senty.view.screen.friendgroup.model.FriendGroupUiModel
+import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
+import com.w36495.senty.view.ui.theme.SentyGray20
 import com.w36495.senty.viewModel.FriendGroupViewModel
 
 @Composable
 fun FriendGroupDialogScreen(
     vm: FriendGroupViewModel = hiltViewModel(),
     onDismiss: () -> Unit,
-    onGroupSelected: (FriendGroup) -> Unit,
+    onGroupSelected: (FriendGroupUiModel) -> Unit,
     onEditClick: () -> Unit,
 ) {
     val friendGroups by vm.friendGroups.collectAsStateWithLifecycle()
@@ -50,7 +59,7 @@ fun FriendGroupDialogScreen(
             onDismiss()
         },
         onEditClick = { onEditClick() },
-        onClickRefresh = { vm.refreshFriendGroups() }
+        onClickRefresh = {  }
     )
 }
 
@@ -58,8 +67,8 @@ fun FriendGroupDialogScreen(
 @Composable
 private fun FriendGroupContents(
     onDismiss: () -> Unit,
-    friendGroups: List<FriendGroup>,
-    onGroupSelected: (FriendGroup) -> Unit,
+    friendGroups: List<FriendGroupUiModel>,
+    onGroupSelected: (FriendGroupUiModel) -> Unit,
     onClickRefresh: () -> Unit,
     onEditClick: () -> Unit,
 ) {
@@ -71,7 +80,12 @@ private fun FriendGroupContents(
         ) {
             Column {
                 CenterAlignedTopAppBar(
-                    title = { Text(text = "친구그룹") },
+                    title = {
+                        Text(
+                            text = stringResource(id = R.string.friend_group_title_read),
+                            style = SentyTheme.typography.headlineSmall,
+                        )
+                            },
                     actions = {
                         IconButton(onClick = { onDismiss() }) {
                             Icon(imageVector = Icons.Default.Close, contentDescription = null)
@@ -90,38 +104,37 @@ private fun FriendGroupContents(
 
                 Column(
                     modifier = Modifier
-                        .padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.SpaceBetween
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState()),
                 ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        friendGroups.forEachIndexed { index, group ->
-                            FriendGroupItem(
-                                group = group,
-                                modifier = Modifier.fillMaxWidth(),
-                                onClick = {
-                                    onGroupSelected(it)
-                                }
-                            )
-
-                            if (index < friendGroups.lastIndex) {
-                                HorizontalDivider(
-                                    modifier = Modifier.padding(vertical = 8.dp)
-                                )
+                    friendGroups.forEachIndexed { index, group ->
+                        FriendGroupItem(
+                            group = group,
+                            onClick = {
+                                onGroupSelected(it)
                             }
+                        )
+
+                        if (index < friendGroups.lastIndex) {
+                            HorizontalDivider(
+                                color = SentyGray20,
+                                thickness = 0.5.dp,
+                                modifier = Modifier.padding(horizontal = 4.dp),
+                            )
                         }
                     }
-                    SentyFilledButton(
-                        text = "그룹 편집",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 16.dp),
-                        onClick = {
-                            onEditClick()
-                        }
-                    )
                 }
+
+                SentyFilledButton(
+                    text = "그룹 편집",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    onClick = {
+                        onEditClick()
+                    }
+                )
             }
         }
     }
@@ -130,23 +143,49 @@ private fun FriendGroupContents(
 @Composable
 private fun FriendGroupItem(
     modifier: Modifier = Modifier,
-    group: FriendGroup,
-    onClick: (FriendGroup) -> Unit
+    group: FriendGroupUiModel,
+    onClick: (FriendGroupUiModel) -> Unit
 ) {
     Row(
-        modifier = modifier.clickable { onClick(group) },
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onClick(group) }
+            .padding(vertical = 12.dp, horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(text = group.name)
+        Text(
+            text = group.name,
+            style = SentyTheme.typography.bodyMedium,
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .fillMaxWidth()
+                .weight(1f),
+        )
 
-        IconButton(
-            onClick = { },
-            modifier = Modifier.background(
-                color = group.getIntTypeColor(),
-                shape = RoundedCornerShape(10.dp)
-            ),
-            enabled = false
-        ) { }
+        Box(
+            modifier = Modifier
+                .size(14.dp)
+                .background(
+                    color = group.color,
+                    shape = CircleShape,
+                ),
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun FriendGroupContentsPreview() {
+    SentyTheme {
+        FriendGroupContents(
+            onDismiss = {},
+            friendGroups = List(5) {
+                FriendGroupUiModel.allFriendGroup
+            },
+            onGroupSelected = {},
+            onClickRefresh = {},
+            onEditClick = {}
+        )
     }
 }
