@@ -1,7 +1,6 @@
 package com.w36495.senty.data.remote.service
 
 import com.w36495.senty.data.domain.GiftCategoryEntity
-import com.w36495.senty.data.domain.GiftCategoryPatchDTO
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -13,7 +12,7 @@ import retrofit2.http.Path
 
 interface GiftCategoryService {
     @GET("giftCategories/{userId}.json")
-    suspend fun getCategories(
+    suspend fun fetchCategories(
         @Path("userId") userId: String
     ): Response<ResponseBody>
 
@@ -23,11 +22,11 @@ interface GiftCategoryService {
         @Body category: GiftCategoryEntity
     ): Response<ResponseBody>
 
-    @PATCH("giftCategories/{userId}/{categoryKey}.json")
+    @PATCH("giftCategories/{userId}/{categoryId}.json")
     suspend fun patchCategory(
         @Path("userId") userId: String,
-        @Path("categoryKey") categoryKey: String,
-        @Body category: GiftCategoryPatchDTO
+        @Path("categoryId") categoryId: String,
+        @Body category: GiftCategoryEntity
     ): Response<ResponseBody>
 
     @DELETE("giftCategories/{userId}/{categoryKey}.json")
