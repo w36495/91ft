@@ -142,7 +142,7 @@
     <string name="gift_edit_title_edit">선물 수정</string>
 
     <string name="gift_edit_image_selection_type_camera">카메라를 통해\n이미지 가져오기</string>
-    <string name="gift_edit_image_selection_type_galery">갤러리를 통해\n이미지 가져오기</string>
+    <string name="gift_edit_image_selection_type_gallery">갤러리를 통해\n이미지 가져오기</string>
 
     <string name="gift_edit_image_text">사진 등록</string>
     <string name="gift_edit_category_text">카테고리</string>
