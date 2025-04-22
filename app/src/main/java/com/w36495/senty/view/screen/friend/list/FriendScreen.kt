@@ -55,13 +55,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.w36495.senty.R
 import com.w36495.senty.view.component.LoadingCircleIndicator
-import com.w36495.senty.view.screen.friend.contact.FriendContact
+import com.w36495.senty.view.screen.friend.list.contact.FriendContact
 import com.w36495.senty.view.screen.friend.model.FriendUiModel
 import com.w36495.senty.view.screen.friendgroup.model.FriendGroupUiModel
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.chips.FriendGroupChip
 import com.w36495.senty.view.ui.theme.SentyGray20
-import com.w36495.senty.view.ui.theme.SentyGray60
 import com.w36495.senty.view.ui.theme.SentyGray70
 import com.w36495.senty.view.ui.theme.SentyGray80
 import com.w36495.senty.view.ui.theme.SentyGreen60
@@ -179,7 +178,7 @@ private fun FriendScreen(
                     FriendContents(
                         friends = friends,
                         friendGroups = friendGroups,
-                        onClickFriend = { friend -> onClickFriend(friend.id) },
+                        onClickFriend = onClickFriend,
                         onChangeFriendGroup = { onChangeFriendsByFriendGroup(it) },
                         onChangeFriendGroupAll = { onChangeFriendsByFriendGroup(null) }
                     )
@@ -200,7 +199,7 @@ private fun FriendContents(
     modifier: Modifier = Modifier,
     friends: List<FriendUiModel>,
     friendGroups: List<FriendGroupUiModel>,
-    onClickFriend: (FriendUiModel) -> Unit,
+    onClickFriend: (String) -> Unit,
     onChangeFriendGroupAll: () -> Unit,
     onChangeFriendGroup: (FriendGroupUiModel) -> Unit,
 ) {
@@ -238,7 +237,7 @@ private fun FriendContents(
             } else {
                 FriendViewPagerItemContainer(
                     friends = friends,
-                    onClickFriend = { onClickFriend(friends[page]) }
+                    onClickFriend = onClickFriend,
                 )
             }
         }
@@ -316,7 +315,7 @@ fun FriendViewPagerEmptyItem(
 fun FriendViewPagerItemContainer(
     modifier: Modifier = Modifier,
     friends: List<FriendUiModel>,
-    onClickFriend: (FriendUiModel) -> Unit,
+    onClickFriend: (String) -> Unit,
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         LazyColumn(
@@ -326,7 +325,7 @@ fun FriendViewPagerItemContainer(
             items(friends.size) {index ->
                 FriendViewPagerItem(
                     friend = friends[index],
-                    onClickFriend = { onClickFriend(friends[index]) }
+                    onClickFriend = { onClickFriend(friends[index].id) },
                 )
 
                 HorizontalDivider(
@@ -343,11 +342,11 @@ fun FriendViewPagerItemContainer(
 fun FriendViewPagerItem(
     modifier: Modifier = Modifier,
     friend: FriendUiModel,
-    onClickFriend: (FriendUiModel) -> Unit
+    onClickFriend: () -> Unit
 ) {
     Column(
         modifier = modifier
-            .clickable { onClickFriend(friend) }
+            .clickable { onClickFriend() }
             .padding(vertical = 20.dp, horizontal = 16.dp)
     ) {
         Row(

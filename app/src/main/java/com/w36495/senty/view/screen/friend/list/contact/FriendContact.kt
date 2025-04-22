@@ -1,4 +1,4 @@
-package com.w36495.senty.view.screen.friend.contact
+package com.w36495.senty.view.screen.friend.list.contact
 
 import com.w36495.senty.view.screen.friend.model.FriendUiModel
 import com.w36495.senty.view.screen.friendgroup.model.FriendGroupUiModel
