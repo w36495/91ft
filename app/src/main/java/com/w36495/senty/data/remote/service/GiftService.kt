@@ -1,7 +1,8 @@
 package com.w36495.senty.data.remote.service
 
-import com.w36495.senty.data.domain.GiftDetailEntity
+import com.w36495.senty.data.domain.GiftEntity
 import com.w36495.senty.data.domain.GiftImgUriDTO
+import com.w36495.senty.data.response.FirebasePostResponse
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -26,8 +27,8 @@ interface GiftService {
     @POST("gifts/{userId}.json")
     suspend fun insertGift(
         @Path("userId") userId: String,
-        @Body gift: GiftDetailEntity
-    ): Response<ResponseBody>
+        @Body gift: GiftEntity
+    ): Response<FirebasePostResponse>
 
     @PATCH("gifts/{userId}/{giftKey}.json")
     suspend fun patchGift(

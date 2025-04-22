@@ -1,13 +1,15 @@
 package com.w36495.senty.data.repository
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
-import com.w36495.senty.data.domain.GiftDetailEntity
+import com.w36495.senty.data.domain.GiftEntity
 import com.w36495.senty.data.domain.GiftImgUriDTO
+import com.w36495.senty.data.mapper.toDomain
+import com.w36495.senty.data.mapper.toEntity
 import com.w36495.senty.data.remote.service.GiftService
+import com.w36495.senty.domain.entity.Gift
 import com.w36495.senty.domain.repository.GiftImgRepository
 import com.w36495.senty.domain.repository.GiftRepository
-import com.w36495.senty.view.entity.FriendDetail
-import com.w36495.senty.view.entity.gift.GiftCategory
 import com.w36495.senty.view.entity.gift.GiftDetail
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -70,8 +72,21 @@ class GiftRepositoryImpl @Inject constructor(
         } else throw IllegalArgumentException(result.errorBody().toString())
     }
 
-    override suspend fun insertGift(gift: GiftDetailEntity): Response<ResponseBody> {
-        return giftService.insertGift(userId, gift)
+    override suspend fun insertGift(gift: Gift): Result<String> {
+        return try {
+            val response = giftService.insertGift(userId, gift.toEntity())
+
+            if (response.isSuccessful) {
+                val body = response.body()
+
+                if (body != null) {
+                    getGifts()
+                    Result.success(body.key)
+                } else Result.failure(Exception("선물 등록 실패"))
+            } else Result.failure(Exception("선물 등록 실패"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     override suspend fun patchGift(giftId: String, gift: GiftDetailEntity): Response<ResponseBody> {
