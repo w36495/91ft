@@ -27,8 +27,8 @@ class GiftCategoryRepositoryImpl @Inject constructor(
 ) : GiftCategoryRepository {
     private var userId: String = firebaseAuth.currentUser!!.uid
 
-    private val _categories = MutableStateFlow<List<com.w36495.senty.domain.entity.GiftCategory>>(emptyList())
-    override val categories: StateFlow<List<com.w36495.senty.domain.entity.GiftCategory>>
+    private val _categories = MutableStateFlow<List<GiftCategory>>(emptyList())
+    override val categories: StateFlow<List<GiftCategory>>
         get() =_categories.asStateFlow()
 
     override suspend fun fetchCategories(): Result<Unit> {
