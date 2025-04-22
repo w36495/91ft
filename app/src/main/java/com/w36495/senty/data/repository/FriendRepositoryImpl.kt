@@ -5,10 +5,12 @@ import com.google.firebase.auth.FirebaseAuth
 import com.w36495.senty.data.domain.FriendEntity
 import com.w36495.senty.data.mapper.toDomain
 import com.w36495.senty.data.mapper.toEntity
+import com.w36495.senty.data.mapper.toUiModel
 import com.w36495.senty.data.remote.service.FriendService
 import com.w36495.senty.domain.entity.Friend
 import com.w36495.senty.domain.repository.FriendRepository
 import com.w36495.senty.domain.repository.GiftRepository
+import com.w36495.senty.view.screen.friend.model.FriendUiModel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,21 +37,13 @@ class FriendRepositoryImpl @Inject constructor(
     override val friends: StateFlow<List<Friend>>
         get() = _friends.asStateFlow()
 
-    override fun getFriend(friendId: String): Flow<Friend> = flow {
-        val result = friendService.getFriend(userId, friendId)
-
-        if (result.isSuccessful) {
-            val body = result.body()?.string()
-
-            if (body != null) {
-                val jsonElement = Json.parseToJsonElement(body)
-                val friend = jsonElement.jsonObject.map { (key, jsonFriend) ->
-                    Json.decodeFromJsonElement<FriendEntity>(jsonFriend).toDomain(key)
-                }.first()
-
-                emit(friend)
-            }
-        } else throw IllegalArgumentException(result.errorBody().toString())
+    override suspend fun getFriend(friendId: String): Result<Friend> {
+        return try {
+            val friend = friends.value.first { it.id == friendId }
+            Result.success(friend)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     override suspend fun fetchFriends(): Result<Unit> {
@@ -70,8 +64,12 @@ class FriendRepositoryImpl @Inject constructor(
                     _friends.update { friends }
                     Result.success(Unit)
                 } else Result.success(Unit)
-            } else Result.failure(Exception(result.errorBody().toString()))
+            } else {
+                Log.d("FriendRepo", result.errorBody().toString())
+                Result.failure(Exception(result.errorBody().toString()))
+            }
         } catch (e: Exception) {
+            Log.d("FriendRepo", e.stackTraceToString())
             Result.failure(e)
         }
     }

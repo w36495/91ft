@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class FriendEntity(
     val name: String = "",
-    val birthday: String = "",
+    val birthday: String? = null,
     val groupId: String = "",
     val groupName: String = "",
     val groupColor: String = "",
