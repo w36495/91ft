@@ -1,29 +1,35 @@
-package com.w36495.senty.view.screen.gift
+package com.w36495.senty.view.screen.gift.list
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Tab
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.rounded.NoPhotography
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
@@ -31,88 +37,108 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil3.compose.AsyncImage
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.compose.SubcomposeAsyncImage
 import coil3.request.ImageRequest
 import com.cheonjaeung.compose.grid.SimpleGridCells
 import com.cheonjaeung.compose.grid.VerticalGrid
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.PagerState
-import com.google.accompanist.pager.rememberPagerState
 import com.w36495.senty.R
-import com.w36495.senty.view.entity.gift.Gift
-import com.w36495.senty.view.ui.theme.Green40
-import com.w36495.senty.viewModel.GiftViewModel
+import com.w36495.senty.view.component.LoadingCircleIndicator
+import com.w36495.senty.view.screen.gift.list.contact.GiftContact
+import com.w36495.senty.view.screen.gift.list.model.GiftTabType
+import com.w36495.senty.view.screen.gift.model.GiftUiModel
+import com.w36495.senty.view.screen.ui.theme.SentyTheme
+import com.w36495.senty.view.ui.theme.SentyGray10
+import com.w36495.senty.view.ui.theme.SentyGray40
+import com.w36495.senty.view.ui.theme.SentyGray80
+import com.w36495.senty.view.ui.theme.SentyGreen60
+import com.w36495.senty.view.ui.theme.SentyWhite
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalPagerApi::class)
 @Composable
-fun GiftScreen(
+fun GiftRoute(
     vm: GiftViewModel = hiltViewModel(),
+    padding: PaddingValues,
+    moveToGiftDetail: (String) -> Unit,
+    moveToGiftCategories: () -> Unit,
     onBackPressed: () -> Unit,
-    onClickGiftDetail: (String) -> Unit,
-    onClickGiftCategory: () -> Unit,
 ) {
-    val tabState = listOf(
-        GiftTabState.ALL.title,
-        GiftTabState.RECEIVED.title,
-        GiftTabState.SENT.title
-    )
+    val uiState by vm.state.collectAsStateWithLifecycle()
+
+    val tabList = GiftTabType.entries.toList()
 
     val pagerState = rememberPagerState(
-        pageCount = tabState.size,
-        initialOffscreenLimit = tabState.size,
-        infiniteLoop = true,
-        initialPage = GiftTabState.ALL.ordinal
+        initialPage = GiftTabType.ALL.num,
+        pageCount = { tabList.size },
     )
+
     LaunchedEffect(pagerState.currentPage) {
-        when (pagerState.currentPage) {
-            GiftTabState.ALL.ordinal -> { vm.getGifts() }
-            GiftTabState.RECEIVED.ordinal -> { vm.getReceivedGifts() }
-            GiftTabState.SENT.ordinal -> { vm.getSentGifts() }
+        vm.handleEvent(GiftContact.Event.OnSelectTab(pagerState.currentPage))
+    }
+
+    LaunchedEffect(Unit) {
+        vm.effect.collect { effect ->
+            when (effect) {
+                is GiftContact.Effect.ShowToast -> {
+
+                }
+                is GiftContact.Effect.ShowError -> {
+
+                }
+                GiftContact.Effect.NavigateToBack -> { onBackPressed() }
+                GiftContact.Effect.NavigateToGiftCategories -> { moveToGiftCategories() }
+                is GiftContact.Effect.NavigateToGiftDetail -> { moveToGiftDetail(effect.giftId) }
+            }
         }
     }
 
-    val gifts by vm.gifts.collectAsState()
-
     GiftContents(
-        gifts = gifts,
-        tabState = tabState,
+        modifier = Modifier.navigationBarsPadding(),
+        uiState = uiState,
+        tabList = tabList,
         pagerState = pagerState,
-        onBackPressed = { onBackPressed() },
-        onClickGiftCategory = { onClickGiftCategory() },
-        onClickGiftDetail = onClickGiftDetail
+        onBackPressed = { vm.handleEvent(GiftContact.Event.OnClickBack) },
+        onClickGiftCategories = { vm.handleEvent(GiftContact.Event.OnClickGiftCategories) },
+        onClickGiftDetail = { vm.handleEvent(GiftContact.Event.OnClickGift(it)) }
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalPagerApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun GiftContents(
-    gifts: List<Gift>,
-    tabState: List<String>,
+    modifier: Modifier = Modifier,
+    uiState: GiftContact.State,
+    tabList: List<GiftTabType>,
     pagerState: PagerState,
-    onBackPressed: () -> Unit,
     onClickGiftDetail: (String) -> Unit,
-    onClickGiftCategory: () -> Unit,
+    onClickGiftCategories: () -> Unit,
+    onBackPressed: () -> Unit,
 ) {
     Scaffold(
+        modifier = modifier,
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(text = "선물목록") },
+                title = {
+                    Text(
+                        text = stringResource(id = R.string.gift_title),
+                        style = SentyTheme.typography.headlineSmall,
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { onBackPressed() }) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                             contentDescription = null
                         )
                     }
@@ -121,35 +147,45 @@ private fun GiftContents(
                     containerColor = Color.White
                 ),
                 actions = {
-                    IconButton(onClick = { onClickGiftCategory() }) {
+                    IconButton(onClick = { onClickGiftCategories() }) {
                         Icon(imageVector = Icons.Outlined.Settings, contentDescription = null)
                     }
                 }
             )
         }
-    ) {
-        Column(modifier = Modifier.padding(it)) {
-            GiftTopTabLow(
-                tabState = tabState,
-                pagerState = pagerState,
-            )
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+                .background(SentyWhite)
+        ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                GiftTopTabLow(
+                    tabList = tabList,
+                    pagerState = pagerState,
+                )
 
-            Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
-            GiftHorizontalViewPager(
-                modifier = Modifier.fillMaxWidth(),
-                pagerState = pagerState,
-                gifts = gifts,
-                onClickGift = onClickGiftDetail
-            )
+                GiftHorizontalViewPager(
+                    modifier = Modifier.fillMaxWidth(),
+                    pagerState = pagerState,
+                    gifts = uiState.gifts,
+                    onClickGift = onClickGiftDetail
+                )
+            }
+
+            if (uiState.isLoading) {
+                LoadingCircleIndicator(hasBackGround = false)
+            }
         }
     }
 }
 
-@OptIn(ExperimentalPagerApi::class)
 @Composable
 private fun GiftTopTabLow(
-    tabState: List<String>,
+    tabList: List<GiftTabType>,
     pagerState: PagerState,
 ) {
     val tabIndex = pagerState.currentPage
@@ -162,11 +198,11 @@ private fun GiftTopTabLow(
         indicator = {
             TabRowDefaults.SecondaryIndicator(
                 modifier = Modifier.tabIndicatorOffset(it[tabIndex]),
-                color = Green40
+                color = SentyGreen60
             )
         }
     ) {
-        tabState.forEachIndexed { index, text ->
+        tabList.forEachIndexed { index, tab ->
             Tab(
                 selected = tabIndex == index,
                 onClick = {
@@ -176,20 +212,24 @@ private fun GiftTopTabLow(
                 },
             ) {
                 Text(
-                    text = text,
-                    modifier = Modifier.padding(vertical = 16.dp)
+                    text = stringResource(id = tab.title),
+                    modifier = Modifier.padding(
+                        vertical = 12.dp,
+                        horizontal = 16.dp
+                    ),
+                    style = if (tabIndex == index) SentyTheme.typography.titleMedium else SentyTheme.typography.bodyMedium,
+                    color = SentyGray80
                 )
             }
         }
     }
 }
 
-@OptIn(ExperimentalPagerApi::class)
 @Composable
 private fun GiftHorizontalViewPager(
     modifier: Modifier = Modifier,
+    gifts: List<GiftUiModel>,
     pagerState: PagerState,
-    gifts: List<Gift>,
     onClickGift: (String) -> Unit,
 ) {
     HorizontalPager(
@@ -202,18 +242,18 @@ private fun GiftHorizontalViewPager(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.Top,
         ) {
-
             VerticalGrid(
-                columns = SimpleGridCells.Fixed(3),
-                modifier = Modifier.fillMaxWidth(),
+                columns = SimpleGridCells.Fixed(2),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(2.dp),
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-
                 gifts.forEach { gift ->
                     GiftViewPagerItem(
-                        giftImages = gift.giftImages,
-                        onClickGift = { onClickGift(gift.giftDetail.id) }
+                        giftImages = gift.images,
+                        onClickGift = { onClickGift(gift.id) }
                     )
                 }
             }
@@ -234,14 +274,14 @@ private fun GiftViewPagerItem(
             modifier = modifier
                 .fillMaxWidth()
                 .aspectRatio(1f)
-                .background(Color(0xFFD9D9D9))
+                .background(SentyGray10)
                 .clickable { onClickGift() },
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 imageVector = Icons.Rounded.NoPhotography,
                 contentDescription = "Gift Image Empty",
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                tint = SentyGray40
             )
         }
     } else {
@@ -251,16 +291,26 @@ private fun GiftViewPagerItem(
                 .aspectRatio(1f)
                 .clickable { onClickGift() },
         ) {
-            AsyncImage(
+            SubcomposeAsyncImage(
                 model = ImageRequest.Builder(context)
-                    .data(giftImages)
-                    .size(200) // ✅ override(200)과 유사한 효과
+                    .data(giftImages.first())
+                    .size(200)
                     .build(),
                 contentDescription = null,
-                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(1f)
+                    .aspectRatio(1f),
+                loading = {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(SentyGray10),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                    }
+                },
+                contentScale = ContentScale.Crop,
             )
 
             if (giftImages.size > 1) {
@@ -276,13 +326,9 @@ private fun GiftViewPagerItem(
                         }
                     ),
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurface
+                    tint = SentyWhite,
                 )
             }
         }
     }
-}
-
-enum class GiftTabState(val title: String) {
-    ALL("전체"), RECEIVED("받은 선물"), SENT("준 선물")
 }

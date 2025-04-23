@@ -20,7 +20,7 @@ interface GiftService {
     ): Response<ResponseBody>
 
     @GET("gifts/{userId}.json")
-    suspend fun getGifts(
+    suspend fun fetchGifts(
         @Path("userId") userId: String
     ): Response<ResponseBody>
 

@@ -13,4 +13,5 @@ data class GiftUiModel(
     val mood: String = "",
     val memo: String = "",
     val hasImages: Boolean = false,
+    val images: List<String> = emptyList(),
 )

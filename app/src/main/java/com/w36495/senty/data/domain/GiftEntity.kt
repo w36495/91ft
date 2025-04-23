@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class GiftEntity(
-    val type: GiftType = GiftType.RECEIVED,
+    val type: Int = 0,
     val categoryId: String = "",
     val categoryName: String = "",
     val friendId: String = "",
