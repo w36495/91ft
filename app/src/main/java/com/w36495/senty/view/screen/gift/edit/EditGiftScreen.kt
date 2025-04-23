@@ -189,7 +189,11 @@ fun EditGiftRoute(
         isEditMode = giftId?.let { true } ?: false,
         onRemoveImageClick = { vm.handleEvent(EditGiftContact.Event.RemoveImage(it)) },
         onPressedBack = { vm.handleEvent(EditGiftContact.Event.OnClickBack) },
-        onClickSave = { vm.handleEvent(EditGiftContact.Event.OnClickSave) },
+        onClickSave = { 
+            giftId?.let {
+                vm.handleEvent(EditGiftContact.Event.OnClickEdit)
+            } ?: vm.handleEvent(EditGiftContact.Event.OnClickSave)
+        },
         onClickImageAdd = { vm.handleEvent(EditGiftContact.Event.OnClickImageAdd) },
         onClickDate = { vm.handleEvent(EditGiftContact.Event.OnClickDate) },
         onClickFriend = { vm.handleEvent(EditGiftContact.Event.OnClickFriend) },

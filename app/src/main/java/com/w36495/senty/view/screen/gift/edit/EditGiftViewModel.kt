@@ -21,6 +21,8 @@ import com.w36495.senty.view.screen.gift.edit.model.ImageSelectionType
 import com.w36495.senty.view.screen.gift.model.GiftUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -53,7 +55,9 @@ class EditGiftViewModel @Inject constructor(
                 saveGift(state.value.gift, state.value.images)
             }
             EditGiftContact.Event.OnClickEdit -> {
+                if (!validateInputForm()) return
 
+                updateGift(state.value.gift, state.value.images)
             }
             EditGiftContact.Event.OnClickImageAdd -> {
                 viewModelScope.launch {
@@ -317,46 +321,46 @@ class EditGiftViewModel @Inject constructor(
         return !(friendError || categoryError || dateError)
     }
 
+    private fun updateGift(gift: GiftUiModel, images: List<Any>) {
+        viewModelScope.launch {
+            val result = giftRepository.updateGift(
+                gift.copy(hasImages = images.isNotEmpty()).toDomain())
 
+            result
+                .onSuccess {
+                    if (images.isNotEmpty()) {
+                        // 새로운 이미지 저장
+                        images
+                            .filterIsInstance<ByteArray>()
+                            .map { image ->
+                                async { giftImgRepository.insertGiftImageByBitmap(gift.id, image) }
+                            }.awaitAll()
 
-//    fun updateGift(giftDetail: GiftDetail) {
-//        viewModelScope.launch {
-//            val result = giftRepository.patchGift(giftDetail.id, giftDetail.toDataEntity())
-//
-//            if (result.isSuccessful) {
-//                if (giftImages.value.isNotEmpty()) {
-//                    giftImages.value.forEach { giftImage ->
-//                        if (giftImage is ByteArray) {
-//                            giftImgRepository.insertGiftImgByBitmap(giftDetail.id, giftImage)
-//                        }
-//                    }
-//                }
-//
-//                coroutineScope {
-//                    originalGiftImages.forEach { originalImg ->
-//                        if (!giftImages.value.contains(originalImg)) {
-//                            val parsePath = originalImg.split("/").run {
-//                                this[lastIndex].split("?")[0]
-//                            }.split("%2F")
-//
-//                            val imageResult = async {
-//                                giftImgRepository.deleteGiftImg(
-//                                    giftDetail.id,
-//                                    parsePath[parsePath.lastIndex]
-//                                )
-//                            }.await()
-//
-//                            if (!imageResult) {
-//                                _snackbarMsg.emit("이미지 삭제 중 오류가 발생하였습니다.")
-//                            }
-//                        }
-//                    }
-//                }
-//
-//                isSaved.value = true
-//            }
-//        }
-//    }
+                        // 기존 이미지 삭제
+                        val deleteTargets = state.value.originalImages
+                            .filterNot { originalImg -> images.contains(originalImg) }
+
+                        val deleteJobs = deleteTargets.map { originalImage ->
+                            async {
+                                val filename = originalImage
+                                    .substringAfterLast("/") // 전체 경로에서 마지막 segment 추출
+                                    .substringBefore("?") // 쿼리 제거
+                                    .substringAfterLast("%2F") // Firebase Storage 경로 추출
+                                giftImgRepository.deleteGiftImg(gift.id, filename)
+                            }
+                        }
+                        deleteJobs.awaitAll()
+                    }
+                    _state.update { state -> state.copy(isLoading = false) }
+                    sendEffect(EditGiftContact.Effect.ShowToast("수정이 완료되었습니다."))
+                }
+                .onFailure {
+                    Log.d("EditGiftVM", "선물 수정 실패 : ${it.stackTraceToString()}")
+                    _state.update { state -> state.copy(isLoading = false) }
+                    sendEffect(EditGiftContact.Effect.ShowError("선물 수정에 실패하였습니다."))
+                }
+        }
+    }
 
     private fun saveGift(gift: GiftUiModel, images: List<Any>) {
         viewModelScope.launch {
@@ -371,14 +375,11 @@ class EditGiftViewModel @Inject constructor(
                         }
                         setGiftImg(EditGiftContact.Effect.ShowToast("등록 완료되었습니다."))
                     } else {
-                        images.filterIsInstance<ByteArray>().map { image ->
-                            giftImgRepository.insertGiftImageByBitmap(giftId, image)
-                                .onFailure {
-                                    _state.update { it.copy(isLoading = false) }
-                                    Log.d("EditGiftVM", "이미지 저장 실패 : ${it.stackTraceToString()}")
-                                    sendEffect(EditGiftContact.Effect.ShowError("선물 등록 중 오류가 발생하였습니다."))
-                                }
-                        }
+                        images
+                            .filterIsInstance<ByteArray>()
+                            .map { image ->
+                                async { giftImgRepository.insertGiftImageByBitmap(gift.id, image) }
+                            }.awaitAll()
 
                         _state.update {
                             it.copy(isLoading = false)
