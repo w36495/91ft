@@ -378,7 +378,7 @@ private fun GiftSection(
             }
         } else {
             VerticalGrid(
-                columns = SimpleGridCells.Fixed(3),
+                columns = SimpleGridCells.Fixed(2),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(4.dp),
