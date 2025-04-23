@@ -24,6 +24,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -340,16 +341,16 @@ class EditGiftViewModel @Inject constructor(
                         val deleteTargets = state.value.originalImages
                             .filterNot { originalImg -> images.contains(originalImg) }
 
-                        val deleteJobs = deleteTargets.map { originalImage ->
-                            async {
-                                val filename = originalImage
+                        coroutineScope {
+                            deleteTargets.map { originalImage ->
+                                val path = originalImage
                                     .substringAfterLast("/") // 전체 경로에서 마지막 segment 추출
                                     .substringBefore("?") // 쿼리 제거
                                     .substringAfterLast("%2F") // Firebase Storage 경로 추출
-                                giftImgRepository.deleteGiftImg(gift.id, filename)
+
+                                async { giftImgRepository.deleteGiftImage(gift.id, path) }
                             }
-                        }
-                        deleteJobs.awaitAll()
+                        }.awaitAll()
                     }
                     _state.update { state -> state.copy(isLoading = false) }
                     sendEffect(EditGiftContact.Effect.ShowToast("수정이 완료되었습니다."))
@@ -378,7 +379,7 @@ class EditGiftViewModel @Inject constructor(
                         images
                             .filterIsInstance<ByteArray>()
                             .map { image ->
-                                async { giftImgRepository.insertGiftImageByBitmap(gift.id, image) }
+                                async { giftImgRepository.insertGiftImageByBitmap(giftId, image) }
                             }.awaitAll()
 
                         _state.update {

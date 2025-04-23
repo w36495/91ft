@@ -1,9 +1,11 @@
-package com.w36495.senty.view.screen.gift
+package com.w36495.senty.view.screen.gift.detail
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -13,11 +15,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.rounded.NoPhotography
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,98 +34,104 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.util.lerp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import com.w36495.senty.R
+import com.w36495.senty.data.domain.GiftType
 import com.w36495.senty.util.StringUtils
-import com.w36495.senty.view.entity.FriendDetail
-import com.w36495.senty.view.entity.gift.Gift
-import com.w36495.senty.view.entity.gift.GiftCategory
-import com.w36495.senty.view.entity.gift.GiftDetail
-import com.w36495.senty.view.entity.gift.GiftType
+import com.w36495.senty.view.component.LoadingCircleIndicator
+import com.w36495.senty.view.screen.friend.model.FriendUiModel
+import com.w36495.senty.view.screen.gift.category.model.GiftCategoryUiModel
+import com.w36495.senty.view.screen.gift.detail.contact.GiftDetailContact
+import com.w36495.senty.view.screen.gift.model.GiftUiModel
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
 import com.w36495.senty.view.ui.component.buttons.SentyOutlinedButton
 import com.w36495.senty.view.ui.component.dialogs.BasicAlertDialog
 import com.w36495.senty.view.ui.component.textFields.SentyMultipleTextField
 import com.w36495.senty.view.ui.component.textFields.SentyReadOnlyTextField
-import com.w36495.senty.viewModel.GiftDetailViewModel
-import kotlin.math.absoluteValue
+import com.w36495.senty.view.ui.theme.SentyBlack
 
 @Composable
-fun GiftDetailScreen(
+fun GiftDetailRoute(
     vm: GiftDetailViewModel = hiltViewModel(),
+    padding: PaddingValues,
     giftId: String,
+    moveToGiftEdit: (String) -> Unit,
     onBackPressed: () -> Unit,
-    onClickEdit: (String) -> Unit,
 ) {
+    val context = LocalContext.current
+    val uiState by vm.state.collectAsStateWithLifecycle()
+
     LaunchedEffect(Unit) {
         vm.getGift(giftId)
     }
 
-    val gift by vm.gift.collectAsStateWithLifecycle()
+    LaunchedEffect(Unit) {
+        vm.effect.collect { effect ->
+            when (effect) {
+                is GiftDetailContact.Effect.ShowToast -> {
+                    Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
+                    vm.sendEffect(GiftDetailContact.Effect.NavigateToBack)
+                }
+                is GiftDetailContact.Effect.ShowError -> {
+
+                }
+                is GiftDetailContact.Effect.NavigateToEditGift -> {
+                    moveToGiftEdit(effect.giftId)
+                }
+                GiftDetailContact.Effect.NavigateToBack -> {
+                    onBackPressed()
+                }
+            }
+        }
+    }
 
     GiftDetailContents(
-        gift = gift,
-        onBackPressed = { onBackPressed() },
-        onClickEdit = {
-            onClickEdit(it)
-        },
-        onClickDelete = {
-            vm.removeGift(gift)
-            onBackPressed()
-        }
+        uiState = uiState,
+        onBackPressed = { vm.handleEvent(GiftDetailContact.Event.OnClickBack) },
+        onClickEdit = { vm.handleEvent(GiftDetailContact.Event.OnClickEdit(it)) },
+        onClickDelete = { vm.handleEvent(GiftDetailContact.Event.OnClickDelete) },
+        onSelectDelete = { vm.handleEvent(GiftDetailContact.Event.OnSelectDelete(it)) }
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun GiftDetailContents(
-    gift: Gift,
+    uiState: GiftDetailContact.State,
     onBackPressed: () -> Unit,
     onClickEdit: (String) -> Unit,
     onClickDelete: () -> Unit,
+    onSelectDelete: (String?) -> Unit,
 ) {
-    var showDeleteDialog by remember { mutableStateOf(false) }
-
-    if (showDeleteDialog) {
-        BasicAlertDialog(
-            title = "삭제하시겠습니까?",
-            discContent = {
-                Text(
-                    text = "삭제된 선물은 복구가 불가능합니다.",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontSize = 16.sp
-                )
-            },
-            onComplete = { onClickDelete() },
-            onDismiss = { showDeleteDialog = false }
-        )
-    }
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(text = if (gift.giftDetail.giftType == GiftType.SENT) "준 선물" else "받은 선물") },
+                title = {
+                    Text(
+                        text = stringResource(id = if (uiState.gift.type == GiftType.RECEIVED) R.string.gift_detail_received_title else R.string.gift_detail_sent_title),
+                        style = SentyTheme.typography.headlineSmall,
+                    )
+                },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = Color.White
                 ),
                 navigationIcon = {
                     IconButton(onClick = { onBackPressed() }) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                             contentDescription = null
                         )
                     }
@@ -129,16 +139,19 @@ private fun GiftDetailContents(
             )
         },
         containerColor = Color.White
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(it)
                     .verticalScroll(rememberScrollState())
             ) {
                 ImgSection(
-                    imgUri = gift.giftImages,
+                    imgUri = uiState.gift.images,
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -148,9 +161,9 @@ private fun GiftDetailContents(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
-                    category = gift.giftDetail.category,
-                    friend = gift.giftDetail.friend,
-                    giftDetail = gift.giftDetail,
+                    category = GiftCategoryUiModel(id = uiState.gift.categoryId, name = uiState.gift.categoryName),
+                    friend = FriendUiModel(id = uiState.gift.friendId, name = uiState.gift.friendName),
+                    giftDetail = uiState.gift,
                 )
 
                 Spacer(modifier = Modifier.height(32.dp))
@@ -161,17 +174,32 @@ private fun GiftDetailContents(
                         .padding(horizontal = 16.dp)
                 ) {
                     SentyFilledButton(
-                        text = "수정",
+                        text = stringResource(id = R.string.common_edit),
                         modifier = Modifier.fillMaxWidth(),
-                        onClick = { onClickEdit(gift.giftDetail.id) }
+                        onClick = { onClickEdit(uiState.gift.id) }
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     SentyOutlinedButton(
-                        text = "삭제",
+                        text = stringResource(id = R.string.common_remove),
                         modifier = Modifier.fillMaxWidth(),
-                        onClick = { showDeleteDialog = true }
+                        onClick = onClickDelete,
                     )
                     Spacer(modifier = Modifier.height(24.dp))
+                }
+            }
+
+            when {
+                uiState.isLoading -> {
+                    LoadingCircleIndicator(hasBackGround = false)
+                }
+                uiState.showDeleteDialog -> {
+                    BasicAlertDialog(
+                        title = stringResource(id = R.string.gift_detail_delete_title),
+                        message = stringResource(id = R.string.gift_detail_delete_message_text),
+                        hasCancel = true,
+                        onComplete = { onSelectDelete(uiState.gift.id) },
+                        onDismiss = { onSelectDelete(null) }
+                    )
                 }
             }
         }
@@ -209,7 +237,9 @@ private fun ImagePager(
     modifier: Modifier = Modifier,
     imgUri: List<Any>,
 ) {
-    val pagerState = rememberPagerState(pageCount = imgUri.size)
+    val pagerState = rememberPagerState(
+        pageCount = { imgUri.size },
+    )
 
     Column(modifier = modifier) {
         HorizontalPager(state = pagerState) {page ->
@@ -220,15 +250,15 @@ private fun ImagePager(
                 modifier = modifier
                     .aspectRatio(1f)
                     .graphicsLayer {
-                        val pageOffset = (
-                                (pagerState.currentPage - page) + pagerState.currentPage
-                                ).absoluteValue
+//                        val pageOffset = (
+//                                (pagerState.currentPage - page) + pagerState.currentPage
+//                                ).absoluteValue
 
-                        alpha = lerp(
-                            start = 0.5f,
-                            stop = 1f,
-                            fraction = 1f - pageOffset.coerceIn(0, 1)
-                        )
+//                        alpha = lerp(
+//                            start = 0.5f,
+//                            stop = 1f,
+//                            fraction = 1f - pageOffset.coerceIn(0, 1)
+//                        )
                     }
             )
         }
@@ -270,9 +300,9 @@ private fun ImgSectionPreview() {
 @Composable
 private fun InfoSection(
     modifier: Modifier = Modifier,
-    category: GiftCategory,
-    giftDetail: GiftDetail,
-    friend: FriendDetail,
+    category: GiftCategoryUiModel,
+    giftDetail: GiftUiModel,
+    friend: FriendUiModel,
 ) {
     Column(modifier = modifier) {
         InfoSectionItem(title = "카테고리", text = category.name)
@@ -299,13 +329,15 @@ private fun InfoSection(
 
         Text(
             text = "메모",
-            style = MaterialTheme.typography.titleMedium,
+            style = SentyTheme.typography.labelSmall,
             modifier = Modifier.padding(bottom = 4.dp)
         )
         SentyMultipleTextField(
             text = giftDetail.memo,
             onChangeText = { },
-            readOnly = true
+            readOnly = true,
+            textStyle = SentyTheme.typography.bodyMedium
+                .copy(color = SentyBlack),
         )
     }
 }
@@ -317,12 +349,13 @@ private fun InfoSectionItem(
 ) {
     Text(
         text = title,
-        style = MaterialTheme.typography.titleMedium,
+        style = SentyTheme.typography.labelSmall,
         modifier = Modifier.padding(bottom = 4.dp)
     )
 
     SentyReadOnlyTextField(
         text = text,
-        textColor = MaterialTheme.colorScheme.onSurface
+        textStyle = SentyTheme.typography.bodyMedium
+            .copy(color = SentyBlack),
     )
 }

@@ -1,12 +1,13 @@
 package com.w36495.senty.data.mapper
 
 import com.w36495.senty.data.domain.GiftEntity
+import com.w36495.senty.data.domain.GiftType
 import com.w36495.senty.domain.entity.Gift
 import com.w36495.senty.view.screen.gift.model.GiftUiModel
 
 fun GiftEntity.toDomain(id: String) = Gift(
     id = id,
-    type = this.type,
+    type = if (this.type == 0) GiftType.RECEIVED else GiftType.SENT,
     categoryId = this.categoryId,
     categoryName = this.categoryName,
     friendId = this.friendId,
@@ -20,7 +21,7 @@ fun GiftEntity.toDomain(id: String) = Gift(
 )
 
 fun Gift.toEntity() = GiftEntity(
-    type = this.type,
+    type = this.type.num,
     categoryId = this.categoryId,
     categoryName = this.categoryName,
     friendId = this.friendId,

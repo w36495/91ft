@@ -3,7 +3,6 @@ package com.w36495.senty.data.repository
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.w36495.senty.data.domain.GiftEntity
-import com.w36495.senty.data.domain.GiftImgUriDTO
 import com.w36495.senty.data.mapper.toDomain
 import com.w36495.senty.data.mapper.toEntity
 import com.w36495.senty.data.remote.service.GiftService
@@ -17,8 +16,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonObject
-import okhttp3.ResponseBody
-import retrofit2.Response
 import javax.inject.Inject
 
 class GiftRepositoryImpl @Inject constructor(
@@ -87,7 +84,7 @@ class GiftRepositoryImpl @Inject constructor(
 
     override suspend fun updateGift(gift: Gift): Result<Unit> {
         return try {
-            val response = giftService.patchGift(userId, gift.id, gift.toEntity())
+            val response = giftService.patchGift(userId, gift.id, gift.copy(createdAt = gift.createdAt, updatedAt = System.currentTimeMillis()).toEntity())
 
             if (response.isSuccessful) {
                 fetchGifts()
@@ -98,18 +95,22 @@ class GiftRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun patchGiftImgUri(giftKey: String, giftUri: String): Response<ResponseBody> {
-        val uri = GiftImgUriDTO(giftUri)
+    override suspend fun deleteGift(giftId: String): Result<Unit> {
+        return try {
+            val response = giftService.deleteGift(userId, giftId)
 
-        return giftService.patchGiftImgUri(userId, giftKey, uri)
-    }
-
-    override suspend fun deleteGift(giftKey: String): Boolean {
-        val result = giftService.deleteGift(userId, giftKey)
-
-        if (result.isSuccessful) {
-            return result.headers()["Content-length"]?.toInt() == 4
-        } else throw IllegalArgumentException("Failed to delete gift")
+            if (response.isSuccessful) {
+                fetchGifts()
+                Log.d("GiftRepo", "선물 삭제 성공")
+                Result.success(Unit)
+            } else {
+                Log.d("GiftRepo", "선물 삭제 실패 : ${response.errorBody()?.string()}")
+                Result.failure(Exception("선물 삭제 실패"))
+            }
+        } catch (e: Exception) {
+            Log.d("GiftRepo", e.stackTraceToString())
+            Result.failure(e)
+        }
 
     }
 }

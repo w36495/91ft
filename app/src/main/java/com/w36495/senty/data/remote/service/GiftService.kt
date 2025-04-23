@@ -34,7 +34,7 @@ interface GiftService {
     suspend fun patchGift(
         @Path("userId") userId: String,
         @Path("giftKey") giftKey: String,
-        @Body body: GiftDetailEntity
+        @Body body: GiftEntity
     ): Response<ResponseBody>
 
     @PATCH("gifts/{userId}/{giftKey}.json")
@@ -44,9 +44,9 @@ interface GiftService {
         @Body body: GiftImgUriDTO
     ): Response<ResponseBody>
 
-    @DELETE("gifts/{userId}/{giftKey}.json")
+    @DELETE("gifts/{userId}/{giftId}.json")
     suspend fun deleteGift(
         @Path("userId") userId: String,
-        @Path("giftKey") giftKey: String
-    ): Response<String>
+        @Path("giftId") giftId: String
+    ): Response<Unit>
 }

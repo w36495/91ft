@@ -11,6 +11,5 @@ interface GiftRepository {
     suspend fun fetchGifts(): Result<Unit>
     suspend fun insertGift(gift: Gift): Result<String>
     suspend fun updateGift(gift: Gift): Result<Unit>
-    suspend fun patchGiftImgUri(giftKey: String, giftUri: String): Response<ResponseBody>
-    suspend fun deleteGift(giftKey: String): Boolean
+    suspend fun deleteGift(giftId: String): Result<Unit>
 }
