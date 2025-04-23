@@ -9,8 +9,10 @@ import android.provider.MediaStore
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.w36495.senty.data.domain.GiftType
 import com.w36495.senty.data.mapper.toDomain
 import com.w36495.senty.data.mapper.toUiModel
+import com.w36495.senty.domain.repository.FriendRepository
 import com.w36495.senty.domain.repository.GiftImgRepository
 import com.w36495.senty.domain.repository.GiftRepository
 import com.w36495.senty.util.ImgConverter
@@ -29,6 +31,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class EditGiftViewModel @Inject constructor(
+    private val friendRepository: FriendRepository,
     private val giftRepository: GiftRepository,
     private val giftImgRepository: GiftImgRepository,
     @ApplicationContext private val context: Context,
@@ -381,6 +384,18 @@ class EditGiftViewModel @Inject constructor(
                             it.copy(isLoading = false)
                         }
                         sendEffect(EditGiftContact.Effect.ShowToast("등록 완료되었습니다."))
+                    }
+
+                    launch {
+                        friendRepository.getFriend(gift.friendId)
+                            .onSuccess {
+                                friendRepository.patchFriend(
+                                    it.copy(
+                                        received = if (gift.type == GiftType.RECEIVED) it.received + 1 else it.received,
+                                        sent = if (gift.type == GiftType.SENT) it.sent + 1 else it.sent
+                                    )
+                                )
+                            }
                     }
                 }
                 .onFailure {

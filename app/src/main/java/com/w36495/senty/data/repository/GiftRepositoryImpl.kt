@@ -10,9 +10,10 @@ import com.w36495.senty.data.remote.service.GiftService
 import com.w36495.senty.domain.entity.Gift
 import com.w36495.senty.domain.repository.GiftImgRepository
 import com.w36495.senty.domain.repository.GiftRepository
-import com.w36495.senty.view.entity.gift.GiftDetail
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonObject
@@ -26,50 +27,45 @@ class GiftRepositoryImpl @Inject constructor(
     private val giftImgRepository: GiftImgRepository,
 ) : GiftRepository {
     private var userId = firebaseAuth.currentUser!!.uid
-    override fun getGift(giftId: String): Flow<GiftDetail> = flow {
-        val result = giftService.getGift(userId, giftId)
+    private val _gifts = MutableStateFlow<List<Gift>>(emptyList())
+    override val gifts: StateFlow<List<Gift>>
+        get() = _gifts.asStateFlow()
 
-        if (result.isSuccessful) {
-            result.body()?.let {
-                val responseJson = Json.parseToJsonElement(it.string())
-                val giftDetailEntity = Json.decodeFromJsonElement<GiftDetailEntity>(responseJson)
+    override suspend fun getGift(giftId: String): Result<Gift> {
+        return try {
+            val gift = gifts.value.first { it.id == giftId }
 
-                val giftCategory = GiftCategory.emptyCategory.apply { setId(giftDetailEntity.categoryId) }
-                val friend = FriendDetail.emptyFriendEntity.apply { setId(giftDetailEntity.friendId) }
-                val giftDetail = giftDetailEntity.toDomainEntity()
-                    .apply { setId(giftId) }
-                    .copy(category = giftCategory.copy(), friend = friend.copy())
-
-                emit(giftDetail)
-
-            }
-        } else throw IllegalArgumentException(result.errorBody().toString())
+            Result.success(gift)
+        } catch (e: Exception) {
+            Log.d("GiftRepo", e.stackTraceToString())
+            Result.failure(e)
+        }
     }
 
-    override fun getGifts(): Flow<List<GiftDetail>> = flow {
-        val result = giftService.getGifts(userId)
+    override suspend fun fetchGifts(): Result<Unit> {
+        return try {
+            val response = giftService.fetchGifts(userId)
 
-        if (result.isSuccessful) {
-            if (result.headers()["Content-length"]?.toInt() != 4) {
-                result.body()?.let {
-                    val responseJson = Json.parseToJsonElement(it.string())
+            if (response.isSuccessful) {
+                val body = response.body()?.string()
+                if (body != null && response.headers()["Content-length"]?.toInt() != 4) {
+                    val responseJson = Json.parseToJsonElement(body)
 
-                    responseJson.jsonObject.map { (key, jsonElement) ->
-                        val giftDetailEntity = Json.decodeFromJsonElement<GiftDetailEntity>(jsonElement)
-                        val tempGiftCategory = GiftCategory.emptyCategory.apply { setId(giftDetailEntity.categoryId) }
-                        val tempFriend = FriendDetail.emptyFriendEntity.apply { setId(giftDetailEntity.friendId) }
+                    val gifts = responseJson.jsonObject.map { (key, jsonElement) ->
+                        Json.decodeFromJsonElement<GiftEntity>(jsonElement).toDomain(key)
+                    }.toList()
 
-                        giftDetailEntity.toDomainEntity()
-                            .apply { setId(key) }
-                            .copy(category = tempGiftCategory.copy(), friend = tempFriend.copy())
-                    }.let { giftDetail ->
-                        val sortedGiftDetail = giftDetail.sortedByDescending { gift -> gift.date }
-
-                        emit(sortedGiftDetail.toList())
-                    }
-                }
-            } else emit(emptyList())
-        } else throw IllegalArgumentException(result.errorBody().toString())
+                    _gifts.update { gifts }
+                    Result.success(Unit)
+                } else Result.success(Unit)
+            } else {
+                Log.d("GiftRepo", response.errorBody()?.toString() ?: "errorBody is null")
+                Result.failure(Exception("오류가 발생했습니다."))
+            }
+        } catch (e: Exception) {
+            Log.d("GiftRepo", e.stackTraceToString())
+            Result.failure(e)
+        }
     }
 
     override suspend fun insertGift(gift: Gift): Result<String> {
@@ -80,7 +76,7 @@ class GiftRepositoryImpl @Inject constructor(
                 val body = response.body()
 
                 if (body != null) {
-                    getGifts()
+                    fetchGifts()
                     Result.success(body.key)
                 } else Result.failure(Exception("선물 등록 실패"))
             } else Result.failure(Exception("선물 등록 실패"))
@@ -89,8 +85,17 @@ class GiftRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun patchGift(giftId: String, gift: GiftDetailEntity): Response<ResponseBody> {
-        return giftService.patchGift(userId, giftId, gift)
+    override suspend fun updateGift(gift: Gift): Result<Unit> {
+        return try {
+            val response = giftService.patchGift(userId, gift.id, gift.toEntity())
+
+            if (response.isSuccessful) {
+                fetchGifts()
+                Result.success(Unit)
+            } else Result.failure(Exception("선물 수정 실패"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     override suspend fun patchGiftImgUri(giftKey: String, giftUri: String): Response<ResponseBody> {
