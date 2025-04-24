@@ -8,7 +8,7 @@ interface FriendGroupRepository {
 
     suspend fun getFriendGroup(friendGroupId: String): Result<FriendGroup>
     suspend fun getFriendGroups(): Result<Unit>
-    suspend fun insertFriendGroup(newFriendGroup: FriendGroup): Result<String>
+    suspend fun insertFriendGroup(newFriendGroup: FriendGroup): Result<Unit>
     suspend fun patchFriendGroup(friendGroup: FriendGroup): Result<Unit>
     suspend fun deleteFriendGroup(friendGroupKey: String): Result<Unit>
 }

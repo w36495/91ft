@@ -7,6 +7,7 @@ interface FriendRepository {
     val friends: StateFlow<List<Friend>>
 
     suspend fun getFriend(friendId: String): Result<Friend>
+    suspend fun getFriendsByFriendGroup(friendGroupId: String): Result<List<Friend>>
     suspend fun fetchFriends(): Result<Unit>
     suspend fun insertFriend(friend: Friend): Result<Unit>
     suspend fun patchFriend(friend: Friend): Result<Unit>

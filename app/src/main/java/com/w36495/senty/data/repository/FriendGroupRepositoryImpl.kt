@@ -80,7 +80,7 @@ class FriendGroupRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun insertFriendGroup(newFriendGroup: FriendGroup): Result<String> {
+    override suspend fun insertFriendGroup(newFriendGroup: FriendGroup): Result<Unit> {
         return try {
             val response = friendGroupService.insertFriendGroup(userId, newFriendGroup.toEntity())
 
@@ -89,7 +89,7 @@ class FriendGroupRepositoryImpl @Inject constructor(
 
                 if (generatedId != null) {
                     getFriendGroups()
-                    Result.success(generatedId)
+                    Result.success(Unit)
                 } else {
                     Result.failure(Exception("친구 그룹 key 생성 실패"))
                 }
@@ -116,19 +116,7 @@ class FriendGroupRepositoryImpl @Inject constructor(
         val result = friendGroupService.deleteFriendGroup(userId, friendGroupKey)
 
         if (result.isSuccessful) {
-//            coroutineScope {
-//                friendRepository.getFriends()
-//                    .map { friends ->
-//                        friends.filter { friend -> friend.friendGroup.id == friendGroupKey }
-//                    }
-//                    .collect { friends ->
-//                        friends.forEach {
-//                            friendRepository.deleteFriend(it.id)
-//                        }
-//                    }
-//            }
-
-//            return result.headers()["Content-length"]?.toInt() == 4
+            getFriendGroups()
             return Result.success(Unit)
         } else throw IllegalArgumentException("Failed to delete friend group(${result.errorBody().toString()})")
     }

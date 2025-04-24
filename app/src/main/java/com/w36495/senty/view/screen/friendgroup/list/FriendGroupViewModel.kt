@@ -1,9 +1,11 @@
-package com.w36495.senty.viewModel
+package com.w36495.senty.view.screen.friendgroup.list
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.w36495.senty.data.mapper.toUiModel
 import com.w36495.senty.domain.repository.FriendGroupRepository
+import com.w36495.senty.domain.usecase.DeleteFriendGroupUseCase
 import com.w36495.senty.view.screen.friendgroup.model.FriendGroupUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -19,10 +21,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FriendGroupViewModel @Inject constructor(
-    private val friendGroupRepository: FriendGroupRepository
+    private val friendGroupRepository: FriendGroupRepository,
+    private val deleteFriendGroupUseCase: DeleteFriendGroupUseCase,
 ) : ViewModel() {
     private val _snackbarMsg = MutableSharedFlow<String>()
     val snackbarMsg get() = _snackbarMsg.asSharedFlow()
+
     private var _errorMsg = MutableStateFlow("")
     val errorMsg = _errorMsg.asStateFlow()
 
@@ -37,12 +41,13 @@ class FriendGroupViewModel @Inject constructor(
 
     fun removeFriendGroup(friendGroupId: String) {
         viewModelScope.launch {
-            val result = friendGroupRepository.deleteFriendGroup(friendGroupId)
 
-            result
-                .onSuccess { _snackbarMsg.emit("성공적으로 그룹이 삭제되었습니다.") }
+            deleteFriendGroupUseCase(friendGroupId)
+                .onSuccess {
+                    _snackbarMsg.emit("성공적으로 그룹이 삭제되었습니다.")
+                }
                 .onFailure {
-
+                    Log.d("FriendGroupVM", it.stackTraceToString())
                 }
         }
     }

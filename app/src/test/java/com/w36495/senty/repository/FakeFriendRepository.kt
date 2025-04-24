@@ -24,6 +24,15 @@ class FakeFriendRepository : FriendRepository {
         }
     }
 
+    override suspend fun getFriendsByFriendGroup(friendGroupId: String): Result<List<Friend>> {
+        return try {
+            val friends = friends.value.filter { it.groupId == friendGroupId }
+            Result.success(friends)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override suspend fun fetchFriends(): Result<Unit> {
         return try {
             _friends.update {

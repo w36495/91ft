@@ -36,6 +36,16 @@ class FriendRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getFriendsByFriendGroup(friendGroupId: String): Result<List<Friend>> {
+        return try {
+            val friends = friends.value.filter { it.groupId == friendGroupId }
+            Result.success(friends)
+        } catch (e: Exception) {
+            Log.d("FriendRepo", e.stackTraceToString())
+            Result.failure(e)
+        }
+    }
+
     override suspend fun fetchFriends(): Result<Unit> {
         return try {
             val result = friendService.getFriends(userId)

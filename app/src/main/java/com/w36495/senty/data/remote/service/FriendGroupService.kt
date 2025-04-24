@@ -41,5 +41,5 @@ interface FriendGroupService {
     suspend fun deleteFriendGroup(
         @Path("userId") userId: String,
         @Path("friendGroupId") friendGroupId: String,
-    ): Response<String>
+    ): Response<Unit>
 }
