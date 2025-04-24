@@ -8,7 +8,7 @@ interface FriendRepository {
 
     suspend fun getFriend(friendId: String): Result<Friend>
     suspend fun fetchFriends(): Result<Unit>
-    suspend fun insertFriend(friend: Friend): Response<ResponseBody>
-    suspend fun patchFriend(friendId: String, friend: Friend): Response<ResponseBody>
-    suspend fun deleteFriend(friendId: String): Boolean
+    suspend fun insertFriend(friend: Friend): Result<Unit>
+    suspend fun patchFriend(friend: Friend): Result<Unit>
+    suspend fun deleteFriend(friendId: String): Result<Unit>
 }

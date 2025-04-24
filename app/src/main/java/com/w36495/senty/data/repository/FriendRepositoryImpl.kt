@@ -5,31 +5,21 @@ import com.google.firebase.auth.FirebaseAuth
 import com.w36495.senty.data.domain.FriendEntity
 import com.w36495.senty.data.mapper.toDomain
 import com.w36495.senty.data.mapper.toEntity
-import com.w36495.senty.data.mapper.toUiModel
 import com.w36495.senty.data.remote.service.FriendService
 import com.w36495.senty.domain.entity.Friend
 import com.w36495.senty.domain.repository.FriendRepository
-import com.w36495.senty.domain.repository.GiftRepository
-import com.w36495.senty.view.screen.friend.model.FriendUiModel
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonObject
-import okhttp3.ResponseBody
-import retrofit2.Response
 import javax.inject.Inject
 
 class FriendRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val friendService: FriendService,
-    private val giftRepository: GiftRepository,
 ) : FriendRepository {
     private var userId: String = firebaseAuth.currentUser!!.uid
 
@@ -74,31 +64,47 @@ class FriendRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun insertFriend(friend: Friend): Response<ResponseBody> {
-        return friendService.insertFriend(userId, friend.toEntity())
+    override suspend fun insertFriend(friend: Friend): Result<Unit> {
+        return try {
+            val response = friendService.insertFriend(userId, friend.toEntity())
+            
+            if (response.isSuccessful) {
+                fetchFriends()
+                Result.success(Unit)
+            } else Result.failure(Exception("친구 등록 실패"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
-    override suspend fun patchFriend(friendId: String, friend: Friend): Response<ResponseBody> {
-        return friendService.patchFriend(userId, friendId, friend.toEntity())
+    override suspend fun patchFriend(friend: Friend): Result<Unit> {
+        return try {
+            val response = friendService.patchFriend(userId, friend.id, friend.toEntity())
+
+            if (response.isSuccessful) {
+                fetchFriends()
+                Result.success(Unit)
+            } else Result.failure(Exception("친구 수정 실패"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
-    override suspend fun deleteFriend(friendId: String): Boolean {
-        val result = friendService.deleteFriend(userId, friendId)
+    override suspend fun deleteFriend(friendId: String): Result<Unit> {
+        return try {
+            val response = friendService.deleteFriend(userId, friendId)
 
-        if (result.isSuccessful) {
-            coroutineScope {
-                giftRepository.getGifts()
-                    .map { gifts ->
-                        gifts.filter { it.friend.id == friendId }
-                    }
-                    .collect { gifts ->
-                        gifts.forEach {
-                            giftRepository.deleteGift(it.id)
-                        }
-                    }
+            if (response.isSuccessful) {
+                fetchFriends()
+                Log.d("FriendRepo", "친구 삭제 성공")
+                Result.success(Unit)
+            } else {
+                Log.d("FriendRepo", "친구 삭제 실패")
+                Result.failure(Exception("친구 삭제 실패"))
             }
-
-            return result.headers()["Content-length"]?.toInt() == 4
-        } else throw IllegalArgumentException("Failed to delete friend")
+        } catch (e: Exception) {
+            Log.d("FriendRepo", e.stackTraceToString())
+            Result.failure(e)
+        }
     }
 }

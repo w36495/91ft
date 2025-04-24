@@ -26,6 +26,16 @@ class FakeGiftRepository : GiftRepository {
         }
     }
 
+    override suspend fun getGiftsByFriend(friendId: String): Result<List<Gift>> {
+        return try {
+            val gifts = gifts.value.filter { it.friendId == friendId }
+
+            Result.success(gifts)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override suspend fun getGiftsByCategoryId(categoryId: String): Result<List<Gift>> {
         return try {
             val gifts = gifts.value.filter { it.categoryId == categoryId }

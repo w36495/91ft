@@ -39,6 +39,26 @@ class GiftRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getGiftsByFriend(friendId: String): Result<List<Gift>> {
+        return try {
+            val gifts = gifts.value.filter { it.friendId == friendId }
+
+            Result.success(gifts)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getGiftsByCategoryId(categoryId: String): Result<List<Gift>> {
+        return try {
+            val gifts = gifts.value.filter { it.categoryId == categoryId }
+
+            Result.success(gifts)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override suspend fun fetchGifts(): Result<Unit> {
         return try {
             val response = giftService.fetchGifts(userId)
@@ -95,12 +115,12 @@ class GiftRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun deleteGift(giftId: String): Result<Unit> {
+    override suspend fun deleteGift(giftId: String, refresh: Boolean): Result<Unit> {
         return try {
             val response = giftService.deleteGift(userId, giftId)
 
             if (response.isSuccessful) {
-                fetchGifts()
+                if (refresh) fetchGifts()
                 Log.d("GiftRepo", "선물 삭제 성공")
                 Result.success(Unit)
             } else {

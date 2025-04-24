@@ -1,6 +1,7 @@
 package com.w36495.senty.data.remote.service
 
-import com.w36495.senty.data.domain.FriendDetailEntity
+import com.w36495.senty.data.domain.FriendEntity
+import com.w36495.senty.data.response.FirebasePostResponse
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -8,6 +9,7 @@ import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 
 interface FriendService {
@@ -25,19 +27,19 @@ interface FriendService {
     @POST("friends/{userId}.json")
     suspend fun insertFriend(
         @Path("userId") userId: String,
-        @Body friend: FriendDetailEntity
-    ): Response<ResponseBody>
+        @Body friend: FriendEntity
+    ): Response<FirebasePostResponse>
 
-    @PATCH("friends/{userId}/{friendId}.json")
+    @PUT("friends/{userId}/{friendId}.json")
     suspend fun patchFriend(
         @Path("userId") userId: String,
         @Path("friendId") friendId: String,
-        @Body friend: FriendDetailEntity
+        @Body friend: FriendEntity
     ): Response<ResponseBody>
 
     @DELETE("friends/{userId}/{friendId}.json")
     suspend fun deleteFriend(
         @Path("userId") userId: String,
         @Path("friendId") friendId: String,
-    ): Response<String>
+    ): Response<Unit>
 }
