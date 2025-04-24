@@ -1,6 +1,5 @@
 package com.w36495.senty.usecase
 
-import android.util.Log
 import com.w36495.senty.repository.FakeFriendRepository
 import com.w36495.senty.repository.FakeGiftRepository
 import com.w36495.senty.data.domain.GiftType
@@ -8,6 +7,7 @@ import com.w36495.senty.data.mapper.toDomain
 import com.w36495.senty.domain.repository.FriendRepository
 import com.w36495.senty.domain.repository.GiftImgRepository
 import com.w36495.senty.domain.repository.GiftRepository
+import com.w36495.senty.domain.usecase.DeleteGiftAndUpdateFriendUseCase
 import com.w36495.senty.domain.usecase.DeleteGiftUseCase
 import com.w36495.senty.repository.FakeGiftImageRepository
 import com.w36495.senty.view.screen.friend.model.FriendUiModel
@@ -20,13 +20,16 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-class DeleteGiftUseCaseTest {
+class DeleteGiftAndUpdateFriendUseCaseTest {
     private val friendRepository: FriendRepository = FakeFriendRepository()
     private val giftRepository: GiftRepository = FakeGiftRepository()
     private val giftImageRepository: GiftImgRepository = FakeGiftImageRepository()
 
-    private val useCase: DeleteGiftUseCase = DeleteGiftUseCase(friendRepository, giftRepository, giftImageRepository)
-
+    private val deleteGiftUseCase: DeleteGiftUseCase = DeleteGiftUseCase(giftRepository, giftImageRepository)
+    private val useCase = DeleteGiftAndUpdateFriendUseCase(
+        friendRepository = friendRepository,
+        deleteGiftUseCase = deleteGiftUseCase,
+    )
     @Before
     fun setUp() {
         runBlocking {

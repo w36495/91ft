@@ -4,6 +4,7 @@ import com.w36495.senty.data.domain.GiftType
 import com.w36495.senty.data.mapper.toDomain
 import com.w36495.senty.domain.repository.GiftCategoryRepository
 import com.w36495.senty.domain.repository.GiftRepository
+import com.w36495.senty.domain.usecase.DeleteGiftAndUpdateFriendUseCase
 import com.w36495.senty.domain.usecase.DeleteGiftCategoryUseCase
 import com.w36495.senty.domain.usecase.DeleteGiftUseCase
 import com.w36495.senty.repository.FakeFriendRepository
@@ -30,14 +31,18 @@ class DeleteGiftCategoryUseCaseTest {
     private val deleteGiftUseCase = DeleteGiftUseCase(
         giftRepository = giftRepository,
         giftImageRepository = giftImageRepository,
-        friendRepository = friendRepository,
     )
 
-    private val deleteGiftCategoryUseCase = DeleteGiftCategoryUseCase(
+    private val deleteGiftAndUpdateFriendUseCase = DeleteGiftAndUpdateFriendUseCase(
+        friendRepository = friendRepository,
+        deleteGiftUseCase = deleteGiftUseCase,
+    )
+
+    private val useCase = DeleteGiftCategoryUseCase(
         giftRepository = giftRepository,
         giftImageRepository = giftImageRepository,
         giftCategoryRepository = giftCategoryRepository,
-        deleteGiftUseCase = deleteGiftUseCase,
+        deleteGiftAndUpdateFriendUseCase = deleteGiftAndUpdateFriendUseCase,
     )
 
     @Before
@@ -63,7 +68,7 @@ class DeleteGiftCategoryUseCaseTest {
         assertTrue(gifts.isNotEmpty())
 
         // When : 카테고리를 삭제한다
-        deleteGiftCategoryUseCase(giftCategory.toDomain())
+        useCase(giftCategory.toDomain())
 
         // Then : 해당 카테고리의 선물이 존재한다면, 함께 삭제된다
         // 카테고리 삭제 확인
@@ -85,7 +90,7 @@ class DeleteGiftCategoryUseCaseTest {
         assertTrue(originalGifts.isEmpty())
 
         // When : 카테고리를 삭제한다
-        deleteGiftCategoryUseCase(giftCategory.toDomain())
+        useCase(giftCategory.toDomain())
 
         // Then : 해당 카테고리의 선물이 존재하지 않으므로, 카테고리만 삭제한다.
         val remainingCategories = giftCategoryRepository.categories.value.filter { it.id == newGiftCategory.id }

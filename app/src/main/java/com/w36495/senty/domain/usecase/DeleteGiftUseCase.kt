@@ -12,7 +12,6 @@ import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
 
 class DeleteGiftUseCase @Inject constructor(
-    private val friendRepository: FriendRepository,
     private val giftRepository: GiftRepository,
     private val giftImageRepository: GiftImgRepository,
 ) {
@@ -20,27 +19,14 @@ class DeleteGiftUseCase @Inject constructor(
         return try {
             giftRepository.deleteGift(gift.id)
                 .onSuccess {
-                    val friend = friendRepository.getFriend(gift.friendId).getOrThrow()
-
                     val results = coroutineScope {
-                        val deleteImageJobs = images.map { image ->
+                        images.map { image ->
                             val parseImagePath = image
                                 .substringAfterLast("/") // 전체 경로에서 마지막 segment 추출
                                 .substringBefore("?") // 쿼리 제거
                                 .substringAfterLast("%2F") // Firebase Storage 경로 추출
                             async { giftImageRepository.deleteGiftImage(gift.id, parseImagePath) }
                         }
-
-                        val updateFriendJob = async {
-                            friendRepository.patchFriend(
-                                friend = friend.copy(
-                                    received = if (gift.type == GiftType.RECEIVED) friend.received - 1 else friend.received,
-                                    sent = if (gift.type == GiftType.SENT) friend.sent - 1 else friend.sent
-                                )
-                            )
-                        }
-
-                        deleteImageJobs + updateFriendJob
                     }.awaitAll()
 
                     results.forEach {
@@ -53,6 +39,7 @@ class DeleteGiftUseCase @Inject constructor(
                 }
                 .onFailure {
                     Log.d("DeleteGiftUseCase", it.stackTraceToString())
+                    Result.failure<Unit>(it)
                 }
         } catch (e: Exception) {
             Log.d("DeleteGiftUseCase", e.stackTraceToString())

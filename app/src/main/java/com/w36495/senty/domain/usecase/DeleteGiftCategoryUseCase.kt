@@ -14,7 +14,7 @@ class DeleteGiftCategoryUseCase @Inject constructor(
     private val giftRepository: GiftRepository,
     private val giftImageRepository: GiftImgRepository,
     private val giftCategoryRepository: GiftCategoryRepository,
-    private val deleteGiftUseCase: DeleteGiftUseCase,
+    private val deleteGiftAndUpdateFriendUseCase: DeleteGiftAndUpdateFriendUseCase,
 ) {
     suspend operator fun invoke(category: GiftCategory): Result<Unit> {
         return giftCategoryRepository.deleteCategory(category.id)
@@ -26,7 +26,7 @@ class DeleteGiftCategoryUseCase @Inject constructor(
                         async {
                             val images = giftImageRepository.getGiftImages(gift.id).getOrElse { emptyList() }
 
-                            deleteGiftUseCase(gift, images)
+                            deleteGiftAndUpdateFriendUseCase(gift, images)
                         }
                     }
                 }.awaitAll()
