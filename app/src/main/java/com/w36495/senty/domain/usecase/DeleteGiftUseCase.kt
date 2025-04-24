@@ -24,7 +24,11 @@ class DeleteGiftUseCase @Inject constructor(
 
                     val results = coroutineScope {
                         val deleteImageJobs = images.map { image ->
-                            async { giftImageRepository.deleteGiftImage(gift.id, image) }
+                            val parseImagePath = image
+                                .substringAfterLast("/") // 전체 경로에서 마지막 segment 추출
+                                .substringBefore("?") // 쿼리 제거
+                                .substringAfterLast("%2F") // Firebase Storage 경로 추출
+                            async { giftImageRepository.deleteGiftImage(gift.id, parseImagePath) }
                         }
 
                         val updateFriendJob = async {
