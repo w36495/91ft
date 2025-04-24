@@ -9,11 +9,9 @@ import com.w36495.senty.data.remote.service.GiftCategoryService
 import com.w36495.senty.domain.entity.GiftCategory
 import com.w36495.senty.domain.repository.GiftCategoryRepository
 import com.w36495.senty.domain.repository.GiftRepository
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
@@ -81,21 +79,20 @@ class GiftCategoryRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun deleteCategory(categoryKey: String): Boolean {
-        val result = giftCategoryService.deleteCategory(userId, categoryKey)
+    override suspend fun deleteCategory(categoryId: String): Result<Unit> {
+        return try {
+            val response = giftCategoryService.deleteCategory(userId, categoryId)
 
-        coroutineScope {
-            giftRepository.getGifts().map { gifts ->
-                gifts.filter { it.category.id == categoryKey }
-            }.collect { gifts ->
-                gifts.forEach { gift ->
-                    giftRepository.deleteGift(gift.id)
-                }
+            if (response.isSuccessful) {
+                fetchCategories()
+                Result.success(Unit)
+            } else {
+                Log.d("GiftCategoryRepo", response.errorBody().toString())
+                Result.failure(Exception("선물 카테고리 삭제 실패 : ${response.errorBody().toString()}"))
             }
+        } catch (e: Exception) {
+            Log.d("GiftCategoryRepo", e.stackTraceToString())
+            Result.failure(e)
         }
-
-        if (result.isSuccessful) {
-            return result.headers()["Content-length"]?.toInt() == 4
-        } else throw IllegalArgumentException("Failed to delete friend")
     }
 }

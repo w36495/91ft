@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.w36495.senty.data.mapper.toDomain
 import com.w36495.senty.data.mapper.toUiModel
 import com.w36495.senty.domain.repository.GiftCategoryRepository
+import com.w36495.senty.domain.usecase.DeleteGiftCategoryUseCase
 import com.w36495.senty.view.screen.gift.category.contact.GiftCategoryContact
 import com.w36495.senty.view.screen.gift.category.model.GiftCategoryUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,7 +23,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class GiftCategoriesViewModel @Inject constructor(
-    private val giftCategoryRepository: GiftCategoryRepository
+    private val giftCategoryRepository: GiftCategoryRepository,
+    private val deleteGiftCategoryUseCase: DeleteGiftCategoryUseCase,
 ) : ViewModel() {
     private val _effect = Channel<GiftCategoryContact.Effect>()
     val effect = _effect.receiveAsFlow()
@@ -86,62 +88,51 @@ class GiftCategoriesViewModel @Inject constructor(
             }
             is GiftCategoryContact.Event.OnClickEdit -> {
                 viewModelScope.launch {
-                    if (state.value.showEditCategoryDialog) {
-                        // 보여진 ㅏㅇ태 + 취소
-                        event.category?.let { editGiftCategory ->
-                            _state.update {
-                                it.copy(
-                                    showEditCategoryDialog = false,
-                                )
-                            }
-                            editGiftCategory(editGiftCategory)
-                        } ?: run {
-                            _state.update {
-                                it.copy(
-                                    selectedCategory = null,
-                                    showEditCategoryDialog = false,
-                                )
-                            }
+                    event.category?.let {
+                        _state.update { state ->
+                            state.copy(
+                                selectedCategory = it,
+                                showEditCategoryDialog = !state.showEditCategoryDialog,
+                            )
                         }
-                    } else {
-                        _state.update {
-                            it.copy(
-                                selectedCategory = event.category,
-                                showEditCategoryDialog = true,
+                    } ?: run {
+                        _state.update { state ->
+                            state.copy(
+                                showEditCategoryDialog = !state.showEditCategoryDialog,
+                                selectedCategory = null,
                             )
                         }
                     }
                 }
             }
+            is GiftCategoryContact.Event.OnSelectEdit -> {
+                state.value.selectedCategory?.let {
+                    editGiftCategory(it)
+                }
+            }
             is GiftCategoryContact.Event.OnClickDelete -> {
                 viewModelScope.launch {
-                    if (state.value.showDeleteCategoryDialog) {
-                        event.categoryId?.let {
-                            _state.update { state ->
-                                state.copy(
-                                    showDeleteCategoryDialog = false,
-                                )
-                            }
-                            deleteGiftCategory(it)
-                        } ?: run {
-                            _state.update {
-                                it.copy(
-                                    selectedCategory = null,
-                                    showDeleteCategoryDialog = false,
-                                )
-                            }
+                    event.category?.let {
+                        _state.update { state ->
+                            state.copy(
+                                selectedCategory = it,
+                                showDeleteCategoryDialog = !state.showDeleteCategoryDialog,
+                            )
                         }
-
-
-                    } else {
-                        _state.update {
-                            it.copy(showDeleteCategoryDialog = true)
+                    } ?: run {
+                        _state.update { state ->
+                            state.copy(
+                                showDeleteCategoryDialog = !state.showDeleteCategoryDialog,
+                                selectedCategory = null,
+                            )
                         }
                     }
                 }
             }
-            is GiftCategoryContact.Event.OnClickSave -> {
-
+            is GiftCategoryContact.Event.OnSelectDelete -> {
+                state.value.selectedCategory?.let {
+                    deleteGiftCategory(it)
+                }
             }
         }
     }
@@ -162,7 +153,7 @@ class GiftCategoriesViewModel @Inject constructor(
             val result = giftCategoryRepository.insertCategory(category.toDomain())
 
             result
-                .onSuccess { 
+                .onSuccess {
                     sendEffect(GiftCategoryContact.Effect.ShowToast("등록 완료되었습니다."))
                 }
                 .onFailure {
@@ -184,23 +175,44 @@ class GiftCategoriesViewModel @Inject constructor(
 
             result
                 .onSuccess {
+                    _state.update {
+                        it.copy(
+                            isLoading = true,
+                            showEditCategoryDialog = false,
+                        )
+                    }
                     sendEffect(GiftCategoryContact.Effect.ShowToast("수정 완료되었습니다."))
                 }
                 .onFailure {
+                    Log.d("GiftCategoryVM", it.stackTraceToString())
+                    _state.update {
+                        it.copy(
+                            isLoading = true,
+                            showEditCategoryDialog = false,
+                        )
+                    }
                     sendEffect(GiftCategoryContact.Effect.ShowError("오류가 발생하였습니다."))
                 }
 
         }
     }
 
-    private fun deleteGiftCategory(categoryId: String) {
+    private fun deleteGiftCategory(category: GiftCategoryUiModel) {
         viewModelScope.launch {
-            _state.update {
-                it.copy(
-                    isLoading = true,
-                    selectedCategory = null,
-                )
-            }
+            _state.update { it.copy(isLoading = true) }
+
+            val result = deleteGiftCategoryUseCase(category.toDomain())
+
+            result
+                .onSuccess {
+                    _state.update { it.copy(isLoading = false, showDeleteCategoryDialog = false) }
+                    sendEffect(GiftCategoryContact.Effect.ShowToast("삭제 완료되었습니다."))
+                }
+                .onFailure {
+                    Log.d("GiftCategoryVM", it.stackTraceToString())
+                    _state.update { it.copy(isLoading = false, showDeleteCategoryDialog = false) }
+                    sendEffect(GiftCategoryContact.Effect.ShowError("오류가 발생하였습니다."))
+                }
         }
     }
 }

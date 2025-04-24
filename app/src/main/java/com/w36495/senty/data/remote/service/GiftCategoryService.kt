@@ -29,10 +29,10 @@ interface GiftCategoryService {
         @Body category: GiftCategoryEntity
     ): Response<ResponseBody>
 
-    @DELETE("giftCategories/{userId}/{categoryKey}.json")
+    @DELETE("giftCategories/{userId}/{categoryId}.json")
     suspend fun deleteCategory(
         @Path("userId") userId: String,
-        @Path("categoryKey") categoryKey: String
-    ): Response<String>
+        @Path("categoryId") categoryId: String
+    ): Response<Unit>
 
 }

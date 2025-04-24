@@ -66,8 +66,10 @@ fun GiftCategoriesRoute(
         uiState = uiState,
         onBackPressed = { vm.handleEvent(GiftCategoryContact.Event.OnClickBack) },
         onClickAdd = { vm.handleEvent(GiftCategoryContact.Event.OnClickAdd(it)) },
+        onClickEdit = { vm.handleEvent(GiftCategoryContact.Event.OnClickEdit(it)) },
+        onSelectEdit = { vm.handleEvent(GiftCategoryContact.Event.OnSelectEdit) },
         onClickRemove = { vm.handleEvent(GiftCategoryContact.Event.OnClickDelete(it)) },
-        onClickEdit = { vm.handleEvent(GiftCategoryContact.Event.OnClickEdit(it)) }
+        onSelectDelete = { vm.handleEvent(GiftCategoryContact.Event.OnSelectDelete) },
     )
 }
 
@@ -79,7 +81,9 @@ private fun GiftCategoriesScreen(
     onBackPressed: () -> Unit,
     onClickAdd: (GiftCategoryUiModel?) -> Unit,
     onClickEdit: (GiftCategoryUiModel?) -> Unit,
-    onClickRemove: (String?) -> Unit,
+    onClickRemove: (GiftCategoryUiModel?) -> Unit,
+    onSelectDelete: () -> Unit,
+    onSelectEdit: () -> Unit,
 ) {
     Scaffold(
         modifier = modifier,
@@ -119,10 +123,10 @@ private fun GiftCategoriesScreen(
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(uiState.categories) {category ->
+                items(uiState.categories) { category ->
                     SwipeListItem(
                         category = category,
-                        onRemove = { onClickRemove(category.id) },
+                        onRemove = { onClickRemove(category) },
                         onEdit = { onClickEdit(category) }
                     )
 
@@ -143,7 +147,7 @@ private fun GiftCategoriesScreen(
             if (uiState.showEditCategoryDialog) {
                 EditGiftCategoryDialog(
                     giftCategory = uiState.selectedCategory,
-                    onComplete = { onClickEdit(it) },
+                    onComplete = { onSelectEdit() },
                     onDismiss = { onClickEdit(null) },
                 )
             }
@@ -152,7 +156,7 @@ private fun GiftCategoriesScreen(
                     title = stringResource(id = R.string.gift_categories_delete_title),
                     message = stringResource(id = R.string.gift_categories_delete_message_text),
                     hasCancel = true,
-                    onComplete = { onClickRemove(uiState.selectedCategory?.id) },
+                    onComplete = { onSelectDelete() },
                     onDismiss = { onClickRemove(null) }
                 )
             }
@@ -171,6 +175,8 @@ private fun GiftCategoryPreview() {
             onClickAdd = {},
             onClickEdit = {},
             onClickRemove = {},
+            onSelectEdit = {},
+            onSelectDelete = {},
         )
     }
 }

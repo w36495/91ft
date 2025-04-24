@@ -9,5 +9,5 @@ interface GiftCategoryRepository {
     suspend fun fetchCategories(): Result<Unit>
     suspend fun insertCategory(category: GiftCategory): Result<Unit>
     suspend fun updateCategory(category: GiftCategory): Result<Unit>
-    suspend fun deleteCategory(categoryKey: String): Boolean
+    suspend fun deleteCategory(categoryId: String): Result<Unit>
 }
