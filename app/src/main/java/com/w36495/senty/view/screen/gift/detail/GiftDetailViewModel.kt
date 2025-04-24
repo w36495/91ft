@@ -3,11 +3,12 @@ package com.w36495.senty.view.screen.gift.detail
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.w36495.senty.data.domain.GiftType
+import com.w36495.senty.data.mapper.toDomain
 import com.w36495.senty.data.mapper.toUiModel
 import com.w36495.senty.domain.repository.FriendRepository
 import com.w36495.senty.domain.repository.GiftImgRepository
 import com.w36495.senty.domain.repository.GiftRepository
+import com.w36495.senty.domain.usecase.DeleteGiftUseCase
 import com.w36495.senty.view.screen.gift.detail.contact.GiftDetailContact
 import com.w36495.senty.view.screen.gift.model.GiftUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,9 +22,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class GiftDetailViewModel @Inject constructor(
-    private val friendRepository: FriendRepository,
     private val giftRepository: GiftRepository,
     private val giftImgRepository: GiftImgRepository,
+    private val deleteGiftUseCase: DeleteGiftUseCase,
 ) : ViewModel() {
     private val _effect = Channel<GiftDetailContact.Effect>()
     val effect = _effect.receiveAsFlow()
@@ -96,31 +97,11 @@ class GiftDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
-            val result = giftRepository.deleteGift(gift.id)
-
-            result
+            deleteGiftUseCase(gift.toDomain(), gift.images)
                 .onSuccess {
-                    giftImgRepository.deleteAllGiftImage(gift.id)
-                        .onSuccess { Log.d("GiftDetailVM", "선물 이미지 삭제 성공") }
-                        .onFailure {
-                            Log.d("GiftDetailVM", "선물 이미지 삭제 실패 : ${it.stackTraceToString()}")
-                        }
-
-                    launch {
-                        friendRepository.getFriend(gift.friendId)
-                            .onSuccess {
-                                friendRepository.patchFriend(
-                                    it.copy(
-                                        received = if (gift.type == GiftType.RECEIVED) it.received - 1 else it.received,
-                                        sent = if (gift.type == GiftType.SENT) it.sent - 1 else it.sent
-                                    )
-                                )
-                            }
-                    }
-
-                _state.update { it.copy(isLoading = false) }
+                    _state.update { it.copy(isLoading = false) }
                     sendEffect(GiftDetailContact.Effect.ShowToast("선물이 삭제되었습니다."))
-            }
+                }
                 .onFailure {
                     _state.update { it.copy(isLoading = false) }
                     sendEffect(GiftDetailContact.Effect.ShowError("오류가 발생하였습니다."))
