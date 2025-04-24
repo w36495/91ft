@@ -63,6 +63,7 @@ class DeleteGiftUseCaseTest {
     @Test
     fun `이미지가 없는 선물을 삭제하면, 선물만 삭제된다`() = runTest {
         // Given
+        val originalFriend = friendRepository.getFriend(friendId = friend.id).getOrThrow()
         // 새로운 선물 추가 (이미지X)
         val newGift = GiftUiModel(id = "Gift 200", friendId = friend.id)
         giftRepository.insertGift(newGift.toDomain())
@@ -75,6 +76,9 @@ class DeleteGiftUseCaseTest {
 
         // Then
         assertTrue(result.isSuccess)
+
+        val updatedFriend = friendRepository.getFriend(gift.friendId).getOrThrow()
+        assertEquals(originalFriend.received-1, updatedFriend.received)
     }
 
     @Test
@@ -88,7 +92,7 @@ class DeleteGiftUseCaseTest {
 
         // Then : 해당 타입의 선물 개수가 줄어든다.
         val updatedFriend = friendRepository.getFriend(gift.friendId).getOrThrow()
-        Assert.assertEquals(originalFriend.received-1, updatedFriend.received)
+        assertEquals(originalFriend.received-1, updatedFriend.received)
     }
 
     @Test
