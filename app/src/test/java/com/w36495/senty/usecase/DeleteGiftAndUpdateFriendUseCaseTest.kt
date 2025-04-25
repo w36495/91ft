@@ -5,7 +5,7 @@ import com.w36495.senty.repository.FakeGiftRepository
 import com.w36495.senty.data.domain.GiftType
 import com.w36495.senty.data.mapper.toDomain
 import com.w36495.senty.domain.repository.FriendRepository
-import com.w36495.senty.domain.repository.GiftImgRepository
+import com.w36495.senty.domain.repository.GiftImageRepository
 import com.w36495.senty.domain.repository.GiftRepository
 import com.w36495.senty.domain.usecase.DeleteGiftAndUpdateFriendUseCase
 import com.w36495.senty.domain.usecase.DeleteGiftUseCase
@@ -23,7 +23,7 @@ import org.junit.Test
 class DeleteGiftAndUpdateFriendUseCaseTest {
     private val friendRepository: FriendRepository = FakeFriendRepository()
     private val giftRepository: GiftRepository = FakeGiftRepository()
-    private val giftImageRepository: GiftImgRepository = FakeGiftImageRepository()
+    private val giftImageRepository: GiftImageRepository = FakeGiftImageRepository()
 
     private val deleteGiftUseCase: DeleteGiftUseCase = DeleteGiftUseCase(giftRepository, giftImageRepository)
     private val useCase = DeleteGiftAndUpdateFriendUseCase(
@@ -42,8 +42,8 @@ class DeleteGiftAndUpdateFriendUseCaseTest {
             giftRepository.insertGift(sentGift.toDomain())
 
             repeat(3) {
-                giftImageRepository.insertGiftImageByBitmap(gift.id, giftImage)
-                giftImageRepository.insertGiftImageByBitmap(sentGift.id, giftImage)
+                giftImageRepository.insertGiftImageByBitmap(gift.id, "testImage123", giftImage)
+                giftImageRepository.insertGiftImageByBitmap(sentGift.id, "testImage1234", giftImage)
             }
         }
     }
@@ -56,7 +56,7 @@ class DeleteGiftAndUpdateFriendUseCaseTest {
         Assert.assertEquals(3, originalGiftImages.size)
 
         // When
-        useCase(gift.toDomain(), originalGiftImages)
+        useCase(gift.toDomain())
 
         // Then
         val updatedGiftImages = giftImageRepository.getGiftImages(gift.id).getOrThrow()
@@ -74,7 +74,7 @@ class DeleteGiftAndUpdateFriendUseCaseTest {
         assertEquals(13, giftRepository.gifts.value.size)
 
         // When : 선물 데이터 삭제
-        val result = useCase(newGift.toDomain(), emptyList())
+        val result = useCase(newGift.toDomain())
         assertEquals(12, giftRepository.gifts.value.size)
 
         // Then
@@ -91,7 +91,7 @@ class DeleteGiftAndUpdateFriendUseCaseTest {
         val originalGiftImages = giftImageRepository.getGiftImages(gift.id).getOrThrow()
 
         // When : 선물을 삭제하면
-        useCase(gift.toDomain(), originalGiftImages)
+        useCase(gift.toDomain())
 
         // Then : 해당 타입의 선물 개수가 줄어든다.
         val updatedFriend = friendRepository.getFriend(gift.friendId).getOrThrow()
@@ -105,7 +105,7 @@ class DeleteGiftAndUpdateFriendUseCaseTest {
         val originalGiftImages = giftImageRepository.getGiftImages(sentGift.id).getOrThrow()
 
         // When : 선물을 삭제하면
-        useCase(sentGift.toDomain(), originalGiftImages)
+        useCase(sentGift.toDomain())
 
         // Then : 해당 타입의 선물 개수가 줄어든다.
         val updatedFriend = friendRepository.getFriend(gift.friendId).getOrThrow()

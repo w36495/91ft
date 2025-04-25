@@ -1,10 +1,15 @@
 package com.w36495.senty.repository
 
-import com.w36495.senty.domain.repository.GiftImgRepository
+import android.util.Log
+import com.w36495.senty.domain.repository.GiftImageRepository
+import kotlinx.coroutines.tasks.await
 
-class FakeGiftImageRepository : GiftImgRepository {
+class FakeGiftImageRepository : GiftImageRepository {
     private val imageMap = mutableMapOf<String, MutableList<String>>() // giftId -> image list
     private var imageCounter = 0
+    override suspend fun getGiftThumbs(giftId: String, imageName: String): Result<String> {
+        return Result.success(imageMap[giftId]?.find { it == imageName } ?: "")
+    }
 
     override suspend fun getGiftImages(giftId: String): Result<List<String>> {
         return Result.success(imageMap[giftId]?.toList() ?: emptyList())
@@ -12,11 +17,12 @@ class FakeGiftImageRepository : GiftImgRepository {
 
     override suspend fun insertGiftImageByBitmap(
         giftId: String,
-        giftImage: ByteArray
+        imageName: String,
+        image: ByteArray
     ): Result<Unit> {
-        val imageName = "img_${imageCounter++}.jpg"
         val list = imageMap.getOrPut(giftId) { mutableListOf() }
-        list.add(imageName)
+        list.add("img_$imageName${imageCounter++}.jpg")
+
         return Result.success(Unit)
     }
 

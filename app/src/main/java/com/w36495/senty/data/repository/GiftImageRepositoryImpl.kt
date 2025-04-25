@@ -3,7 +3,7 @@ package com.w36495.senty.data.repository
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
-import com.w36495.senty.domain.repository.GiftImgRepository
+import com.w36495.senty.domain.repository.GiftImageRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -12,12 +12,28 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import kotlin.coroutines.resume
 
-class GiftImgRepositoryImpl @Inject constructor(
+class GiftImageRepositoryImpl @Inject constructor(
     private val firebaseStorage: FirebaseStorage,
     private val firebaseAuth: FirebaseAuth,
-) : GiftImgRepository {
+) : GiftImageRepository {
     private val userId: String
         get() = firebaseAuth.currentUser?.uid ?: throw IllegalStateException("User not logged in")
+
+    override suspend fun getGiftThumbs(giftId: String, imageName: String): Result<String> {
+        return try {
+            Log.d("GiftImgRepo", "\n🎁 선물 썸네일 가져오는 중...")
+            val imgPath = "images/gifts/$userId/$giftId/${imageName.plus(".jpg")}"
+
+            val ref = firebaseStorage.reference.child(imgPath)
+
+            val downloadUrl = ref.downloadUrl.await().toString()
+            Log.d("GiftImgRepo", "\uD83C\uDF81 선물 썸네일 다운로드 완료!")
+            Result.success(downloadUrl)
+        } catch (e: Exception) {
+            Log.d("GiftImgRepo", e.stackTraceToString())
+            Result.failure(e)
+        }
+    }
 
     override suspend fun getGiftImages(giftId: String): Result<List<String>> {
         return try {
@@ -25,11 +41,14 @@ class GiftImgRepositoryImpl @Inject constructor(
             val imgPath = "images/gifts/$userId/$giftId"
 
             val imgResult = firebaseStorage.reference.child(imgPath).listAll().await()
+            val imagesWithoutThumbs = imgResult.items.filter { !it.name.contains("thumbs_") }
+
             val itemCount = imgResult.items.size
             Log.d("GiftImgRepo", "📸 다운로드할 이미지 개수: $itemCount")
 
             val downloadUrls = coroutineScope {
-                imgResult.items.sortedBy { it.name } // 필요 시 정렬
+                imagesWithoutThumbs
+                    .sortedBy { it.name }
                     .map { ref ->
                         async { ref.downloadUrl.await().toString() }
                     }.awaitAll()
@@ -45,15 +64,16 @@ class GiftImgRepositoryImpl @Inject constructor(
 
     override suspend fun insertGiftImageByBitmap(
         giftId: String,
-        giftImage: ByteArray
+        imageName: String,
+        image: ByteArray
     ): Result<Unit> {
         return suspendCancellableCoroutine { cont ->
-            val imgName = generateImageName()
-            val giftImagePath = "images/gifts/$userId/$giftId/$imgName.jpg"
+
+            val giftImagePath = "images/gifts/$userId/$giftId/$imageName.jpg"
 
             val uploadTask = firebaseStorage.reference
                 .child(giftImagePath)
-                .putBytes(giftImage)
+                .putBytes(image)
 
             uploadTask
                 .addOnSuccessListener { task ->

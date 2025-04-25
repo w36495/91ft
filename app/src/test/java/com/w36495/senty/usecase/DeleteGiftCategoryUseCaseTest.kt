@@ -40,7 +40,6 @@ class DeleteGiftCategoryUseCaseTest {
 
     private val useCase = DeleteGiftCategoryUseCase(
         giftRepository = giftRepository,
-        giftImageRepository = giftImageRepository,
         giftCategoryRepository = giftCategoryRepository,
         deleteGiftAndUpdateFriendUseCase = deleteGiftAndUpdateFriendUseCase,
     )
