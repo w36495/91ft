@@ -1,5 +1,6 @@
 package com.w36495.senty.view.screen.setting
 
+import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.w36495.senty.R
+import com.w36495.senty.view.screen.setting.model.SettingEffect
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.dialogs.BasicAlertDialog
 import com.w36495.senty.view.ui.theme.SentyGray20
@@ -38,10 +41,25 @@ import com.w36495.senty.view.ui.theme.SentyGray20
 fun SettingsRoute(
     vm: SettingViewModel = hiltViewModel(),
     padding: PaddingValues,
+    moveToLogin: () -> Unit,
     moveToGiftCategories: () -> Unit,
 ) {
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        vm.effect.collect { effect ->
+            when (effect) {
+                is SettingEffect.ShowToast -> {
+                    Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
+                    vm.sendEffect(SettingEffect.SignOutComplete)
+                }
+                SettingEffect.SignOutComplete -> { moveToLogin() }
+            }
+        }
+    }
+
     SettingsScreen(
-        onClickLogout = {},
+        onClickLogout = { vm.signOut(context) },
         onClickGiftCategories = moveToGiftCategories,
     )
 }
@@ -52,14 +70,13 @@ fun SettingsScreen(
     onClickLogout: () -> Unit,
     onClickGiftCategories: () -> Unit,
 ) {
-    val context = LocalContext.current
-
     var showLogoutDialog by remember { mutableStateOf(false) }
     var showDeleteUserDialog by remember { mutableStateOf(false) }
 
     if (showLogoutDialog) {
         BasicAlertDialog(
-            title = "로그아웃하시겠습니까?",
+            title = stringResource(id = R.string.settings_logout_title),
+            hasCancel = true,
             onComplete = {
                 onClickLogout()
                 showLogoutDialog = false
@@ -111,7 +128,7 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxWidth(),
                 title = R.string.settings_logout_text,
                 icon = Icons.AutoMirrored.Filled.Logout,
-                onClickItem = onClickLogout,
+                onClickItem = { showLogoutDialog = true },
             )
 
             HorizontalDivider(

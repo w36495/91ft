@@ -6,6 +6,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import com.w36495.senty.view.screen.gift.category.GiftCategoriesRoute
+import com.w36495.senty.view.screen.login.navigation.navigateToLogin
 import com.w36495.senty.view.screen.main.BottomTabRoute
 import com.w36495.senty.view.screen.main.Route
 import com.w36495.senty.view.screen.setting.SettingsRoute
@@ -25,6 +26,15 @@ fun NavGraphBuilder.settingNavGraph(
     composable<BottomTabRoute.Settings> {
         SettingsRoute(
             padding = padding,
+            moveToLogin = {
+                val navOptions = NavOptions.Builder()
+                    .setPopUpTo(
+                        route = BottomTabRoute.Home,
+                        inclusive = true
+                    ).build()
+
+                navController.navigateToLogin(navOptions)
+            },
             moveToGiftCategories = { navController.navigateToGiftCategories() },
         )
     }
