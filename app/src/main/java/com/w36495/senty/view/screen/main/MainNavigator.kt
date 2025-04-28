@@ -10,6 +10,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import com.w36495.senty.view.screen.friend.navigation.navigateToFriend
+import com.w36495.senty.view.screen.gift.navigation.navigateToGiftAdd
 import com.w36495.senty.view.screen.home.navigation.navigateToHome
 import com.w36495.senty.view.screen.setting.navigation.navigateToSettings
 import kotlinx.serialization.Serializable
@@ -40,9 +41,7 @@ class MainNavigator(
         when (bottomTab) {
             MainBottomTab.HOME -> navController.navigateToHome(navOptions)
             MainBottomTab.FRIEND -> navController.navigateToFriend(navOptions)
-            MainBottomTab.GIFT_ADD -> {
-//                navController.navigateToPocketTab(navOptions)
-            }
+            MainBottomTab.GIFT_ADD -> navController.navigateToGiftAdd(navOptions)
             MainBottomTab.ANNIVERSARY -> {
 //                navController.navigateToLoungeTab(navOptions)
             }
@@ -67,7 +66,13 @@ sealed interface Route {
     @Serializable data class FriendDetail(val friendId: String) : Route
     @Serializable data object FriendGroups : Route
 
+    // Gift
+    @Serializable data object Gifts : Route
+    @Serializable data class GiftDetail(val giftId: String) : Route
+    @Serializable data class GiftEdit(val giftId: String) : Route
+
     // Settings
+    @Serializable data object GiftCategories : Route
 
 }
 

@@ -35,11 +35,11 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.w36495.senty.R
+import com.w36495.senty.view.screen.friendgroup.list.FriendGroupViewModel
 import com.w36495.senty.view.screen.friendgroup.model.FriendGroupUiModel
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
 import com.w36495.senty.view.ui.theme.SentyGray20
-import com.w36495.senty.viewModel.FriendGroupViewModel
 
 @Composable
 fun FriendGroupSelectionDialog(

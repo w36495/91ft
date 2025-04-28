@@ -9,7 +9,7 @@ import androidx.navigation.toRoute
 import com.w36495.senty.view.screen.friend.edit.EditFriendRoute
 import com.w36495.senty.view.screen.friend.detail.FriendDetailRoute
 import com.w36495.senty.view.screen.friend.list.FriendRoute
-import com.w36495.senty.view.screen.friendgroup.FriendGroupScreen
+import com.w36495.senty.view.screen.friendgroup.list.FriendGroupScreen
 import com.w36495.senty.view.screen.gift.navigation.navigateToGiftDetail
 import com.w36495.senty.view.screen.main.BottomTabRoute
 import com.w36495.senty.view.screen.main.Route

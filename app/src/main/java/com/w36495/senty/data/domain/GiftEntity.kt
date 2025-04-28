@@ -13,6 +13,8 @@ data class GiftEntity(
     val mood: String = "",
     val memo: String = "",
     val hasImages: Boolean = false,
+    val thumbnail: String? = null,
+    val images: List<String> = emptyList(),
     val createdAt: Long = 0L,
     val updatedAt: Long = 0L,
 )

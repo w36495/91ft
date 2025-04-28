@@ -13,6 +13,8 @@ data class Gift(
     val mood: String,
     val memo: String,
     val hasImages: Boolean,
+    val thumbnailName: String?,
+    val images: List<String>,
     val createdAt: Long,
     val updatedAt: Long,
 )

@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.w36495.senty.data.mapper.toUiModel
 import com.w36495.senty.domain.repository.FriendGroupRepository
 import com.w36495.senty.domain.repository.FriendRepository
-import com.w36495.senty.view.screen.friend.contact.FriendContact
+import com.w36495.senty.view.screen.friend.list.contact.FriendContact
 import com.w36495.senty.view.screen.friendgroup.model.FriendGroupUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -15,8 +15,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update

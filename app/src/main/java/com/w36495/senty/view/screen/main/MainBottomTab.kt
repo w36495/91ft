@@ -43,7 +43,7 @@ enum class MainBottomTab(
 
         @Composable
         fun contains(predicate: @Composable (Route) -> Boolean): Boolean {
-            return entries.map { it.route }.any { predicate(it) }
+            return entries.filter { it != GIFT_ADD }.map { it.route }.any { predicate(it) }
         }
     }
 }

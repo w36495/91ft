@@ -1,6 +1,7 @@
-package com.w36495.senty.view.screen.friend
+package com.w36495.senty.view.screen.friend.list
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,6 +48,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -117,6 +119,7 @@ private fun FriendScreen(
     onClickFriendAdd: () -> Unit,
     onChangeFriendsByFriendGroup: (FriendGroupUiModel?) -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
     var showProgressBar by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -160,7 +163,12 @@ private fun FriendScreen(
         Box(
             modifier = Modifier
                 .padding(innerPadding)
-                .fillMaxSize(),
+                .fillMaxSize()
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = { focusManager.clearFocus() },
+                ),
         ) {
             when (uiState) {
                 FriendContact.State.Idle -> {
@@ -357,7 +365,6 @@ fun FriendViewPagerItem(
             FriendGroupChip(
                 text = friend.groupName,
                 chipColor = friend.groupColor,
-                textColor = SentyGray60
             )
 
             Text(
@@ -368,7 +375,7 @@ fun FriendViewPagerItem(
         }
         Text(
             text = friend.name,
-            style = SentyTheme.typography.headlineSmall,
+            style = SentyTheme.typography.titleLarge,
             modifier = Modifier.padding(top = 12.dp)
         )
         Text(

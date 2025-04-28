@@ -1,4 +1,4 @@
-package com.w36495.senty.view.screen.friendgroup
+package com.w36495.senty.view.screen.friendgroup.list
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -57,11 +57,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.w36495.senty.R
 import com.w36495.senty.util.darken
+import com.w36495.senty.view.screen.friendgroup.EditFriendGroupDialog
 import com.w36495.senty.view.screen.friendgroup.model.FriendGroupUiModel
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.dialogs.BasicAlertDialog
 import com.w36495.senty.view.ui.theme.SentyGray20
-import com.w36495.senty.viewModel.FriendGroupViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -150,6 +150,7 @@ private fun FriendGroupContents(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         containerColor = Color.White,
     ) { innerPadding ->
+
         LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
@@ -196,6 +197,7 @@ private fun FriendGroupItem(
         BasicAlertDialog(
             title = stringResource(id = R.string.friend_group_delete_title),
             message = stringResource(id = R.string.friend_group_delete_text),
+            hasCancel = true,
             onComplete = {
                 onClickDelete(group.id)
                 showDeleteDialog = false

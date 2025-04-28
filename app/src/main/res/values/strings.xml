@@ -93,12 +93,12 @@
     <string name="signup_email_title">이메일</string>
     <string name="signup_email_title_sub1">비밀번호를 재설정할 때 사용되는 이메일입니다.</string>
     <string name="signup_email_title_sub2">실제 사용하시는 이메일을 입력해주세요.</string>
-    <string name="signup_email_hint_text">이메일을 입력해주세요.</string>
+    <string name="signup_email_hint_text">이메일 입력</string>
 
     <string name="signup_password_title">비밀번호</string>
     <string name="signup_password_title_sub1">영문자/숫자로 입력해주세요. (8자 이상)</string>
-    <string name="signup_password_hint_text">비밀번호를 입력해주세요.</string>
-    <string name="signup_password_confirm_hint_text">비밀번호를 다시 입력해주세요.</string>
+    <string name="signup_password_hint_text">비밀번호</string>
+    <string name="signup_password_confirm_hint_text">비밀번호 확인</string>
 
     <string name="signup_error1">필수입력입니다.</string>
     <string name="signup_error_email">이메일 형식으로 입력해주세요.</string>
@@ -116,6 +116,17 @@
     <string name="login_auto_text">자동 로그인</string>
     <string name="login_find_passowrd_text">비밀번호 재설정</string>
     <string name="login_error1">아이디 혹은 비밀번호가 일치하지 않습니다.</string>
+
+    <!-- 홈 -->
+    <string name="home_anniversary_title">다가오는 기념일</string>
+    <string name="home_anniversary_empty_text">기념일을 등록해보세요.</string>
+
+    <string name="home_gift_received_title">최근 받은 선물</string>
+    <string name="home_gift_sent_title">최근 준 선물</string>
+    <string name="home_gift_loading_text">선물을 불러오고 있습니다.</string>
+    <string name="home_gift_received_empty_text">받은 선물을 등록해보세요.</string>
+    <string name="home_gift_sent_empty_text">준 선물을 등록해보세요.</string>
+    <string name="home_gift_show_all_text">선물\n전체보기</string>
 
     <!-- 친구 목록 -->
     <string name="friend_title">친구 목록</string>
@@ -163,6 +174,8 @@
     <string name="friend_group_complete_save_text">등록이 완료되었습니다.</string>
     <string name="friend_group_complete_edit_text">수정이 완료되었습니다.</string>
 
+    <string name="friend_group_selection_edit_button_text">그룹 편집</string>
+
     <string name="friend_group_delete_title">그룹을 삭제하시겠습니까?</string>
     <string name="friend_group_delete_text">해당 그룹의 친구도 모두 함께 삭제되며, 삭제된 그룹은 복구가 불가능합니다.</string>
 
@@ -209,6 +222,13 @@
     <string name="category_selection_empty_button_text">선물 카테고리 등록</string>
     <string name="category_selection_edit_button_text">선물 카테고리 등록</string>
 
+    <!-- 선물 조회 -->
+    <string name="gift_detail_received_title">받은 선물</string>
+    <string name="gift_detail_sent_title">준 선물</string>
+
+    <string name="gift_detail_delete_title">삭제하시겠습니까?</string>
+    <string name="gift_detail_delete_message_text">삭제된 선물은 복구가 불가능합니다.</string>
+
     <!-- 선물 카테고리 목록 -->
     <string name="gift_categories_title">선물 카테고리</string>
 
@@ -227,6 +247,7 @@
     <string name="common_cancel">취소</string>
     <string name="common_save">저장</string>
     <string name="common_edit">수정</string>
+    <string name="common_remove">삭제</string>
     <string name="common_heart">♥</string>
     <string name="common_received_gift_text">받은 선물</string>
     <string name="common_sent_gift_text">준 선물</string>
