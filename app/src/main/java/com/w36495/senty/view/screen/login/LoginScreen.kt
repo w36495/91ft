@@ -16,8 +16,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -61,7 +59,6 @@ import com.w36495.senty.view.ui.theme.SentyGray50
 import com.w36495.senty.view.ui.theme.SentyGray60
 import com.w36495.senty.view.ui.theme.SentyGreen60
 import com.w36495.senty.view.ui.theme.SentyWhite
-import com.w36495.senty.viewModel.LoginViewModel
 
 @Composable
 fun LoginRoute(
@@ -238,13 +235,13 @@ private fun LoginScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 12.dp),
+                        .padding(top = 4.dp),
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = stringResource(id = R.string.login_find_passowrd_text),
-                        style = SentyTheme.typography.bodyMedium
+                        style = SentyTheme.typography.labelMedium
                             .copy(color = SentyGray50),
                         modifier = Modifier
                             .padding(vertical = 8.dp)
@@ -253,7 +250,7 @@ private fun LoginScreen(
 
                     Text(
                         text = stringResource(id = R.string.signup_title),
-                        style = SentyTheme.typography.bodyMedium
+                        style = SentyTheme.typography.labelMedium
                             .copy(color = SentyGray50),
                         modifier = Modifier
                             .padding(8.dp)
@@ -326,16 +323,16 @@ private fun SocialLoginSection(
                     .clickable { onGoogleLoginClick() }
             )
 
-            Spacer(modifier = Modifier.width(24.dp))
-
-            Image(
-                painter = painterResource(id = R.drawable.img_kakao),
-                contentDescription = "Kakao Login Button",
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .clickable { onKakaoLoginClick() }
-            )
+//            Spacer(modifier = Modifier.width(24.dp))
+//
+//            Image(
+//                painter = painterResource(id = R.drawable.img_kakao),
+//                contentDescription = "Kakao Login Button",
+//                modifier = Modifier
+//                    .size(40.dp)
+//                    .clip(CircleShape)
+//                    .clickable { onKakaoLoginClick() }
+//            )
         }
     }
 }

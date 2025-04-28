@@ -1,4 +1,4 @@
-package com.w36495.senty.viewModel
+package com.w36495.senty.view.screen.login
 
 import android.content.Context
 import android.content.Intent
