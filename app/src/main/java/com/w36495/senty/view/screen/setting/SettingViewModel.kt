@@ -38,6 +38,22 @@ class SettingViewModel @Inject constructor(
         }
     }
 
+    fun withDraw(context: Context) {
+        userRepository.user.value?.let {
+            viewModelScope.launch {
+                authRepository.withdraw(it.loginType, context)
+                    .onSuccess {
+                        userRepository.updateUser(null)
+                        _effect.send(SettingEffect.ShowToast(context.getString(R.string.settings_withdraw_complete_text)))
+                        Log.d("SettingVM", "🟢 회원탈퇴 완료")
+                    }
+                    .onFailure {
+                        Log.d("SettingVM", "🔴 회원탈퇴 실패")
+                    }
+            }
+        }
+    }
+
     fun sendEffect(effect: SettingEffect) {
         viewModelScope.launch {
             _effect.send(effect)

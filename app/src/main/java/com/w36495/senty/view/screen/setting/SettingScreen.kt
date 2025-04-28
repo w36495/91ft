@@ -51,24 +51,26 @@ fun SettingsRoute(
             when (effect) {
                 is SettingEffect.ShowToast -> {
                     Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
-                    vm.sendEffect(SettingEffect.SignOutComplete)
+                    vm.sendEffect(SettingEffect.Complete)
                 }
-                SettingEffect.SignOutComplete -> { moveToLogin() }
+                SettingEffect.Complete -> { moveToLogin() }
             }
         }
     }
 
     SettingsScreen(
-        onClickLogout = { vm.signOut(context) },
         onClickGiftCategories = moveToGiftCategories,
+        onClickLogout = { vm.signOut(context) },
+        onClickWithDraw = { vm.withDraw(context) },
     )
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     modifier: Modifier = Modifier,
-    onClickLogout: () -> Unit,
     onClickGiftCategories: () -> Unit,
+    onClickLogout: () -> Unit,
+    onClickWithDraw: () -> Unit,
 ) {
     var showLogoutDialog by remember { mutableStateOf(false) }
     var showDeleteUserDialog by remember { mutableStateOf(false) }
@@ -85,9 +87,11 @@ fun SettingsScreen(
         )
     } else if (showDeleteUserDialog) {
         BasicAlertDialog(
-            title = "계정을 삭제하시겠습니까?",
-            message = "계정을 삭제하면 복구할 수 없습니다.",
+            title = stringResource(id = R.string.settings_withdraw_title),
+            message = stringResource(id = R.string.settings_withdraw_message_text),
+            hasCancel = true,
             onComplete = {
+                onClickWithDraw()
                 showDeleteUserDialog = false
             },
             onDismiss = { showDeleteUserDialog = false }
@@ -141,7 +145,7 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxWidth(),
                 title = R.string.settings_withdraw_text,
                 icon = Icons.Default.DeleteForever,
-                onClickItem = { }
+                onClickItem = { showDeleteUserDialog = true }
             )
 
             HorizontalDivider(
@@ -186,6 +190,7 @@ private fun SettingScreenPreview() {
         SettingsScreen(
             onClickLogout = {},
             onClickGiftCategories = {},
+            onClickWithDraw = {},
         )
     }
 }

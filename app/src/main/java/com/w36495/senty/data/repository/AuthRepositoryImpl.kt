@@ -97,4 +97,17 @@ class AuthRepositoryImpl @Inject constructor(
             }
         }
     }
+
+    override suspend fun withdraw(loginType: LoginType, context: Context): Result<Unit> {
+        return suspendCancellableCoroutine { cont ->
+            firebaseAuth.currentUser?.delete()
+                ?.addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        cont.resume(Result.success(Unit))
+                    } else {
+                        cont.resume(Result.failure(task.exception ?: Exception("Unknown error")))
+                    }
+                }
+        }
+    }
 }

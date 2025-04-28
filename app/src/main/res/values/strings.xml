@@ -249,6 +249,10 @@
     <string name="settings_logout_title">로그아웃 하시겠습니까?</string>
     <string name="settings_logout_complete_text">로그아웃되였습니다.</string>
 
+    <string name="settings_withdraw_title">계정을 삭제하시겠습니까?</string>
+    <string name="settings_withdraw_message_text">계정을 삭제하면 복구할 수 없습니다.</string>
+    <string name="settings_withdraw_complete_text">회원탈퇴가 완료되었습니다.</string>
+
     <!-- 공통 -->
     <string name="common_confirm">확인</string>
     <string name="common_cancel">취소</string>

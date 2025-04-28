@@ -15,7 +15,7 @@ class UserRepositoryImpl @Inject constructor(
     override val user: StateFlow<AuthUser?>
         get() = _user.asStateFlow()
 
-    override fun updateUser(user: AuthUser) {
+    override fun updateUser(user: AuthUser?) {
         _user.update { user }
     }
 }

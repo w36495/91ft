@@ -12,4 +12,5 @@ interface AuthRepository {
     suspend fun signInWithGoogle(idToken: String): Result<FirebaseUser?>
     suspend fun signInWithKakao(context: Context): Result<AuthUser>
     suspend fun signOut(loginType: LoginType, context: Context): Result<Unit>
+    suspend fun withdraw(loginType: LoginType, context: Context): Result<Unit>
 }
