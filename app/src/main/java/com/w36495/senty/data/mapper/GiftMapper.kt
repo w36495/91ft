@@ -5,6 +5,7 @@ import com.w36495.senty.data.domain.GiftType
 import com.w36495.senty.domain.entity.Gift
 import com.w36495.senty.view.screen.friend.detail.model.FriendDetailGiftUiModel
 import com.w36495.senty.view.screen.gift.list.contact.GiftListUiModel
+import com.w36495.senty.view.screen.gift.list.model.GiftListUiModel
 import com.w36495.senty.view.screen.gift.model.GiftUiModel
 
 fun GiftEntity.toDomain(id: String) = Gift(

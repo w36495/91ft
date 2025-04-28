@@ -1,11 +1,11 @@
 package com.w36495.senty.view.screen.gift.list.contact
 
-import com.w36495.senty.view.screen.gift.model.GiftUiModel
+import com.w36495.senty.view.screen.gift.list.model.GiftListUiModel
 
 sealed interface GiftContact {
     data class State(
         val isLoading: Boolean = true,
-        val gifts: List<GiftUiModel> = emptyList(),
+        val gifts: List<GiftListUiModel> = emptyList(),
     )
 
     sealed interface Event {

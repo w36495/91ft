@@ -53,7 +53,7 @@ import com.w36495.senty.R
 import com.w36495.senty.view.component.LoadingCircleIndicator
 import com.w36495.senty.view.component.SentyAsyncImage
 import com.w36495.senty.view.screen.gift.list.contact.GiftContact
-import com.w36495.senty.view.screen.gift.list.contact.GiftListUiModel
+import com.w36495.senty.view.screen.gift.list.model.GiftListUiModel
 import com.w36495.senty.view.screen.gift.list.model.GiftTabType
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.theme.SentyGray10
