@@ -7,7 +7,6 @@ import com.w36495.senty.data.mapper.toDomain
 import com.w36495.senty.data.mapper.toEntity
 import com.w36495.senty.data.remote.service.GiftService
 import com.w36495.senty.domain.entity.Gift
-import com.w36495.senty.domain.repository.GiftImgRepository
 import com.w36495.senty.domain.repository.GiftRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +20,6 @@ import javax.inject.Inject
 class GiftRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val giftService: GiftService,
-    private val giftImgRepository: GiftImgRepository,
 ) : GiftRepository {
     private var userId = firebaseAuth.currentUser!!.uid
     private val _gifts = MutableStateFlow<List<Gift>>(emptyList())
@@ -61,6 +59,7 @@ class GiftRepositoryImpl @Inject constructor(
 
     override suspend fun fetchGifts(): Result<Unit> {
         return try {
+            Log.d("GiftRepo","🟢 선물 조회 시작")
             val response = giftService.fetchGifts(userId)
 
             if (response.isSuccessful) {
@@ -72,6 +71,7 @@ class GiftRepositoryImpl @Inject constructor(
                         Json.decodeFromJsonElement<GiftEntity>(jsonElement).toDomain(key)
                     }.toList()
 
+                    Log.d("GiftRepo","🟢 선물 조회 완료")
                     _gifts.update { gifts }
                     Result.success(Unit)
                 } else Result.success(Unit)
@@ -87,30 +87,43 @@ class GiftRepositoryImpl @Inject constructor(
 
     override suspend fun insertGift(gift: Gift): Result<String> {
         return try {
+            Log.d("GiftRepo","🟢 선물 등록 시작")
             val response = giftService.insertGift(userId, gift.toEntity())
 
             if (response.isSuccessful) {
                 val body = response.body()
 
                 if (body != null) {
-                    fetchGifts()
+                    Log.d("GiftRepo","🟢 선물 등록 완료")
                     Result.success(body.key)
-                } else Result.failure(Exception("선물 등록 실패"))
-            } else Result.failure(Exception("선물 등록 실패"))
+                } else {
+                    Log.d("GiftRepo","🔴 선물 등록 실패")
+                    Result.failure(Exception("선물 등록 실패"))
+                }
+            } else {
+                Log.d("GiftRepo","🔴 선물 등록 실패")
+                Result.failure(Exception("선물 등록 실패"))
+            }
         } catch (e: Exception) {
+            Log.d("GiftRepo","🔴 선물 등록 실패")
             Result.failure(e)
         }
     }
 
     override suspend fun updateGift(gift: Gift): Result<Unit> {
         return try {
+            Log.d("GiftRepo","🟢 선물 수정 시작")
             val response = giftService.patchGift(userId, gift.id, gift.copy(createdAt = gift.createdAt, updatedAt = System.currentTimeMillis()).toEntity())
 
             if (response.isSuccessful) {
-                fetchGifts()
+                Log.d("GiftRepo","🟢 선물 수정 완료")
                 Result.success(Unit)
-            } else Result.failure(Exception("선물 수정 실패"))
+            } else {
+                Log.d("GiftRepo","🔴 선물 수정 실패")
+                Result.failure(Exception("선물 수정 실패"))
+            }
         } catch (e: Exception) {
+            Log.d("GiftRepo","🔴 선물 수정 실패")
             Result.failure(e)
         }
     }

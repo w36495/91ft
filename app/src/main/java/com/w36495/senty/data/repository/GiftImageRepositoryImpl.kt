@@ -21,30 +21,30 @@ class GiftImageRepositoryImpl @Inject constructor(
 
     override suspend fun getGiftThumbs(giftId: String, imageName: String): Result<String> {
         return try {
-            Log.d("GiftImgRepo", "\n🎁 선물 썸네일 가져오는 중...")
+            Log.d("GiftImgRepo(getGiftThumbs)", "\n🎁 선물 썸네일 가져오는 중...")
             val imgPath = "images/gifts/$userId/$giftId/${imageName.plus(".jpg")}"
 
             val ref = firebaseStorage.reference.child(imgPath)
 
             val downloadUrl = ref.downloadUrl.await().toString()
-            Log.d("GiftImgRepo", "\uD83C\uDF81 선물 썸네일 다운로드 완료!")
+            Log.d("GiftImgRepo(getGiftThumbs)", "\uD83C\uDF81 선물 썸네일 다운로드 완료!")
             Result.success(downloadUrl)
         } catch (e: Exception) {
-            Log.d("GiftImgRepo", e.stackTraceToString())
+            Log.d("GiftImgRepo(getGiftThumbs)", e.stackTraceToString())
             Result.failure(e)
         }
     }
 
     override suspend fun getGiftImages(giftId: String): Result<List<String>> {
         return try {
-            Log.d("GiftImgRepo", "\n🎁 선물 이미지 가져오는 중...")
+            Log.d("GiftImgRepo(getGiftImages)", "\n🎁 선물 이미지 가져오는 중...")
             val imgPath = "images/gifts/$userId/$giftId"
 
             val imgResult = firebaseStorage.reference.child(imgPath).listAll().await()
             val imagesWithoutThumbs = imgResult.items.filter { !it.name.contains("thumbs_") }
 
             val itemCount = imgResult.items.size
-            Log.d("GiftImgRepo", "📸 다운로드할 이미지 개수: $itemCount")
+            Log.d("GiftImgRepo(getGiftImages)", "📸 다운로드할 이미지 개수: $itemCount")
 
             val downloadUrls = coroutineScope {
                 imagesWithoutThumbs
@@ -54,10 +54,10 @@ class GiftImageRepositoryImpl @Inject constructor(
                     }.awaitAll()
             }
             val end = System.currentTimeMillis()
-            Log.d("GiftImgRepo", "\uD83C\uDF81 선물 이미지 다운로드 완료!")
+            Log.d("GiftImgRepo(getGiftImages)", "\uD83C\uDF81 선물 이미지 다운로드 완료!")
             Result.success(downloadUrls.toList())
         } catch (e: Exception) {
-            Log.d("GiftImgRepo", e.stackTraceToString())
+            Log.d("GiftImgRepo(getGiftImages)", e.stackTraceToString())
             Result.failure(e)
         }
     }
@@ -68,7 +68,7 @@ class GiftImageRepositoryImpl @Inject constructor(
         image: ByteArray
     ): Result<Unit> {
         return suspendCancellableCoroutine { cont ->
-
+            Log.d("GiftImage","🟢 ${if (imageName.contains("thumbs")) "썸네일" else "이미지"} 저장 시작" )
             val giftImagePath = "images/gifts/$userId/$giftId/$imageName.jpg"
 
             val uploadTask = firebaseStorage.reference
@@ -78,9 +78,10 @@ class GiftImageRepositoryImpl @Inject constructor(
             uploadTask
                 .addOnSuccessListener { task ->
                     if (task.task.isSuccessful) {
-                        Log.d("GiftImgRepo", "이미지 등록 성공")
+                        Log.d("GiftImage","🟢 ${if (imageName.contains("thumbs")) "썸네일" else "이미지"} 저장 완료" )
                         cont.resume(Result.success(Unit))
                     } else {
+                        Log.d("GiftImage","🔴 ${if (imageName.contains("thumbs")) "썸네일" else "이미지"} 저장 실패" )
                         cont.resume(Result.failure(task.error ?: Exception("Unknown error")))
                     }
                 }
@@ -89,12 +90,15 @@ class GiftImageRepositoryImpl @Inject constructor(
 
     override suspend fun deleteGiftImage(giftId: String, imgPath: String): Result<Unit> {
         return try {
-            val imagePath = "images/gifts/$userId/$giftId/$imgPath"
+            Log.d("GiftImage","🟢 이미지 삭제 시작" )
+            val imagePath = "images/gifts/$userId/$giftId/$imgPath.jpg"
             firebaseStorage.reference.child(imagePath).delete().await()
 
+            Log.d("GiftImage","🟢 이미지 삭제 완료" )
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.d("GiftImageRepo", e.stackTraceToString())
+            Log.d("GiftImage","🔴 이미지 삭제 실패" )
+            Log.d("GiftImageRepo(delete)", e.stackTraceToString())
             Result.failure(e)
         }
     }
@@ -107,7 +111,7 @@ class GiftImageRepositoryImpl @Inject constructor(
             val allItems = giftDirRef.listAll().await() // 모든 이미지 참조 가져오기
 
             if (allItems.items.isEmpty()) {
-                Log.d("GiftImageRepo", "삭제할 이미지가 존재하지 않음")
+                Log.d("GiftImageRepo(deleteAll)", "삭제할 이미지가 존재하지 않음")
                 return Result.success(Unit)
             }
 
@@ -121,7 +125,7 @@ class GiftImageRepositoryImpl @Inject constructor(
 
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.w("GiftImageRepo", "전체 이미지 삭제 실패", e)
+            Log.w("GiftImageRepo(deleteAll)", "전체 이미지 삭제 실패", e)
             Result.failure(e)
         }
     }
