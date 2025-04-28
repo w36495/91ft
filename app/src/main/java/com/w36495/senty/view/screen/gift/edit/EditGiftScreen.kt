@@ -84,8 +84,10 @@ import com.w36495.senty.view.screen.friend.model.FriendUiModel
 import com.w36495.senty.view.screen.gift.category.GiftCategorySelectionDialog
 import com.w36495.senty.view.screen.gift.category.model.GiftCategoryUiModel
 import com.w36495.senty.view.screen.gift.edit.contact.EditGiftContact
+import com.w36495.senty.view.screen.gift.edit.model.EditGiftUiModel
+import com.w36495.senty.view.screen.gift.edit.model.EditImage
 import com.w36495.senty.view.screen.gift.edit.model.ImageSelectionType
-import com.w36495.senty.view.screen.gift.model.GiftUiModel
+import com.w36495.senty.view.screen.gift.edit.model.getImageData
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
 import com.w36495.senty.view.ui.component.dialogs.BasicCalendarDialog
@@ -216,7 +218,7 @@ private fun EditGiftScreen(
     modifier: Modifier = Modifier,
     uiState: EditGiftContact.State,
     isEditMode: Boolean,
-    onRemoveImageClick: (Int) -> Unit,
+    onRemoveImageClick: (String) -> Unit,
     onPressedBack: () -> Unit,
     onClickSave: () -> Unit,
     onClickImageAdd: () -> Unit,
@@ -271,7 +273,7 @@ private fun EditGiftScreen(
             ) {
                 ImgSection(
                     modifier = Modifier.fillMaxWidth(),
-                    giftImages = uiState.images,
+                    giftImages = uiState.gift.images.toList(),
                     onRemoveImageClick = onRemoveImageClick,
                     onAddImageClick = { onClickImageAdd() }
                 )
@@ -338,8 +340,8 @@ private fun EditGiftScreen(
 @Composable
 private fun ImgSection(
     modifier: Modifier = Modifier,
-    giftImages: List<Any>,
-    onRemoveImageClick: (Int) -> Unit,
+    giftImages: List<Pair<String, EditImage>>,
+    onRemoveImageClick: (String) -> Unit,
     onAddImageClick: () -> Unit,
 ) {
     LazyRow(
@@ -349,12 +351,12 @@ private fun ImgSection(
     ) {
         if (giftImages.isNotEmpty()) {
             itemsIndexed(giftImages) { index, image ->
+                val (imageName, imagePath) = image
+
                 DisplayGiftImage(
                     modifier = Modifier.fillMaxWidth(),
-                    giftImage = image,
-                    onRemoveImageClick = {
-                        onRemoveImageClick(index)
-                    }
+                    giftImage = imagePath,
+                    onRemoveImageClick = { onRemoveImageClick(imageName) }
                 )
 
                 if (index < giftImages.lastIndex) {
@@ -382,10 +384,10 @@ private fun ImgSection(
 @Composable
 private fun DisplayGiftImage(
     modifier: Modifier = Modifier,
-    giftImage: Any,
+    giftImage: EditImage,
     onRemoveImageClick: () -> Unit,
 ) {
-    val context = LocalContext.current
+    val imageData = giftImage.getImageData()
 
     Box(
         modifier = modifier.aspectRatio(1f)
@@ -474,7 +476,7 @@ private fun AddGiftImage(
 @Composable
 private fun InputSection(
     modifier: Modifier = Modifier,
-    gift: GiftUiModel,
+    gift: EditGiftUiModel,
     isEditMode: Boolean,
     isErrorGiftCategory: Boolean,
     isErrorFriend: Boolean,

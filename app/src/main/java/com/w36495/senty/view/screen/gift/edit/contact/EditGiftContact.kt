@@ -1,17 +1,16 @@
 package com.w36495.senty.view.screen.gift.edit.contact
 
+import android.net.Uri
 import com.w36495.senty.data.domain.GiftType
 import com.w36495.senty.view.screen.friend.model.FriendUiModel
 import com.w36495.senty.view.screen.gift.category.model.GiftCategoryUiModel
+import com.w36495.senty.view.screen.gift.edit.model.EditGiftUiModel
 import com.w36495.senty.view.screen.gift.edit.model.ImageSelectionType
-import com.w36495.senty.view.screen.gift.model.GiftUiModel
 
 sealed interface EditGiftContact {
     data class State(
         val isLoading: Boolean = false,
-        val gift: GiftUiModel = GiftUiModel(),
-        val images: List<Any> = emptyList(),
-        val originalImages: List<String> = emptyList(),
+        val gift: EditGiftUiModel = EditGiftUiModel(),
         val isErrorGiftCategory: Boolean = false,
         val isErrorFriend: Boolean = false,
         val isErrorDate: Boolean = false,
@@ -38,8 +37,8 @@ sealed interface EditGiftContact {
         data class OnSelectDate(val date: String?) : Event
         data class UpdateMood(val mood: String) : Event
         data class UpdateMemo(val memo: String) : Event
-        data class UpdateImage(val image: Any) : Event
-        data class RemoveImage(val index: Int) : Event
+        data class UpdateImage(val image: Uri) : Event
+        data class RemoveImage(val imageName: String) : Event
     }
 
     sealed interface Effect {
