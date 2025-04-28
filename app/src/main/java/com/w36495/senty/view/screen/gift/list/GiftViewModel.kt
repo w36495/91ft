@@ -3,13 +3,13 @@ package com.w36495.senty.view.screen.gift.list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.w36495.senty.data.domain.GiftType
-import com.w36495.senty.data.mapper.toUiModel
-import com.w36495.senty.domain.repository.GiftImgRepository
 import com.w36495.senty.data.mapper.toGiftListUiModel
+import com.w36495.senty.domain.repository.GiftImageRepository
 import com.w36495.senty.domain.repository.GiftRepository
 import com.w36495.senty.view.screen.gift.list.contact.GiftContact
 import com.w36495.senty.view.screen.gift.list.model.GiftTabType
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
@@ -28,13 +28,15 @@ import javax.inject.Inject
 @HiltViewModel
 class GiftViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
-    private val giftImageRepository: GiftImgRepository,
+    private val giftImageRepository: GiftImageRepository,
 ) : ViewModel() {
+    private val thumbnailCache = mutableMapOf<Pair<String, String>, String>()
     private val _selectedTab = MutableStateFlow(GiftTabType.ALL)
 
     private val _effect = Channel<GiftContact.Effect>()
     val effect = _effect.receiveAsFlow()
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     val state = combine(
         giftRepository.gifts,
         _selectedTab
@@ -52,17 +54,28 @@ class GiftViewModel @Inject constructor(
     }
         .flatMapLatest { uiList ->
             flow {
-                emit(GiftContact.State(isLoading = true))            // 로딩 상태 emit
                 // 이미지까지 붙여 준 뒤
                 val enriched = coroutineScope {
                     uiList.map { gift ->
                         async {
-                            giftImageRepository.getGiftImages(gift.id)
-                                .map { imgs -> gift.copy(images = imgs) }
-                                .getOrElse { gift }
+                            gift.thumbnailName?.let { thumbnailName ->
+                                val cached = thumbnailCache[gift.id to thumbnailName]
+                                if (cached != null) {
+                                    gift.copy(thumbnailPath = cached)
+                                } else {
+                                    giftImageRepository.getGiftThumbs(gift.id, thumbnailName)
+                                        .map { path ->
+                                            thumbnailCache[gift.id to thumbnailName] = path
+                                            gift.copy(thumbnailPath = path)
+                                        }
+                                        .getOrElse { gift }
+                                }
+                            } ?: gift
+
                         }
                     }.awaitAll()
                 }
+
                 emit(
                     GiftContact.State(
                         isLoading = false,
