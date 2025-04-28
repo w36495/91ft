@@ -1,26 +1,25 @@
 package com.w36495.senty.view.screen.gift.edit
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.ImageDecoder
 import android.net.Uri
-import android.os.Build
-import android.provider.MediaStore
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.w36495.senty.data.domain.GiftType
 import com.w36495.senty.data.mapper.toDomain
-import com.w36495.senty.data.mapper.toUiModel
+import com.w36495.senty.data.mapper.toEditUiModel
 import com.w36495.senty.domain.repository.FriendRepository
-import com.w36495.senty.domain.repository.GiftImgRepository
+import com.w36495.senty.domain.repository.GiftImageRepository
 import com.w36495.senty.domain.repository.GiftRepository
-import com.w36495.senty.util.ImgConverter
+import com.w36495.senty.util.ImageConverter
+import com.w36495.senty.util.toLinkedMap
 import com.w36495.senty.view.screen.gift.edit.contact.EditGiftContact
+import com.w36495.senty.view.screen.gift.edit.model.EditImage
 import com.w36495.senty.view.screen.gift.edit.model.ImageSelectionType
-import com.w36495.senty.view.screen.gift.model.GiftUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
@@ -30,13 +29,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class EditGiftViewModel @Inject constructor(
     private val friendRepository: FriendRepository,
     private val giftRepository: GiftRepository,
-    private val giftImgRepository: GiftImgRepository,
+    private val giftImageRepository: GiftImageRepository,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
     private val _effect = Channel<EditGiftContact.Effect>()
@@ -53,12 +53,12 @@ class EditGiftViewModel @Inject constructor(
             EditGiftContact.Event.OnClickSave -> {
                 if (!validateInputForm()) return
 
-                saveGift(state.value.gift, state.value.images)
+                saveGift()
             }
             EditGiftContact.Event.OnClickEdit -> {
                 if (!validateInputForm()) return
 
-                updateGift(state.value.gift, state.value.images)
+                updateGift()
             }
             EditGiftContact.Event.OnClickImageAdd -> {
                 viewModelScope.launch {
@@ -214,14 +214,18 @@ class EditGiftViewModel @Inject constructor(
                 }
             }
             is EditGiftContact.Event.UpdateImage -> {
-                setGiftImg(event.image)
+                uploadImage(event.image)
             }
             is EditGiftContact.Event.RemoveImage -> {
                 viewModelScope.launch {
                     _state.update { state ->
                         state.copy(
-                            gift = state.gift.copy(hasImages = state.images.isNotEmpty()),
-                            images = state.images.minus(state.images[event.index]).toList(),
+                            gift = state.gift.copy(
+                                images = state.gift.images
+                                    .toMutableMap()
+                                    .apply { remove(event.imageName) }
+                                    .toLinkedMap()
+                            ),
                         )
                     }
                 }
@@ -234,24 +238,39 @@ class EditGiftViewModel @Inject constructor(
             _state.update { it.copy(isLoading = true) }
 
             val giftResult = giftRepository.getGift(giftId)
-            val imgResult = giftImgRepository.getGiftImages(giftId)
 
-            giftResult.onSuccess { gift ->
-                _state.update { it.copy(gift = gift.toUiModel()) }
-            }
+            giftResult
+                .onSuccess { gift ->
+                    // 이미지 가져오기
+                    if (gift.images.isNotEmpty()) {
+                        giftImageRepository.getGiftImages(giftId)
+                            .onSuccess { imagePaths ->
+                                val originalImagePaths = linkedMapOf<String, EditImage>().apply {
+                                    imagePaths
+                                        .map { path ->
+                                            val key = path.substringAfterLast("%2F").substringBefore(".jpg?")
+                                            key to EditImage.Original(path)
+                                        }
+                                        .sortedBy { (key, _) -> key } // 필요 시 정렬
+                                        .forEach { (key, image) -> this[key] = image }
+                                }
 
-            imgResult
-                .onSuccess { imgPaths ->
-                    val sortedPaths = imgPaths.sortedBy {
-                        it.substringAfterLast("%2F").substringBefore("?")
-                    }
-
-                    _state.update { state ->
-                        state.copy(
-                            isLoading = false,
-                            images = sortedPaths,
-                            originalImages = imgPaths,
-                        )
+                                _state.update { state ->
+                                    state.copy(
+                                        isLoading = false,
+                                        gift = gift
+                                            .toEditUiModel()
+                                            .copy(images = originalImagePaths)
+                                    )
+                                }
+                            }
+                    } else {
+                        _state.update { state ->
+                            state.copy(
+                                isLoading = false,
+                                gift = gift.toEditUiModel()
+                            )
+                        }
                     }
                 }
                 .onFailure {
@@ -271,36 +290,22 @@ class EditGiftViewModel @Inject constructor(
         }
     }
 
-    private fun setGiftImg(img: Any) {
-        if (img is Uri) {
-            val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                ImageDecoder.decodeBitmap(
-                    ImageDecoder.createSource(context.contentResolver, img)
-                )
-            } else {
-                MediaStore.Images.Media.getBitmap(context.contentResolver, img)
+    private fun uploadImage(image: Uri) {
+        val bitmap = ImageConverter.uriToBitmap(context, image)
+        val resizedBitmap = ImageConverter.resizeToWidth(context, bitmap)
+
+        val imageName = System.currentTimeMillis().toString()
+
+        _state.update { state ->
+            val updatedImages = state.gift.images.toMutableMap().apply {
+                this[imageName] = EditImage.New(resizedBitmap)
             }
 
-            val formattedGiftImg = ImgConverter.bitmapToByteArray(bitmap)
-            viewModelScope.launch {
-                _state.update { state ->
-                    state.copy(
-                        gift = state.gift.copy(hasImages = true),
-                        images = state.images.plus(formattedGiftImg).toList()
-                    )
-                }
-            }
-        } else if (img is Bitmap) {
-            val formattedGiftImg = ImgConverter.bitmapToByteArray(img)
-
-            viewModelScope.launch {
-                _state.update { state ->
-                    state.copy(
-                        gift = state.gift.copy(hasImages = true),
-                        images = state.images.plus(formattedGiftImg).toList()
-                    )
-                }
-            }
+            state.copy(
+                gift = state.gift.copy(
+                    images = LinkedHashMap(updatedImages),
+                ),
+            )
         }
     }
 
@@ -322,36 +327,100 @@ class EditGiftViewModel @Inject constructor(
         return !(friendError || categoryError || dateError)
     }
 
-    private fun updateGift(gift: GiftUiModel, images: List<Any>) {
+    private fun updateGift() {
         viewModelScope.launch {
-            val result = giftRepository.updateGift(
-                gift.copy(hasImages = images.isNotEmpty()).toDomain())
+            Log.d("EditGiftVM","🟢 선물 수정 시작")
+            _state.update { it.copy(isLoading = true) }
+
+            val updateGift = state.value.gift
+
+            val result = giftRepository.updateGift(updateGift.copy(
+                thumbnail = updateGift.images.entries.firstOrNull()?.let {
+                    if (it.value is EditImage.New) {
+                        "thumbs_${it.key}"
+                    } else {
+                        // 기존 썸네일과 같다면
+                        if (updateGift.thumbnail?.contains(it.key) == true) {
+                            updateGift.thumbnail
+                        } else {
+                            "thumbs_${it.key}"
+                        }
+                    }
+                }
+            ).toDomain())
 
             result
                 .onSuccess {
-                    if (images.isNotEmpty()) {
+                    if (updateGift.images.isNotEmpty()) {
                         // 새로운 이미지 저장
-                        images
-                            .filterIsInstance<ByteArray>()
-                            .map { image ->
-                                async { giftImgRepository.insertGiftImageByBitmap(gift.id, image) }
-                            }.awaitAll()
-
-                        // 기존 이미지 삭제
-                        val deleteTargets = state.value.originalImages
-                            .filterNot { originalImg -> images.contains(originalImg) }
-
                         coroutineScope {
-                            deleteTargets.map { originalImage ->
-                                val path = originalImage
-                                    .substringAfterLast("/") // 전체 경로에서 마지막 segment 추출
-                                    .substringBefore("?") // 쿼리 제거
-                                    .substringAfterLast("%2F") // Firebase Storage 경로 추출
+                            val resultJobs = mutableListOf<Deferred<Result<Unit>>>()
 
-                                async { giftImgRepository.deleteGiftImage(gift.id, path) }
+                            val (firstImageName, firstImage) = updateGift.images.entries.first()
+
+                            // 새로운 썸네일
+                            if (firstImage is EditImage.New) {
+                                resultJobs += async {
+                                    val resizedThumbnail = ImageConverter.resizeToWidth(context, firstImage.bitmap, 600)
+                                    val webPThumbnail = ImageConverter.compressToWebP(resizedThumbnail)
+
+                                    giftImageRepository.insertGiftImageByBitmap(updateGift.id, "thumbs_$firstImageName", webPThumbnail)
+                                }
+                            } else {
+                                val sameThumbnail = updateGift.thumbnail?.contains(firstImageName) == true
+
+                                if (!sameThumbnail) {
+                                    val bitmap = withContext(Dispatchers.IO) {
+                                        ImageConverter.urlToBitmap((firstImage as EditImage.Original).path)
+                                    }
+
+                                    if (bitmap != null) {
+                                        resultJobs += async {
+                                            Log.d("EditGiftVM","🟢 새로운 썸네일 저장 시작")
+                                            val newResizedThumbnail = ImageConverter.resizeToWidth(context, bitmap, 600)
+                                            val newThumbnail = ImageConverter.compressToWebP(newResizedThumbnail)
+
+                                            giftImageRepository.insertGiftImageByBitmap(updateGift.id, "thumbs_$firstImageName", newThumbnail)
+                                        }
+
+                                        resultJobs += async {
+                                            Log.d("EditGiftVM","🟢 기존 썸네일 삭제 시작")
+                                            giftImageRepository.deleteGiftImage(updateGift.id, "thumbs_${updateGift.originalImages.first()}")
+                                        }
+                                    }
+                                }
                             }
-                        }.awaitAll()
+
+                            // 새로운 이미지 저장
+                            updateGift.images.map { (imageName, image) ->
+                                if (image is EditImage.New) {
+                                    resultJobs += async {
+                                        val webPImage = ImageConverter.compressToWebP(image.bitmap)
+                                        giftImageRepository.insertGiftImageByBitmap(updateGift.id, imageName, webPImage)
+                                    }
+                                }
+                            }
+
+                            // 삭제해야 할 이미지
+                            val deleteImages = updateGift.originalImages.filterNot { it in updateGift.images.keys.toList() }
+
+                            deleteImages.map { deleteImageName ->
+                                resultJobs += async {
+                                    giftImageRepository.deleteGiftImage(updateGift.id, deleteImageName)
+                                }
+                            }
+
+                            resultJobs.awaitAll()
+                        }
+                    } else {
+                        // 기존 이미지를 모두 삭제햇다면
+                        if (updateGift.originalImages.isNotEmpty()) {
+                            giftImageRepository.deleteAllGiftImage(updateGift.id)
+                        }
                     }
+
+                    giftRepository.fetchGifts()
+                    Log.d("EditGiftVM","🟢 선물 수정 완료")
                     _state.update { state -> state.copy(isLoading = false) }
                     sendEffect(EditGiftContact.Effect.ShowToast("수정이 완료되었습니다."))
                 }
@@ -363,45 +432,71 @@ class EditGiftViewModel @Inject constructor(
         }
     }
 
-    private fun saveGift(gift: GiftUiModel, images: List<Any>) {
+    private fun saveGift() {
         viewModelScope.launch {
+            Log.d("EditGiftVM","🟢 선물 저장 시작")
             _state.update { it.copy(isLoading = true) }
 
-            val giftInsertResult = giftRepository.insertGift(gift.toDomain())
-            giftInsertResult
+            val gift = state.value.gift
+            val result = giftRepository.insertGift(gift.copy(
+                thumbnail = if (gift.images.entries.firstOrNull() != null) {
+                    "thumbs_${gift.images.entries.first().key}"
+                } else null
+            ).toDomain())
+
+            result
                 .onSuccess { giftId ->
-                    if (images.isEmpty()) {
-                        _state.update {
-                            it.copy(isLoading = false)
-                        }
-                        setGiftImg(EditGiftContact.Effect.ShowToast("등록 완료되었습니다."))
-                    } else {
-                        images
-                            .filterIsInstance<ByteArray>()
-                            .map { image ->
-                                async { giftImgRepository.insertGiftImageByBitmap(giftId, image) }
-                            }.awaitAll()
+                    if (gift.images.isNotEmpty()) {
+                        coroutineScope {
+                            val resultJobs = mutableListOf<Deferred<Result<Unit>>>()
+                            // 썸네일 저장
+                            val (thumbnailName, thumbnailBitmap) = gift.images.entries.first()
+                            if (thumbnailBitmap is EditImage.New) {
+                                resultJobs += async {
+                                    val resizedThumbnail = ImageConverter.resizeToWidth(context, thumbnailBitmap.bitmap, 600)
+                                    val webPThumbnail = ImageConverter.compressToWebP(resizedThumbnail)
 
-                        _state.update {
-                            it.copy(isLoading = false)
-                        }
-                        sendEffect(EditGiftContact.Effect.ShowToast("등록 완료되었습니다."))
-                    }
-
-                    launch {
-                        friendRepository.getFriend(gift.friendId)
-                            .onSuccess {
-                                friendRepository.patchFriend(
-                                    it.copy(
-                                        received = if (gift.type == GiftType.RECEIVED) it.received + 1 else it.received,
-                                        sent = if (gift.type == GiftType.SENT) it.sent + 1 else it.sent
-                                    )
-                                )
+                                    giftImageRepository.insertGiftImageByBitmap(giftId, "thumbs_$thumbnailName", webPThumbnail)
+                                }
                             }
+
+                            // 이미지 저장
+                            resultJobs += gift.images.mapNotNull { (imageName, image) ->
+                                if (image is EditImage.New) {
+                                    async {
+                                        val webPImage = ImageConverter.compressToWebP(image.bitmap)
+                                        giftImageRepository.insertGiftImageByBitmap(giftId, imageName, webPImage)
+                                    }
+                                } else null
+                            }
+
+                            resultJobs.awaitAll()
+                        }
                     }
+
+                    _state.update {
+                        it.copy(isLoading = false)
+                    }
+                    Log.d("EditGiftVM","🟢 선물 저장 완료")
+
+                    sendEffect(EditGiftContact.Effect.ShowToast("등록 완료되었습니다."))
+
+                    friendRepository.getFriend(state.value.gift.friendId)
+                        .onSuccess {
+                            Log.d("EditGiftVM","🟢 친구 정보 수정 시작")
+                            friendRepository.patchFriend(
+                                it.copy(
+                                    received = if (state.value.gift.type == GiftType.RECEIVED) it.received + 1 else it.received,
+                                    sent = if (state.value.gift.type == GiftType.SENT) it.sent + 1 else it.sent
+                                )
+                            ).onSuccess {
+                                Log.d("EditGiftVM","🟢 친구 정보 수정 완료")
+                            }
+                        }
                 }
                 .onFailure {
-                    Log.d("EditGiftMV", "선물 등록 실패 : ${it.stackTraceToString()}")
+                    Log.d("EditGiftVM","🔴 선물 저장 실패" )
+
                     _state.update { it.copy(isLoading = false) }
                     sendEffect(EditGiftContact.Effect.ShowError("선물 등록에 실패하였습니다."))
                 }
