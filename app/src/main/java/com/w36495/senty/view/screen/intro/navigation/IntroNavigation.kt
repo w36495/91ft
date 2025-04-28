@@ -11,7 +11,6 @@ import com.w36495.senty.view.screen.main.Route
 
 fun NavGraphBuilder.introNavGraph(
     navController: NavController,
-    moveToHome: () -> Unit,
 ) {
     composable<Route.Intro> {
         IntroRoute(

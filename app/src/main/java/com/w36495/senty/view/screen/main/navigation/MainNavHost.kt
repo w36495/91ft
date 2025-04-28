@@ -23,7 +23,6 @@ fun MainNavHost(
     ) {
         introNavGraph(
             navController = navigator.navController,
-            moveToHome = { navigator.navigate(MainBottomTab.HOME) }
         )
 
         authNavGraph(
