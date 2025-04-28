@@ -10,8 +10,8 @@ import com.w36495.senty.view.screen.login.LoginRoute
 import com.w36495.senty.view.screen.main.Route
 import com.w36495.senty.view.screen.signup.SignUpRoute
 
-fun NavController.navigateToLogin() {
-    navigate(Route.Login)
+fun NavController.navigateToLogin(navOptions: NavOptions? = null) {
+    navigate(Route.Login, navOptions)
 }
 fun NavController.navigateToSignUp() {
     navigate(Route.SignUp)
