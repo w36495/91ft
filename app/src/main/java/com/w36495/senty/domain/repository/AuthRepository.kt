@@ -6,7 +6,7 @@ import com.w36495.senty.domain.entity.AuthUser
 import com.w36495.senty.domain.entity.LoginType
 
 interface AuthRepository {
-    suspend fun checkLoginState(): Result<Boolean>
+    suspend fun checkLoginState(): Result<AuthUser?>
     suspend fun signUpWithEmail(email: String, password: String): Result<Unit>
     suspend fun signInWithEmail(email: String, password: String): Result<FirebaseUser?>
     suspend fun signInWithGoogle(idToken: String): Result<FirebaseUser?>

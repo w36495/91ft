@@ -17,11 +17,24 @@ class AuthRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     @Named("kakao") private val kakaoAuthManager: SnsAuthManager,
 ) : AuthRepository {
-    override suspend fun checkLoginState(): Result<Boolean> {
+    override suspend fun checkLoginState(): Result<AuthUser?> {
         return try {
             val result = firebaseAuth.currentUser
 
-            Result.success(result != null)
+            result?.let { user ->
+                val loginProvider = user.providerData.filter { it.providerId != "firebase" }.first()
+
+                val loginType = when (loginProvider.providerId) {
+                    "password" -> LoginType.EMAIL
+                    "google.com" -> LoginType.GOOGLE
+                    else -> null
+                }
+
+                loginType?.let {
+                    Result.success(AuthUser(user.uid, it))
+                } ?: Result.success(null)
+
+            } ?: Result.success(null)
         } catch (e: Exception) {
             Result.failure(e)
         }
