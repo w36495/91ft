@@ -1,6 +1,7 @@
 package com.w36495.senty.view.screen.gift.category
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -20,10 +21,12 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -36,6 +39,7 @@ import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.dialogs.BasicAlertDialog
 import com.w36495.senty.view.ui.component.lists.SwipeListItem
 import com.w36495.senty.view.ui.theme.SentyGray20
+import com.w36495.senty.view.ui.theme.SentyGray60
 import com.w36495.senty.view.ui.theme.SentyWhite
 
 @Composable
@@ -120,21 +124,37 @@ private fun GiftCategoriesScreen(
                 .padding(innerPadding)
                 .fillMaxSize(),
         ) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(uiState.categories) { category ->
-                    SwipeListItem(
-                        category = category,
-                        onRemove = { onClickRemove(category) },
-                        onEdit = { onClickEdit(category) }
+            if (uiState.categories.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color(0xFFFBFBFB)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.gift_categories_empty_text),
+                        textAlign = TextAlign.Center,
+                        style = SentyTheme.typography.labelMedium.copy(color = SentyGray60),
+                        modifier = Modifier.padding(top = 8.dp),
                     )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(uiState.categories) { category ->
+                        SwipeListItem(
+                            category = category,
+                            onRemove = { onClickRemove(category) },
+                            onEdit = { onClickEdit(category) }
+                        )
 
-                    HorizontalDivider(
-                        color = SentyGray20,
-                        thickness = 0.5.dp,
-                        modifier = Modifier.padding(horizontal = 4.dp),
-                    )
+                        HorizontalDivider(
+                            color = SentyGray20,
+                            thickness = 0.5.dp,
+                            modifier = Modifier.padding(horizontal = 4.dp),
+                        )
+                    }
                 }
             }
 

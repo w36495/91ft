@@ -50,6 +50,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -62,6 +63,7 @@ import com.w36495.senty.view.screen.friendgroup.model.FriendGroupUiModel
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.dialogs.BasicAlertDialog
 import com.w36495.senty.view.ui.theme.SentyGray20
+import com.w36495.senty.view.ui.theme.SentyGray60
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -150,28 +152,47 @@ private fun FriendGroupContents(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         containerColor = Color.White,
     ) { innerPadding ->
-
-        LazyColumn(
+        Box(
             modifier = Modifier
                 .padding(innerPadding)
-                .fillMaxSize(),
+                .fillMaxSize()
         ) {
-            items(
-                items = friendGroups,
-                key = { it.id },
-            ) {friendGroup ->
-                FriendGroupItem(
-                    modifier = Modifier.fillMaxWidth(),
-                    group = friendGroup,
-                    onClickDelete = onClickDelete,
-                    onClickEdit = onClickEdit,
-                )
+            if (friendGroups.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color(0xFFFBFBFB)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.friend_group_empty_text),
+                        textAlign = TextAlign.Center,
+                        style = SentyTheme.typography.labelMedium.copy(color = SentyGray60),
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    items(
+                        items = friendGroups,
+                        key = { it.id },
+                    ) {friendGroup ->
+                        FriendGroupItem(
+                            modifier = Modifier.fillMaxWidth(),
+                            group = friendGroup,
+                            onClickDelete = onClickDelete,
+                            onClickEdit = onClickEdit,
+                        )
 
-                HorizontalDivider(
-                    color = SentyGray20,
-                    thickness = 0.5.dp,
-                    modifier = Modifier.padding(horizontal = 4.dp),
-                )
+                        HorizontalDivider(
+                            color = SentyGray20,
+                            thickness = 0.5.dp,
+                            modifier = Modifier.padding(horizontal = 4.dp),
+                        )
+                    }
+                }
             }
         }
     }

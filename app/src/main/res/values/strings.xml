@@ -179,6 +179,8 @@
     <string name="friend_group_delete_title">그룹을 삭제하시겠습니까?</string>
     <string name="friend_group_delete_text">해당 그룹의 친구도 모두 함께 삭제되며, 삭제된 그룹은 복구가 불가능합니다.</string>
 
+    <string name="friend_group_empty_text">친구 그룹이 존재하지 않습니다.\n새로운 그룹을 등록해보세요!</string>
+
     <!-- 선물 목록 -->
     <string name="gift_title">선물 목록</string>
     <string name="gift_tab_title_all">전체</string>
@@ -234,6 +236,8 @@
 
     <string name="gift_categories_delete_title">카테고리를 삭제하시겠습니까?</string>
     <string name="gift_categories_delete_message_text">카테고리에 속해있는 선물도 모두 함께 삭제되며, 삭제된 카테고리/선물은 복구가 불가능합니다.</string>
+
+    <string name="gift_categories_empty_text">선물 카테고리가 존재하지 않습니다.\n새로운 카테고리를 등록해보세요!</string>
 
     <!-- 설정 -->
     <string name="settings_title">설정</string>
