@@ -179,15 +179,12 @@ private fun FriendGroupAddContents(
                     SentyTextField(
                         text = inputGroup,
                         onChangeText = {
-                            if (it.isEmpty()) {
-                                isError = true
-                            } else {
-                                isError = false
-
-                                inputGroup = when {
-                                    it.length <= 8 -> it
-                                    else -> inputGroup.substring(0, 8)
+                            inputGroup = when {
+                                it.length <= 8 -> {
+                                    isError = false
+                                    it
                                 }
+                                else -> inputGroup.substring(0, 8)
                             }
                         },
                         hint = stringResource(id = R.string.friend_group_name_hint_text),
@@ -207,6 +204,11 @@ private fun FriendGroupAddContents(
                         .padding(horizontal = 16.dp, vertical = 16.dp),
                     onClick = {
                         focusManager.clearFocus()
+
+                        if (inputGroup.isEmpty()) {
+                            isError = true
+                            return@SentyFilledButton
+                        }
 
                         group?.let {
                             val editFriendGroup = it.copy(name = inputGroup, color = selectedColor)

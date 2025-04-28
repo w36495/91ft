@@ -84,11 +84,12 @@ fun EditGiftCategoryDialog(
                         .padding(horizontal = 16.dp),
                     text = categoryName,
                     onChangeText = {
-                                   if (it.length <= 10) {
-                                       categoryName = it
-                                   } else {
-                                       categoryName = it.substring(0, 10)
-                                   }
+                        categoryName = if (it.length <= 10) {
+                            isError = false
+                            it
+                        } else {
+                            it.substring(0, 10)
+                        }
                     },
                     hint = "카테고리명 입력 (최대 10자)",
                     errorMsg = "카테고리명을 입력해주세요.",
