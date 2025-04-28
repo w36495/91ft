@@ -3,6 +3,7 @@ package com.w36495.senty.data.mapper
 import com.w36495.senty.data.domain.GiftEntity
 import com.w36495.senty.data.domain.GiftType
 import com.w36495.senty.domain.entity.Gift
+import com.w36495.senty.view.screen.friend.detail.model.FriendDetailGiftUiModel
 import com.w36495.senty.view.screen.gift.model.GiftUiModel
 
 fun GiftEntity.toDomain(id: String) = Gift(
@@ -45,6 +46,12 @@ fun Gift.toUiModel() = GiftUiModel(
     mood = this.mood,
     memo = this.memo,
     hasImages = this.hasImages,
+fun Gift.toFriendDetailUiModel() = FriendDetailGiftUiModel(
+    id = this.id,
+    thumbnail = this.thumbnailName,
+    hasImageCount = this.images.size,
+)
+
 )
 
 fun GiftUiModel.toDomain() = Gift(

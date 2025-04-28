@@ -1,13 +1,13 @@
 package com.w36495.senty.view.screen.friend.detail.contact
 
+import com.w36495.senty.view.screen.friend.detail.model.FriendDetailGiftUiModel
 import com.w36495.senty.view.screen.friend.model.FriendUiModel
-import com.w36495.senty.view.screen.gift.model.GiftUiModel
 
 sealed interface FriendDetailContact {
     data class State(
         val isLoading: Boolean = false,
         val friend: FriendUiModel = FriendUiModel(),
-        val gifts: List<GiftUiModel> = emptyList(),
+        val gifts: List<FriendDetailGiftUiModel> = emptyList(),
         val showDeleteDialog: Boolean = false,
     )
 

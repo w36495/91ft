@@ -41,7 +41,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -50,18 +49,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
 import com.cheonjaeung.compose.grid.SimpleGridCells
 import com.cheonjaeung.compose.grid.VerticalGrid
 import com.w36495.senty.R
-import com.w36495.senty.view.component.LoadingCircleIndicator
 import com.w36495.senty.view.component.SentyAsyncImage
 import com.w36495.senty.view.screen.friend.detail.contact.FriendDetailContact
+import com.w36495.senty.view.screen.friend.detail.model.FriendDetailGiftUiModel
 import com.w36495.senty.view.screen.friend.detail.model.FriendDetailTabType
 import com.w36495.senty.view.screen.friend.model.FriendUiModel
 import com.w36495.senty.view.screen.friendgroup.model.FriendGroupUiModel
-import com.w36495.senty.view.screen.gift.model.GiftUiModel
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
 import com.w36495.senty.view.ui.component.buttons.SentyOutlinedButton
@@ -174,9 +170,6 @@ private fun FriendUiModelContents(
             )
 
             when {
-                uiState.isLoading -> {
-                    LoadingCircleIndicator(hasBackGround = false)
-                }
                 uiState.showDeleteDialog -> {
                     BasicAlertDialog(
                         title = stringResource(id = R.string.friend_detail_delete_title),
@@ -194,7 +187,7 @@ private fun FriendUiModelContents(
 @Composable
 private fun FriendDetailViewPager(
     modifier: Modifier = Modifier,
-    gifts: List<GiftUiModel>,
+    gifts: List<FriendDetailGiftUiModel>,
     friend: FriendUiModel,
     onClickGiftDetail: (String) -> Unit,
     onClickEdit: () -> Unit,
@@ -349,7 +342,7 @@ private fun FriendInfoSection(
 @Composable
 private fun GiftSection(
     modifier: Modifier = Modifier,
-    gifts: List<GiftUiModel>,
+    gifts: List<FriendDetailGiftUiModel>,
     onClickGift: (String) -> Unit,
 ) {
     Column(
@@ -400,12 +393,12 @@ private fun GiftSection(
 @Composable
 private fun GiftItem(
     modifier: Modifier = Modifier,
-    gift: GiftUiModel,
+    gift: FriendDetailGiftUiModel,
     onClickGiftDetail: (String) -> Unit,
 ) {
     val context = LocalContext.current
 
-    if (gift.hasImages) {
+    gift.thumbnailPath?.let { path ->
         Box(
             modifier = modifier
                 .fillMaxWidth()
@@ -419,24 +412,24 @@ private fun GiftItem(
                     .aspectRatio(1f),
             )
 
-            if (gift.images.size > 1) {
+            if (gift.hasImageCount > 1) {
                 Icon(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(top = 4.dp, end = 4.dp),
                     painter = painterResource(
-                        id = if (gift.images.size == 2) {
+                        id = if (gift.hasImageCount == 2) {
                             R.drawable.ic_baseline_counter_2
                         } else {
                             R.drawable.ic_baseline_counter_3
                         }
                     ),
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurface
+                    tint = SentyWhite,
                 )
             }
         }
-    } else {
+    } ?: run {
         Box(
             modifier = modifier
                 .fillMaxWidth()
