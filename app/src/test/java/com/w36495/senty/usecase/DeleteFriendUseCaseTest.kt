@@ -27,7 +27,6 @@ class DeleteFriendUseCaseTest {
     private val useCase = DeleteFriendUseCase(
         friendRepository = friendRepository,
         giftRepository = giftRepository,
-        giftImageRepository = giftImageRepository,
         deleteGiftUseCase = deleteGiftUseCase,
     )
 

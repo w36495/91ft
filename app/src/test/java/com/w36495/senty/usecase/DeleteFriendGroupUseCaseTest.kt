@@ -29,7 +29,6 @@ class DeleteFriendGroupUseCaseTest {
     private val deleteFriendUseCase = DeleteFriendUseCase(
         friendRepository = friendRepository,
         giftRepository = giftRepository,
-        giftImageRepository = giftImageRepository,
         deleteGiftUseCase = deleteGiftUseCase,
     )
 

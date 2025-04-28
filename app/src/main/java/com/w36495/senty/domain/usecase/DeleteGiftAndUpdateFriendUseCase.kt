@@ -10,8 +10,8 @@ class DeleteGiftAndUpdateFriendUseCase @Inject constructor(
     private val friendRepository: FriendRepository,
     private val deleteGiftUseCase: DeleteGiftUseCase,
 ) {
-    suspend operator fun invoke(gift: Gift, images: List<String>): Result<Unit> {
-        return deleteGiftUseCase(gift, images)
+    suspend operator fun invoke(gift: Gift): Result<Unit> {
+        return deleteGiftUseCase(gift)
             .onSuccess {
                 val friend = friendRepository.getFriend(gift.friendId).getOrThrow()
 

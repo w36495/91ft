@@ -2,7 +2,6 @@ package com.w36495.senty.domain.usecase
 
 import com.w36495.senty.domain.entity.Friend
 import com.w36495.senty.domain.repository.FriendRepository
-import com.w36495.senty.domain.repository.GiftImgRepository
 import com.w36495.senty.domain.repository.GiftRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -12,7 +11,6 @@ import javax.inject.Inject
 class DeleteFriendUseCase @Inject constructor(
     private val friendRepository: FriendRepository,
     private val giftRepository: GiftRepository,
-    private val giftImageRepository: GiftImgRepository,
     private val deleteGiftUseCase: DeleteGiftUseCase,
 ) {
     suspend operator fun invoke(friend: Friend): Result<Unit> {
@@ -22,11 +20,7 @@ class DeleteFriendUseCase @Inject constructor(
 
                 coroutineScope {
                     gifts.map { gift ->
-                        async {
-                            val images = giftImageRepository.getGiftImages(gift.id).getOrElse { emptyList() }
-
-                            deleteGiftUseCase(gift, images)
-                        }
+                        async { deleteGiftUseCase(gift) }
                     }
                 }.awaitAll()
             }
