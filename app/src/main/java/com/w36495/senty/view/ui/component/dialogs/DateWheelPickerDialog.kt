@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.w36495.senty.view.screen.anniversary.CalendarRange
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
-import com.w36495.senty.view.ui.theme.Green40
+import com.w36495.senty.view.ui.theme.SentyGreen60
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
@@ -153,7 +153,7 @@ private fun DateWheelPicker(
     items: List<Int>,
     startIndex: Int = 0,
     visibleItemCount: Int = 5,
-    dividerColor: Color = Green40,
+    dividerColor: Color = SentyGreen60,
     dividerHorizontalPadding: Dp = 16.dp,
     onSelectedItem: @Composable (Int) -> Unit,
 ) {

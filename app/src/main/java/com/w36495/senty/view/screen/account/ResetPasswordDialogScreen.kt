@@ -1,7 +1,6 @@
 package com.w36495.senty.view.screen.account
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,15 +18,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.w36495.senty.viewModel.ResetPasswordViewModel
+import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
 import com.w36495.senty.view.ui.component.buttons.SentyOutlinedButton
 import com.w36495.senty.view.ui.component.textFields.SentyEmailTextField
+import com.w36495.senty.view.ui.theme.SentyBlack
+import com.w36495.senty.view.ui.theme.SentyGray50
+import com.w36495.senty.viewModel.ResetPasswordViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,38 +60,44 @@ fun FindPasswordDialogScreen(
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                         containerColor = Color.White
                     ),
-                    title = { Text(text = "비밀번호 재설정") })
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = "이메일",
-                        modifier = Modifier.padding(end = 16.dp)
-                    )
-                    SentyEmailTextField(
-                        text = email,
-                        hint = "",
-                        isError = hasEmailError,
-                        errorMsg = emailErrorMsg,
-                        onChangeText = {
-                            email = it
-                        }
-                    )
-                }
+                    title = {
+                        Text(
+                            text = "비밀번호 재설정",
+                            style = SentyTheme.typography.headlineSmall
+                                .copy(color = SentyBlack),
+                        )
+                    }
+                )
+                Text(
+                    text = "이메일",
+                    style = SentyTheme.typography.bodyMedium
+                        .copy(color = SentyGray50),
+                )
+
+                SentyEmailTextField(
+                    text = email,
+                    hint = "이메일을 입력해주세요",
+                    isError = hasEmailError,
+                    errorMsg = emailErrorMsg,
+                    onChangeText = {
+                        email = it
+                    }
+                )
 
                 Spacer(modifier = Modifier.height(24.dp))
+
                 SentyFilledButton(
                     text = "확인",
                     onClick = { vm.sendPasswordResetEmail(email) },
                     modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+
                 SentyOutlinedButton(
                     text = "취소",
                     onClick = { onDismiss() },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 16.dp)
+                        .padding(top = 8.dp, bottom = 16.dp)
                 )
             }
         }

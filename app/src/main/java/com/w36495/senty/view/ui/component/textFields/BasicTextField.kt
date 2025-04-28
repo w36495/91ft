@@ -1,15 +1,19 @@
 package com.w36495.senty.view.ui.component.textFields
 
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.TextUnit
-import com.w36495.senty.view.ui.theme.Green40
+import com.w36495.senty.view.screen.ui.theme.SentyTheme
+import com.w36495.senty.view.ui.theme.SentyGray50
+import com.w36495.senty.view.ui.theme.SentyGreen60
 
 @Composable
 fun SentyTextField(
@@ -21,6 +25,7 @@ fun SentyTextField(
     errorMsg: String,
     enabled: Boolean = true,
     inputType: KeyboardType = KeyboardType.Text,
+    textStyle: TextStyle = LocalTextStyle.current,
     onChangeText: (String) -> Unit,
 ) {
     TextField(
@@ -33,18 +38,22 @@ fun SentyTextField(
             onChangeText(it)
         },
         placeholder = {
-            Text(text = hint, fontSize = hintSize)
+            Text(
+                text = hint,
+                style = SentyTheme.typography.bodyMedium
+                    .copy(SentyGray50),
+            )
         },
         colors = TextFieldDefaults.colors(
             focusedContainerColor = Color.White,
             unfocusedContainerColor = Color.White,
-            unfocusedIndicatorColor = Green40,
-            focusedIndicatorColor = Green40,
+            unfocusedIndicatorColor = SentyGreen60,
+            focusedIndicatorColor = SentyGreen60,
             disabledContainerColor = Color.White,
-            disabledIndicatorColor = Green40,
+            disabledIndicatorColor = SentyGreen60,
             disabledPlaceholderColor = Color.Unspecified,
             errorContainerColor = Color.White,
-            cursorColor = Green40,
+            cursorColor = SentyGreen60,
         ),
         singleLine = true,
         maxLines = 1,
@@ -52,8 +61,12 @@ fun SentyTextField(
         readOnly = !enabled,
         supportingText = {
             if (isError) {
-                Text(text = errorMsg)
+                Text(
+                    text = errorMsg,
+                    style = SentyTheme.typography.bodySmall,
+                )
             }
         },
+        textStyle = textStyle,
     )
 }

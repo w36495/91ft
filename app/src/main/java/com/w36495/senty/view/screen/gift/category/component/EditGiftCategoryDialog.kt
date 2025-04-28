@@ -28,7 +28,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.w36495.senty.view.entity.gift.GiftCategory
 import com.w36495.senty.view.screen.gift.category.model.GiftCategoryUiModel
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
@@ -122,18 +121,6 @@ fun EditGiftCategoryDialog(
             }
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun GiftCategoryAddContents(
-    modifier: Modifier = Modifier,
-    giftCategory: GiftCategory? = null,
-    errorMsg: String = "",
-    onDismiss: () -> Unit,
-    onClickSave: (String) -> Unit,
-) {
-
 }
 
 @Preview(showBackground = true)

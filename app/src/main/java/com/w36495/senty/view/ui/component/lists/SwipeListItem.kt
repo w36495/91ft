@@ -42,7 +42,7 @@ import kotlinx.coroutines.launch
 fun SwipeListItem(
     modifier: Modifier = Modifier,
     category: GiftCategoryUiModel,
-    onRemove: (String) -> Unit,
+    onRemove: (GiftCategoryUiModel) -> Unit,
     onEdit: (GiftCategoryUiModel) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -114,7 +114,7 @@ fun SwipeListItem(
                             swipeState.animateTo(0)
                         }
 
-                        onRemove(category.id)
+                        onRemove(category)
                     },
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = Color.Red,

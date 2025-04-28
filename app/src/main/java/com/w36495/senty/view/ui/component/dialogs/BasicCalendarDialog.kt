@@ -14,6 +14,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
@@ -25,7 +29,8 @@ import com.vsnappy1.datepicker.ui.model.DatePickerConfiguration
 import com.w36495.senty.util.DateUtil
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
-import com.w36495.senty.view.ui.theme.Green40
+import com.w36495.senty.view.ui.theme.SentyGreen60
+import org.threeten.bp.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,6 +39,7 @@ fun BasicCalendarDialog(
     onSelectedDate: (Int, Int, Int) -> Unit,
 ) {
     val (year, month, day) = DateUtil.getCurrentDate().map { it.toInt() }
+    var selectedDate by remember { mutableStateOf("") }
 
     Dialog(onDismissRequest = { onDismiss() }) {
         Card(
@@ -44,7 +50,12 @@ fun BasicCalendarDialog(
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 CenterAlignedTopAppBar(
-                    title = { Text(text = "날짜선택") },
+                    title = {
+                        Text(
+                            text = "날짜 선택",
+                            style = SentyTheme.typography.headlineSmall,
+                        )
+                    },
                     actions = {
                         IconButton(onClick = { onDismiss() }) {
                             Icon(
@@ -61,11 +72,11 @@ fun BasicCalendarDialog(
                     modifier = Modifier
                         .padding(16.dp),
                     onDateSelected = { year, month, day ->
-                        onSelectedDate(year, month, day)
+                        selectedDate = "$year-$month-$day"
                     },
                     date = DatePickerDate(year, month-1, day),
                     configuration = DatePickerConfiguration.Builder()
-                        .selectedDateBackgroundColor(Green40)
+                        .selectedDateBackgroundColor(SentyGreen60)
                         .build()
                 )
 
@@ -76,7 +87,8 @@ fun BasicCalendarDialog(
                         .padding(horizontal = 16.dp)
                         .padding(bottom = 16.dp)
                 ) {
-                    onDismiss()
+                    val (year, month, day) = selectedDate.split("-").map { it.toInt() }
+                    onSelectedDate(year, month, day)
                 }
             }
 

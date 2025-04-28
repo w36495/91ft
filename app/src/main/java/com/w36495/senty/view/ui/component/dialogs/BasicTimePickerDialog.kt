@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
-import com.w36495.senty.view.ui.theme.Green40
+import com.w36495.senty.view.ui.theme.SentyGreen60
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,7 +53,12 @@ fun BasicTimePickerDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 CenterAlignedTopAppBar(
-                    title = { Text(text = "시간선택") },
+                    title = {
+                        Text(
+                            text = "시간 선택",
+                            style = SentyTheme.typography.headlineSmall,
+                        )
+                    },
                     actions = {
                         IconButton(onClick = { onDismiss() }) {
                             Icon(imageVector = Icons.Default.Close, contentDescription = null)
@@ -69,7 +74,7 @@ fun BasicTimePickerDialog(
                 TimeInput(
                     state = timePickerState,
                     colors = TimePickerDefaults.colors(
-                        periodSelectorSelectedContainerColor = Green40.copy(0.3f),
+                        periodSelectorSelectedContainerColor = SentyGreen60.copy(0.3f),
                         timeSelectorSelectedContainerColor = MaterialTheme.colorScheme.onPrimary,
                         timeSelectorUnselectedContainerColor = MaterialTheme.colorScheme.onSurface.copy(
                             alpha = 0.1f

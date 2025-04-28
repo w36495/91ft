@@ -1,6 +1,7 @@
 package com.w36495.senty.view.ui.component.dialogs
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,8 +38,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.w36495.senty.util.darken
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
+import com.w36495.senty.view.ui.theme.SentyBlack
+import com.w36495.senty.view.ui.theme.SentyGray20
+import com.w36495.senty.view.ui.theme.SentyGray40
+import com.w36495.senty.view.ui.theme.SentyGray60
+import com.w36495.senty.view.ui.theme.SentyGreen60
+import com.w36495.senty.view.ui.theme.SentyYellow60
 
 @Composable
 fun BasicColorPickerDialog(
@@ -93,7 +101,12 @@ private fun ColorPickerContents(
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 CenterAlignedTopAppBar(
-                    title = { Text(text = "색상선택") },
+                    title = {
+                        Text(
+                            text = "색상 선택",
+                            style = SentyTheme.typography.headlineSmall,
+                        )
+                    },
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                         containerColor = Color.White
                     ),
@@ -149,6 +162,11 @@ private fun ColorPaletteRow(
                 Box(modifier = Modifier
                     .size(56.dp)
                     .background(basicColors[index], RoundedCornerShape(10.dp))
+                    .border(
+                        if (selectColor == basicColors[index]) 2.dp else 0.dp,
+                        color = selectColor.darken(),
+                        RoundedCornerShape(10.dp)
+                    )
                     .clip(RoundedCornerShape(10.dp))
                     .clickable { onClick(basicColors[index]) },
                     contentAlignment = Alignment.Center,
@@ -159,11 +177,26 @@ private fun ColorPaletteRow(
                                 disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(0.8f)
                             )
                         ) {
-                            Icon(imageVector = Icons.Filled.CheckCircle, contentDescription = null)
+                            Icon(
+                                imageVector = Icons.Filled.CheckCircle,
+                                contentDescription = null,
+                                tint = SentyBlack,
+                            )
                         }
                     }
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BasicColorPickerDialogPreview() {
+    SentyTheme {
+        BasicColorPickerDialog(
+            onDismiss = {},
+            onSelectColor = {},
+        )
     }
 }
