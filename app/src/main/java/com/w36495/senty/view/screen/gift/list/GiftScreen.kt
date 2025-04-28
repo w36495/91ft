@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -26,7 +25,6 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.rounded.NoPhotography
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,26 +40,25 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.SubcomposeAsyncImage
-import coil3.request.ImageRequest
 import com.cheonjaeung.compose.grid.SimpleGridCells
 import com.cheonjaeung.compose.grid.VerticalGrid
 import com.w36495.senty.R
 import com.w36495.senty.view.component.LoadingCircleIndicator
+import com.w36495.senty.view.component.SentyAsyncImage
 import com.w36495.senty.view.screen.gift.list.contact.GiftContact
 import com.w36495.senty.view.screen.gift.list.contact.GiftListUiModel
 import com.w36495.senty.view.screen.gift.list.model.GiftTabType
-import com.w36495.senty.view.screen.gift.model.GiftUiModel
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.theme.SentyGray10
 import com.w36495.senty.view.ui.theme.SentyGray40
+import com.w36495.senty.view.ui.theme.SentyGray60
 import com.w36495.senty.view.ui.theme.SentyGray80
 import com.w36495.senty.view.ui.theme.SentyGreen60
 import com.w36495.senty.view.ui.theme.SentyWhite
@@ -173,6 +170,7 @@ private fun GiftContents(
                     modifier = Modifier.fillMaxWidth(),
                     pagerState = pagerState,
                     gifts = uiState.gifts,
+                    isLoading = uiState.isLoading,
                     onClickGift = onClickGiftDetail
                 )
             }
@@ -229,7 +227,7 @@ private fun GiftTopTabLow(
 @Composable
 private fun GiftHorizontalViewPager(
     modifier: Modifier = Modifier,
-    gifts: List<GiftUiModel>,
+    isLoading: Boolean,
     gifts: List<GiftListUiModel>,
     pagerState: PagerState,
     onClickGift: (String) -> Unit,
@@ -237,41 +235,93 @@ private fun GiftHorizontalViewPager(
     HorizontalPager(
         state = pagerState,
         modifier = modifier.fillMaxSize()
-    ) { index ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.Top,
-        ) {
-            VerticalGrid(
-                columns = SimpleGridCells.Fixed(2),
+    ) { page ->
+        if (gifts.isEmpty() && !isLoading) {
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(2.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
+                    .fillMaxSize()
+                    .background(Color(0xFFFBFBFB)),
+                contentAlignment = Alignment.Center,
             ) {
-                gifts.forEach { gift ->
-                    GiftViewPagerItem(
-                        giftImages = gift.images,
-                        onClickGift = { onClickGift(gift.id) }
-                    )
+                Text(
+                    text = stringResource(id = when (page) {
+                        0 -> R.string.gift_empty_text_all
+                        1 -> R.string.gift_empty_text_received
+                        else -> R.string.gift_empty_text_sent
+                    }),
+                    textAlign = TextAlign.Center,
+                    style = SentyTheme.typography.labelMedium.copy(color = SentyGray60),
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.Top,
+            ) {
+                VerticalGrid(
+                    columns = SimpleGridCells.Fixed(2),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(2.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    gifts.forEach { gift ->
+                        GiftViewPagerItem(
+                            thumbnail = gift.thumbnailPath,
+                            hasImageCount = gift.hasImageCount,
+                            onClickGift = { onClickGift(gift.id) }
+                        )
+                    }
                 }
             }
         }
+
     }
 }
 
 @Composable
 private fun GiftViewPagerItem(
     modifier: Modifier = Modifier,
-    giftImages: List<Any>,
+    thumbnail: String?,
+    hasImageCount: Int,
     onClickGift: () -> Unit,
 ) {
-    val context = LocalContext.current
+    thumbnail?.let { path ->
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .aspectRatio(1f)
+                .clickable { onClickGift() },
+        ) {
+            SentyAsyncImage(
+                model = path,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f),
+            )
 
-    if (giftImages.isEmpty()) {
+            if (hasImageCount > 1) {
+                Icon(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(top = 4.dp, end = 4.dp),
+                    painter = painterResource(
+                        id = if (hasImageCount == 2) {
+                            R.drawable.ic_baseline_counter_2
+                        } else {
+                            R.drawable.ic_baseline_counter_3
+                        }
+                    ),
+                    contentDescription = null,
+                    tint = SentyWhite,
+                )
+            }
+        }
+    } ?: run {
         Box(
             modifier = modifier
                 .fillMaxWidth()
@@ -285,52 +335,6 @@ private fun GiftViewPagerItem(
                 contentDescription = "Gift Image Empty",
                 tint = SentyGray40
             )
-        }
-    } else {
-        Box(
-            modifier = modifier
-                .fillMaxWidth()
-                .aspectRatio(1f)
-                .clickable { onClickGift() },
-        ) {
-            SubcomposeAsyncImage(
-                model = ImageRequest.Builder(context)
-                    .data(giftImages.first())
-                    .size(200)
-                    .build(),
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(1f),
-                loading = {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(SentyGray10),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                    }
-                },
-                contentScale = ContentScale.Crop,
-            )
-
-            if (giftImages.size > 1) {
-                Icon(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(top = 4.dp, end = 4.dp),
-                    painter = painterResource(
-                        id = if (giftImages.size == 2) {
-                            R.drawable.ic_baseline_counter_2
-                        } else {
-                            R.drawable.ic_baseline_counter_3
-                        }
-                    ),
-                    contentDescription = null,
-                    tint = SentyWhite,
-                )
-            }
         }
     }
 }
