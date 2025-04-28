@@ -74,7 +74,7 @@ fun NavGraphBuilder.friendNavGraph(
     // 친구 그룹 목록 화면
     composable<Route.FriendGroups> {
         FriendGroupScreen(
-            onBackPressed = { navController.navigateUp() },
+            onBackPressed = { navController.popBackStack() },
         )
     }
 }

@@ -8,7 +8,6 @@ import com.w36495.senty.data.mapper.toEntity
 import com.w36495.senty.data.remote.service.FriendGroupService
 import com.w36495.senty.domain.entity.FriendGroup
 import com.w36495.senty.domain.repository.FriendGroupRepository
-import com.w36495.senty.domain.repository.FriendRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,7 +19,6 @@ import javax.inject.Inject
 
 class FriendGroupRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
-    private val friendRepository: FriendRepository,
     private val friendGroupService: FriendGroupService,
 ) : FriendGroupRepository {
     private var userId: String = firebaseAuth.currentUser!!.uid
@@ -35,7 +33,7 @@ class FriendGroupRepositoryImpl @Inject constructor(
             if (result.isSuccessful) {
                 val body = result.body()?.string()
 
-                if (body != null) {
+                if (body != null && result.headers()["Content-length"]?.toInt() != 4) {
                     val responseJson = Json.parseToJsonElement(body)
 
                     val friendGroup = responseJson.jsonObject.map { (key, jsonElement) ->
@@ -70,6 +68,7 @@ class FriendGroupRepositoryImpl @Inject constructor(
                     _friendGroups.update { friendGroups.sortedBy { it.name }.toList() }
                     Result.success(Unit)
                 } else {
+                    _friendGroups.update { emptyList() }
                     Result.success(Unit)
                 }
             } else {
