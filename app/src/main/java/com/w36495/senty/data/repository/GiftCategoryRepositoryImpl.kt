@@ -20,7 +20,6 @@ import javax.inject.Inject
 
 class GiftCategoryRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
-    private val giftRepository: GiftRepository,
     private val giftCategoryService: GiftCategoryService
 ) : GiftCategoryRepository {
     private var userId: String = firebaseAuth.currentUser!!.uid
@@ -45,7 +44,10 @@ class GiftCategoryRepositoryImpl @Inject constructor(
 
                     _categories.update { giftCategories.sortedBy { category -> category.name }.toList() }
                     Result.success(Unit)
-                } else Result.success(Unit)
+                } else {
+                    _categories.update { emptyList() }
+                    Result.success(Unit)
+                }
             } else throw IllegalArgumentException(result.errorBody().toString())
         } catch (e: Exception) {
             Result.failure(e)
