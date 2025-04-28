@@ -8,11 +8,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -20,7 +25,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowCircleRight
@@ -36,94 +40,99 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.w36495.senty.R
-import com.w36495.senty.view.entity.FriendDetail
+import com.w36495.senty.util.dropShadow
 import com.w36495.senty.view.component.SentyAsyncImage
 import com.w36495.senty.view.entity.Schedule
-import com.w36495.senty.view.entity.gift.Gift
-import com.w36495.senty.view.entity.gift.GiftDetail
-import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
+import com.w36495.senty.view.screen.home.contact.HomeContact
+import com.w36495.senty.view.screen.home.model.HomeGiftUiModel
+import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.cards.ScheduleWithDateList
-import com.w36495.senty.view.ui.theme.Green40
-import com.w36495.senty.viewModel.HomeGiftUiState
-import com.w36495.senty.viewModel.HomeViewModel
+import com.w36495.senty.view.ui.theme.SentyGray10
+import com.w36495.senty.view.ui.theme.SentyGray80
+import com.w36495.senty.view.ui.theme.SentyGreen60
+import com.w36495.senty.view.ui.theme.SentyPink60
+import com.w36495.senty.view.ui.theme.SentyWhite
+import com.w36495.senty.view.ui.theme.SentyYellow60
 
 @Composable
-fun HomeScreen(
+fun HomeRoute(
     vm: HomeViewModel = hiltViewModel(),
-    onClickGiftButton: () -> Unit,
-    onClickGiftDetail: (String) -> Unit,
+    padding: PaddingValues,
+    moveToGifts: () -> Unit,
+    moveToGiftDetail: (String) -> Unit,
 ) {
-    val sentGifts by vm.sentGifts.collectAsStateWithLifecycle()
-    val receivedGifts by vm.receivedGifts.collectAsStateWithLifecycle()
+    val uiState by vm.state.collectAsStateWithLifecycle()
     val schedules by vm.schedules.collectAsStateWithLifecycle()
 
-    LaunchedEffect(key1 = sentGifts) {
-        vm.getSentGifts()
+    LaunchedEffect(Unit) {
+        vm.effect.collect { effect ->
+            when(effect) {
+                is HomeContact.Effect.ShowError -> {
+                    
+                }
+                HomeContact.Effect.NavigateToGifts -> { moveToGifts() }
+                is HomeContact.Effect.NavigateToGiftDetail -> { moveToGiftDetail(effect.giftId) }
+            }
+        }
     }
 
-    LaunchedEffect(key1 = receivedGifts) {
-        vm.getReceivedGifts()
-    }
-
-    LaunchedEffect(key1 = schedules) {
-        vm.getSchedules()
-    }
-
-    HomeContents(
-        sentGiftUiState = sentGifts,
-        receivedGiftUiState = receivedGifts,
+    HomeScreen(
+        modifier = Modifier.padding(bottom = padding.calculateBottomPadding(), top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()),
+        uiState = uiState,
         schedules = schedules,
-        onClickGiftButton = { onClickGiftButton() },
-        onClickGiftDetail = { onClickGiftDetail(it) },
+        onClickGifts = { vm.handleEvent(HomeContact.Event.OnClickGifts) },
+        onClickGiftDetail = { vm.handleEvent(HomeContact.Event.OnClickGift(it)) },
     )
 }
 
 @Composable
-private fun HomeContents(
-    sentGiftUiState: HomeGiftUiState,
-    receivedGiftUiState: HomeGiftUiState,
+private fun HomeScreen(
+    modifier: Modifier = Modifier,
+    uiState: HomeContact.State,
     schedules: List<Schedule>,
-    onClickGiftButton: () -> Unit,
+    onClickGifts: () -> Unit,
     onClickGiftDetail: (String) -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier
+            .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
         TopAppBar(
             title = {
                 Text(
-                    text = "Senty",
-                    color = Color.White,
-                    style = MaterialTheme.typography.titleMedium,
+                    text = stringResource(id = R.string.app_name),
+                    color = SentyWhite,
+                    style = SentyTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                 )
             },
             elevation = 0.dp,
-            backgroundColor = Green40
+            backgroundColor = SentyGreen60,
         )
 
         TopGiftButtons(
-            sentGiftCount = if (sentGiftUiState is HomeGiftUiState.Success) sentGiftUiState.gifts.size else 0,
-            receivedGiftCount = if (receivedGiftUiState is HomeGiftUiState.Success) receivedGiftUiState.gifts.size else 0,
-            onClickGiftButton = { onClickGiftButton() }
+            sentGiftCount = uiState.sentGifts.size,
+            receivedGiftCount = uiState.receivedGifts.size,
+            onClickGifts = { onClickGifts() }
         )
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight()
-                .background(Green40)
+                .background(SentyGreen60)
         ) {
             Card(
                 shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
@@ -139,41 +148,41 @@ private fun HomeContents(
                         .padding(vertical = 32.dp)
                 ) {
                     Text(
-                        text = "다가오는 기념일",
+                        text = stringResource(id = R.string.home_anniversary_title),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = 16.dp),
-                        style = MaterialTheme.typography.headlineMedium
+                            .padding(horizontal = 16.dp),
+                        style = SentyTheme.typography.titleLarge
+                            .copy(fontWeight = FontWeight.SemiBold),
                     )
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    if (schedules.isEmpty()) EmptyGifts("기념일을 등록해보세요.")
+                    if (schedules.isEmpty()) EmptyGifts(stringResource(id = R.string.home_anniversary_empty_text))
                     else ScheduleWithDateList(schedules = schedules)
 
                     Spacer(modifier = Modifier.height(48.dp))
 
                     Text(
-                        text = "받은 선물",
+                        text = stringResource(id = R.string.home_gift_received_title),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = 16.dp),
-                        style = MaterialTheme.typography.headlineMedium
+                            .padding(horizontal = 16.dp),
+                        style = SentyTheme.typography.titleLarge
+                            .copy(fontWeight = FontWeight.SemiBold),
                     )
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    when (receivedGiftUiState) {
-                        HomeGiftUiState.Loading -> {
-                            LoadingGifts()
+                    when {
+                        uiState.isReceivedGiftLoading -> {
+                            LoadingGifts(loadingText = stringResource(id = R.string.home_gift_loading_text))
                         }
-
-                        HomeGiftUiState.Empty -> {
-                            EmptyGifts("받은 선물을 등록해보세요.")
+                        !uiState.isReceivedGiftLoading && uiState.receivedGifts.isEmpty() -> {
+                            EmptyGifts(stringResource(id = R.string.home_gift_received_empty_text))
                         }
-
-                        is HomeGiftUiState.Success -> {
+                        else -> {
                             GiftCardSection(
-                                gifts = receivedGiftUiState.gifts,
-                                onClickAllGifts = { onClickGiftButton() },
+                                gifts = uiState.receivedGifts,
+                                onClickAllGifts = { onClickGifts() },
                                 onClickGiftDetail = { onClickGiftDetail(it) },
                             )
                         }
@@ -182,27 +191,27 @@ private fun HomeContents(
                     Spacer(modifier = Modifier.height(48.dp))
 
                     Text(
-                        text = "준 선물",
+                        text = stringResource(id = R.string.home_gift_sent_title),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = 16.dp),
-                        style = MaterialTheme.typography.headlineMedium
+                            .padding(horizontal = 16.dp),
+                        style = SentyTheme.typography.titleLarge
+                            .copy(fontWeight = FontWeight.SemiBold),
                     )
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    when (sentGiftUiState) {
-                        HomeGiftUiState.Loading -> {
-                            LoadingGifts()
-                        }
 
-                        HomeGiftUiState.Empty -> {
-                            EmptyGifts("준 선물을 등록해보세요.")
+                    when {
+                        uiState.isSentGiftLoading -> {
+                            LoadingGifts(loadingText = stringResource(id = R.string.home_gift_loading_text))
                         }
-
-                        is HomeGiftUiState.Success -> {
+                        !uiState.isSentGiftLoading && uiState.sentGifts.isEmpty() -> {
+                            EmptyGifts(stringResource(id = R.string.home_gift_sent_empty_text))
+                        }
+                        else -> {
                             GiftCardSection(
-                                gifts = sentGiftUiState.gifts,
-                                onClickAllGifts = { onClickGiftButton() },
+                                gifts = uiState.sentGifts,
+                                onClickAllGifts = { onClickGifts() },
                                 onClickGiftDetail = { onClickGiftDetail(it) },
                             )
                         }
@@ -218,32 +227,99 @@ private fun TopGiftButtons(
     modifier: Modifier = Modifier,
     sentGiftCount: Int,
     receivedGiftCount: Int,
-    onClickGiftButton: () -> Unit,
+    onClickGifts: () -> Unit,
 ) {
     Row(
         modifier = modifier
-            .background(Green40)
+            .background(SentyGreen60)
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .padding(bottom = 32.dp)
     ) {
-        SentyFilledButton(
-            modifier = Modifier.weight(1f),
-            buttonColor = Color.White,
-            textColor = Color.Black,
-            text = "받은 선물 $receivedGiftCount",
-            onClick = { onClickGiftButton() }
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+                .dropShadow(
+                    shape = RoundedCornerShape(10.dp),
+                    color = Color(0x14000000),
+                    offsetX = 0.dp,
+                    offsetY = 0.dp,
+                    blur = 4.dp,
+                )
+                .background(SentyWhite, RoundedCornerShape(10.dp))
+                .weight(1f)
+                .clip(RoundedCornerShape(10.dp))
+                .clickable { onClickGifts() },
+        ) {
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                Text(
+                    text = stringResource(id = R.string.common_heart),
+                    style = SentyTheme.typography.labelMedium
+                        .copy(color = SentyPink60)
+                )
 
-        Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = stringResource(id = R.string.common_received_gift_text),
+                    style = SentyTheme.typography.labelMedium,
+                    modifier = Modifier.padding(start = 4.dp),
+                )
 
-        SentyFilledButton(
-            modifier = Modifier.weight(1f),
-            buttonColor = Color.White,
-            textColor = Color.Black,
-            text = "준 선물 $sentGiftCount",
-            onClick = { onClickGiftButton() }
-        )
+                Text(
+                    text = "($receivedGiftCount)",
+                    style = SentyTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(start = 4.dp)
+                )
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .padding(start = 8.dp)
+                .fillMaxWidth()
+                .height(48.dp)
+                .dropShadow(
+                    shape = RoundedCornerShape(10.dp),
+                    color = Color(0x14000000),
+                    offsetX = 0.dp,
+                    offsetY = 0.dp,
+                    blur = 4.dp,
+                )
+                .background(SentyWhite, RoundedCornerShape(10.dp))
+                .weight(1f)
+                .clip(RoundedCornerShape(10.dp))
+                .clickable { onClickGifts() },
+        ) {
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                Text(
+                    text = stringResource(id = R.string.common_heart),
+                    style = SentyTheme.typography.labelMedium
+                        .copy(color = SentyYellow60)
+                )
+
+                Text(
+                    text = stringResource(id = R.string.common_sent_gift_text),
+                    style = SentyTheme.typography.labelMedium,
+                    modifier = Modifier.padding(start = 4.dp),
+                )
+
+                Text(
+                    text = "($sentGiftCount)",
+                    style = SentyTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(start = 4.dp)
+                )
+            }
+        }
     }
 }
 
@@ -262,14 +338,16 @@ private fun EmptyGifts(
                 .fillMaxWidth()
                 .padding(vertical = 56.dp),
             text = text,
-            style = MaterialTheme.typography.labelLarge,
+            style = SentyTheme.typography.bodySmall,
             textAlign = TextAlign.Center
         )
     }
 }
 
 @Composable
-private fun LoadingGifts() {
+private fun LoadingGifts(
+    loadingText: String,
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -282,13 +360,13 @@ private fun LoadingGifts() {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             CircularProgressIndicator(
-                color = Green40
+                color = SentyGreen60
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "선물을 불러오고 있습니다.",
-                style = MaterialTheme.typography.labelLarge
+                text = loadingText,
+                style = SentyTheme.typography.bodySmall,
+                modifier = Modifier.padding(top = 12.dp),
             )
         }
     }
@@ -297,20 +375,19 @@ private fun LoadingGifts() {
 @Composable
 private fun GiftCardSection(
     modifier: Modifier = Modifier,
-    gifts: List<Gift>,
+    gifts: List<HomeGiftUiModel>,
     onClickAllGifts: () -> Unit,
     onClickGiftDetail: (String) -> Unit,
 ) {
     LazyRow(
         modifier = modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(horizontal = 16.dp)
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         itemsIndexed(gifts) { index, gift ->
             if (index < 8) {
                 GiftCardItem(
-                    giftImages = gift.giftImages,
-                    gift = gift.giftDetail,
-                    friend = gift.giftDetail.friend,
+                    gift = gift,
                     onClickGiftDetail = { onClickGiftDetail(it) }
                 )
             }
@@ -322,7 +399,6 @@ private fun GiftCardSection(
                     modifier = Modifier
                         .fillMaxHeight()
                         .clickable { onClickAllGifts() },
-                    verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     IconButton(
@@ -334,13 +410,15 @@ private fun GiftCardSection(
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.ArrowCircleRight,
-                            contentDescription = null
+                            contentDescription = null,
+                            tint = SentyGray80,
                         )
                     }
                     Text(
-                        text = "선물\n전체보기",
+                        text = stringResource(id = R.string.home_gift_show_all_text),
                         textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.labelLarge
+                        style = SentyTheme.typography.bodyMedium
+                            .copy(color = SentyGray80),
                     )
                 }
             } else if (index != gifts.lastIndex) {
@@ -354,34 +432,27 @@ private fun GiftCardSection(
 @Composable
 private fun GiftCardItem(
     modifier: Modifier = Modifier,
-    giftImages: List<Any>,
-    gift: GiftDetail,
-    friend: FriendDetail,
+    gift: HomeGiftUiModel,
     onClickGiftDetail: (String) -> Unit,
 ) {
-    Card(
-        modifier = modifier.width(156.dp),
-        shape = RoundedCornerShape(10.dp),
-        elevation = 4.dp,
-        onClick = { onClickGiftDetail(gift.id) }) {
-    val context = LocalContext.current
-
+    Box(
+        modifier = modifier
+            .width(156.dp)
+            .dropShadow(
+                shape = RoundedCornerShape(10.dp),
+                offsetX = 0.dp,
+                offsetY = 0.dp,
+                blur = 2.dp
+            )
+            .background(
+                color = SentyWhite,
+                shape = RoundedCornerShape(10.dp)
+            )
+            .clip(RoundedCornerShape(10.dp))
+            .clickable { onClickGiftDetail(gift.id) }
+    ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            if (giftImages.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f)
-                        .background(Color(0xFFD9D9D9)),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.NoPhotography,
-                        contentDescription = "Gift Image Empty",
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                    )
-                }
-            } else {
+            gift.thumbnailPath?.let { path ->
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -392,46 +463,116 @@ private fun GiftCardItem(
                         modifier = Modifier
                             .fillMaxWidth()
                             .aspectRatio(1f),
-                        contentScale = ContentScale.Crop,
                     )
 
-                    if (giftImages.size > 1) {
+                    if (gift.hasImageCount > 1) {
                         Icon(
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
                                 .padding(top = 4.dp, end = 4.dp),
                             painter = painterResource(
-                                id = if (giftImages.size == 2) {
+                                id = if (gift.hasImageCount == 2) {
                                     R.drawable.ic_baseline_counter_2
                                 } else {
                                     R.drawable.ic_baseline_counter_3
                                 }
                             ),
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurface
+                            tint = SentyWhite
                         )
                     }
+                }
+            } ?: run {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f)
+                        .background(SentyGray10),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.NoPhotography,
+                        contentDescription = "Gift Image Empty",
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    )
                 }
             }
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 24.dp, bottom = 24.dp)
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
             ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_calendar_month_24),
+                        contentDescription = null,
+                        tint = SentyGray80,
+                        modifier = Modifier.size(14.dp)
+                    )
+
+                    Text(
+                        text = gift.date.replace("-", "."),
+                        style = SentyTheme.typography.bodySmall
+                            .copy(color = SentyGray80),
+                        modifier = Modifier.padding(start = 4.dp),
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
                 Text(
-                    text = "🗓️ ${gift.date.replace("-", "/")}",
-                    style = MaterialTheme.typography.labelLarge,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = friend.name,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold
+                    text = gift.friendName,
+                    style = SentyTheme.typography.bodySmall
+                        .copy(fontWeight = FontWeight.Medium),
                 )
             }
         }
+    }
+}
+
+//@Preview(showBackground = true, widthDp = 1080, heightDp = 1500)
+//@Composable
+//private fun HomeContentsPreview() {
+//    HomeScreen(
+//        sentGiftUiState = HomeGiftUiState.Success(
+//            List(10) {
+//                Gift(
+//                    giftDetail = GiftDetail(
+//                        category = GiftCategory(name = "생일"),
+//                        friend = FriendUiModel2(
+//                            name = "지수",
+//                            birthday = "",
+//                            memo = "",
+//                        ),
+//                        date = "2025-12-11",
+//                        mood = "",
+//                        memo = ""
+//                    )
+//                )
+//            }
+//        ),
+//        receivedGiftUiState = HomeGiftUiState.Empty,
+//        schedules = List(5) {
+//                            Schedule(
+//                                title = "기념일",
+//                                date = "2025-04-24"
+//                            )
+//        },
+////        schedules = emptyList(),
+//        onClickGifts = {},
+//        onClickGiftDetail = {},
+//    )
+//}
+
+@Preview(showBackground = true)
+@Composable
+private fun LoadingGiftsPreview() {
+    SentyTheme {
+        LoadingGifts(
+            loadingText = "선물을 불러오고 있습니다."
+        )
     }
 }
