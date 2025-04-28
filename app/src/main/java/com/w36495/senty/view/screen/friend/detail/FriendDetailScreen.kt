@@ -56,6 +56,7 @@ import com.cheonjaeung.compose.grid.SimpleGridCells
 import com.cheonjaeung.compose.grid.VerticalGrid
 import com.w36495.senty.R
 import com.w36495.senty.view.component.LoadingCircleIndicator
+import com.w36495.senty.view.component.SentyAsyncImage
 import com.w36495.senty.view.screen.friend.detail.contact.FriendDetailContact
 import com.w36495.senty.view.screen.friend.detail.model.FriendDetailTabType
 import com.w36495.senty.view.screen.friend.model.FriendUiModel
@@ -411,16 +412,11 @@ private fun GiftItem(
                 .aspectRatio(1f)
                 .clickable { onClickGiftDetail(gift.id) },
         ) {
-            AsyncImage(
-                model = ImageRequest.Builder(context)
-                    .data(gift.images.first())
-                    .size(200)
-                    .build(),
-                contentDescription = null,
+            SentyAsyncImage(
+                model = path,
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(1f),
-                contentScale = ContentScale.Crop,
             )
 
             if (gift.images.size > 1) {

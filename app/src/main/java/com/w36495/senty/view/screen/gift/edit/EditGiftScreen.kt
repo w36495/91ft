@@ -71,7 +71,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.w36495.senty.R
 import com.w36495.senty.data.domain.GiftType
@@ -79,6 +78,7 @@ import com.w36495.senty.util.StringUtils
 import com.w36495.senty.util.checkCameraPermission
 import com.w36495.senty.util.getUriFile
 import com.w36495.senty.view.component.LoadingCircleIndicator
+import com.w36495.senty.view.component.SentyAsyncImage
 import com.w36495.senty.view.screen.friend.FriendSelectionDialog
 import com.w36495.senty.view.screen.friend.model.FriendUiModel
 import com.w36495.senty.view.screen.gift.category.GiftCategorySelectionDialog
@@ -396,14 +396,11 @@ private fun DisplayGiftImage(
                 .aspectRatio(1f)
                 .padding(8.dp)
         ) {
-            AsyncImage(
-                model = ImageRequest.Builder(context)
-                    .data(giftImage)
-                    .size(200)
-                    .build(),
-                contentDescription = "Gift Image",
-                modifier = Modifier.aspectRatio(1f),
-                contentScale = ContentScale.Crop
+            SentyAsyncImage(
+                model = imageData,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f),
             )
         }
 

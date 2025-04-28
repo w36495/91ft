@@ -51,6 +51,7 @@ import com.w36495.senty.R
 import com.w36495.senty.data.domain.GiftType
 import com.w36495.senty.util.StringUtils
 import com.w36495.senty.view.component.LoadingCircleIndicator
+import com.w36495.senty.view.component.SentyAsyncImage
 import com.w36495.senty.view.screen.friend.model.FriendUiModel
 import com.w36495.senty.view.screen.gift.category.model.GiftCategoryUiModel
 import com.w36495.senty.view.screen.gift.detail.contact.GiftDetailContact
@@ -243,23 +244,11 @@ private fun ImagePager(
 
     Column(modifier = modifier) {
         HorizontalPager(state = pagerState) {page ->
-            AsyncImage(
+            SentyAsyncImage(
                 model = imgUri[page],
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = modifier
-                    .aspectRatio(1f)
-                    .graphicsLayer {
-//                        val pageOffset = (
-//                                (pagerState.currentPage - page) + pagerState.currentPage
-//                                ).absoluteValue
-
-//                        alpha = lerp(
-//                            start = 0.5f,
-//                            stop = 1f,
-//                            fraction = 1f - pageOffset.coerceIn(0, 1)
-//                        )
-                    }
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f),
             )
         }
 

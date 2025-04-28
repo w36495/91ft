@@ -44,10 +44,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
 import com.w36495.senty.R
 import com.w36495.senty.view.entity.FriendDetail
+import com.w36495.senty.view.component.SentyAsyncImage
 import com.w36495.senty.view.entity.Schedule
 import com.w36495.senty.view.entity.gift.Gift
 import com.w36495.senty.view.entity.gift.GiftDetail
@@ -388,12 +387,8 @@ private fun GiftCardItem(
                         .fillMaxWidth()
                         .aspectRatio(1f),
                 ) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(context)
-                            .data(giftImages[0])
-                            .size(200)
-                            .build(),
-                        contentDescription = null,
+                    SentyAsyncImage(
+                        model = path,
                         modifier = Modifier
                             .fillMaxWidth()
                             .aspectRatio(1f),
