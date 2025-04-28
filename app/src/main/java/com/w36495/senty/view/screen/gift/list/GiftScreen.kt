@@ -56,6 +56,7 @@ import com.cheonjaeung.compose.grid.VerticalGrid
 import com.w36495.senty.R
 import com.w36495.senty.view.component.LoadingCircleIndicator
 import com.w36495.senty.view.screen.gift.list.contact.GiftContact
+import com.w36495.senty.view.screen.gift.list.contact.GiftListUiModel
 import com.w36495.senty.view.screen.gift.list.model.GiftTabType
 import com.w36495.senty.view.screen.gift.model.GiftUiModel
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
@@ -229,6 +230,7 @@ private fun GiftTopTabLow(
 private fun GiftHorizontalViewPager(
     modifier: Modifier = Modifier,
     gifts: List<GiftUiModel>,
+    gifts: List<GiftListUiModel>,
     pagerState: PagerState,
     onClickGift: (String) -> Unit,
 ) {

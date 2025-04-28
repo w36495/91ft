@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.w36495.senty.data.domain.GiftType
 import com.w36495.senty.data.mapper.toUiModel
 import com.w36495.senty.domain.repository.GiftImgRepository
+import com.w36495.senty.data.mapper.toGiftListUiModel
 import com.w36495.senty.domain.repository.GiftRepository
 import com.w36495.senty.view.screen.gift.list.contact.GiftContact
 import com.w36495.senty.view.screen.gift.list.model.GiftTabType
@@ -47,7 +48,7 @@ class GiftViewModel @Inject constructor(
             }
         }
             .sortedBy { it.createdAt }
-            .map { it.toUiModel() }
+            .map { it.toGiftListUiModel() }
     }
         .flatMapLatest { uiList ->
             flow {

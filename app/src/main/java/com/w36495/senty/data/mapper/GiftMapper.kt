@@ -4,6 +4,7 @@ import com.w36495.senty.data.domain.GiftEntity
 import com.w36495.senty.data.domain.GiftType
 import com.w36495.senty.domain.entity.Gift
 import com.w36495.senty.view.screen.friend.detail.model.FriendDetailGiftUiModel
+import com.w36495.senty.view.screen.gift.list.contact.GiftListUiModel
 import com.w36495.senty.view.screen.gift.model.GiftUiModel
 
 fun GiftEntity.toDomain(id: String) = Gift(
@@ -52,6 +53,12 @@ fun Gift.toFriendDetailUiModel() = FriendDetailGiftUiModel(
     hasImageCount = this.images.size,
 )
 
+
+fun Gift.toGiftListUiModel() = GiftListUiModel(
+    id = this.id,
+    type = this.type,
+    thumbnailName = this.thumbnailName,
+    hasImageCount = this.images.size,
 )
 
 fun GiftUiModel.toDomain() = Gift(
