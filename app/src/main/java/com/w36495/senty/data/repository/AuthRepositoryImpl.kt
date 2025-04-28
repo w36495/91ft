@@ -4,10 +4,10 @@ import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
-import com.w36495.senty.domain.entity.AuthUser
-import com.w36495.senty.domain.repository.AuthRepository
 import com.w36495.senty.data.manager.SnsAuthManager
+import com.w36495.senty.domain.entity.AuthUser
 import com.w36495.senty.domain.entity.LoginType
+import com.w36495.senty.domain.repository.AuthRepository
 import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 import javax.inject.Named
@@ -17,6 +17,16 @@ class AuthRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     @Named("kakao") private val kakaoAuthManager: SnsAuthManager,
 ) : AuthRepository {
+    override suspend fun checkLoginState(): Result<Boolean> {
+        return try {
+            val result = firebaseAuth.currentUser
+
+            Result.success(result != null)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override suspend fun signUpWithEmail(email: String, password: String): Result<Unit> {
         return suspendCancellableCoroutine { cont ->
             firebaseAuth.createUserWithEmailAndPassword(email, password)

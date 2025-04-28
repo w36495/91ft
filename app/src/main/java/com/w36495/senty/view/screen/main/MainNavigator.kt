@@ -22,7 +22,7 @@ class MainNavigator(
         @Composable get() = navController
             .currentBackStackEntryAsState().value?.destination
 
-    val startDestination = Route.Login
+    val startDestination = Route.Intro
 
     val currentTab: MainBottomTab?
         @Composable get() = MainBottomTab.find { tab ->
