@@ -69,7 +69,6 @@ import com.w36495.senty.view.ui.theme.SentyGreen60
 import com.w36495.senty.view.ui.theme.SentyPink60
 import com.w36495.senty.view.ui.theme.SentyWhite
 import com.w36495.senty.view.ui.theme.SentyYellow60
-import com.w36495.senty.viewModel.FriendViewModel
 import kotlinx.coroutines.launch
 
 @Composable

@@ -1,4 +1,4 @@
-package com.w36495.senty.viewModel
+package com.w36495.senty.view.screen.friend.list
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
