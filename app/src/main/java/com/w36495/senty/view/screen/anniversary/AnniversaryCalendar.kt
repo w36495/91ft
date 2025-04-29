@@ -262,7 +262,7 @@ private fun DayBox(
             .wrapContentSize()
             .size(32.dp)
             .background(
-                color = if (isToday) Green40 else Color.Transparent,
+                color = if (isToday) SentyGreen60 else if (hasSchedule) SentyYellow60 else Color.Transparent,
                 shape = CircleShape
             )
             .border(
