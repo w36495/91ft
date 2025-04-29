@@ -3,6 +3,7 @@ package com.w36495.senty.view.screen.main.navigation
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
+import com.w36495.senty.view.screen.anniversary.navigation.anniversaryNavGraph
 import com.w36495.senty.view.screen.friend.navigation.friendNavGraph
 import com.w36495.senty.view.screen.gift.navigation.giftNavGraph
 import com.w36495.senty.view.screen.home.navigation.homeNavGraph
@@ -44,6 +45,12 @@ fun MainNavHost(
             padding = padding,
             navController = navigator.navController,
             moveToHome = { navigator.navigate(MainBottomTab.HOME) },
+        )
+
+        anniversaryNavGraph(
+            padding = padding,
+            navController = navigator.navController,
+            onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
         )
 
         settingNavGraph(

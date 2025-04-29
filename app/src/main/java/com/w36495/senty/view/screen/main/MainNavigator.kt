@@ -9,6 +9,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
+import com.w36495.senty.view.screen.anniversary.navigation.navigateToAnniversary
 import com.w36495.senty.view.screen.friend.navigation.navigateToFriend
 import com.w36495.senty.view.screen.gift.navigation.navigateToGiftAdd
 import com.w36495.senty.view.screen.home.navigation.navigateToHome
@@ -42,9 +43,7 @@ class MainNavigator(
             MainBottomTab.HOME -> navController.navigateToHome(navOptions)
             MainBottomTab.FRIEND -> navController.navigateToFriend(navOptions)
             MainBottomTab.GIFT_ADD -> navController.navigateToGiftAdd(navOptions)
-            MainBottomTab.ANNIVERSARY -> {
-//                navController.navigateToLoungeTab(navOptions)
-            }
+            MainBottomTab.ANNIVERSARY -> navController.navigateToAnniversary(navOptions)
             MainBottomTab.SETTINGS -> navController.navigateToSettings(navOptions)
         }
     }

@@ -45,8 +45,10 @@ import com.w36495.senty.view.ui.component.cards.ScheduleCard
 import com.w36495.senty.viewModel.AnniversaryViewModel
 
 @Composable
-fun AnniversaryScreen(
+fun AnniversaryRoute(
     vm: AnniversaryViewModel = hiltViewModel(),
+    padding: PaddingValues,
+    onShowGlobalErrorSnackBar: (throwable: Throwable?) -> Unit,
 ) {
     val schedules by vm.schedules.collectAsStateWithLifecycle()
     val schedulesOfSelectionDate by vm.schedulesOfSelectionDate.collectAsStateWithLifecycle()
@@ -58,7 +60,7 @@ fun AnniversaryScreen(
         }
     }
 
-    AnniversaryScreenContents(
+    AnniversaryScreen(
         schedules = schedules,
         schedulesOfSelectionDate = schedulesOfSelectionDate,
         snackbarHostState = snackbarHostState,
@@ -71,7 +73,7 @@ fun AnniversaryScreen(
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
-private fun AnniversaryScreenContents(
+private fun AnniversaryScreen(
     schedules: List<Schedule>,
     schedulesOfSelectionDate: List<Schedule>,
     snackbarHostState: SnackbarHostState,
