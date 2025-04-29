@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -65,6 +66,7 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -72,6 +74,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.request.ImageRequest
+import com.vsnappy1.extension.noRippleClickable
 import com.w36495.senty.R
 import com.w36495.senty.data.domain.GiftType
 import com.w36495.senty.util.StringUtils
@@ -235,6 +238,8 @@ private fun EditGiftScreen(
     onSelectGiftCategory: (GiftCategoryUiModel?) -> Unit,
     onSelectImageSelectionType: (ImageSelectionType?) -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -265,6 +270,9 @@ private fun EditGiftScreen(
                 .padding(innerPadding)
                 .fillMaxSize()
                 .background(SentyWhite)
+                .noRippleClickable(
+                    onClick = { focusManager.clearFocus() },
+                ),
         ) {
             Column(
                 modifier = Modifier
@@ -490,12 +498,20 @@ private fun InputSection(
     onSelectGiftType: (GiftType) -> Unit,
     onSelectDate: (String?) -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
+
     Column(modifier = modifier.padding(top = 16.dp)) {
         GiftTypeSection(
             modifier = Modifier.fillMaxWidth(),
             type = gift.type,
-            onChangeToReceived = { onSelectGiftType(GiftType.RECEIVED) },
-            onChangeToSent = { onSelectGiftType(GiftType.SENT) }
+            onChangeToReceived = {
+                focusManager.clearFocus()
+                onSelectGiftType(GiftType.RECEIVED)
+            },
+            onChangeToSent = {
+                focusManager.clearFocus()
+                onSelectGiftType(GiftType.SENT)
+            }
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -510,7 +526,10 @@ private fun InputSection(
             errorMsg = R.string.gift_edit_category_error_text,
             placeHolder = gift.categoryName.ifEmpty { stringResource(id = R.string.gift_edit_category_hint_text) },
             onChangeText = { },
-            onClick = onClickGiftCategory,
+            onClick = {
+                focusManager.clearFocus()
+                onClickGiftCategory()
+            },
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -525,7 +544,10 @@ private fun InputSection(
             isRequired = true,
             isError = isErrorFriend,
             errorMsg = R.string.gift_edit_friend_error_text,
-            onClick = onClickFriend,
+            onClick = {
+                focusManager.clearFocus()
+                onClickFriend()
+            },
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -544,7 +566,10 @@ private fun InputSection(
             placeHolder = gift.date.ifEmpty { stringResource(id = R.string.gift_edit_date_hint_text) },
             onChangeText = { onSelectDate(it) },
             isRequired = true,
-            onClick = onClickDate,
+            onClick = {
+                focusManager.clearFocus()
+                onClickDate()
+            },
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -561,7 +586,9 @@ private fun InputSection(
         Text(
             text = stringResource(id = R.string.gift_edit_memo_text),
             style = SentyTheme.typography.labelSmall,
-            modifier = Modifier.padding(bottom = 12.dp, top = 16.dp)
+            modifier = Modifier
+                .padding(bottom = 12.dp, top = 16.dp)
+                .noRippleClickable { focusManager.clearFocus() },
         )
 
         SentyMultipleTextField(
@@ -575,7 +602,10 @@ private fun InputSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 24.dp, top = 32.dp),
-            onClick = onClickSave,
+            onClick = {
+                focusManager.clearFocus()
+                onClickSave()
+            },
         )
     }
 }
