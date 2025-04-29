@@ -63,7 +63,10 @@ class FriendRepositoryImpl @Inject constructor(
                     Log.d("FriendRepository", "친구 목록 조회 완료")
                     _friends.update { friends }
                     Result.success(Unit)
-                } else Result.success(Unit)
+                } else {
+                    _friends.update { emptyList() }
+                    Result.success(Unit)
+                }
             } else {
                 Log.d("FriendRepo", result.errorBody().toString())
                 Result.failure(Exception(result.errorBody().toString()))
