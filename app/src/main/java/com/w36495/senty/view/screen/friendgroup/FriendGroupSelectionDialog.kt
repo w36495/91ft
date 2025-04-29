@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -29,6 +30,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -40,6 +43,7 @@ import com.w36495.senty.view.screen.friendgroup.model.FriendGroupUiModel
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
 import com.w36495.senty.view.ui.theme.SentyGray20
+import com.w36495.senty.view.ui.theme.SentyGray70
 
 @Composable
 fun FriendGroupSelectionDialog(
@@ -72,7 +76,10 @@ private fun FriendGroupSelectionContent(
                 containerColor = Color.White
             )
         ) {
-            Column {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+                    .height(360.dp)
+            ) {
                 CenterAlignedTopAppBar(
                     title = {
                         Text(
@@ -91,30 +98,50 @@ private fun FriendGroupSelectionContent(
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                         containerColor = Color.White
                     ),
-                    modifier = Modifier.padding(bottom = 16.dp)
                 )
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .verticalScroll(rememberScrollState()),
-                ) {
-                    friendGroups.forEachIndexed { index, group ->
-                        FriendGroupItem(
-                            group = group,
-                            onClick = onSelectFriendGroup,
+                if (friendGroups.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .background(Color(0xFFFBFBFB))
+                            .padding(bottom = 16.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.friend_group_empty_text),
+                            style = SentyTheme.typography.bodyMedium
+                                .copy(color = SentyGray70),
+                            textAlign = TextAlign.Center,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier
                         )
-
-                        if (index < friendGroups.lastIndex) {
-                            HorizontalDivider(
-                                color = SentyGray20,
-                                thickness = 0.5.dp,
-                                modifier = Modifier.padding(horizontal = 4.dp),
+                    }
+                } else {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState()),
+                    ) {
+                        friendGroups.forEachIndexed { index, group ->
+                            FriendGroupItem(
+                                group = group,
+                                onClick = onSelectFriendGroup,
                             )
+
+                            if (index < friendGroups.lastIndex) {
+                                HorizontalDivider(
+                                    color = SentyGray20,
+                                    thickness = 0.5.dp,
+                                    modifier = Modifier.padding(horizontal = 4.dp),
+                                )
+                            }
                         }
                     }
                 }
+
 
                 SentyFilledButton(
                     text = stringResource(id = R.string.friend_group_selection_edit_button_text),
@@ -171,6 +198,19 @@ private fun FriendGroupContentsPreview() {
             friendGroups = List(5) {
                 FriendGroupUiModel.allFriendGroup
             },
+            onSelectFriendGroup = {},
+            onClickFriendGroupEdit = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun FriendGroupEmptyContentsPreview() {
+    SentyTheme {
+        FriendGroupSelectionContent(
+            onDismiss = {},
+            friendGroups = emptyList(),
             onSelectFriendGroup = {},
             onClickFriendGroupEdit = {},
         )
