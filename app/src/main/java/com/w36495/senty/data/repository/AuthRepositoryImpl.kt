@@ -44,7 +44,7 @@ class AuthRepositoryImpl @Inject constructor(
         return suspendCancellableCoroutine { cont ->
             firebaseAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
-                    if (task.isSuccessful && task.exception != null) {
+                    if (task.isSuccessful && task.exception == null) {
                         cont.resume(Result.success(Unit))
                     } else {
                         cont.resume(Result.failure(task.exception ?: Exception("Unknown error")))
