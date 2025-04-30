@@ -3,7 +3,6 @@ package com.w36495.senty.di
 import android.content.Context
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.w36495.senty.BuildConfig
-import com.w36495.senty.data.remote.service.AccountService
 import com.w36495.senty.data.remote.service.AnniversaryService
 import com.w36495.senty.data.remote.service.FriendGroupService
 import com.w36495.senty.data.remote.service.FriendService
@@ -26,7 +25,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-    private const val ACCOUNT_URL = BuildConfig.FIREBASE_ACCOUNT_BASE_URL
     private const val DATABASE_URL = BuildConfig.FIREBASE_DATABASE_BASE_URL
     private const val NAVER_BASE_URL = BuildConfig.NAVER_GEOCODING_BASE_URI
 
@@ -68,19 +66,6 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    @Account
-    fun provideAccountRetrofit(
-        okHttpClient: OkHttpClient,
-    ): Retrofit {
-        return Retrofit.Builder()
-            .addConverterFactory(jsonOptions.asConverterFactory("application/json; charset=UTF8".toMediaType()))
-            .baseUrl(ACCOUNT_URL)
-            .client(okHttpClient)
-            .build()
-    }
-
-    @Provides
-    @Singleton
     fun provideOkhttpClient(
         logger: HttpLoggingInterceptor,
         @ApplicationContext context: Context,
@@ -88,8 +73,6 @@ object NetworkModule {
         return OkHttpClient.Builder()
             .addInterceptor(logger)
             .build()
-//            .addInterceptor(NetworkConnectionInterceptor(context))
-
     }
 
     @Provides
@@ -117,12 +100,6 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideAnniversaryApi(retrofit: Retrofit): AnniversaryService = retrofit.create(AnniversaryService::class.java)
-
-    @Provides
-    @Singleton
-    @Account
-    fun provideAccountApi(@Account retrofit: Retrofit): AccountService = retrofit.create(AccountService::class.java)
-
 
     @Provides
     @Singleton

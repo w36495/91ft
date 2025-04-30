@@ -53,7 +53,6 @@ class GiftImageRepositoryImpl @Inject constructor(
                         async { ref.downloadUrl.await().toString() }
                     }.awaitAll()
             }
-            val end = System.currentTimeMillis()
             Log.d("GiftImgRepo(getGiftImages)", "\uD83C\uDF81 선물 이미지 다운로드 완료!")
             Result.success(downloadUrls.toList())
         } catch (e: Exception) {
