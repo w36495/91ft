@@ -11,6 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,7 +40,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.outlined.CameraAlt
-import androidx.compose.material.icons.rounded.RemoveCircle
+import androidx.compose.material.icons.rounded.Cancel
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -94,6 +95,8 @@ import com.w36495.senty.view.ui.component.dialogs.BasicCalendarDialog
 import com.w36495.senty.view.ui.component.dialogs.ImageSelectionDialog
 import com.w36495.senty.view.ui.component.textFields.SentyMultipleTextField
 import com.w36495.senty.view.ui.component.textFields.SentyTextField
+import com.w36495.senty.view.ui.theme.SentyBlack
+import com.w36495.senty.view.ui.theme.SentyGray20
 import com.w36495.senty.view.ui.theme.SentyGray60
 import com.w36495.senty.view.ui.theme.SentyGray80
 import com.w36495.senty.view.ui.theme.SentyGreen60
@@ -352,7 +355,7 @@ private fun ImgSection(
     LazyRow(
         modifier = modifier
             .aspectRatio(1f),
-        contentPadding = PaddingValues(32.dp)
+        contentPadding = PaddingValues(16.dp)
     ) {
         if (giftImages.isNotEmpty()) {
             itemsIndexed(giftImages) { index, image ->
@@ -407,20 +410,35 @@ private fun DisplayGiftImage(
                 model = imageData,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(1f),
+                    .aspectRatio(1f)
+                    .border(
+                        width = 0.5.dp,
+                        color = SentyGray20,
+                        shape = RoundedCornerShape(12.dp)
+                    ),
             )
         }
 
-        Icon(
-            imageVector = Icons.Rounded.RemoveCircle,
-            contentDescription = "Gift Image Remove",
+        Box(
             modifier = Modifier
-                .size(32.dp)
                 .align(Alignment.TopEnd)
-                .clip(CircleShape)
-                .clickable { onRemoveImageClick() },
-            tint = MaterialTheme.colorScheme.error
-        )
+                .padding(12.dp)
+                .size(32.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(modifier = Modifier.size(24.dp)
+                .background(SentyWhite, CircleShape))
+            Icon(
+                imageVector = Icons.Rounded.Cancel,
+                contentDescription = "Gift Image Remove",
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .clickable { onRemoveImageClick() },
+                tint = SentyBlack,
+            )
+        }
+
     }
 }
 
