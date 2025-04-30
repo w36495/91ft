@@ -1,14 +1,14 @@
 package com.w36495.senty.domain.repository
 
-import com.w36495.senty.data.domain.ScheduleEntity
-import com.w36495.senty.view.entity.Schedule
-import kotlinx.coroutines.flow.Flow
-import okhttp3.ResponseBody
-import retrofit2.Response
+import com.w36495.senty.domain.entity.Schedule
+import kotlinx.coroutines.flow.StateFlow
 
 interface AnniversaryRepository {
-    fun getSchedules(): Flow<List<Schedule>>
-    suspend fun insertSchedule(schedule: ScheduleEntity): Response<ResponseBody>
-    suspend fun patchSchedule(scheduleId: String, schedule: ScheduleEntity): Response<ResponseBody>
-    suspend fun deleteSchedule(scheduleId: String): Boolean
+    val schedules: StateFlow<List<Schedule>>
+
+    suspend fun fetchSchedules(): Result<Unit>
+    suspend fun getSchedule(scheduleId: String): Result<Schedule>
+    suspend fun insertSchedule(schedule: Schedule): Result<Unit>
+    suspend fun patchSchedule(schedule: Schedule): Result<Unit>
+    suspend fun deleteSchedule(scheduleId: String): Result<Unit>
 }
