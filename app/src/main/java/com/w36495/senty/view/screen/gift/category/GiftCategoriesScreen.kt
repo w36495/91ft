@@ -71,7 +71,7 @@ fun GiftCategoriesRoute(
         onBackPressed = { vm.handleEvent(GiftCategoryContact.Event.OnClickBack) },
         onClickAdd = { vm.handleEvent(GiftCategoryContact.Event.OnClickAdd(it)) },
         onClickEdit = { vm.handleEvent(GiftCategoryContact.Event.OnClickEdit(it)) },
-        onSelectEdit = { vm.handleEvent(GiftCategoryContact.Event.OnSelectEdit) },
+        onSelectEdit = { vm.handleEvent(GiftCategoryContact.Event.OnSelectEdit(it)) },
         onClickRemove = { vm.handleEvent(GiftCategoryContact.Event.OnClickDelete(it)) },
         onSelectDelete = { vm.handleEvent(GiftCategoryContact.Event.OnSelectDelete) },
     )
@@ -87,7 +87,7 @@ private fun GiftCategoriesScreen(
     onClickEdit: (GiftCategoryUiModel?) -> Unit,
     onClickRemove: (GiftCategoryUiModel?) -> Unit,
     onSelectDelete: () -> Unit,
-    onSelectEdit: () -> Unit,
+    onSelectEdit: (GiftCategoryUiModel) -> Unit,
 ) {
     Scaffold(
         modifier = modifier,
@@ -167,7 +167,7 @@ private fun GiftCategoriesScreen(
             if (uiState.showEditCategoryDialog) {
                 EditGiftCategoryDialog(
                     giftCategory = uiState.selectedCategory,
-                    onComplete = { onSelectEdit() },
+                    onComplete = { onSelectEdit(it) },
                     onDismiss = { onClickEdit(null) },
                 )
             }

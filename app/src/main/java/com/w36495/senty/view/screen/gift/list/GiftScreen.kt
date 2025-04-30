@@ -81,6 +81,10 @@ fun GiftRoute(
         pageCount = { tabList.size },
     )
 
+    LaunchedEffect(Unit) {
+        vm.loadGifts()
+    }
+
     LaunchedEffect(pagerState.currentPage) {
         vm.handleEvent(GiftContact.Event.OnSelectTab(pagerState.currentPage))
     }

@@ -113,9 +113,9 @@ fun EditGiftCategoryDialog(
                         return@SentyFilledButton
                     }
 
-                    giftCategory?.copy(name = categoryName)?.let {
-                        onComplete(it)
-                    } ?: run { 
+                    giftCategory?.let {
+                        onComplete(it.copy(name = categoryName))
+                    } ?: run {
                         onComplete(GiftCategoryUiModel(name = categoryName))
                     }
                 }

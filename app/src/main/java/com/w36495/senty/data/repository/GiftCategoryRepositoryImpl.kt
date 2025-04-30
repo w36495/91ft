@@ -54,6 +54,17 @@ class GiftCategoryRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun fetchCategory(categoryId: String): Result<GiftCategory> {
+        return try {
+            val category = _categories.value.find { it.id == categoryId }
+            category?.let {
+                Result.success(it)
+            } ?: Result.failure(Exception("카테고리가 존재하지 않습니다."))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override suspend fun insertCategory(category: GiftCategory): Result<Unit> {
         return try {
             val response = giftCategoryService.insertCategory(userId, category.toEntity())

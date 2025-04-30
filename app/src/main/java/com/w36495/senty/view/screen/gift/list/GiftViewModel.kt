@@ -88,7 +88,7 @@ class GiftViewModel @Inject constructor(
             initialValue     = GiftContact.State(isLoading = true),
         )
 
-    init {
+    fun loadGifts() {
         viewModelScope.launch {
             giftRepository.fetchGifts()
         }

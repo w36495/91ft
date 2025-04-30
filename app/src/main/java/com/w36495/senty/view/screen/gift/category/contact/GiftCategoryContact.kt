@@ -18,7 +18,7 @@ sealed interface GiftCategoryContact {
         data class OnClickEdit(val category: GiftCategoryUiModel?) : Event
         data class OnClickDelete(val category: GiftCategoryUiModel?) : Event
         data object OnSelectDelete : Event
-        data object OnSelectEdit : Event
+        data class OnSelectEdit(val category: GiftCategoryUiModel) : Event
     }
 
     sealed interface Effect {

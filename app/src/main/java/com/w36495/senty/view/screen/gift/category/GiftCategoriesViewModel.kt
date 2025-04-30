@@ -7,6 +7,7 @@ import com.w36495.senty.data.mapper.toDomain
 import com.w36495.senty.data.mapper.toUiModel
 import com.w36495.senty.domain.repository.GiftCategoryRepository
 import com.w36495.senty.domain.usecase.DeleteGiftCategoryUseCase
+import com.w36495.senty.domain.usecase.UpdateGiftCategoryUseCase
 import com.w36495.senty.view.screen.gift.category.contact.GiftCategoryContact
 import com.w36495.senty.view.screen.gift.category.model.GiftCategoryUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,6 +26,7 @@ import javax.inject.Inject
 class GiftCategoriesViewModel @Inject constructor(
     private val giftCategoryRepository: GiftCategoryRepository,
     private val deleteGiftCategoryUseCase: DeleteGiftCategoryUseCase,
+    private val updateGiftCategoryUseCase: UpdateGiftCategoryUseCase,
 ) : ViewModel() {
     private val _effect = Channel<GiftCategoryContact.Effect>()
     val effect = _effect.receiveAsFlow()
@@ -106,9 +108,11 @@ class GiftCategoriesViewModel @Inject constructor(
                 }
             }
             is GiftCategoryContact.Event.OnSelectEdit -> {
-                state.value.selectedCategory?.let {
-                    editGiftCategory(it)
+                _state.update { state ->
+                    state.copy(selectedCategory = event.category)
                 }
+
+                editGiftCategory(event.category)
             }
             is GiftCategoryContact.Event.OnClickDelete -> {
                 viewModelScope.launch {
@@ -164,31 +168,29 @@ class GiftCategoriesViewModel @Inject constructor(
 
     private fun editGiftCategory(category: GiftCategoryUiModel) {
         viewModelScope.launch {
-            _state.update {
-                it.copy(
-                    isLoading = true,
-                    selectedCategory = null,
-                )
-            }
+            _state.update { it.copy(isLoading = true) }
 
-            val result = giftCategoryRepository.updateCategory(category.toDomain())
+            val result = updateGiftCategoryUseCase(category.toDomain())
 
             result
                 .onSuccess {
                     _state.update {
                         it.copy(
-                            isLoading = true,
+                            isLoading = false,
+                            selectedCategory = null,
                             showEditCategoryDialog = false,
                         )
                     }
                     sendEffect(GiftCategoryContact.Effect.ShowToast("수정 완료되었습니다."))
+                    giftCategoryRepository.fetchCategories()
                 }
                 .onFailure {
                     Log.d("GiftCategoryVM", it.stackTraceToString())
-                    _state.update {
-                        it.copy(
+                    _state.update { state ->
+                        state.copy(
                             isLoading = true,
                             showEditCategoryDialog = false,
+                            selectedCategory = null,
                         )
                     }
                     sendEffect(GiftCategoryContact.Effect.ShowError("오류가 발생하였습니다."))
