@@ -57,9 +57,13 @@ class EditFriendViewModel @Inject constructor(
                 sendEffect(EditFriendContact.Effect.NavigateToFriendGroups)
             }
             EditFriendContact.Event.OnClickSave -> {
+                if (!validateInput()) return
+
                 saveFriend(uiState.value.friend)
             }
             EditFriendContact.Event.OnClickEdit -> {
+                if (!validateInput()) return
+
                 editFriend(uiState.value.friend)
             }
             EditFriendContact.Event.OnClickBack -> {
@@ -159,5 +163,19 @@ class EditFriendViewModel @Inject constructor(
         _uiState.update { state ->
             state.copy(isLoading = newState)
         }
+    }
+
+    private fun validateInput(): Boolean {
+        val validName = _uiState.value.friend.name.isNotEmpty()
+        val validGroup = _uiState.value.friend.groupId.isNotEmpty() && _uiState.value.friend.groupName.isNotEmpty()
+
+        _uiState.update {
+            it.copy(
+                isErrorName = !validName,
+                isErrorGroup = !validGroup,
+            )
+        }
+
+        return validName && validGroup
     }
 }

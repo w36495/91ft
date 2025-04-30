@@ -23,6 +23,7 @@ import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -198,11 +199,12 @@ private fun EditFriendScreen(
                     .padding(bottom = 88.dp)
                     .verticalScroll(rememberScrollState()),
             ) {
-                InputSection(
+                NameInputSection(
                     modifier = Modifier.fillMaxWidth(),
                     title = stringResource(id = R.string.friend_edit_name_text),
                     text = friend.name,
                     placeHolder = stringResource(id = R.string.friend_edit_name_hint_text),
+                    isError = uiState.isErrorName,
                     onChangeText = onChangeName,
                 )
 
@@ -211,6 +213,7 @@ private fun EditFriendScreen(
                 GroupSection(
                     modifier = Modifier.fillMaxWidth(),
                     group = FriendGroupUiModel(id = friend.groupId, name = friend.groupName, color = friend.groupColor),
+                    isError = uiState.isErrorGroup,
                     onFriendGroupClick = {
                         focusManager.clearFocus()
                         openFriendGroupSelectionDialog = true
@@ -273,27 +276,41 @@ private fun EditFriendScreen(
 }
 
 @Composable
-private fun InputSection(
+private fun NameInputSection(
     modifier: Modifier = Modifier,
     title: String,
     text: String,
     placeHolder: String,
+    isError: Boolean,
     onChangeText: (String) -> Unit
 ) {
     Column(
         modifier = modifier
     ) {
-        Text(
-            text = title,
-            style = SentyTheme.typography.labelSmall
-                .copy(color = SentyGray70),
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = title,
+                style = SentyTheme.typography.labelSmall
+                    .copy(color = SentyGray70),
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+
+            Text(
+                text = stringResource(id = R.string.common_required_star),
+                style = SentyTheme.typography.labelSmall
+                    .copy(color = MaterialTheme.colorScheme.error),
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+        }
+
         SentyTextField(
             modifier = Modifier.fillMaxWidth(),
             text = text,
             hint = placeHolder,
-            errorMsg = "",
+            errorMsg = stringResource(id = R.string.friend_edit_name_error_text),
+            isError = isError,
             onChangeText = {
                 onChangeText(it)
             },
@@ -366,24 +383,35 @@ fun BirthdayInputSection(
 private fun GroupSection(
     modifier: Modifier = Modifier,
     group: FriendGroupUiModel,
+    isError: Boolean,
     onFriendGroupClick: () -> Unit
 ) {
     Column(
         modifier = modifier.clickable { onFriendGroupClick() }
     ) {
-        Text(
-            text = stringResource(id = R.string.friend_edit_group_text),
-            style = SentyTheme.typography.labelSmall
-                .copy(color = SentyGray70),
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
+        Row (
+            modifier = Modifier.padding(bottom = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(id = R.string.friend_edit_group_text),
+                style = SentyTheme.typography.labelSmall
+                    .copy(color = SentyGray70),
+            )
+
+            Text(
+                text = stringResource(id = R.string.common_required_star),
+                style = SentyTheme.typography.labelSmall
+                    .copy(color = MaterialTheme.colorScheme.error),
+            )
+        }
 
         SentyReadOnlyTextField(
-            text = stringResource(id = R.string.friend_edit_group_hint_text),
+            text = stringResource(id = if (isError) R.string.friend_edit_group_ereror_text else R.string.friend_edit_group_hint_text),
             group = group,
             showChip = group != FriendGroupUiModel.emptyFriendGroup,
-            textColor = SentyGray50,
-            dividerColor = SentyGreen60,
+            textColor = if (isError) MaterialTheme.colorScheme.error else SentyGray50,
+            dividerColor = if (isError) MaterialTheme.colorScheme.error else SentyGreen60,
             textStyle = SentyTheme.typography.bodyMedium,
         )
     }
