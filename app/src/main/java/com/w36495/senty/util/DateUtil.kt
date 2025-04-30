@@ -1,5 +1,7 @@
 package com.w36495.senty.util
 
+import org.threeten.bp.LocalDate
+import org.threeten.bp.format.DateTimeFormatter
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -47,6 +49,34 @@ class DateUtil {
             val calDay = getIgnoredTimeDays(savedScheduleDate) - getIgnoredTimeDays(currentDate)
 
             return (calDay / (24 * 60 * 60 * 1000)).toInt()
+        }
+
+        /**
+         * 오늘 날짜로부터 D-Day 계산을 위한 함수입니다.
+         */
+        fun calculateDays(date: String): Int {
+            val (year, month, day) = DateUtil.getCurrentDate().map { it.toInt() }
+            val (tYear, tMonth, tDay) = date.split("-").map { it.toInt() }
+            val currentCalendar = Calendar.getInstance().apply {
+                set(year, month, day)
+            }.time.time
+
+            val targetCalendar = Calendar.getInstance().apply {
+                set(tYear, tMonth, tDay)
+            }.time.time
+
+            return ((targetCalendar - currentCalendar) / (1000 * 60 * 60 * 24)).toInt()
+        }
+
+        /**
+         * 오늘 포함하여 이후의 일정인지 확인하는 함수입니다.
+         */
+        fun isTodayOrAfter(dateString: String): Boolean {
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+            val inputDate = LocalDate.parse(dateString, formatter)
+            val today = LocalDate.now()
+
+            return !inputDate.isBefore(today)
         }
 
         private fun getIgnoredTimeDays(time: Long): Long {
