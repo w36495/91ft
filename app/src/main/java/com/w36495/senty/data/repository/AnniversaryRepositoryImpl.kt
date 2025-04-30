@@ -39,7 +39,7 @@ class AnniversaryRepositoryImpl @Inject constructor(
 
                     val schedules = jsonElement.jsonObject.map { (key, jsonElement) ->
                         Json.decodeFromJsonElement<ScheduleEntity>(jsonElement).toDomain(key)
-                    }.toList()
+                    }.sortedBy { it.date }.toList()
 
                     _schedules.update { schedules }
                     Result.success(Unit)

@@ -46,7 +46,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -54,7 +53,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.w36495.senty.R
 import com.w36495.senty.util.dropShadow
 import com.w36495.senty.view.component.SentyAsyncImage
-import com.w36495.senty.view.entity.Schedule
 import com.w36495.senty.view.screen.home.contact.HomeContact
 import com.w36495.senty.view.screen.home.model.HomeGiftUiModel
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
@@ -75,7 +73,6 @@ fun HomeRoute(
     moveToGiftDetail: (String) -> Unit,
 ) {
     val uiState by vm.state.collectAsStateWithLifecycle()
-    val schedules by vm.schedules.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         vm.effect.collect { effect ->
@@ -92,7 +89,6 @@ fun HomeRoute(
     HomeScreen(
         modifier = Modifier.padding(bottom = padding.calculateBottomPadding(), top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()),
         uiState = uiState,
-        schedules = schedules,
         onClickGifts = { vm.handleEvent(HomeContact.Event.OnClickGifts) },
         onClickGiftDetail = { vm.handleEvent(HomeContact.Event.OnClickGift(it)) },
     )
@@ -102,7 +98,6 @@ fun HomeRoute(
 private fun HomeScreen(
     modifier: Modifier = Modifier,
     uiState: HomeContact.State,
-    schedules: List<Schedule>,
     onClickGifts: () -> Unit,
     onClickGiftDetail: (String) -> Unit,
 ) {
@@ -159,8 +154,8 @@ private fun HomeScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    if (schedules.isEmpty()) EmptyGifts(stringResource(id = R.string.home_anniversary_empty_text))
-                    else ScheduleWithDateList(schedules = schedules)
+                    if (uiState.schedules.isEmpty()) EmptyGifts(stringResource(id = R.string.home_anniversary_empty_text))
+                    else ScheduleWithDateList(schedules = uiState.schedules)
 
                     Spacer(modifier = Modifier.height(48.dp))
 
@@ -532,49 +527,5 @@ private fun GiftCardItem(
                 )
             }
         }
-    }
-}
-
-//@Preview(showBackground = true, widthDp = 1080, heightDp = 1500)
-//@Composable
-//private fun HomeContentsPreview() {
-//    HomeScreen(
-//        sentGiftUiState = HomeGiftUiState.Success(
-//            List(10) {
-//                Gift(
-//                    giftDetail = GiftDetail(
-//                        category = GiftCategory(name = "생일"),
-//                        friend = FriendUiModel2(
-//                            name = "지수",
-//                            birthday = "",
-//                            memo = "",
-//                        ),
-//                        date = "2025-12-11",
-//                        mood = "",
-//                        memo = ""
-//                    )
-//                )
-//            }
-//        ),
-//        receivedGiftUiState = HomeGiftUiState.Empty,
-//        schedules = List(5) {
-//                            Schedule(
-//                                title = "기념일",
-//                                date = "2025-04-24"
-//                            )
-//        },
-////        schedules = emptyList(),
-//        onClickGifts = {},
-//        onClickGiftDetail = {},
-//    )
-//}
-
-@Preview(showBackground = true)
-@Composable
-private fun LoadingGiftsPreview() {
-    SentyTheme {
-        LoadingGifts(
-            loadingText = "선물을 불러오고 있습니다."
-        )
     }
 }

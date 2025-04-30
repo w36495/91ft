@@ -10,7 +10,6 @@ import com.w36495.senty.domain.repository.FriendRepository
 import com.w36495.senty.domain.repository.GiftImageRepository
 import com.w36495.senty.domain.repository.GiftRepository
 import com.w36495.senty.util.DateUtil
-import com.w36495.senty.view.entity.Schedule
 import com.w36495.senty.view.screen.home.contact.HomeContact
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -19,9 +18,8 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -40,12 +38,8 @@ class HomeViewModel @Inject constructor(
     private val _state = MutableStateFlow(HomeContact.State())
     val state get() = _state.asStateFlow()
 
-    private var _schedules = MutableStateFlow<List<Schedule>>(emptyList())
-    val schedules = _schedules.asStateFlow()
-
     init {
-        observeGifts()
-        getSchedules()
+        observeState()
     }
 
     fun handleEvent(event: HomeContact.Event) {
@@ -68,12 +62,13 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             giftRepository.fetchGifts()
             friendRepository.fetchFriends()
+            anniversaryRepository.fetchSchedules()
         }
     }
 
-    private fun observeGifts() {
+    private fun observeState() {
         viewModelScope.launch {
-            Log.d("HomeVM","🟢 선물 조회 시작")
+            Log.d("HomeVM","🟢 홈 데이터 조회 시작")
             _state.update {
                 it.copy(
                     isReceivedGiftLoading = true,
@@ -83,23 +78,26 @@ class HomeViewModel @Inject constructor(
 
             fetchInitialData()
 
-            // ➋ 방출된 목록 처리
-            giftRepository.gifts
-                .map { gifts ->
-                    val received = gifts.filter { it.type == GiftType.RECEIVED }
-                        .sortedByDescending { it.createdAt }
-                        .take(9)
-                        .map { it.toHomeUiModel() }
-                    val sent     = gifts.filter { it.type == GiftType.SENT }
-                        .sortedByDescending { it.createdAt }
-                        .take(9)
-                        .map { it.toHomeUiModel() }
-                    received to sent
-                }
-                .catch {
-                    Log.d("HomeVM","🔴 선물 조회 실패")
-                }
-                .collectLatest { (received, sent) ->
+            combine(
+                giftRepository.gifts,
+                anniversaryRepository.schedules
+            ) { gifts, schedules ->
+                val received = gifts.filter { it.type == GiftType.RECEIVED }
+                    .sortedByDescending { it.createdAt }
+                    .take(9)
+                    .map { it.toHomeUiModel() }
+                val sent     = gifts.filter { it.type == GiftType.SENT }
+                    .sortedByDescending { it.createdAt }
+                    .take(9)
+                    .map { it.toHomeUiModel() }
+
+                val homeSchedules = schedules
+                    .filter { DateUtil.isTodayOrAfter(it.date) }
+                    .map { it.toHomeUiModel() }
+
+                Triple(received, sent, homeSchedules)
+            }
+                .collectLatest { (received, sent, schedules) ->
                     val enrichedReceivedGifts = coroutineScope {
                         received.map { gift ->
                             async {
@@ -130,27 +128,11 @@ class HomeViewModel @Inject constructor(
                             isSentGiftLoading = false,
                             receivedGifts = enrichedReceivedGifts,
                             sentGifts = enrichedSentGifts,
+                            schedules = schedules,
                         )
                     }
 
-                    Log.d("HomeVM","🟢 선물 조회 완료")
-                }
-        }
-    }
-
-
-    fun getSchedules() {
-        viewModelScope.launch {
-            anniversaryRepository.getSchedules()
-                .map { schedules ->
-                    schedules.filter { DateUtil.calRemainDate(it.date) >= 0 }
-                }
-                .collectLatest { schedules ->
-                    val sortedSchedules = schedules.sortedBy { it.date }
-
-                    if (schedules.size > 2) {
-                        _schedules.value = sortedSchedules.subList(0, 1).toList()
-                    } else _schedules.value = sortedSchedules.toList()
+                    Log.d("HomeVM","🟢 홈 데이터 조회 완료")
                 }
         }
     }

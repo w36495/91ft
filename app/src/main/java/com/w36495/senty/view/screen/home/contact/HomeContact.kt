@@ -1,12 +1,14 @@
 package com.w36495.senty.view.screen.home.contact
 
 import com.w36495.senty.view.screen.home.model.HomeGiftUiModel
+import com.w36495.senty.view.screen.home.model.HomeScheduleUiModel
 
 sealed interface HomeContact {
     data class State(
         val isReceivedGiftLoading: Boolean = true,
         val isSentGiftLoading: Boolean = true,
         val isAnniversaryLoading: Boolean = true,
+        val schedules: List<HomeScheduleUiModel> = emptyList(),
         val receivedGifts: List<HomeGiftUiModel> = emptyList(),
         val sentGifts: List<HomeGiftUiModel> = emptyList(),
     )

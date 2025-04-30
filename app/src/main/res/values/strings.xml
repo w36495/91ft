@@ -121,6 +121,10 @@
     <string name="home_anniversary_title">다가오는 기념일</string>
     <string name="home_anniversary_empty_text">기념일을 등록해보세요.</string>
 
+    <string name="home_anniversary_label_before">지난 기념일</string>
+    <string name="home_anniversary_label_today">오늘</string>
+    <string name="home_anniversary_label_after">일 후</string>
+
     <string name="home_gift_received_title">최근 받은 선물</string>
     <string name="home_gift_sent_title">최근 준 선물</string>
     <string name="home_gift_loading_text">선물을 불러오고 있습니다.</string>
