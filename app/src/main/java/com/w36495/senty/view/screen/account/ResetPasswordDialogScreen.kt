@@ -20,8 +20,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.w36495.senty.R
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
 import com.w36495.senty.view.ui.component.buttons.SentyOutlinedButton
@@ -62,38 +64,38 @@ fun FindPasswordDialogScreen(
                     ),
                     title = {
                         Text(
-                            text = "비밀번호 재설정",
+                            text = stringResource(id = R.string.reset_password_title),
                             style = SentyTheme.typography.headlineSmall
                                 .copy(color = SentyBlack),
                         )
                     }
                 )
                 Text(
-                    text = "이메일",
-                    style = SentyTheme.typography.bodyMedium
+                    text = stringResource(id = R.string.reset_password_email_text),
+                    style = SentyTheme.typography.labelSmall
                         .copy(color = SentyGray50),
                 )
 
                 SentyEmailTextField(
                     text = email,
-                    hint = "이메일을 입력해주세요",
+                    hint = stringResource(id = R.string.reset_password_hint_text),
                     isError = hasEmailError,
                     errorMsg = emailErrorMsg,
                     onChangeText = {
                         email = it
-                    }
+                    },
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 SentyFilledButton(
-                    text = "확인",
+                    text = stringResource(id = R.string.common_confirm),
                     onClick = { vm.sendPasswordResetEmail(email) },
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 SentyOutlinedButton(
-                    text = "취소",
+                    text = stringResource(id = R.string.common_cancel),
                     onClick = { onDismiss() },
                     modifier = Modifier
                         .fillMaxWidth()

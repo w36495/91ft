@@ -97,7 +97,7 @@
 
     <string name="signup_password_title">비밀번호</string>
     <string name="signup_password_title_sub1">영문자/숫자로 입력해주세요. (8자 이상)</string>
-    <string name="signup_password_hint_text">비밀번호</string>
+    <string name="signup_password_hint_text">비밀번호 입력</string>
     <string name="signup_password_confirm_hint_text">비밀번호 확인</string>
 
     <string name="signup_error1">필수입력입니다.</string>
@@ -107,6 +107,11 @@
     <string name="signup_error_check_email">이미 존재하는 이메일입니다.</string>
 
     <string name="signup_msg_complete">회원가입이 완료되었습니다.</string>
+
+    <!-- 비밀번호 재설정 -->
+    <string name="reset_password_title">비밀번호 재설정</string>
+    <string name="reset_password_email_text">이메일</string>
+    <string name="reset_password_hint_text">이메일 입력</string>
 
     <!-- 로그인 -->
     <string name="login_title">로그인</string>
