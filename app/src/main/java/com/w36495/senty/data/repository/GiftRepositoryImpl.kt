@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonObject
+import org.threeten.bp.LocalDate
 import javax.inject.Inject
 
 class GiftRepositoryImpl @Inject constructor(
@@ -69,7 +70,7 @@ class GiftRepositoryImpl @Inject constructor(
 
                     val gifts = responseJson.jsonObject.map { (key, jsonElement) ->
                         Json.decodeFromJsonElement<GiftEntity>(jsonElement).toDomain(key)
-                    }.toList()
+                    }.toList().sortedByDescending { LocalDate.parse(it.date) }
 
                     Log.d("GiftRepo","🟢 선물 조회 완료")
                     _gifts.update { gifts }

@@ -49,7 +49,6 @@ class GiftViewModel @Inject constructor(
                 GiftTabType.ALL -> true
             }
         }
-            .sortedBy { it.createdAt }
             .map { it.toGiftListUiModel() }
     }
         .flatMapLatest { uiList ->

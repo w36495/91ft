@@ -83,11 +83,9 @@ class HomeViewModel @Inject constructor(
                 anniversaryRepository.schedules
             ) { gifts, schedules ->
                 val received = gifts.filter { it.type == GiftType.RECEIVED }
-                    .sortedByDescending { it.createdAt }
                     .take(9)
                     .map { it.toHomeUiModel() }
                 val sent     = gifts.filter { it.type == GiftType.SENT }
-                    .sortedByDescending { it.createdAt }
                     .take(9)
                     .map { it.toHomeUiModel() }
 
