@@ -12,11 +12,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -37,23 +40,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.cheonjaeung.compose.grid.SimpleGridCells
 import com.cheonjaeung.compose.grid.VerticalGrid
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.PagerState
-import com.google.accompanist.pager.rememberPagerState
-import com.w36495.senty.view.entity.Schedule
+import com.w36495.senty.view.screen.anniversary.model.ScheduleUiModel
+import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.dialogs.DateWheelPickerDialog
-import com.w36495.senty.view.ui.theme.Green40
+import com.w36495.senty.view.ui.theme.SentyGreen50
+import com.w36495.senty.view.ui.theme.SentyGreen60
+import com.w36495.senty.view.ui.theme.SentyYellow60
 import org.threeten.bp.DayOfWeek
 import org.threeten.bp.LocalDate
 import org.threeten.bp.format.DateTimeFormatter
 import org.threeten.bp.format.TextStyle
 import java.util.Locale
 
-@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun AnniversaryCalendar(
-    schedules: List<Schedule>,
+    schedules: List<ScheduleUiModel>,
     onSelectedDate: (Int, Int, Int) -> Unit,
 ) {
     val initialDate: LocalDate = LocalDate.now()
@@ -64,7 +65,7 @@ fun AnniversaryCalendar(
 
     val pagerState = rememberPagerState(
         initialPage = currentPage,
-        pageCount = (CalendarRange.LAST_YEAR - CalendarRange.START_YEAR) * 12
+        pageCount = { (CalendarRange.LAST_YEAR - CalendarRange.START_YEAR) * 12 }
     )
 
     LaunchedEffect(pagerState.currentPage) {
@@ -152,13 +153,15 @@ private fun CalendarHeader(
         ) {
             Text(
                 text = formattedDate,
-                style = MaterialTheme.typography.labelLarge,
+                style = SentyTheme.typography.bodySmall,
                 fontWeight = FontWeight.Medium
             )
+
             Icon(
-                imageVector = Icons.Default.ArrowDropDown,
+                imageVector = Icons.Rounded.ArrowDropDown,
                 contentDescription = null,
                 modifier = Modifier
+                    .padding(start = 2.dp)
                     .clip(CircleShape)
                     .clickable { showDateWheelPicker = true }
             )
@@ -196,7 +199,7 @@ private fun CalendarDayOfWeek(
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center,
                 text = it.getDisplayName(TextStyle.NARROW, Locale.KOREA),
-                style = MaterialTheme.typography.labelLarge,
+                style = SentyTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold,
                 color = if (it == DayOfWeek.SUNDAY) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
             )
@@ -204,13 +207,12 @@ private fun CalendarDayOfWeek(
     }
 }
 
-@OptIn(ExperimentalPagerApi::class)
 @Composable
 private fun CalendarDays(
     modifier: Modifier = Modifier,
     pagerState: PagerState,
     currentDate: LocalDate,
-    schedules: List<Schedule>,
+    schedules: List<ScheduleUiModel>,
     onSelectedDate: (Int) -> Unit,
 ) {
     val days by remember(currentDate) {
@@ -221,12 +223,13 @@ private fun CalendarDays(
     }
 
     val dayOfSchedules = schedules.filter {
-        it.getYear() == currentDate.year && it.getMonth() == currentDate.monthValue
-    }.map { it.getDay() }
+        val (year, month, day) = it.date.split("-").map { it.toInt() }
+        year == currentDate.year && month == currentDate.monthValue
+    }.map { it.date.split("-").map { it.toInt() }.last() }
 
     HorizontalPager(
         state = pagerState,
-        dragEnabled = true
+        userScrollEnabled = true
     ) {page ->
         VerticalGrid(
             columns = SimpleGridCells.Fixed(7),
@@ -281,7 +284,7 @@ private fun DayBox(
         Text(
             text = day.toString(),
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.labelLarge,
+            style = SentyTheme.typography.bodySmall,
             color = if (isToday) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
         )
     }

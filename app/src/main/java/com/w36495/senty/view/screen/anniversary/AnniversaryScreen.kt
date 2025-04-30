@@ -1,47 +1,56 @@
-package com.w36495.senty.view.screen.home
+package com.w36495.senty.view.screen.anniversary
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Scaffold
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.w36495.senty.util.DateUtil
-import com.w36495.senty.view.entity.Schedule
-import com.w36495.senty.view.screen.anniversary.AnniversaryBottomSheetDialog
-import com.w36495.senty.view.screen.anniversary.AnniversaryCalendar
-import com.w36495.senty.view.screen.anniversary.AnniversaryDialogType
+import com.w36495.senty.R
+import com.w36495.senty.view.screen.anniversary.contact.AnniversaryContact
+import com.w36495.senty.view.screen.anniversary.edit.AnniversaryBottomSheet
+import com.w36495.senty.view.screen.anniversary.edit.AnniversaryBottomSheetType
+import com.w36495.senty.view.screen.anniversary.model.ScheduleUiModel
+import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyOutlinedButton
 import com.w36495.senty.view.ui.component.cards.ScheduleCard
+import com.w36495.senty.view.ui.theme.SentyGray60
+import com.w36495.senty.view.ui.theme.SentyGray80
+import com.w36495.senty.view.ui.theme.SentyGreen60
+import com.w36495.senty.view.ui.theme.SentyWhite
+import com.w36495.senty.view.ui.theme.SentyYellow60
 import com.w36495.senty.viewModel.AnniversaryViewModel
 
 @Composable
@@ -50,133 +59,161 @@ fun AnniversaryRoute(
     padding: PaddingValues,
     onShowGlobalErrorSnackBar: (throwable: Throwable?) -> Unit,
 ) {
-    val schedules by vm.schedules.collectAsStateWithLifecycle()
-    val schedulesOfSelectionDate by vm.schedulesOfSelectionDate.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    LaunchedEffect(true) {
-        vm.snackMsg.collect{
-            snackbarHostState.showSnackbar(it)
-        }
-    }
+    val uiState by vm.state.collectAsStateWithLifecycle()
 
     AnniversaryScreen(
-        schedules = schedules,
-        schedulesOfSelectionDate = schedulesOfSelectionDate,
-        snackbarHostState = snackbarHostState,
-        onClickDate = { year, month, day ->
-            vm.getSchedules(year, month, day)
+        modifier = Modifier.padding(bottom = padding.calculateBottomPadding()),
+        uiState = uiState,
+        onSelectDate = { year, month, day ->
+            vm.handleEvent(AnniversaryContact.Event.UpdateSelectedDate(year, month, day))
         },
-        onClickDelete = { vm.removeSchedule(it) }
+        onClickSchedule = { vm.handleEvent(AnniversaryContact.Event.OnClickSchedule(it)) },
+        onClickAddSchedule = { vm.handleEvent(AnniversaryContact.Event.OnClickAddSchedule) },
+        onClickCloseScheduleBottomSheet = { vm.handleEvent(AnniversaryContact.Event.OnClickCloseScheduleBottomSheet) },
+        onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AnniversaryScreen(
-    schedules: List<Schedule>,
-    schedulesOfSelectionDate: List<Schedule>,
-    snackbarHostState: SnackbarHostState,
-    onClickDate: (Int, Int, Int) -> Unit,
-    onClickDelete: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    uiState: AnniversaryContact.State,
+    onSelectDate: (Int, Int, Int) -> Unit,
+    onClickAddSchedule: () -> Unit,
+    onClickSchedule: (ScheduleUiModel) -> Unit,
+    onClickCloseScheduleBottomSheet: () -> Unit,
+    onShowGlobalErrorSnackBar: (throwable: Throwable?) -> Unit,
 ) {
-    val scaffoldState = androidx.compose.material.rememberBottomSheetScaffoldState()
+    var bottomSheetType by remember { mutableStateOf(AnniversaryBottomSheetType.READ) }
+    val scaffoldState = rememberScaffoldState()
+    val bottomSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
+    )
 
-    var showAddDialog by remember { mutableStateOf(false) }
-    var showReadDialog by remember { mutableStateOf(false) }
-    var savedSchedule by remember { mutableStateOf(Schedule.emptySchedule) }
-    val currentDate = DateUtil.getCurrentDate().map { it.toInt() }
-    var year by remember { mutableIntStateOf(currentDate[0]) }
-    var month by remember { mutableIntStateOf(currentDate[1]) }
-    var day by remember { mutableIntStateOf(currentDate[2]) }
-
-    LaunchedEffect(showAddDialog || showReadDialog) {
-        if (showAddDialog || showReadDialog) scaffoldState.bottomSheetState.expand()
-        else scaffoldState.bottomSheetState.collapse()
+    if (uiState.showBottomSheet) {
+        AnniversaryBottomSheet(
+            sheetState = bottomSheetState,
+            scheduleId = uiState.selectedSchedule?.id,
+            type = bottomSheetType,
+            selectedDate = uiState.selectedDate,
+            onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
+            onChangeBottomSheetType = { bottomSheetType = AnniversaryBottomSheetType.EDIT },
+            onDismiss = {
+                bottomSheetType = AnniversaryBottomSheetType.READ
+                onClickCloseScheduleBottomSheet()
+            },
+        )
     }
 
-    BottomSheetScaffold(
-        sheetContent = {
-            if (showAddDialog) {
-                AnniversaryBottomSheetDialog(
-                    selectDate = listOf(year, month, day),
-                    onDismiss = { showAddDialog = false },
-                    onComplete = { showAddDialog = false },
-                )
-            } else if (showReadDialog) {
-                val savedDate = savedSchedule.date.split("-").map { it.toInt() }
-
-                AnniversaryBottomSheetDialog(
-                    type = AnniversaryDialogType.READ,
-                    schedule = savedSchedule,
-                    selectDate = savedDate,
-                    onDismiss = {
-                        showReadDialog = false
-                    },
-                    onClickDelete = { onClickDelete(it) },
-                    onComplete = { showReadDialog = false }
-                )
-            }
-        },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+    Scaffold(
+        modifier = modifier,
         scaffoldState = scaffoldState,
-        sheetPeekHeight = 0.dp,
-        sheetShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(text = "기념일") },
+                title = {
+                    Text(
+                        text = stringResource(id = R.string.anniversary_title),
+                        style = SentyTheme.typography.headlineSmall,
+                    )
+                },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = Color.White
-                )
+                ),
             )
-        }) {
-        Column(
+        }
+    ) { innerPadding ->
+        Box(
             modifier = Modifier
+                .padding(innerPadding)
                 .fillMaxSize()
-                .padding(it)
-                .background(Color(0xFFFBFBFB))
-                .verticalScroll(rememberScrollState())
+                .background(SentyWhite)
         ) {
-            TopCalendarSection(
-                modifier = Modifier.fillMaxWidth(),
-                schedules = schedules,
-                onClickDate = { y, m, d ->
-                    year = y
-                    month = m
-                    day = d
-
-                    onClickDate(y, m, d)
-                }
-            )
-
-            SentyOutlinedButton(
-                text = "새로운 기념일 등록하기",
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 16.dp)
-                    .background(Color.White)
-            ) { showAddDialog = true }
+                    .fillMaxSize()
+                    .background(Color(0xFFFBFBFB))
+                    .verticalScroll(rememberScrollState())
+            ) {
+                TopCalendarSection(
+                    modifier = Modifier.fillMaxWidth(),
+                    schedules = uiState.schedules,
+                    onClickDate = { year, month, day -> onSelectDate(year, month, day) },
+                )
 
-            BottomScheduleSection(
-                schedules = schedulesOfSelectionDate,
-                modifier = Modifier.fillMaxWidth(),
-                year = year,
-                month = month,
-                day = day,
-                onClickSchedule = { schedule ->
-                    savedSchedule = schedule
-                    showReadDialog = true
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End,
+                ) {
+                    ScheduleLabel(
+                        chipColor = SentyGreen60,
+                        text = stringResource(id = R.string.anniversary_label_today_text)
+                    )
+
+                    ScheduleLabel(
+                        chipColor = SentyYellow60,
+                        text = stringResource(id = R.string.anniversary_label_schedule_text)
+                    )
                 }
-            )
+
+                SentyOutlinedButton(
+                    text = stringResource(id = R.string.anniversary_button_add_text),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 16.dp)
+                        .background(Color.White),
+                    onClick = {
+                        bottomSheetType = AnniversaryBottomSheetType.EDIT
+                        onClickAddSchedule()
+                    },
+                )
+
+                BottomScheduleSection(
+                    schedules = uiState.selectedSchedules,
+                    year = uiState.selectedDate.first,
+                    month = uiState.selectedDate.second,
+                    day = uiState.selectedDate.third,
+                    onClickSchedule = { schedule ->
+                        bottomSheetType = AnniversaryBottomSheetType.READ
+                        onClickSchedule(schedule)
+                    },
+                )
+            }
         }
     }
 }
 
 @Composable
+private fun ScheduleLabel(
+    chipColor: Color,
+    text: String,
+) {
+    Row (
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(12.dp)
+                .background(
+                    color = chipColor,
+                    shape = CircleShape,
+                )
+        )
+        Text(
+            text = text,
+            modifier = Modifier.padding(horizontal = 8.dp),
+            style = SentyTheme.typography.labelSmall,
+        )
+    }
+}
+@Composable
 private fun TopCalendarSection(
     modifier: Modifier = Modifier,
-    schedules: List<Schedule>,
+    schedules: List<ScheduleUiModel>,
     onClickDate: (Int, Int, Int) -> Unit,
 ) {
     Box(
@@ -206,29 +243,43 @@ private fun BottomScheduleSection(
     year: Int,
     month: Int,
     day: Int,
-    schedules: List<Schedule>,
-    onClickSchedule: (Schedule) -> Unit,
+    schedules: List<ScheduleUiModel>,
+    onClickSchedule: (ScheduleUiModel) -> Unit,
 ) {
     Column(
         modifier = modifier
+            .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .padding(top = 16.dp)
     ) {
         Text(
             text = "${year}년 ${month}월 ${day}일",
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurface.copy(0.8f),
-            fontWeight = FontWeight.Bold
+            style = SentyTheme.typography.titleMedium
+                .copy(fontWeight = FontWeight.Bold),
+            color = SentyGray80,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        schedules.forEachIndexed { index, schedule ->
-            ScheduleCard(
-                schedule = schedule,
-                onClickSchedule = { onClickSchedule(it) }
-            )
-            Spacer(modifier = Modifier.height(16.dp))
+        if (schedules.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = stringResource(id = R.string.anniversary_empty_text),
+                    style = SentyTheme.typography.labelSmall
+                        .copy(color = SentyGray60),
+                )
+            }
+        } else {
+            schedules.forEachIndexed { index, schedule ->
+                ScheduleCard(
+                    schedule = schedule,
+                    onClickSchedule = { onClickSchedule(it) }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
         }
     }
 }

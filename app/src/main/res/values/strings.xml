@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Senty</string>
+    <string name="app_name">91ft</string>
 
     <string name="toolbar_login">로그인</string>
     <string name="toolbar_signup">회원가입</string>
@@ -115,7 +115,7 @@
     <string name="login_password_hint_text">비밀번호</string>
     <string name="login_auto_text">자동 로그인</string>
     <string name="login_find_passowrd_text">비밀번호 재설정</string>
-    <string name="login_error1">아이디 혹은 비밀번호가 일치하지 않습니다.</string>
+    <string name="login_error_message">아이디 또는 비밀번호가 일치하지 않습니다.</string>
 
     <!-- 홈 -->
     <string name="home_anniversary_title">다가오는 기념일</string>
@@ -239,6 +239,20 @@
 
     <string name="gift_categories_empty_text">선물 카테고리가 존재하지 않습니다.\n새로운 카테고리를 등록해보세요!</string>
 
+    <!-- 기념일 -->
+    <string name="anniversary_title">기념일</string>
+
+    <string name="anniversary_label_today_text">오늘</string>
+    <string name="anniversary_label_schedule_text">기념일</string>
+
+    <string name="anniversary_button_add_text">새로운 기념일 등록하기</string>
+    <string name="anniversary_empty_text">등록된 기념일이 없습니다.</string>
+
+    <string name="anniversary_delete_title">기념일을 삭제하시겠습니까?</string>
+    <string name="anniversary_delete_message_text">삭제된 기념일은 복구가 불가능합니다.</string>
+
+    <string name="anniversary_bottom_sheet_title_error_message_text">제목을 입력하세요.</string>
+
     <!-- 설정 -->
     <string name="settings_title">설정</string>
 
@@ -259,10 +273,12 @@
     <string name="common_save">저장</string>
     <string name="common_edit">수정</string>
     <string name="common_remove">삭제</string>
+    <string name="common_reset">초기화</string>
     <string name="common_heart">♥</string>
     <string name="common_received_gift_text">받은 선물</string>
     <string name="common_sent_gift_text">준 선물</string>
     <string name="common_required_star"> *</string>
 
-    <string name="common_error1">오류가 발생했습니다.</string>
+    <string name="common_error_unknown">오류가 발생하였습니다.</string>
+    <string name="common_error_message_network">네트워크 연결이 원활하지 않습니다.</string>
 </resources>
