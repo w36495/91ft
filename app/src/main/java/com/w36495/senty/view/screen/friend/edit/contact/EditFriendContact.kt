@@ -7,6 +7,8 @@ sealed interface EditFriendContact {
     data class State(
         val isLoading: Boolean = false,
         val friend: FriendUiModel = FriendUiModel(),
+        val isErrorName: Boolean = false,
+        val isErrorGroup: Boolean = false,
         val checkBirthdaySkipped: Boolean = false,
     )
 
