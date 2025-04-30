@@ -160,12 +160,14 @@ private fun GiftCategoriesScreen(
 
             if (uiState.showAddCategoryDialog) {
                 EditGiftCategoryDialog(
+                    isLoading = uiState.isLoading,
                     onComplete = { onClickAdd(it) },
                     onDismiss = { onClickAdd(null) },
                 )
             }
             if (uiState.showEditCategoryDialog) {
                 EditGiftCategoryDialog(
+                    isLoading = uiState.isLoading,
                     giftCategory = uiState.selectedCategory,
                     onComplete = { onSelectEdit(it) },
                     onDismiss = { onClickEdit(null) },
@@ -190,7 +192,7 @@ private fun GiftCategoriesScreen(
 private fun GiftCategoryPreview() {
     SentyTheme {
         GiftCategoriesScreen(
-            uiState = GiftCategoryContact.State(),
+            uiState = GiftCategoryContact.State(isLoading = true, showAddCategoryDialog = true),
             onBackPressed = {},
             onClickAdd = {},
             onClickEdit = {},

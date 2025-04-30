@@ -150,17 +150,17 @@ class GiftCategoriesViewModel @Inject constructor(
 
     private fun addGiftCategory(category: GiftCategoryUiModel) {
         viewModelScope.launch {
-            _state.update {
-                it.copy(isLoading = true)
-            }
+            _state.update { it.copy(isLoading = true) }
 
             val result = giftCategoryRepository.insertCategory(category.toDomain())
 
             result
                 .onSuccess {
+                    _state.update { it.copy(isLoading = false, showAddCategoryDialog = false) }
                     sendEffect(GiftCategoryContact.Effect.ShowToast("등록 완료되었습니다."))
                 }
                 .onFailure {
+                    _state.update { it.copy(isLoading = false, showAddCategoryDialog = false) }
                     sendEffect(GiftCategoryContact.Effect.ShowError("오류가 발생하였습니다."))
                 }
         }
