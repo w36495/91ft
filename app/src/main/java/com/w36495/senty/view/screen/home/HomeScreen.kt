@@ -48,6 +48,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.w36495.senty.R
@@ -64,6 +65,7 @@ import com.w36495.senty.view.ui.theme.SentyGreen60
 import com.w36495.senty.view.ui.theme.SentyPink60
 import com.w36495.senty.view.ui.theme.SentyWhite
 import com.w36495.senty.view.ui.theme.SentyYellow60
+import com.w36495.senty.view.ui.theme.antonFontFamily
 
 @Composable
 fun HomeRoute(
@@ -112,10 +114,10 @@ private fun HomeScreen(
         TopAppBar(
             title = {
                 Text(
-                    text = stringResource(id = R.string.app_name),
+                    text = stringResource(id = R.string.app_name).uppercase(),
                     color = SentyWhite,
-                    style = SentyTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
+                    fontFamily = antonFontFamily,
+                    fontSize = 16.sp,
                 )
             },
             elevation = 0.dp,

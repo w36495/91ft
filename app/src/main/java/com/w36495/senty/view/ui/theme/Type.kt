@@ -19,6 +19,10 @@ val pretendardFontFamily = FontFamily(
     Font(R.font.pretendard_black, FontWeight.Black, FontStyle.Normal),
 )
 
+val antonFontFamily = FontFamily(
+    Font(R.font.anton_regular, FontWeight.W400, FontStyle.Normal),
+)
+
 private val pretendardStyle = TextStyle(
     fontFamily = pretendardFontFamily,
     letterSpacing = (-0.6).sp,
