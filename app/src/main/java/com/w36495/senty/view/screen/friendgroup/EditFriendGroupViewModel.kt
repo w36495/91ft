@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.w36495.senty.data.mapper.toDomain
 import com.w36495.senty.domain.repository.FriendGroupRepository
+import com.w36495.senty.domain.usecase.UpdateFriendGroupUseCase
 import com.w36495.senty.view.screen.friendgroup.model.EditFriendGroupContact
 import com.w36495.senty.view.screen.friendgroup.model.FriendGroupUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,6 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class EditFriendGroupViewModel @Inject constructor(
     private val friendGroupRepository: FriendGroupRepository,
+    private val updateFriendGroupUseCase: UpdateFriendGroupUseCase,
 ): ViewModel() {
     private val _effect = Channel<EditFriendGroupContact.Effect>()
     val effect = _effect.receiveAsFlow()
@@ -59,12 +61,14 @@ class EditFriendGroupViewModel @Inject constructor(
 
     private fun editFriendGroup(friendGroup: FriendGroupUiModel) {
         viewModelScope.launch {
-            val result = friendGroupRepository.patchFriendGroup(friendGroup.toDomain())
+            _uiState.update { EditFriendGroupContact.State.Loading }
+
+            val result = updateFriendGroupUseCase(friendGroup.toDomain())
 
             result
                 .onSuccess {
-                    _uiState.update { EditFriendGroupContact.State.Success }
                     _effect.send(EditFriendGroupContact.Effect.NavigateFriendGroups("수정 완료되었습니다."))
+                    _uiState.update { EditFriendGroupContact.State.Success }
                 }
                 .onFailure {
                     _uiState.update { EditFriendGroupContact.State.Idle }
