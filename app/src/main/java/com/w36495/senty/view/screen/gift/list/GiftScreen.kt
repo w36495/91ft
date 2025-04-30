@@ -250,7 +250,7 @@ private fun GiftHorizontalViewPager(
                         else -> R.string.gift_empty_text_sent
                     }),
                     textAlign = TextAlign.Center,
-                    style = SentyTheme.typography.labelMedium.copy(color = SentyGray60),
+                    style = SentyTheme.typography.bodySmall.copy(color = SentyGray60),
                     modifier = Modifier.padding(top = 8.dp),
                 )
             }

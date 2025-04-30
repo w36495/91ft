@@ -313,7 +313,7 @@ fun FriendViewPagerEmptyItem(
             } else {
                 friendGroup.name + stringResource(id = R.string.friend_empty_group_text)
             },
-            style = SentyTheme.typography.bodyMedium
+            style = SentyTheme.typography.bodySmall
                 .copy(color = SentyGray70),
         )
     }

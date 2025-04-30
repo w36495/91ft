@@ -268,7 +268,7 @@ private fun BottomScheduleSection(
             ) {
                 Text(
                     text = stringResource(id = R.string.anniversary_empty_text),
-                    style = SentyTheme.typography.labelSmall
+                    style = SentyTheme.typography.bodySmall
                         .copy(color = SentyGray60),
                 )
             }
