@@ -30,9 +30,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -111,6 +109,8 @@ fun EditFriendRoute(
             } ?: vm.handleEvent(EditFriendContact.Event.OnClickSave)
         },
         onClickFriendGroupEdit = { vm.handleEvent(EditFriendContact.Event.OnClickFriendGroups) },
+        onClickCalendar = { vm.handleEvent(EditFriendContact.Event.OnClickCalendar) },
+        onClickFriendGroupSelectionDialog = { vm.handleEvent(EditFriendContact.Event.OnClickFriendGroupSelectionDialog) },
         onBackPressed = { vm.handleEvent(EditFriendContact.Event.OnClickBack) },
     )
 }
@@ -126,33 +126,29 @@ private fun EditFriendScreen(
     onChangeMemo: (String) -> Unit,
     onClickSave: () -> Unit,
     onClickFriendGroupEdit: () -> Unit,
+    onClickCalendar: () -> Unit,
+    onClickFriendGroupSelectionDialog: () -> Unit,
     onBackPressed: () -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    var openFriendGroupSelectionDialog by remember { mutableStateOf(false) }
-    var showCalendarDialog by remember { mutableStateOf(false) }
 
-    if (openFriendGroupSelectionDialog) {
-        FriendGroupSelectionDialog(
-            onDismiss = { openFriendGroupSelectionDialog = false },
-            onSelectFriendGroup = {
-                openFriendGroupSelectionDialog = false
-                onChangeFriendGroup(it)
-            },
-            onClickFriendGroupEdit = {
-                openFriendGroupSelectionDialog = false
-                onClickFriendGroupEdit()
-            }
-        )
-    }
-    if (showCalendarDialog) {
-        BasicCalendarDialog(
-            onDismiss = { showCalendarDialog = false },
-            onSelectedDate = { year, month, day ->
-                val birthday = "$year-${StringUtils.format2Digits(month + 1)}-${StringUtils.format2Digits(day)}"
-                onChangeBirthday(birthday, uiState.checkBirthdaySkipped)
-            }
-        )
+    when {
+        uiState.showCalendarDialog -> {
+            BasicCalendarDialog(
+                onDismiss = { onClickCalendar() },
+                onSelectedDate = { year, month, day ->
+                    val birthday = "$year-${StringUtils.format2Digits(month + 1)}-${StringUtils.format2Digits(day)}"
+                    onChangeBirthday(birthday, uiState.checkBirthdaySkipped)
+                }
+            )
+        }
+        uiState.showFriendGroupSelectionDialog -> {
+            FriendGroupSelectionDialog(
+                onDismiss = { onClickFriendGroupSelectionDialog() },
+                onSelectFriendGroup = { onChangeFriendGroup(it) },
+                onClickFriendGroupEdit = { onClickFriendGroupEdit() }
+            )
+        }
     }
 
     Scaffold(
@@ -182,8 +178,6 @@ private fun EditFriendScreen(
         Box(
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(top = 16.dp)
-                .padding(horizontal = 16.dp)
                 .fillMaxSize()
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
@@ -196,7 +190,7 @@ private fun EditFriendScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = 88.dp)
+                    .padding(top = 16.dp, bottom = 88.dp)
                     .verticalScroll(rememberScrollState()),
             ) {
                 NameInputSection(
@@ -214,10 +208,7 @@ private fun EditFriendScreen(
                     modifier = Modifier.fillMaxWidth(),
                     group = FriendGroupUiModel(id = friend.groupId, name = friend.groupName, color = friend.groupColor),
                     isError = uiState.isErrorGroup,
-                    onFriendGroupClick = {
-                        focusManager.clearFocus()
-                        openFriendGroupSelectionDialog = true
-                    }
+                    onFriendGroupClick = { onClickFriendGroupSelectionDialog() },
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -234,30 +225,36 @@ private fun EditFriendScreen(
                     },
                     onChangeText = onChangeBirthday,
                     enable = false,
-                    onClick = {
-                        focusManager.clearFocus()
-                        showCalendarDialog = true
-                    },
+                    onClick = { onClickCalendar() },
                     isCheckedBirthday = uiState.checkBirthdaySkipped,
                 )
 
-                Text(
-                    text = stringResource(id = R.string.friend_edit_memo_text),
-                    style = SentyTheme.typography.labelSmall
-                        .copy(color = SentyGray70),
-                    modifier = Modifier.padding(bottom = 12.dp, top = 16.dp)
-                )
-                SentyMultipleTextField(
-                    text = friend.memo,
-                    onChangeText = onChangeMemo,
-                    textStyle = SentyTheme.typography.bodyMedium,
-                )
+                Column(
+                    modifier = Modifier
+                        .padding(top = 16.dp)
+                        .padding(horizontal = 16.dp)
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.friend_edit_memo_text),
+                        style = SentyTheme.typography.labelSmall
+                            .copy(color = SentyGray70),
+                        modifier = Modifier
+                            .padding(bottom = 12.dp)
+                    )
+
+                    SentyMultipleTextField(
+                        text = friend.memo,
+                        onChangeText = onChangeMemo,
+                        textStyle = SentyTheme.typography.bodyMedium,
+                    )
+                }
             }
 
             SentyFilledButton(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
                     .padding(bottom = 24.dp),
                 text = stringResource(id = if (isEditMode) R.string.common_edit else R.string.common_save),
                 onClick = {
@@ -285,7 +282,7 @@ private fun NameInputSection(
     onChangeText: (String) -> Unit
 ) {
     Column(
-        modifier = modifier
+        modifier = modifier.padding(horizontal = 16.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -330,9 +327,10 @@ fun BirthdayInputSection(
     onChangeText: (String, Boolean) -> Unit,
     onClick: () -> Unit,
 ) {
-
     Column(
-        modifier = modifier.clickable { onClick() }
+        modifier = modifier
+            .clickable { if (!isCheckedBirthday) onClick() }
+            .padding(horizontal = 16.dp)
     ) {
         Row(modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -387,7 +385,9 @@ private fun GroupSection(
     onFriendGroupClick: () -> Unit
 ) {
     Column(
-        modifier = modifier.clickable { onFriendGroupClick() }
+        modifier = modifier
+            .clickable { onFriendGroupClick() }
+            .padding(horizontal = 16.dp)
     ) {
         Row (
             modifier = Modifier.padding(bottom = 12.dp),
@@ -422,7 +422,7 @@ private fun GroupSection(
 private fun CalendarPreview() {
     SentyTheme {
         EditFriendScreen(
-            uiState = EditFriendContact.State(isLoading = true),
+            uiState = EditFriendContact.State(isLoading = false),
             isEditMode = false,
             onChangeName = {},
             onChangeFriendGroup = {},
@@ -431,6 +431,8 @@ private fun CalendarPreview() {
             onClickSave = {},
             onClickFriendGroupEdit = {},
             onBackPressed = {},
+            onClickCalendar = {},
+            onClickFriendGroupSelectionDialog = {},
         )
 //        var isCheckedBirthday by remember { mutableStateOf(false) }
 //        var birthday by remember { mutableStateOf("") }

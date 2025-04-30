@@ -10,6 +10,8 @@ sealed interface EditFriendContact {
         val isErrorName: Boolean = false,
         val isErrorGroup: Boolean = false,
         val checkBirthdaySkipped: Boolean = false,
+        val showCalendarDialog: Boolean = false,
+        val showFriendGroupSelectionDialog: Boolean = false,
     )
 
     sealed interface Event {
@@ -17,6 +19,8 @@ sealed interface EditFriendContact {
         data object OnClickSave : Event
         data object OnClickEdit : Event
         data object OnClickBack : Event
+        data object OnClickCalendar : Event
+        data object OnClickFriendGroupSelectionDialog : Event
         data class UpdateFriendName(val name: String) : Event
         data class UpdateFriendGroup(val group: FriendGroupUiModel) : Event
         data class UpdateFriendBirthday(val birthday: String, val checkBirthdaySkipped: Boolean) : Event

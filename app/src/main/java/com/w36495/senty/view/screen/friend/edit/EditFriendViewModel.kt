@@ -69,6 +69,12 @@ class EditFriendViewModel @Inject constructor(
             EditFriendContact.Event.OnClickBack -> {
                 sendEffect(EditFriendContact.Effect.NavigateToFriends)
             }
+            EditFriendContact.Event.OnClickCalendar -> {
+                _uiState.update { it.copy(showCalendarDialog = !it.showCalendarDialog) }
+            }
+            EditFriendContact.Event.OnClickFriendGroupSelectionDialog -> {
+                _uiState.update { it.copy(showFriendGroupSelectionDialog = !it.showFriendGroupSelectionDialog) }
+            }
             is EditFriendContact.Event.UpdateFriendName -> {
                 updateFriendName(event.name)
             }
@@ -139,7 +145,8 @@ class EditFriendViewModel @Inject constructor(
                     groupId = friendGroup.id,
                     groupName = friendGroup.name,
                     groupColor = friendGroup.color
-                )
+                ),
+                showFriendGroupSelectionDialog = false,
             )
         }
     }
@@ -149,6 +156,7 @@ class EditFriendViewModel @Inject constructor(
             state.copy(
                 friend = state.friend.copy(birthday = birthday),
                 checkBirthdaySkipped = isSkipped,
+                showCalendarDialog = false,
             )
         }
     }
