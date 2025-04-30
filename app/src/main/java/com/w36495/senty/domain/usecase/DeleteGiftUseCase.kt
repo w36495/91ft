@@ -1,6 +1,8 @@
 package com.w36495.senty.domain.usecase
 
 import android.util.Log
+import com.google.common.cache.Cache
+import com.w36495.senty.data.manager.CachedImageInfoManager
 import com.w36495.senty.domain.entity.Gift
 import com.w36495.senty.domain.repository.GiftImageRepository
 import com.w36495.senty.domain.repository.GiftRepository
@@ -15,6 +17,11 @@ class DeleteGiftUseCase @Inject constructor(
             giftRepository.deleteGift(gift.id)
                 .onSuccess {
                     giftImageRepository.deleteAllGiftImage(gift.id)
+                        .onSuccess {
+                            gift.thumbnailName?.let {
+                                CachedImageInfoManager.remove(it)
+                            }
+                        }
                         .onFailure {
                             Log.d("DeleteGiftUseCase", it.stackTraceToString())
                         }

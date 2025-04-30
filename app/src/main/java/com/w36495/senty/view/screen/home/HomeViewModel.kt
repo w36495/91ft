@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.w36495.senty.data.domain.GiftType
+import com.w36495.senty.data.manager.CachedImageInfoManager
 import com.w36495.senty.data.mapper.toHomeUiModel
 import com.w36495.senty.domain.repository.AnniversaryRepository
 import com.w36495.senty.domain.repository.FriendRepository
@@ -100,9 +101,16 @@ class HomeViewModel @Inject constructor(
                         received.map { gift ->
                             async {
                                 gift.thumbnailName?.let { imageName ->
-                                    giftImageRepository.getGiftThumbs(gift.id, imageName)
-                                        .map { gift.copy(thumbnailPath = it) }
-                                        .getOrElse { gift }
+                                    CachedImageInfoManager.get(imageName)?.let {
+                                        gift.copy(thumbnailPath = it)
+                                    } ?: run {
+                                        giftImageRepository.getGiftThumbs(gift.id, imageName)
+                                            .map {  path ->
+                                                CachedImageInfoManager.put(imageName, path)
+                                                gift.copy(thumbnailPath = path)
+                                            }
+                                            .getOrElse { gift }
+                                    }
                                 } ?: gift
                             }
                         }
@@ -112,9 +120,16 @@ class HomeViewModel @Inject constructor(
                         sent.map { gift ->
                             async {
                                 gift.thumbnailName?.let { imageName ->
-                                    giftImageRepository.getGiftThumbs(gift.id, imageName)
-                                        .map { gift.copy(thumbnailPath = it) }
-                                        .getOrElse { gift }
+                                    CachedImageInfoManager.get(imageName)?.let {
+                                        gift.copy(thumbnailPath = it)
+                                    } ?: run {
+                                        giftImageRepository.getGiftThumbs(gift.id, imageName)
+                                            .map { path ->
+                                                CachedImageInfoManager.put(imageName, path)
+                                                gift.copy(thumbnailPath = path)
+                                            }
+                                            .getOrElse { gift }
+                                    }
                                 } ?: gift
                             }
                         }

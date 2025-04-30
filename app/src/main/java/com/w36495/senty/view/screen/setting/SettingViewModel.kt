@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.w36495.senty.R
+import com.w36495.senty.data.manager.CachedImageInfoManager
 import com.w36495.senty.domain.repository.AuthRepository
 import com.w36495.senty.domain.repository.UserRepository
 import com.w36495.senty.view.screen.setting.model.SettingEffect
@@ -43,6 +44,7 @@ class SettingViewModel @Inject constructor(
             viewModelScope.launch {
                 authRepository.withdraw(it.loginType, context)
                     .onSuccess {
+                        CachedImageInfoManager.clear()
                         userRepository.updateUser(null)
                         _effect.send(SettingEffect.ShowToast(context.getString(R.string.settings_withdraw_complete_text)))
                         Log.d("SettingVM", "🟢 회원탈퇴 완료")

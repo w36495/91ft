@@ -2,6 +2,7 @@ package com.w36495.senty.view.screen.friend.detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.w36495.senty.data.manager.CachedImageInfoManager
 import com.w36495.senty.data.mapper.toDomain
 import com.w36495.senty.data.mapper.toFriendDetailUiModel
 import com.w36495.senty.data.mapper.toUiModel
@@ -58,9 +59,16 @@ class FriendDetailViewModel @Inject constructor(
                 .collect { (friend, gifts) ->
                     val enrichedGifts = gifts.map { gift ->
                         gift.thumbnail?.let { thumbnailName ->
-                            giftImageRepository.getGiftThumbs(gift.id, thumbnailName)
-                                .map { gift.copy(thumbnailPath = it) }
-                                .getOrElse { gift }
+                            CachedImageInfoManager.get(thumbnailName)?.let {
+                                gift.copy(thumbnailPath = it)
+                            } ?: run {
+                                giftImageRepository.getGiftThumbs(gift.id, thumbnailName)
+                                    .map { path ->
+                                        CachedImageInfoManager.put(thumbnailName, path)
+                                        gift.copy(thumbnailPath = path)
+                                    }
+                                    .getOrElse { gift }
+                            }
                         } ?: gift
                     }
 

@@ -3,6 +3,7 @@ package com.w36495.senty.view.screen.gift.list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.w36495.senty.data.domain.GiftType
+import com.w36495.senty.data.manager.CachedImageInfoManager
 import com.w36495.senty.data.mapper.toGiftListUiModel
 import com.w36495.senty.domain.repository.GiftImageRepository
 import com.w36495.senty.domain.repository.GiftRepository
@@ -30,7 +31,6 @@ class GiftViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
     private val giftImageRepository: GiftImageRepository,
 ) : ViewModel() {
-    private val thumbnailCache = mutableMapOf<Pair<String, String>, String>()
     private val _selectedTab = MutableStateFlow(GiftTabType.ALL)
 
     private val _effect = Channel<GiftContact.Effect>()
@@ -58,13 +58,12 @@ class GiftViewModel @Inject constructor(
                     uiList.map { gift ->
                         async {
                             gift.thumbnailName?.let { thumbnailName ->
-                                val cached = thumbnailCache[gift.id to thumbnailName]
-                                if (cached != null) {
-                                    gift.copy(thumbnailPath = cached)
-                                } else {
+                                CachedImageInfoManager.get(thumbnailName)?.let {
+                                    gift.copy(thumbnailPath = it)
+                                } ?: run {
                                     giftImageRepository.getGiftThumbs(gift.id, thumbnailName)
                                         .map { path ->
-                                            thumbnailCache[gift.id to thumbnailName] = path
+                                            CachedImageInfoManager.put(thumbnailName, path)
                                             gift.copy(thumbnailPath = path)
                                         }
                                         .getOrElse { gift }
