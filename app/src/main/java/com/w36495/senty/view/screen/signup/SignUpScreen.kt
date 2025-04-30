@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.w36495.senty.R
+import com.w36495.senty.view.component.LoadingCircleIndicator
 import com.w36495.senty.view.component.SentyCenterAlignedTopAppBar
 import com.w36495.senty.view.screen.signup.model.SignUpEffect
 import com.w36495.senty.view.screen.signup.model.SignUpFormState
@@ -91,15 +92,14 @@ fun SignUpRoute(
 
     when (uiState) {
         SignUpUiState.Idle -> {}
-        SignUpUiState.Loading -> {
-
-        }
+        SignUpUiState.Loading -> {}
         SignUpUiState.Success -> {
             showCompleteDialog = true
         }
     }
 
     SignUpScreen(
+        uiState = uiState,
         formState = formState,
         isEmailValid = isEmailValid,
         isPasswordValid = isPasswordValid,
@@ -116,6 +116,7 @@ fun SignUpRoute(
 @Composable
 private fun SignUpScreen(
     modifier: Modifier = Modifier,
+    uiState: SignUpUiState,
     formState: SignUpFormState,
     isEmailValid: Boolean,
     isPasswordValid: Boolean,
@@ -184,6 +185,10 @@ private fun SignUpScreen(
                 onClick = onClickSignUp,
             )
         }
+    }
+
+    if (uiState is SignUpUiState.Loading) {
+        LoadingCircleIndicator()
     }
 }
 
@@ -279,6 +284,7 @@ private fun PasswordSection(
 private fun SignupScreenPreview() {
     SentyTheme {
         SignUpScreen(
+            uiState = SignUpUiState.Loading,
             formState = SignUpFormState(),
             isEmailValid = false,
             isPasswordValid = false,
