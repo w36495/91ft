@@ -45,6 +45,7 @@ class AuthRepositoryImpl @Inject constructor(
             firebaseAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful && task.exception == null) {
+                        firebaseAuth.signOut()
                         cont.resume(Result.success(Unit))
                     } else {
                         cont.resume(Result.failure(task.exception ?: Exception("Unknown error")))
