@@ -1,31 +1,21 @@
 package com.w36495.senty.data.domain
 
-import com.w36495.senty.util.DateUtil
-import com.w36495.senty.view.entity.Schedule
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonNames
 
-@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class ScheduleEntity(
-    val title: String,
-    val date: String,
-    val location: String,
-    val time: String,
-    val memo: String,
-    val isPast: Boolean = false,
-    @JsonNames("create_at")
-    val createAt: String = DateUtil.toTimeStamp(System.currentTimeMillis()),
-    @JsonNames("update_at")
-    val updateAt: String = DateUtil.toTimeStamp(System.currentTimeMillis()),
-) {
-    fun toDomainEntity() = Schedule(
-        title = title,
-        date = date,
-        location = location,
-        time = time,
-        memo = memo,
-        isPast = isPast
-    )
-}
+    val title: String = "",
+    val date: String = "",
+    val location: String = "",
+    val time: String = "",
+    val memo: String = "",
+    val friends: List<ScheduleFriendEntity> = emptyList(),
+    val createdAt: Long = 0L,
+    val updatedAt: Long = 0L,
+)
+
+@Serializable
+data class ScheduleFriendEntity(
+    val friendId: String = "",
+    val friendName: String = "",
+)

@@ -1,7 +1,8 @@
 package com.w36495.senty.data.remote.service
 
-import com.w36495.senty.data.domain.GiftDetailEntity
+import com.w36495.senty.data.domain.GiftEntity
 import com.w36495.senty.data.domain.GiftImgUriDTO
+import com.w36495.senty.data.response.FirebasePostResponse
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -19,21 +20,21 @@ interface GiftService {
     ): Response<ResponseBody>
 
     @GET("gifts/{userId}.json")
-    suspend fun getGifts(
+    suspend fun fetchGifts(
         @Path("userId") userId: String
     ): Response<ResponseBody>
 
     @POST("gifts/{userId}.json")
     suspend fun insertGift(
         @Path("userId") userId: String,
-        @Body gift: GiftDetailEntity
-    ): Response<ResponseBody>
+        @Body gift: GiftEntity
+    ): Response<FirebasePostResponse>
 
     @PATCH("gifts/{userId}/{giftKey}.json")
     suspend fun patchGift(
         @Path("userId") userId: String,
         @Path("giftKey") giftKey: String,
-        @Body body: GiftDetailEntity
+        @Body body: GiftEntity
     ): Response<ResponseBody>
 
     @PATCH("gifts/{userId}/{giftKey}.json")
@@ -43,9 +44,9 @@ interface GiftService {
         @Body body: GiftImgUriDTO
     ): Response<ResponseBody>
 
-    @DELETE("gifts/{userId}/{giftKey}.json")
+    @DELETE("gifts/{userId}/{giftId}.json")
     suspend fun deleteGift(
         @Path("userId") userId: String,
-        @Path("giftKey") giftKey: String
-    ): Response<String>
+        @Path("giftId") giftId: String
+    ): Response<Unit>
 }

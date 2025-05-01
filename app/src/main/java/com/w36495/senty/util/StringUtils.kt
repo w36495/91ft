@@ -1,7 +1,7 @@
 package com.w36495.senty.util
 
 import android.util.Patterns
-import java.util.regex.Pattern
+import java.util.Locale
 
 class StringUtils {
     companion object {
@@ -9,9 +9,6 @@ class StringUtils {
             return Patterns.EMAIL_ADDRESS.matcher(email).matches()
         }
 
-        fun isValidPassword(password: String): Boolean {
-            val passwordPattern = "^((?=.*[a-z])(?=.*[0-9]).{8,})$"
-            return Pattern.matches(passwordPattern, password)
-        }
+        fun format2Digits(value: Int): String = String.format(Locale.KOREA, "%02d", value)
     }
 }

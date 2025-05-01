@@ -24,12 +24,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,43 +33,24 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.w36495.senty.view.entity.gift.GiftCategory
+import com.w36495.senty.view.screen.gift.category.model.GiftCategoryUiModel
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
-import com.w36495.senty.view.ui.component.dialogs.BasicAlertDialog
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun SwipeListItem(
     modifier: Modifier = Modifier,
-    category: GiftCategory,
-    onRemove: (String) -> Unit,
-    onEdit: (GiftCategory) -> Unit,
+    category: GiftCategoryUiModel,
+    onRemove: (GiftCategoryUiModel) -> Unit,
+    onEdit: (GiftCategoryUiModel) -> Unit,
 ) {
-    var showDeleteDialog by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
     val swipeState = rememberSwipeableState(initialValue = 0)
 
     val squareSize = 112.dp
     val sizePx = with(LocalDensity.current) { squareSize.toPx() }
     val anchors = mapOf(0f to 0, -sizePx to 1)
-
-    if (showDeleteDialog) {
-        BasicAlertDialog(
-            title = "카테고리를 삭제하시겠습니까?",
-            onComplete = {
-                onRemove(category.id)
-                showDeleteDialog = false
-            },
-            discContent = {
-                Text(
-                    text = "카테고리에 속해있는 선물들도 모두 함께 삭제됩니다. 삭제된 카테고리/선물은 복구가 불가능합니다.",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontSize = 16.sp
-                )
-            },
-            onDismiss = { showDeleteDialog = false }
-        )
-    }
 
     Box(
         modifier = modifier
@@ -104,7 +81,13 @@ fun SwipeListItem(
                     .padding(horizontal = 4.dp)
             ) {
                 IconButton(
-                    onClick = { onEdit(category) },
+                    onClick = {
+                        coroutineScope.launch {
+                            swipeState.animateTo(0)
+                        }
+
+                        onEdit(category)
+                    },
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = Color(0xFFF5A61D),
                         contentColor = Color.White
@@ -126,7 +109,13 @@ fun SwipeListItem(
                     .padding(horizontal = 4.dp)
             ) {
                 IconButton(
-                    onClick = { showDeleteDialog = true },
+                    onClick = {
+                        coroutineScope.launch {
+                            swipeState.animateTo(0)
+                        }
+
+                        onRemove(category)
+                    },
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = Color.Red,
                     )
@@ -144,7 +133,12 @@ fun SwipeListItem(
             modifier = Modifier.offset {
                 IntOffset(swipeState.offset.value.toInt(), 0)
             },
-            headlineContent = { Text(text = category.name) },
+            headlineContent = {
+                Text(
+                    text = category.name,
+                    style = SentyTheme.typography.bodyMedium,
+                )
+            },
             colors = ListItemDefaults.colors(
                 containerColor = Color.White,
             )
@@ -159,7 +153,7 @@ fun DefaultPreview() {
         SwipeListItem(
             onRemove = {},
             onEdit = {},
-            category = GiftCategory("취업취업")
+            category = GiftCategoryUiModel("취업취업")
         )
     }
 }

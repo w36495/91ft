@@ -1,6 +1,5 @@
 package com.w36495.senty.view.ui.component.buttons
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults

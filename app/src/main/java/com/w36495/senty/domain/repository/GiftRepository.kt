@@ -1,16 +1,17 @@
 package com.w36495.senty.domain.repository
 
-import com.w36495.senty.data.domain.GiftDetailEntity
-import com.w36495.senty.view.entity.gift.GiftDetail
-import kotlinx.coroutines.flow.Flow
+import com.w36495.senty.domain.entity.Gift
+import kotlinx.coroutines.flow.StateFlow
 import okhttp3.ResponseBody
 import retrofit2.Response
 
 interface GiftRepository {
-    fun getGift(giftId: String): Flow<GiftDetail>
-    fun getGifts(): Flow<List<GiftDetail>>
-    suspend fun insertGift(gift: GiftDetailEntity): Response<ResponseBody>
-    suspend fun patchGift(giftId: String, gift: GiftDetailEntity): Response<ResponseBody>
-    suspend fun patchGiftImgUri(giftKey: String, giftUri: String): Response<ResponseBody>
-    suspend fun deleteGift(giftKey: String): Boolean
+    val gifts: StateFlow<List<Gift>>
+    suspend fun getGift(giftId: String): Result<Gift>
+    suspend fun getGiftsByFriend(friendId: String): Result<List<Gift>>
+    suspend fun getGiftsByCategoryId(categoryId: String): Result<List<Gift>>
+    suspend fun fetchGifts(): Result<Unit>
+    suspend fun insertGift(gift: Gift): Result<String>
+    suspend fun updateGift(gift: Gift): Result<Unit>
+    suspend fun deleteGift(giftId: String, refresh: Boolean = true): Result<Unit>
 }

@@ -1,7 +1,6 @@
 package com.w36495.senty.di
 
 import android.content.Context
-import com.firebase.ui.auth.AuthUI
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
@@ -32,11 +31,6 @@ object FirebaseModule {
 
     @Provides
     @Singleton
-    fun provideFirebaseAuthUI(): AuthUI {
-        return AuthUI.getInstance()
-    }
-
-    @Provides
     fun provideSingInClient(
         @ApplicationContext context: Context,
     ): SignInClient {
@@ -44,16 +38,17 @@ object FirebaseModule {
     }
 
     @Provides
+    @Singleton
     fun provideSignInRequest(): BeginSignInRequest {
         return BeginSignInRequest.builder()
             .setGoogleIdTokenRequestOptions(
                 BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
                     .setSupported(true)
                     .setServerClientId(BuildConfig.GOOGLE_CLOUD_WEB_CLIENT_ID)
-                    .setFilterByAuthorizedAccounts(true)
+                    .setFilterByAuthorizedAccounts(false)
                     .build()
             )
-            .setAutoSelectEnabled(true)
+            .setAutoSelectEnabled(false)
             .build()
     }
 }

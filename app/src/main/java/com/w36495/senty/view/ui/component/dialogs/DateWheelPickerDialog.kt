@@ -48,8 +48,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.w36495.senty.view.screen.anniversary.CalendarRange
+import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
-import com.w36495.senty.view.ui.theme.Green40
+import com.w36495.senty.view.ui.theme.SentyGreen60
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
@@ -107,7 +108,7 @@ fun DateWheelPickerDialog(
                             .fillMaxWidth()
                             .weight(0.5f)
                             .align(Alignment.CenterVertically),
-                        style = MaterialTheme.typography.labelLarge,
+                        style = SentyTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
                     )
 
@@ -128,8 +129,7 @@ fun DateWheelPickerDialog(
                             .weight(0.5f)
                             .padding(start = 8.dp)
                             .align(Alignment.CenterVertically),
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Medium,
+                        style = SentyTheme.typography.bodyMedium,
                     )
                 }
 
@@ -153,7 +153,7 @@ private fun DateWheelPicker(
     items: List<Int>,
     startIndex: Int = 0,
     visibleItemCount: Int = 5,
-    dividerColor: Color = Green40,
+    dividerColor: Color = SentyGreen60,
     dividerHorizontalPadding: Dp = 16.dp,
     onSelectedItem: @Composable (Int) -> Unit,
 ) {
@@ -205,7 +205,8 @@ private fun DateWheelPicker(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
                         .onSizeChanged { size -> itemHeightPixel = size.height }
-                        .padding(vertical = 4.dp)
+                        .padding(vertical = 4.dp),
+                    style = SentyTheme.typography.bodyMedium,
                 )
 
             }

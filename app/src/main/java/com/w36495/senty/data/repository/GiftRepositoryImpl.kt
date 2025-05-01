@@ -1,95 +1,150 @@
 package com.w36495.senty.data.repository
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
-import com.w36495.senty.data.domain.GiftDetailEntity
-import com.w36495.senty.data.domain.GiftImgUriDTO
+import com.w36495.senty.data.domain.GiftEntity
+import com.w36495.senty.data.mapper.toDomain
+import com.w36495.senty.data.mapper.toEntity
 import com.w36495.senty.data.remote.service.GiftService
-import com.w36495.senty.domain.repository.GiftImgRepository
+import com.w36495.senty.domain.entity.Gift
 import com.w36495.senty.domain.repository.GiftRepository
-import com.w36495.senty.view.entity.FriendDetail
-import com.w36495.senty.view.entity.gift.GiftCategory
-import com.w36495.senty.view.entity.gift.GiftDetail
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonObject
-import okhttp3.ResponseBody
-import retrofit2.Response
+import org.threeten.bp.LocalDate
 import javax.inject.Inject
 
 class GiftRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val giftService: GiftService,
-    private val giftImgRepository: GiftImgRepository,
 ) : GiftRepository {
     private var userId = firebaseAuth.currentUser!!.uid
-    override fun getGift(giftId: String): Flow<GiftDetail> = flow {
-        val result = giftService.getGift(userId, giftId)
+    private val _gifts = MutableStateFlow<List<Gift>>(emptyList())
+    override val gifts: StateFlow<List<Gift>>
+        get() = _gifts.asStateFlow()
 
-        if (result.isSuccessful) {
-            result.body()?.let {
-                val responseJson = Json.parseToJsonElement(it.string())
-                val giftDetailEntity = Json.decodeFromJsonElement<GiftDetailEntity>(responseJson)
+    override suspend fun getGift(giftId: String): Result<Gift> {
+        return try {
+            val gift = gifts.value.first { it.id == giftId }
 
-                val giftCategory = GiftCategory.emptyCategory.apply { setId(giftDetailEntity.categoryId) }
-                val friend = FriendDetail.emptyFriendEntity.apply { setId(giftDetailEntity.friendId) }
-                val giftDetail = giftDetailEntity.toDomainEntity()
-                    .apply { setId(giftId) }
-                    .copy(category = giftCategory.copy(), friend = friend.copy())
+            Result.success(gift)
+        } catch (e: Exception) {
+            Log.d("GiftRepo", e.stackTraceToString())
+            Result.failure(e)
+        }
+    }
 
-                emit(giftDetail)
+    override suspend fun getGiftsByFriend(friendId: String): Result<List<Gift>> {
+        return try {
+            val gifts = gifts.value.filter { it.friendId == friendId }
 
+            Result.success(gifts)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getGiftsByCategoryId(categoryId: String): Result<List<Gift>> {
+        return try {
+            val gifts = gifts.value.filter { it.categoryId == categoryId }
+
+            Result.success(gifts)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun fetchGifts(): Result<Unit> {
+        return try {
+            Log.d("GiftRepo","🟢 선물 조회 시작")
+            val response = giftService.fetchGifts(userId)
+
+            if (response.isSuccessful) {
+                val body = response.body()?.string()
+                if (body != null && response.headers()["Content-length"]?.toInt() != 4) {
+                    val responseJson = Json.parseToJsonElement(body)
+
+                    val gifts = responseJson.jsonObject.map { (key, jsonElement) ->
+                        Json.decodeFromJsonElement<GiftEntity>(jsonElement).toDomain(key)
+                    }.toList().sortedByDescending { LocalDate.parse(it.date) }
+
+                    Log.d("GiftRepo","🟢 선물 조회 완료")
+                    _gifts.update { gifts }
+                    Result.success(Unit)
+                } else Result.success(Unit)
+            } else {
+                Log.d("GiftRepo", response.errorBody()?.toString() ?: "errorBody is null")
+                Result.failure(Exception("오류가 발생했습니다."))
             }
-        } else throw IllegalArgumentException(result.errorBody().toString())
+        } catch (e: Exception) {
+            Log.d("GiftRepo", e.stackTraceToString())
+            Result.failure(e)
+        }
     }
 
-    override fun getGifts(): Flow<List<GiftDetail>> = flow {
-        val result = giftService.getGifts(userId)
+    override suspend fun insertGift(gift: Gift): Result<String> {
+        return try {
+            Log.d("GiftRepo","🟢 선물 등록 시작")
+            val response = giftService.insertGift(userId, gift.toEntity())
 
-        if (result.isSuccessful) {
-            if (result.headers()["Content-length"]?.toInt() != 4) {
-                result.body()?.let {
-                    val responseJson = Json.parseToJsonElement(it.string())
+            if (response.isSuccessful) {
+                val body = response.body()
 
-                    responseJson.jsonObject.map { (key, jsonElement) ->
-                        val giftDetailEntity = Json.decodeFromJsonElement<GiftDetailEntity>(jsonElement)
-                        val tempGiftCategory = GiftCategory.emptyCategory.apply { setId(giftDetailEntity.categoryId) }
-                        val tempFriend = FriendDetail.emptyFriendEntity.apply { setId(giftDetailEntity.friendId) }
-
-                        giftDetailEntity.toDomainEntity()
-                            .apply { setId(key) }
-                            .copy(category = tempGiftCategory.copy(), friend = tempFriend.copy())
-                    }.let { giftDetail ->
-                        val sortedGiftDetail = giftDetail.sortedByDescending { gift -> gift.date }
-
-                        emit(sortedGiftDetail.toList())
-                    }
+                if (body != null) {
+                    Log.d("GiftRepo","🟢 선물 등록 완료")
+                    Result.success(body.key)
+                } else {
+                    Log.d("GiftRepo","🔴 선물 등록 실패")
+                    Result.failure(Exception("선물 등록 실패"))
                 }
-            } else emit(emptyList())
-        } else throw IllegalArgumentException(result.errorBody().toString())
+            } else {
+                Log.d("GiftRepo","🔴 선물 등록 실패")
+                Result.failure(Exception("선물 등록 실패"))
+            }
+        } catch (e: Exception) {
+            Log.d("GiftRepo","🔴 선물 등록 실패")
+            Result.failure(e)
+        }
     }
 
-    override suspend fun insertGift(gift: GiftDetailEntity): Response<ResponseBody> {
-        return giftService.insertGift(userId, gift)
+    override suspend fun updateGift(gift: Gift): Result<Unit> {
+        return try {
+            Log.d("GiftRepo","🟢 선물 수정 시작")
+            val response = giftService.patchGift(userId, gift.id, gift.copy(createdAt = gift.createdAt, updatedAt = System.currentTimeMillis()).toEntity())
+
+            if (response.isSuccessful) {
+                Log.d("GiftRepo","🟢 선물 수정 완료")
+                Result.success(Unit)
+            } else {
+                Log.d("GiftRepo","🔴 선물 수정 실패")
+                Result.failure(Exception("선물 수정 실패"))
+            }
+        } catch (e: Exception) {
+            Log.d("GiftRepo","🔴 선물 수정 실패")
+            Result.failure(e)
+        }
     }
 
-    override suspend fun patchGift(giftId: String, gift: GiftDetailEntity): Response<ResponseBody> {
-        return giftService.patchGift(userId, giftId, gift)
-    }
+    override suspend fun deleteGift(giftId: String, refresh: Boolean): Result<Unit> {
+        return try {
+            val response = giftService.deleteGift(userId, giftId)
 
-    override suspend fun patchGiftImgUri(giftKey: String, giftUri: String): Response<ResponseBody> {
-        val uri = GiftImgUriDTO(giftUri)
-
-        return giftService.patchGiftImgUri(userId, giftKey, uri)
-    }
-
-    override suspend fun deleteGift(giftKey: String): Boolean {
-        val result = giftService.deleteGift(userId, giftKey)
-
-        if (result.isSuccessful) {
-            return result.headers()["Content-length"]?.toInt() == 4
-        } else throw IllegalArgumentException("Failed to delete gift")
+            if (response.isSuccessful) {
+                if (refresh) fetchGifts()
+                Log.d("GiftRepo", "선물 삭제 성공")
+                Result.success(Unit)
+            } else {
+                Log.d("GiftRepo", "선물 삭제 실패 : ${response.errorBody()?.string()}")
+                Result.failure(Exception("선물 삭제 실패"))
+            }
+        } catch (e: Exception) {
+            Log.d("GiftRepo", e.stackTraceToString())
+            Result.failure(e)
+        }
 
     }
 }

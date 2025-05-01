@@ -1,122 +1,118 @@
 package com.w36495.senty.viewModel
 
-import androidx.compose.runtime.mutableStateOf
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.w36495.senty.data.mapper.toUiModel
 import com.w36495.senty.domain.repository.AnniversaryRepository
-import com.w36495.senty.util.DateUtil
 import com.w36495.senty.util.StringUtils
-import com.w36495.senty.view.entity.Schedule
+import com.w36495.senty.view.screen.anniversary.contact.AnniversaryContact
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.threeten.bp.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
 class AnniversaryViewModel @Inject constructor(
     private val anniversaryRepository: AnniversaryRepository
 ) : ViewModel() {
-    private val _snackMsg = MutableSharedFlow<String>()
-    val snackMsg = _snackMsg.asSharedFlow()
+    private val _effect = Channel<AnniversaryContact.Effect>()
+    val effect = _effect.receiveAsFlow()
 
-    private var selectDate = mutableStateOf(DateUtil.getDateTime())
+    private val _state = MutableStateFlow(AnniversaryContact.State())
+    val state get() = _state.asStateFlow()
 
-    private val _schedules = MutableStateFlow<List<Schedule>>(emptyList())
-    val schedules = _schedules.asStateFlow()
-    private var _schedulesOfSelectionDate = MutableStateFlow<List<Schedule>>(emptyList())
-    val schedulesOfSelectionDate = _schedulesOfSelectionDate.asStateFlow()
-
-    fun getSchedules(selectYear: Int, selectMonth: Int, selectDay: Int) {
-        selectDate.value = "${selectYear}-${selectMonth}-${selectDay}"
-
-        viewModelScope.launch {
-            schedules.map {
-                it.filter { schedule ->
-                    selectYear == schedule.getYear()
-                            && StringUtils.format2Digits(selectMonth).toInt() == schedule.getMonth()
-                            && StringUtils.format2Digits(selectDay).toInt() == schedule.getDay()
+    fun handleEvent(event: AnniversaryContact.Event) {
+        when (event) {
+            AnniversaryContact.Event.OnClickAddSchedule -> {
+                _state.update { it.copy(showBottomSheet = true) }
+            }
+            AnniversaryContact.Event.OnClickCloseScheduleBottomSheet -> {
+                _state.update {
+                    it.copy(
+                        selectedSchedule = null,
+                        showBottomSheet = false,
+                    )
                 }
             }
-                .collectLatest { schedules ->
-                    _schedulesOfSelectionDate.update { schedules.toList() }
+            is AnniversaryContact.Event.OnClickSchedule -> {
+                _state.update { state ->
+                    state.copy(
+                        selectedSchedule = event.schedule,
+                        showBottomSheet = true,
+                    )
                 }
+            }
+            is AnniversaryContact.Event.UpdateSelectedDate -> {
+                getSchedules(event.year, event.month, event.day)
+            }
         }
     }
 
     init {
-        val currentDate = LocalDate.now()
-
-        loadSchedules()
-        getSchedules(currentDate.year, currentDate.monthValue, currentDate.dayOfMonth)
+        observeSchedules()
     }
 
-    fun saveSchedule(schedule: Schedule) {
+    private fun observeSchedules() {
         viewModelScope.launch {
-            val result = anniversaryRepository.insertSchedule(schedule.toDataEntity())
-            if (result.isSuccessful) {
-                refreshSchedules()
+            anniversaryRepository.fetchSchedules()
 
-                _snackMsg.emit("성공적으로 일정이 등록되었습니다.")
-            }
-        }
-    }
+            val (selectedYear, selectedMonth, selectedDay) = _state.value.selectedDate
 
-    fun updateSchedule(newSchedule: Schedule) {
-        viewModelScope.launch {
-            val result = anniversaryRepository.patchSchedule(newSchedule.id, newSchedule.toDataEntity())
-            if (result.isSuccessful) {
-                refreshSchedules()
+            anniversaryRepository.schedules
+                .map { schedules ->
+                    val allSchedule = schedules.map { it.toUiModel() }
 
-                _snackMsg.emit("성공적으로 일정이 수정되었습니다.")
-            }
-        }
-    }
+                    val selectedSchedules = schedules.filter { schedule ->
+                        val (year, month, day) = schedule.date.split("-").map { it.toInt() }
+                        selectedYear == year
+                                && StringUtils.format2Digits(selectedMonth).toInt() == month
+                                && StringUtils.format2Digits(selectedDay).toInt() == day
+                    }.map { it.toUiModel() }
 
-    fun removeSchedule(scheduleId: String) {
-        viewModelScope.launch {
-            val result = anniversaryRepository.deleteSchedule(scheduleId)
-            if (result) {
-                refreshSchedules()
-
-                _snackMsg.emit("성공적으로 일정이 삭제되었습니다.")
-            }
-        }
-    }
-
-    fun validateSchedule(schedule: Schedule): Boolean {
-        var validateResult = true
-
-        if (schedule.title.trim().isEmpty()) {
-            viewModelScope.launch {
-                _snackMsg.emit("제목을 입력해주세요.")
-            }
-
-            validateResult = false
-        }
-
-        return validateResult
-    }
-
-    private fun loadSchedules() {
-        viewModelScope.launch {
-            anniversaryRepository.getSchedules()
-                .collectLatest { schedules ->
-                    _schedules.update { schedules.toList() }
+                    allSchedule to selectedSchedules
+                }
+                .catch {
+                    Log.d("AnniversaryVM", it.stackTraceToString())
+                    _effect.send(AnniversaryContact.Effect.ShowError(it))
+                }
+                .collectLatest { (allSchedule, selectedSchedules) ->
+                    _state.update { state ->
+                        state.copy(
+                            schedules = allSchedule,
+                            selectedSchedules = selectedSchedules
+                        )
+                    }
                 }
         }
     }
 
-    private fun refreshSchedules() {
-        loadSchedules()
-        val (selectYear, selectMonth, selectDay) = this.selectDate.value.split("-").map { it.toInt() }
+    private fun getSchedules(selectedYear: Int, selectedMonth: Int, selectedDay: Int) {
+        runCatching {
+            val selectedSchedules = state.value.schedules.filter { schedule ->
+                val (year, month, day) = schedule.date.split("-").map { it.toInt() }
+                selectedYear == year
+                        && StringUtils.format2Digits(selectedMonth).toInt() == month
+                        && StringUtils.format2Digits(selectedDay).toInt() == day
+            }
 
-        getSchedules(selectYear, selectMonth, selectDay)
+            _state.update {
+                it.copy(
+                    selectedSchedules = selectedSchedules,
+                    selectedDate = Triple(selectedYear, selectedMonth, selectedDay),
+                )
+            }
+        }.onFailure {
+            viewModelScope.launch {
+                _effect.send(AnniversaryContact.Effect.ShowError(it))
+            }
+        }
     }
 }

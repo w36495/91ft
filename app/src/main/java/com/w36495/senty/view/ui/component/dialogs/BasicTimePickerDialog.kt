@@ -1,6 +1,8 @@
 package com.w36495.senty.view.ui.component.dialogs
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,17 +25,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.w36495.senty.R
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
-import com.w36495.senty.view.ui.theme.Green40
+import com.w36495.senty.view.ui.component.buttons.SentyOutlinedButton
+import com.w36495.senty.view.ui.theme.SentyGreen60
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BasicTimePickerDialog(
     onSelectTime: (Int, Int) -> Unit,
+    onReset: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     val timePickerState = rememberTimePickerState(
@@ -53,7 +59,12 @@ fun BasicTimePickerDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 CenterAlignedTopAppBar(
-                    title = { Text(text = "시간선택") },
+                    title = {
+                        Text(
+                            text = "시간 선택",
+                            style = SentyTheme.typography.headlineSmall,
+                        )
+                    },
                     actions = {
                         IconButton(onClick = { onDismiss() }) {
                             Icon(imageVector = Icons.Default.Close, contentDescription = null)
@@ -69,7 +80,7 @@ fun BasicTimePickerDialog(
                 TimeInput(
                     state = timePickerState,
                     colors = TimePickerDefaults.colors(
-                        periodSelectorSelectedContainerColor = Green40.copy(0.3f),
+                        periodSelectorSelectedContainerColor = SentyGreen60.copy(0.3f),
                         timeSelectorSelectedContainerColor = MaterialTheme.colorScheme.onPrimary,
                         timeSelectorUnselectedContainerColor = MaterialTheme.colorScheme.onSurface.copy(
                             alpha = 0.1f
@@ -79,19 +90,31 @@ fun BasicTimePickerDialog(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                SentyFilledButton(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    text = "확인",
-                    onClick = {
-                        onSelectTime(timePickerState.hour, timePickerState.minute)
-                        onDismiss()
-                    },
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-            }
+                Row(
+                    modifier = Modifier.padding(bottom = 24.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    SentyOutlinedButton(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 16.dp),
+                        text = stringResource(id = R.string.common_reset),
+                        onClick = { onReset() },
+                    )
 
+                    SentyFilledButton(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 16.dp),
+                        text = stringResource(id = R.string.common_confirm),
+                        onClick = {
+                            onSelectTime(timePickerState.hour, timePickerState.minute)
+                            onDismiss()
+                        },
+                    )
+                }
+            }
         }
     }
 }
@@ -102,6 +125,7 @@ private fun TimePickerDialogPreview() {
     SentyTheme {
         BasicTimePickerDialog(
             onDismiss = {},
+            onReset = {},
             onSelectTime = { _, _ -> }
         )
     }

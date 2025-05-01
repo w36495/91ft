@@ -1,12 +1,9 @@
 package com.w36495.senty.di
 
 import android.content.Context
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.w36495.senty.BuildConfig
-import com.w36495.senty.data.interceptor.NetworkConnectionInterceptor
 import com.w36495.senty.data.remote.service.AnniversaryService
-import com.w36495.senty.data.remote.service.AuthService
 import com.w36495.senty.data.remote.service.FriendGroupService
 import com.w36495.senty.data.remote.service.FriendService
 import com.w36495.senty.data.remote.service.GiftCategoryService
@@ -17,32 +14,41 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-    private const val BASE_URL: String = BuildConfig.DATABASE_BASE_URL
-    private const val NAVER_BASE_URL: String = BuildConfig.NAVER_GEOCODING_BASE_URI
+    private const val DATABASE_URL = BuildConfig.FIREBASE_DATABASE_BASE_URL
+    private const val NAVER_BASE_URL = BuildConfig.NAVER_GEOCODING_BASE_URI
 
     @Qualifier
     @Retention(AnnotationRetention.BINARY)
     annotation class naver
+
+    @Qualifier
+    @Retention(AnnotationRetention.BINARY)
+    annotation class Account
+
+    private val jsonOptions = Json {
+        ignoreUnknownKeys = true
+        coerceInputValues = true
+    }
 
     @Provides
     @Singleton
     @naver
     fun provideNaverRetrofit(
         okHttpClient: OkHttpClient,
-        moshi: Moshi
     ): Retrofit = Retrofit.Builder()
         .baseUrl(NAVER_BASE_URL)
-        .addConverterFactory(MoshiConverterFactory.create(moshi))
+        .addConverterFactory(jsonOptions.asConverterFactory("application/json; charset=UTF8".toMediaType()))
         .client(okHttpClient)
         .build()
 
@@ -50,11 +56,10 @@ object NetworkModule {
     @Singleton
     fun provideRetrofit(
         okHttpClient: OkHttpClient,
-        moshi: Moshi
     ): Retrofit {
         return Retrofit.Builder()
-            .addConverterFactory(MoshiConverterFactory.create(moshi))
-            .baseUrl(BASE_URL)
+            .addConverterFactory(jsonOptions.asConverterFactory("application/json; charset=UTF8".toMediaType()))
+            .baseUrl(DATABASE_URL)
             .client(okHttpClient)
             .build()
     }
@@ -67,7 +72,6 @@ object NetworkModule {
     ): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(logger)
-            .addInterceptor(NetworkConnectionInterceptor(context))
             .build()
     }
 
@@ -75,14 +79,6 @@ object NetworkModule {
     @Singleton
     fun provideLoggerInterceptor(): HttpLoggingInterceptor {
         return HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
-    }
-
-    @Provides
-    @Singleton
-    fun provideMoshi(): Moshi {
-        return Moshi.Builder()
-            .addLast(KotlinJsonAdapterFactory())
-            .build()
     }
 
     @Provides
@@ -104,10 +100,6 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideAnniversaryApi(retrofit: Retrofit): AnniversaryService = retrofit.create(AnniversaryService::class.java)
-
-    @Provides
-    @Singleton
-    fun provideAuthApi(retrofit: Retrofit): AuthService = retrofit.create(AuthService::class.java)
 
     @Provides
     @Singleton

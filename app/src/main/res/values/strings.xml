@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Senty</string>
+    <string name="app_name">91ft</string>
 
     <string name="toolbar_login">로그인</string>
     <string name="toolbar_signup">회원가입</string>
@@ -86,4 +86,209 @@
     <string name="error_input_password">영문자, 숫자로 입력해주세요.</string>
     <string name="error_input_password_length">8자 이상 입력해주세요.</string>
     <string name="error_input_password_check">비밀번호와 일치하지 않습니다.</string>
+
+    <!-- 회원가입 -->
+    <string name="signup_title">회원가입</string>
+
+    <string name="signup_email_title">이메일</string>
+    <string name="signup_email_title_sub1">비밀번호를 재설정할 때 사용되는 이메일입니다.</string>
+    <string name="signup_email_title_sub2">실제 사용하시는 이메일을 입력해주세요.</string>
+    <string name="signup_email_hint_text">이메일 입력</string>
+
+    <string name="signup_password_title">비밀번호</string>
+    <string name="signup_password_title_sub1">영문자/숫자로 입력해주세요. (8자 이상)</string>
+    <string name="signup_password_hint_text">비밀번호 입력</string>
+    <string name="signup_password_confirm_hint_text">비밀번호 확인</string>
+
+    <string name="signup_error1">필수입력입니다.</string>
+    <string name="signup_error_email">이메일 형식으로 입력해주세요.</string>
+    <string name="signup_error_password">8자 이상의 영문자, 숫자로 입력해주세요.</string>
+    <string name="signup_error_password_confirm">비밀번호와 일치하지 않습니다.</string>
+    <string name="signup_error_check_email">이미 존재하는 이메일입니다.</string>
+
+    <string name="signup_msg_complete">회원가입이 완료되었습니다.</string>
+
+    <!-- 비밀번호 재설정 -->
+    <string name="reset_password_title">비밀번호 재설정</string>
+    <string name="reset_password_email_text">이메일</string>
+    <string name="reset_password_hint_text">이메일 입력</string>
+
+    <!-- 로그인 -->
+    <string name="login_title">로그인</string>
+
+    <string name="login_email_hint_text">이메일</string>
+    <string name="login_password_hint_text">비밀번호</string>
+    <string name="login_auto_text">자동 로그인</string>
+    <string name="login_find_passowrd_text">비밀번호 재설정</string>
+    <string name="login_error_message">아이디 또는 비밀번호가 일치하지 않습니다.</string>
+
+    <!-- 홈 -->
+    <string name="home_anniversary_title">다가오는 기념일</string>
+    <string name="home_anniversary_empty_text">기념일을 등록해보세요.</string>
+
+    <string name="home_anniversary_label_before">지난 기념일</string>
+    <string name="home_anniversary_label_today">오늘</string>
+    <string name="home_anniversary_label_after">일 후</string>
+
+    <string name="home_gift_received_title">최근 받은 선물</string>
+    <string name="home_gift_sent_title">최근 준 선물</string>
+    <string name="home_gift_loading_text">선물을 불러오고 있습니다.</string>
+    <string name="home_gift_received_empty_text">받은 선물을 등록해보세요.</string>
+    <string name="home_gift_sent_empty_text">준 선물을 등록해보세요.</string>
+    <string name="home_gift_show_all_text">선물\n전체보기</string>
+
+    <!-- 친구 목록 -->
+    <string name="friend_title">친구 목록</string>
+
+    <string name="friend_empty_group_all_text">등록된 친구가 존재하지 않습니다.\n새로운 친구를 등록해보세요.</string>
+    <string name="friend_empty_group_text"> 그룹에 등록된 친구가 없어요.\n새로운 친구를 추가해보세요!</string>
+
+    <!-- 친구 조회 -->
+    <string name="friend_detail_title">친구</string>
+
+    <string name="friend_detail_delete_title">친구를 삭제하시겠습니까?</string>
+    <string name="friend_detail_delete_message_text">친구와 주고받았던 선물들도 모두 함께 삭제되며, 복원이 불가능합니다.\n선택한 친구의 정보를 삭제하시겠습니까?</string>
+
+    <string name="friend_detail_name_text">이름</string>
+    <string name="friend_detail_group_text">그룹</string>
+    <string name="friend_detail_birthday_text">생일</string>
+    <string name="friend_detail_memo_text">메모</string>
+
+    <string name="friend_detail_gift_empty_text">등록된 선물이 없습니다.\n새로운 선물을 등록해보세요!</string>
+
+    <!-- 친구 편집 -->
+    <string name="friend_title_add">친구 등록</string>
+    <string name="friend_title_edit">친구 수정</string>
+
+    <string name="friend_edit_name_text">이름</string>
+    <string name="friend_edit_name_hint_text">이름 입력</string>
+    <string name="friend_edit_group_text">그룹</string>
+    <string name="friend_edit_group_hint_text">그룹 선택</string>
+    <string name="friend_edit_birthday_text">생일</string>
+    <string name="friend_edit_birthday_hint_text">생일 입력</string>
+    <string name="friend_edit_birthday_checkable_text">생략하기</string>
+    <string name="friend_edit_memo_text">메모</string>
+
+    <string name="friend_detail_tab_info_text">정보</string>
+    <string name="friend_detail_tab_gift_text">선물</string>
+
+    <!-- 친구 그룹 -->
+    <string name="friend_group_title">친구 그룹</string>
+    <string name="friend_group_title_save">친구 그룹 등록</string>
+    <string name="friend_group_title_edit">친구 그룹 수정</string>
+    <string name="friend_group_title_read">친구 그룹 선택</string>
+
+    <string name="friend_group_name_hint_text">그룹명 입력 (최대 8자)</string>
+    <string name="friend_group_error">그룹명을 입력해주세요.</string>
+    <string name="friend_group_complete_save_text">등록이 완료되었습니다.</string>
+    <string name="friend_group_complete_edit_text">수정이 완료되었습니다.</string>
+
+    <string name="friend_group_selection_edit_button_text">그룹 편집</string>
+
+    <string name="friend_group_delete_title">그룹을 삭제하시겠습니까?</string>
+    <string name="friend_group_delete_text">해당 그룹의 친구도 모두 함께 삭제되며, 삭제된 그룹은 복구가 불가능합니다.</string>
+
+    <string name="friend_group_empty_text">친구 그룹이 존재하지 않습니다.\n새로운 그룹을 등록해보세요!</string>
+
+    <!-- 선물 목록 -->
+    <string name="gift_title">선물 목록</string>
+    <string name="gift_tab_title_all">전체</string>
+    <string name="gift_tab_title_received">받은 선물</string>
+    <string name="gift_tab_title_sent">준 선물</string>
+
+    <string name="gift_empty_text_all">등록된 선물이 없습니다.\n새로운 선물을 등록해보세요!</string>
+    <string name="gift_empty_text_received">받은 선물이 없습니다.\n받은 선물을 등록해보세요!</string>
+    <string name="gift_empty_text_sent">준 선물이 없습니다.\n준 선물을 등록해보세요!</string>
+
+    <!-- 선물 편집 -->
+    <string name="gift_edit_title_save">선물 등록</string>
+    <string name="gift_edit_title_edit">선물 수정</string>
+
+    <string name="gift_edit_image_selection_type_camera">카메라를 통해\n이미지 가져오기</string>
+    <string name="gift_edit_image_selection_type_gallery">갤러리를 통해\n이미지 가져오기</string>
+
+    <string name="gift_edit_image_text">사진 등록</string>
+    <string name="gift_edit_category_text">카테고리</string>
+    <string name="gift_edit_category_hint_text">카테고리 선택</string>
+    <string name="gift_edit_category_error_text">카테고리를 선택해주세요.</string>
+    <string name="gift_edit_friend_text">친구</string>
+    <string name="gift_edit_friend_hint_text">친구 선택</string>
+    <string name="gift_edit_friend_error_text">친구를 선택해주세요.</string>
+    <string name="gift_edit_date_text">날짜</string>
+    <string name="gift_edit_date_hint_text">날짜 선택</string>
+    <string name="gift_edit_date_error_text">날짜를 선택해주세요.</string>
+    <string name="gift_edit_mood_text">기분</string>
+    <string name="gift_edit_mood_hint_text">기분 입력</string>
+    <string name="gift_edit_memo_text">메모</string>
+
+    <!-- 선물 편집 - 친구 선택 -->
+    <string name="friend_selection_title">친구 선택</string>
+
+    <string name="friend_selection_empty_text">친구 목록이 존재하지 않습니다.\n친구를 등록해보세요!</string>
+    <string name="friend_selection_empty_button_text">친구 등록</string>
+
+    <!-- 선물 편집 - 카테고리 선택 -->
+    <string name="category_selection_title">선물 카테고리 선택</string>
+    <string name="category_selection_empty_text">선물 카테고리가 존재하지 않습니다.\n카테고리를 등록해보세요!</string>
+    <string name="category_selection_empty_button_text">선물 카테고리 등록</string>
+    <string name="category_selection_edit_button_text">선물 카테고리 등록</string>
+
+    <!-- 선물 조회 -->
+    <string name="gift_detail_received_title">받은 선물</string>
+    <string name="gift_detail_sent_title">준 선물</string>
+
+    <string name="gift_detail_delete_title">삭제하시겠습니까?</string>
+    <string name="gift_detail_delete_message_text">삭제된 선물은 복구가 불가능합니다.</string>
+
+    <!-- 선물 카테고리 목록 -->
+    <string name="gift_categories_title">선물 카테고리</string>
+
+    <string name="gift_categories_delete_title">카테고리를 삭제하시겠습니까?</string>
+    <string name="gift_categories_delete_message_text">카테고리에 속해있는 선물도 모두 함께 삭제되며, 삭제된 카테고리/선물은 복구가 불가능합니다.</string>
+
+    <string name="gift_categories_empty_text">선물 카테고리가 존재하지 않습니다.\n새로운 카테고리를 등록해보세요!</string>
+
+    <!-- 기념일 -->
+    <string name="anniversary_title">기념일</string>
+
+    <string name="anniversary_label_today_text">오늘</string>
+    <string name="anniversary_label_schedule_text">기념일</string>
+
+    <string name="anniversary_button_add_text">새로운 기념일 등록하기</string>
+    <string name="anniversary_empty_text">등록된 기념일이 없습니다.</string>
+
+    <string name="anniversary_delete_title">기념일을 삭제하시겠습니까?</string>
+    <string name="anniversary_delete_message_text">삭제된 기념일은 복구가 불가능합니다.</string>
+
+    <string name="anniversary_bottom_sheet_title_error_message_text">제목을 입력하세요.</string>
+
+    <!-- 설정 -->
+    <string name="settings_title">설정</string>
+
+    <string name="settings_gift_category_text">선물 카테고리 설정</string>
+    <string name="settings_logout_text">로그아웃</string>
+    <string name="settings_withdraw_text">회원탈퇴</string>
+    <string name="settings_suggestion_box_text">건의사항</string>
+
+    <string name="settings_logout_title">로그아웃 하시겠습니까?</string>
+    <string name="settings_logout_complete_text">로그아웃되였습니다.</string>
+
+    <string name="settings_withdraw_title">계정을 삭제하시겠습니까?</string>
+    <string name="settings_withdraw_message_text">계정을 삭제하면 복구할 수 없습니다.</string>
+    <string name="settings_withdraw_complete_text">회원탈퇴가 완료되었습니다.</string>
+
+    <!-- 공통 -->
+    <string name="common_confirm">확인</string>
+    <string name="common_cancel">취소</string>
+    <string name="common_save">저장</string>
+    <string name="common_edit">수정</string>
+    <string name="common_remove">삭제</string>
+    <string name="common_reset">초기화</string>
+    <string name="common_heart">♥</string>
+    <string name="common_received_gift_text">받은 선물</string>
+    <string name="common_sent_gift_text">준 선물</string>
+    <string name="common_required_star"> *</string>
+
+    <string name="common_error_unknown">오류가 발생하였습니다.</string>
+    <string name="common_error_message_network">네트워크 연결이 원활하지 않습니다.</string>
 </resources>

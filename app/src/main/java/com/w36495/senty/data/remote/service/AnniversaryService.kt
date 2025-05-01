@@ -33,5 +33,5 @@ interface AnniversaryService {
     suspend fun deleteSchedule(
         @Path("userId") userId: String,
         @Path("scheduleId") scheduleId: String
-    ): Response<String>
+    ): Response<Unit>
 }

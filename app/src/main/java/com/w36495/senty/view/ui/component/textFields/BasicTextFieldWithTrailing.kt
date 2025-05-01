@@ -9,7 +9,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
-import com.w36495.senty.view.ui.theme.Green40
+import com.w36495.senty.view.screen.ui.theme.SentyTheme
+import com.w36495.senty.view.ui.theme.SentyGray50
+import com.w36495.senty.view.ui.theme.SentyGreen60
 
 @Composable
 fun BasicTextFieldWithTrailing(
@@ -31,15 +33,19 @@ fun BasicTextFieldWithTrailing(
         value = text,
         onValueChange = onChangeText,
         placeholder = {
-            Text(text = hint)
+            Text(
+                text = hint,
+                style = SentyTheme.typography.bodyMedium
+                    .copy(SentyGray50),
+            )
         },
         colors = TextFieldDefaults.colors(
             focusedContainerColor = Color.White,
             unfocusedContainerColor = Color.White,
-            unfocusedIndicatorColor = Green40,
-            focusedIndicatorColor = Green40,
+            unfocusedIndicatorColor = SentyGreen60,
+            focusedIndicatorColor = SentyGreen60,
             errorContainerColor = Color.White,
-            cursorColor = Green40,
+            cursorColor = SentyGreen60,
         ),
         singleLine = true,
         maxLines = 1,

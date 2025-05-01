@@ -1,19 +1,10 @@
 package com.w36495.senty.data.domain
 
-import com.w36495.senty.util.DateUtil
-import com.w36495.senty.view.entity.gift.GiftCategory
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonNames
 
-@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class GiftCategoryEntity(
-    val name: String,
-    @JsonNames("create_at")
-    val createAt: String = DateUtil.toTimeStamp(System.currentTimeMillis()),
-    @JsonNames("update_at")
-    val updateAt: String = DateUtil.toTimeStamp(System.currentTimeMillis())
-) {
-    fun toDomainEntity() = GiftCategory(name = this@GiftCategoryEntity.name)
-}
+    val name: String = "",
+    val createdAt: Long = 0L,
+    val updatedAt: Long = 0L,
+)
