@@ -43,12 +43,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.w36495.senty.R
 import com.w36495.senty.util.StringUtils
-import com.w36495.senty.view.component.LoadingCircleIndicator
 import com.w36495.senty.view.screen.friend.edit.contact.EditFriendContact
 import com.w36495.senty.view.screen.friendgroup.FriendGroupSelectionDialog
 import com.w36495.senty.view.screen.friendgroup.model.FriendGroupUiModel
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
-import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
+import com.w36495.senty.view.ui.component.buttons.SentyFilledButtonWithProgress
 import com.w36495.senty.view.ui.component.dialogs.BasicCalendarDialog
 import com.w36495.senty.view.ui.component.textFields.SentyMultipleTextField
 import com.w36495.senty.view.ui.component.textFields.SentyReadOnlyTextField
@@ -251,24 +250,20 @@ private fun EditFriendScreen(
                 }
             }
 
-            SentyFilledButton(
+            SentyFilledButtonWithProgress(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
                     .padding(bottom = 24.dp),
+                enabled = !uiState.isLoading,
                 text = stringResource(id = if (isEditMode) R.string.common_edit else R.string.common_save),
                 onClick = {
                     focusManager.clearFocus()
-                    onClickSave()
+
+                    if (!uiState.isLoading) { onClickSave() }
                 },
             )
-
-            if (uiState.isLoading) {
-                LoadingCircleIndicator(
-                    hasBackGround = false,
-                )
-            }
         }
     }
 }

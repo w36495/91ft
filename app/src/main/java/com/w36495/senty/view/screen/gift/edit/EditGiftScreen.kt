@@ -78,7 +78,6 @@ import com.w36495.senty.data.domain.GiftType
 import com.w36495.senty.util.StringUtils
 import com.w36495.senty.util.checkCameraPermission
 import com.w36495.senty.util.getUriFile
-import com.w36495.senty.view.component.LoadingCircleIndicator
 import com.w36495.senty.view.component.SentyAsyncImage
 import com.w36495.senty.view.screen.friend.FriendSelectionDialog
 import com.w36495.senty.view.screen.friend.model.FriendUiModel
@@ -90,7 +89,7 @@ import com.w36495.senty.view.screen.gift.edit.model.EditImage
 import com.w36495.senty.view.screen.gift.edit.model.ImageSelectionType
 import com.w36495.senty.view.screen.gift.edit.model.getImageData
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
-import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
+import com.w36495.senty.view.ui.component.buttons.SentyFilledButtonWithProgress
 import com.w36495.senty.view.ui.component.dialogs.BasicCalendarDialog
 import com.w36495.senty.view.ui.component.dialogs.ImageSelectionDialog
 import com.w36495.senty.view.ui.component.textFields.SentyMultipleTextField
@@ -290,6 +289,7 @@ private fun EditGiftScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
+                    isLoading = uiState.isLoading,
                     gift = uiState.gift,
                     isEditMode = isEditMode,
                     isErrorGiftCategory = uiState.isErrorGiftCategory,
@@ -307,11 +307,6 @@ private fun EditGiftScreen(
             }
 
             when {
-                uiState.isLoading -> {
-                    LoadingCircleIndicator(
-                        hasBackGround = false,
-                    )
-                }
                 uiState.showFriendsDialog -> {
                     FriendSelectionDialog(
                         onDismiss = { onSelectFriend(null) },
@@ -500,6 +495,7 @@ private fun AddGiftImage(
 @Composable
 private fun InputSection(
     modifier: Modifier = Modifier,
+    isLoading: Boolean,
     gift: EditGiftUiModel,
     isEditMode: Boolean,
     isErrorGiftCategory: Boolean,
@@ -613,14 +609,16 @@ private fun InputSection(
             textStyle = SentyTheme.typography.bodyMedium,
         )
 
-        SentyFilledButton(
+        SentyFilledButtonWithProgress(
             text = stringResource(id = if (isEditMode) { R.string.common_edit } else R.string.common_save),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 24.dp, top = 32.dp),
+            enabled = !isLoading,
             onClick = {
                 focusManager.clearFocus()
-                onClickSave()
+
+                if (!isLoading) { onClickSave() }
             },
         )
     }

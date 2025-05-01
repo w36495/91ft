@@ -324,6 +324,8 @@ class EditGiftViewModel @Inject constructor(
     }
 
     private fun updateGift() {
+        if (state.value.isLoading) return
+
         viewModelScope.launch {
             Log.d("EditGiftVM","🟢 선물 수정 시작")
             _state.update { it.copy(isLoading = true) }
@@ -429,6 +431,8 @@ class EditGiftViewModel @Inject constructor(
     }
 
     private fun saveGift() {
+        if (state.value.isLoading) return
+
         viewModelScope.launch {
             Log.d("EditGiftVM","🟢 선물 저장 시작")
             _state.update { it.copy(isLoading = true) }

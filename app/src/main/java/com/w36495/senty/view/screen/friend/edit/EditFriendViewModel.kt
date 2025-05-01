@@ -91,6 +91,8 @@ class EditFriendViewModel @Inject constructor(
         }
     }
     private fun saveFriend(friend: FriendUiModel) {
+        if (uiState.value.isLoading) return
+
         viewModelScope.launch {
             updateLoadingState(true)
 
@@ -110,6 +112,8 @@ class EditFriendViewModel @Inject constructor(
     }
 
     private fun editFriend(friend: FriendUiModel) {
+        if (uiState.value.isLoading) return
+
         viewModelScope.launch {
             updateLoadingState(true)
 
