@@ -30,8 +30,8 @@ fun MainScreen(
     val onShowGlobalErrorSnackBar: (throwable: Throwable?) -> Unit = { throwable ->
         coroutineScope.launch {
             Log.d("GlobalError", throwable?.stackTraceToString() ?: "Error is null")
-            val message = vm.getErrorMessage(throwable)
-            snackBarHost.showSnackbar(localContextResource.getString(message))
+            val messageRes = vm.getErrorMessageRes(throwable)
+            snackBarHost.showSnackbar(localContextResource.getString(messageRes))
         }
     }
 
