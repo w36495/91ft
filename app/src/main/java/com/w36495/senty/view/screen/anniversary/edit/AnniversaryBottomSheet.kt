@@ -45,10 +45,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.w36495.senty.R
 import com.w36495.senty.util.StringUtils
-import com.w36495.senty.view.component.LoadingCircleIndicator
 import com.w36495.senty.view.screen.anniversary.contact.AnniversaryBottomSheetContact
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
-import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
+import com.w36495.senty.view.ui.component.buttons.SentyFilledButtonWithProgress
 import com.w36495.senty.view.ui.component.dialogs.BasicAlertDialog
 import com.w36495.senty.view.ui.component.dialogs.BasicCalendarDialog
 import com.w36495.senty.view.ui.component.dialogs.BasicTimePickerDialog
@@ -99,9 +98,6 @@ fun AnniversaryBottomSheet(
     val uiState by vm.state.collectAsStateWithLifecycle()
 
     when {
-        uiState.isLoading -> {
-            LoadingCircleIndicator()
-        }
         uiState.showCalendar -> {
             BasicCalendarDialog(
                 onDismiss = { vm.handleEvent(AnniversaryBottomSheetContact.Event.HideCalendar) },
@@ -354,16 +350,19 @@ private fun AnniversaryBottomSheetContents(
                 }
 
                 if (type == AnniversaryBottomSheetType.EDIT) {
-                    SentyFilledButton(
+                    SentyFilledButtonWithProgress(
                         text = stringResource(id = R.string.common_save),
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 16.dp)
                             .padding(horizontal = 16.dp),
+                        enabled = !uiState.isLoading,
                         onClick = {
-                            scheduleId?.let {
-                                onClickEvent(AnniversaryBottomSheetContact.Event.OnClickUpdate)
-                            } ?: onClickEvent(AnniversaryBottomSheetContact.Event.OnClickSave)
+                            if (!uiState.isLoading) {
+                                scheduleId?.let {
+                                    onClickEvent(AnniversaryBottomSheetContact.Event.OnClickUpdate)
+                                } ?: onClickEvent(AnniversaryBottomSheetContact.Event.OnClickSave)
+                            }
                         },
                     )
                 }
