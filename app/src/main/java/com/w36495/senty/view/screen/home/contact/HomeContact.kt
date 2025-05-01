@@ -19,7 +19,7 @@ sealed interface HomeContact {
     }
 
     sealed interface Effect {
-        data class ShowError(val message: String) : Effect
+        data class ShowError(val throwable: Throwable? = null) : Effect
         data object NavigateToGifts : Effect
         data class NavigateToGiftDetail(val giftId: String) : Effect
     }

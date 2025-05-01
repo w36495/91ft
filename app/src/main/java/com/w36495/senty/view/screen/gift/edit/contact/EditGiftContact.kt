@@ -43,7 +43,7 @@ sealed interface EditGiftContact {
 
     sealed interface Effect {
         data class ShowToast(val message: String) : Effect
-        data class ShowError(val message: String) : Effect
+        data class ShowError(val throwable: Throwable? = null) : Effect
         data object ShowCamera : Effect
         data object ShowGallery : Effect
         data object NavigateToBack : Effect

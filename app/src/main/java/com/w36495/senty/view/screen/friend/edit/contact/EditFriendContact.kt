@@ -29,7 +29,7 @@ sealed interface EditFriendContact {
 
     sealed interface Effect {
         data class ShowSnackBar(val message: String) : Effect
-        data class ShowError(val message: String) : Effect
+        data class ShowError(val throwable: Throwable? = null) : Effect
         data object NavigateToFriendGroups : Effect
         data object NavigateToFriends : Effect
     }

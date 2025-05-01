@@ -23,7 +23,7 @@ sealed interface GiftCategoryContact {
 
     sealed interface Effect {
         data class ShowToast(val message: String): Effect
-        data class ShowError(val message: String) : Effect
+        data class ShowError(val throwable: Throwable? = null) : Effect
         data object NavigateToSettings : Effect
     }
 }

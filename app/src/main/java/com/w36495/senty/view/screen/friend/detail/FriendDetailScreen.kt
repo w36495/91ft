@@ -77,6 +77,7 @@ fun FriendDetailRoute(
     moveToGiftDetail: (String) -> Unit,
     moveToEditFriend: (String) -> Unit,
     onBackPressed: () -> Unit,
+    onShowGlobalErrorSnackBar: (throwable: Throwable?) -> Unit,
 ) {
     LaunchedEffect(Unit) {
         vm.getFriend(friendId)
@@ -96,7 +97,7 @@ fun FriendDetailRoute(
                     vm.sendEffect(FriendDetailContact.Effect.NavigateToFriends)
                 }
                 is FriendDetailContact.Effect.ShowError -> {
-
+                    onShowGlobalErrorSnackBar(effect.throwable)
                 }
                 is FriendDetailContact.Effect.NavigateToEditFriend -> {
                     moveToEditFriend(effect.friendId)

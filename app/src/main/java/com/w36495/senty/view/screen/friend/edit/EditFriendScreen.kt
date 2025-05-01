@@ -66,6 +66,7 @@ fun EditFriendRoute(
     friendId: String?,
     moveToFriendGroups: () -> Unit,
     onBackPressed: () -> Unit,
+    onShowGlobalErrorSnackBar: (throwable: Throwable?) -> Unit,
 ) {
     val context = LocalContext.current
     val uiState by vm.uiState.collectAsStateWithLifecycle()
@@ -82,7 +83,7 @@ fun EditFriendRoute(
                     vm.sendEffect(EditFriendContact.Effect.NavigateToFriends)
                 }
                 is EditFriendContact.Effect.ShowError -> {
-
+                    onShowGlobalErrorSnackBar(effect.throwable)
                 }
                 EditFriendContact.Effect.NavigateToFriends -> {
                     onBackPressed()

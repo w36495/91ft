@@ -4,8 +4,6 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuthUserCollisionException
-import com.w36495.senty.R
 import com.w36495.senty.domain.repository.AuthRepository
 import com.w36495.senty.util.validator.Validator
 import com.w36495.senty.view.screen.signup.model.SignUpEffect
@@ -70,15 +68,8 @@ class SignUpViewModel @Inject constructor(
                 }
                 .onFailure { throwable ->
                     Log.d("SignUpVM", throwable.stackTraceToString())
-
-                    when (throwable) {
-                        is FirebaseAuthUserCollisionException -> {
-                            _effect.send(SignUpEffect.ShowError(context.getString(R.string.signup_error_check_email)))
-                        }
-                        else -> {
-                            _effect.send(SignUpEffect.ShowError(context.getString(R.string.common_error1)))
-                        }
-                    }
+                    _uiState.update { SignUpUiState.Idle }
+                    _effect.send(SignUpEffect.ShowError(throwable))
                 }
         }
     }

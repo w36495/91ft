@@ -78,9 +78,14 @@ fun FriendRoute(
     moveToFriendAdd: () -> Unit,
     moveToFriendGroup: () -> Unit,
     moveToFriendDetail: (String) -> Unit,
+    onShowGlobalErrorSnackBar: (throwable: Throwable?) -> Unit,
 ) {
     val uiState by vm.uiState.collectAsStateWithLifecycle()
     val snackBarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(Unit) {
+        vm.loadFriends()
+    }
 
     LaunchedEffect(Unit) {
         vm.effect.collect {effect ->
@@ -92,6 +97,9 @@ fun FriendRoute(
                 }
                 is FriendContact.Effect.ShowSnackBar -> {
                     snackBarHostState.showSnackbar(effect.message)
+                }
+                is FriendContact.Effect.ShowError -> {
+                    onShowGlobalErrorSnackBar(effect.throwable)
                 }
             }
         }

@@ -20,6 +20,7 @@ fun NavController.navigateToSignUp() {
 fun NavGraphBuilder.authNavGraph(
     padding: PaddingValues,
     navController: NavController,
+    onShowGlobalErrorSnackBar: (throwable: Throwable?) -> Unit,
 ) {
     composable<Route.Login> {
         LoginRoute(
@@ -31,6 +32,7 @@ fun NavGraphBuilder.authNavGraph(
                 navController.navigateToHome(navOptions)
             },
             moveToSignUp = { navController.navigateToSignUp() },
+            onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
         )
     }
 
@@ -39,6 +41,7 @@ fun NavGraphBuilder.authNavGraph(
             padding = padding,
             moveToLogin = { navController.navigateToLogin() },
             onBackPressed = { navController.popBackStack() },
+            onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
         )
     }
 }

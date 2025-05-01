@@ -32,7 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.w36495.senty.R
-import com.w36495.senty.view.screen.setting.model.SettingEffect
+import com.w36495.senty.view.screen.setting.model.SettingContact
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.dialogs.BasicAlertDialog
 import com.w36495.senty.view.ui.theme.SentyGray20
@@ -43,17 +43,21 @@ fun SettingsRoute(
     padding: PaddingValues,
     moveToLogin: () -> Unit,
     moveToGiftCategories: () -> Unit,
+    onShowGlobalErrorSnackBar: (throwable: Throwable?) -> Unit,
 ) {
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         vm.effect.collect { effect ->
             when (effect) {
-                is SettingEffect.ShowToast -> {
+                is SettingContact.Effect.ShowToast -> {
                     Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
-                    vm.sendEffect(SettingEffect.Complete)
+                    vm.sendEffect(SettingContact.Effect.Complete)
                 }
-                SettingEffect.Complete -> { moveToLogin() }
+                is SettingContact.Effect.ShowError -> {
+                    onShowGlobalErrorSnackBar(effect.throwable)
+                }
+                SettingContact.Effect.Complete -> { moveToLogin() }
             }
         }
     }

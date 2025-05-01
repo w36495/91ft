@@ -52,9 +52,8 @@ class FriendDetailViewModel @Inject constructor(
                     _state.update { state -> state.copy(isLoading = true) }
                 }
                 .catch {
-                    _state.update { state ->
-                        state.copy(isLoading = false)
-                    }
+                    _state.update { state -> state.copy(isLoading = false) }
+                    _effect.send(FriendDetailContact.Effect.ShowError(it))
                 }
                 .collect { (friend, gifts) ->
                     val enrichedGifts = gifts.map { gift ->
@@ -128,7 +127,7 @@ class FriendDetailViewModel @Inject constructor(
                 }
                 .onFailure {
                     _state.update { it.copy(isLoading = false) }
-                    sendEffect(FriendDetailContact.Effect.ShowError("삭제에 실패했습니다."))
+                    sendEffect(FriendDetailContact.Effect.ShowError(it))
                 }
         }
     }

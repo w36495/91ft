@@ -37,6 +37,7 @@ fun NavController.navigateToFriendGroups() {
 fun NavGraphBuilder.friendNavGraph(
     padding: PaddingValues,
     navController: NavController,
+    onShowGlobalErrorSnackBar: (throwable: Throwable?) -> Unit,
 ) {
     composable<BottomTabRoute.Friend> {
         FriendRoute(
@@ -44,6 +45,7 @@ fun NavGraphBuilder.friendNavGraph(
             moveToFriendAdd = { navController.navigateToFriendAdd() },
             moveToFriendDetail = { navController.navigateToFriendDetail(it) },
             moveToFriendGroup = { navController.navigateToFriendGroups() },
+            onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
         )
     }
 
@@ -56,6 +58,7 @@ fun NavGraphBuilder.friendNavGraph(
             friendId = friendId,
             moveToFriendGroups = { navController.navigateToFriendGroups() },
             onBackPressed = { navController.navigateUp() },
+            onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
         )
     }
 
@@ -68,6 +71,7 @@ fun NavGraphBuilder.friendNavGraph(
             onBackPressed = { navController.popBackStack() },
             moveToGiftDetail = { navController.navigateToGiftDetail(it) },
             moveToEditFriend = { navController.navigateToFriendEdit(it) },
+            onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
         )
     }
 
@@ -75,6 +79,7 @@ fun NavGraphBuilder.friendNavGraph(
     composable<Route.FriendGroups> {
         FriendGroupScreen(
             onBackPressed = { navController.popBackStack() },
+            onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
         )
     }
 }

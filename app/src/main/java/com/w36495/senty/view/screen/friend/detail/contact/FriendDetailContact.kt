@@ -22,7 +22,7 @@ sealed interface FriendDetailContact {
 
     sealed interface Effect {
         data class ShowToast(val message: String) : Effect
-        data class ShowError(val message: String) : Effect
+        data class ShowError(val throwable: Throwable? = null) : Effect
         data object NavigateToFriends : Effect
         data class NavigateToEditFriend(val friendId: String) : Effect
         data class NavigateToGiftDetail(val giftId: String) : Effect

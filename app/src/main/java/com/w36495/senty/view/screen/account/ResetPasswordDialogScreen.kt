@@ -14,6 +14,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +40,7 @@ import com.w36495.senty.viewModel.ResetPasswordViewModel
 fun FindPasswordDialogScreen(
     vm: ResetPasswordViewModel = hiltViewModel(),
     onDismiss: () -> Unit,
+    onShowGlobalErrorSnackBar: (throwable: Throwable?) -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -52,6 +54,12 @@ fun FindPasswordDialogScreen(
     }
 
     var email by rememberSaveable { mutableStateOf("") }
+
+    LaunchedEffect(true) {
+        vm.errorFlow.collect { throwable ->
+            onShowGlobalErrorSnackBar(throwable)
+        }
+    }
 
     BasicAlertDialog(
         onDismissRequest = { onDismiss() },

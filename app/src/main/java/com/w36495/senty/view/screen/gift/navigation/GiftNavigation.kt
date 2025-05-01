@@ -34,6 +34,7 @@ fun NavGraphBuilder.giftNavGraph(
     padding: PaddingValues,
     navController: NavController,
     moveToHome: () -> Unit,
+    onShowGlobalErrorSnackBar: (throwable: Throwable?) -> Unit,
 ) {
     composable<BottomTabRoute.GiftAdd> { 
         EditGiftRoute(
@@ -41,6 +42,7 @@ fun NavGraphBuilder.giftNavGraph(
             moveToGiftCategories = { navController.navigateToGiftCategories() },
             moveToFriendAdd = { navController.navigateToFriendAdd() },
             moveToHome = { moveToHome() },
+            onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
         )
     }
 
@@ -50,6 +52,7 @@ fun NavGraphBuilder.giftNavGraph(
             moveToGiftDetail = { navController.navigateToGiftDetail(it) },
             moveToGiftCategories = { navController.navigateToGiftCategories() },
             onBackPressed = { navController.popBackStack() },
+            onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
         )
     }
 
@@ -61,6 +64,7 @@ fun NavGraphBuilder.giftNavGraph(
             giftId = giftId,
             moveToGiftEdit = { navController.navigateToGiftEdit(it) },
             onBackPressed = { navController.popBackStack() },
+            onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
         )
     }
 
@@ -73,6 +77,7 @@ fun NavGraphBuilder.giftNavGraph(
             moveToGiftCategories = { navController.navigateToGiftCategories() },
             moveToFriendAdd = { navController.navigateToFriendAdd() },
             moveToHome = { navController.popBackStack() },
+            onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
         )
     }
 }

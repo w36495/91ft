@@ -87,7 +87,7 @@ class GiftDetailViewModel @Inject constructor(
                 .onFailure {
                     Log.d("GiftDetailVM", "선물 정보 조회 실패")
                     _state.update { it.copy(isLoading = false) }
-                    sendEffect(GiftDetailContact.Effect.ShowError("오류가 발생하였습니다."))
+                    sendEffect(GiftDetailContact.Effect.ShowError(it))
                 }
         }
     }
@@ -103,7 +103,7 @@ class GiftDetailViewModel @Inject constructor(
                 }
                 .onFailure {
                     _state.update { it.copy(isLoading = false) }
-                    sendEffect(GiftDetailContact.Effect.ShowError("오류가 발생하였습니다."))
+                    sendEffect(GiftDetailContact.Effect.ShowError(it))
                 }
         }
     }

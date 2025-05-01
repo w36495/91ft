@@ -40,13 +40,14 @@ class EditFriendViewModel @Inject constructor(
                     updateLoadingState(false)
                     _uiState.update { state ->
                         state.copy(
+                            isLoading = false,
                             friend = it.toUiModel(),
                             checkBirthdaySkipped = it.birthday.isEmpty(),
                         )
                     }
                 }
                 .onFailure {
-                    sendEffect(EditFriendContact.Effect.ShowError("오류가 발생했습니다."))
+                    sendEffect(EditFriendContact.Effect.ShowError(it))
                 }
         }
     }
@@ -103,7 +104,7 @@ class EditFriendViewModel @Inject constructor(
                 }
                 .onFailure {
                     updateLoadingState(false)
-                    _effect.send(EditFriendContact.Effect.ShowError("오류가 발생하였습니다."))
+                    _effect.send(EditFriendContact.Effect.ShowError(it))
                 }
         }
     }
@@ -121,7 +122,7 @@ class EditFriendViewModel @Inject constructor(
                 }
                 .onFailure {
                     updateLoadingState(false)
-                    _effect.send(EditFriendContact.Effect.ShowError("오류가 발생하였습니다."))
+                    _effect.send(EditFriendContact.Effect.ShowError(it))
                 }
         }
     }

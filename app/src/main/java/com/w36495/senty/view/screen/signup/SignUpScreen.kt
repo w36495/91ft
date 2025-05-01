@@ -52,6 +52,7 @@ fun SignUpRoute(
     padding: PaddingValues,
     moveToLogin: () -> Unit,
     onBackPressed: () -> Unit,
+    onShowGlobalErrorSnackBar: (throwable: Throwable?) -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -68,10 +69,8 @@ fun SignUpRoute(
 
     LaunchedEffect(Unit) {
         vm.effect.collect { effect ->
-            when (effect) {
-                is SignUpEffect.ShowError -> {
-                    showErrorDialog = effect.message
-                }
+            if (effect is SignUpEffect.ShowError) {
+                onShowGlobalErrorSnackBar(effect.throwable)
             }
         }
     }

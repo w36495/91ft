@@ -21,6 +21,7 @@ sealed interface FriendContact {
     }
 
     sealed interface Effect {
+        data class ShowError(val throwable: Throwable? = null) : Effect
         data class ShowSnackBar(val message: String) : Effect
         data class NavigateToFriendDetail(val friendId: String) : Effect
         data object NavigateToFriendGroups : Effect

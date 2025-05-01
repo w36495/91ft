@@ -57,11 +57,9 @@ class GiftCategoriesViewModel @Inject constructor(
                         }
                 }
                 .onFailure {
-                    _state.update {
-                        it.copy(isLoading = false)
-                    }
+                    _state.update { state -> state.copy(isLoading = false) }
                     Log.d("GiftCategoryVM", it.stackTraceToString())
-                    sendEffect(GiftCategoryContact.Effect.ShowError("오류가 발생하였습니다."))
+                    sendEffect(GiftCategoryContact.Effect.ShowError(it))
                 }
         }
     }
@@ -161,7 +159,7 @@ class GiftCategoriesViewModel @Inject constructor(
                 }
                 .onFailure {
                     _state.update { it.copy(isLoading = false, showAddCategoryDialog = false) }
-                    sendEffect(GiftCategoryContact.Effect.ShowError("오류가 발생하였습니다."))
+                    sendEffect(GiftCategoryContact.Effect.ShowError(it))
                 }
         }
     }
@@ -188,12 +186,12 @@ class GiftCategoriesViewModel @Inject constructor(
                     Log.d("GiftCategoryVM", it.stackTraceToString())
                     _state.update { state ->
                         state.copy(
-                            isLoading = true,
+                            isLoading = false,
                             showEditCategoryDialog = false,
                             selectedCategory = null,
                         )
                     }
-                    sendEffect(GiftCategoryContact.Effect.ShowError("오류가 발생하였습니다."))
+                    sendEffect(GiftCategoryContact.Effect.ShowError(it))
                 }
 
         }
@@ -213,7 +211,7 @@ class GiftCategoriesViewModel @Inject constructor(
                 .onFailure {
                     Log.d("GiftCategoryVM", it.stackTraceToString())
                     _state.update { it.copy(isLoading = false, showDeleteCategoryDialog = false) }
-                    sendEffect(GiftCategoryContact.Effect.ShowError("오류가 발생하였습니다."))
+                    sendEffect(GiftCategoryContact.Effect.ShowError(it))
                 }
         }
     }

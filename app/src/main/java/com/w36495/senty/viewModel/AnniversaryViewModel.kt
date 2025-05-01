@@ -95,18 +95,24 @@ class AnniversaryViewModel @Inject constructor(
     }
 
     private fun getSchedules(selectedYear: Int, selectedMonth: Int, selectedDay: Int) {
-        val selectedSchedules = state.value.schedules.filter { schedule ->
-            val (year, month, day) = schedule.date.split("-").map { it.toInt() }
-            selectedYear == year
-                    && StringUtils.format2Digits(selectedMonth).toInt() == month
-                    && StringUtils.format2Digits(selectedDay).toInt() == day
-        }
+        runCatching {
+            val selectedSchedules = state.value.schedules.filter { schedule ->
+                val (year, month, day) = schedule.date.split("-").map { it.toInt() }
+                selectedYear == year
+                        && StringUtils.format2Digits(selectedMonth).toInt() == month
+                        && StringUtils.format2Digits(selectedDay).toInt() == day
+            }
 
-        _state.update {
-            it.copy(
-                selectedSchedules = selectedSchedules,
-                selectedDate = Triple(selectedYear, selectedMonth, selectedDay),
-            )
+            _state.update {
+                it.copy(
+                    selectedSchedules = selectedSchedules,
+                    selectedDate = Triple(selectedYear, selectedMonth, selectedDay),
+                )
+            }
+        }.onFailure {
+            viewModelScope.launch {
+                _effect.send(AnniversaryContact.Effect.ShowError(it))
+            }
         }
     }
 }

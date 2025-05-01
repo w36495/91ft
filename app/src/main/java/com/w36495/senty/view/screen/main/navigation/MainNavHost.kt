@@ -17,6 +17,7 @@ import com.w36495.senty.view.screen.setting.navigation.settingNavGraph
 fun MainNavHost(
     navigator: MainNavigator,
     padding: PaddingValues,
+    onShowGlobalErrorSnackBar: (throwable: Throwable?) -> Unit,
 ) {
     NavHost(
         navController = navigator.navController,
@@ -24,27 +25,32 @@ fun MainNavHost(
     ) {
         introNavGraph(
             navController = navigator.navController,
+            onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
         )
 
         authNavGraph(
             padding = padding,
             navController = navigator.navController,
+            onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
         )
 
         homeNavGraph(
             padding = padding,
             navController = navigator.navController,
+            onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
         )
 
         friendNavGraph(
             padding = padding,
             navController = navigator.navController,
+            onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
         )
 
         giftNavGraph(
             padding = padding,
             navController = navigator.navController,
             moveToHome = { navigator.navigate(MainBottomTab.HOME) },
+            onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
         )
 
         anniversaryNavGraph(
@@ -56,6 +62,7 @@ fun MainNavHost(
         settingNavGraph(
             padding = padding,
             navController = navigator.navController,
+            onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
         )
     }
 }

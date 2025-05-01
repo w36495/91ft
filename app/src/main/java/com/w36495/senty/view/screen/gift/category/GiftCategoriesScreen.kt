@@ -46,6 +46,7 @@ import com.w36495.senty.view.ui.theme.SentyWhite
 fun GiftCategoriesRoute(
     vm: GiftCategoriesViewModel = hiltViewModel(),
     onBackPressed: () -> Unit,
+    onShowGlobalErrorSnackBar: (throwable: Throwable?) -> Unit,
 ) {
     val context = LocalContext.current
     val uiState by vm.state.collectAsStateWithLifecycle()
@@ -60,7 +61,7 @@ fun GiftCategoriesRoute(
                     Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
                 }
                 is GiftCategoryContact.Effect.ShowError -> {
-
+                    onShowGlobalErrorSnackBar(effect.throwable)
                 }
             }
         }

@@ -71,6 +71,7 @@ import kotlinx.coroutines.launch
 fun FriendGroupScreen(
     vm: FriendGroupViewModel = hiltViewModel(),
     onBackPressed: () -> Unit,
+    onShowGlobalErrorSnackBar: (throwable: Throwable?) -> Unit,
 ) {
     val friendGroups by vm.friendGroups.collectAsStateWithLifecycle()
 
@@ -82,6 +83,10 @@ fun FriendGroupScreen(
         vm.snackbarMsg.collectLatest {
             snackBarHostState.showSnackbar(it)
         }
+    }
+
+    LaunchedEffect(true) {
+        vm.errorFlow.collect { onShowGlobalErrorSnackBar(it) }
     }
 
     if (showAddDialog) {

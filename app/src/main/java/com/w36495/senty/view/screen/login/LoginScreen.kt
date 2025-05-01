@@ -20,8 +20,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Divider
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -67,6 +65,7 @@ fun LoginRoute(
     vm: LoginViewModel = hiltViewModel(),
     moveToHome: () -> Unit,
     moveToSignUp: () -> Unit,
+    onShowGlobalErrorSnackBar: (throwable: Throwable?) -> Unit,
 ) {
     val context = LocalContext.current
     val uiState by vm.uiState.collectAsState()
@@ -86,7 +85,7 @@ fun LoginRoute(
         vm.effect.collect { effect ->
             when (effect) {
                 is LoginEffect.ShowError -> {
-
+                    onShowGlobalErrorSnackBar(effect.throwable)
                 }
                 LoginEffect.NavigateToHome -> {
                     moveToHome()
@@ -111,6 +110,7 @@ fun LoginRoute(
         onClickSignUp = moveToSignUp,
         onClickKakao = { vm.signInWithKakao(context) },
         onClickGoogle = { vm.prepareSignInWithGoogle(context) },
+        onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
     )
 }
 
@@ -126,6 +126,7 @@ private fun LoginScreen(
     onClickSignUp: () -> Unit,
     onClickGoogle: () -> Unit,
     onClickKakao: () -> Unit,
+    onShowGlobalErrorSnackBar: (throwable: Throwable?) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -228,7 +229,7 @@ private fun LoginScreen(
                     text = stringResource(id = R.string.login_title),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 8.dp),
+                        .padding(top = 16.dp),
                     onClick = {
                         focusManager.clearFocus()
                         if (formState.email.isNotEmpty() && formState.password.isNotEmpty()) {
@@ -275,7 +276,8 @@ private fun LoginScreen(
         when {
             showFindPasswordDialog -> {
                 FindPasswordDialogScreen(
-                    onDismiss = { showFindPasswordDialog = false }
+                    onDismiss = { showFindPasswordDialog = false },
+                    onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
                 )
             }
 
@@ -356,6 +358,7 @@ private fun LoginPreview() {
             onClickSignUp = {},
             onClickGoogle = {},
             onClickKakao = {},
+            onShowGlobalErrorSnackBar = {},
         )
     }
 }

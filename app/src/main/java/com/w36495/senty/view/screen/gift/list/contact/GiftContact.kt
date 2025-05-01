@@ -17,7 +17,7 @@ sealed interface GiftContact {
 
     sealed interface Effect {
         data class ShowToast(val message: String) : Effect
-        data class ShowError(val message: String) : Effect
+        data class ShowError(val throwable: Throwable?) : Effect
         data object NavigateToBack : Effect
         data object NavigateToGiftCategories : Effect
         data class NavigateToGiftDetail(val giftId: String) : Effect

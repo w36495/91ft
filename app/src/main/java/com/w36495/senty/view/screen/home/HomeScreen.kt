@@ -71,6 +71,7 @@ fun HomeRoute(
     padding: PaddingValues,
     moveToGifts: () -> Unit,
     moveToGiftDetail: (String) -> Unit,
+    onShowGlobalErrorSnackBar: (throwable: Throwable?) -> Unit,
 ) {
     val uiState by vm.state.collectAsStateWithLifecycle()
 
@@ -78,7 +79,7 @@ fun HomeRoute(
         vm.effect.collect { effect ->
             when(effect) {
                 is HomeContact.Effect.ShowError -> {
-                    
+                    onShowGlobalErrorSnackBar(effect.throwable)
                 }
                 HomeContact.Effect.NavigateToGifts -> { moveToGifts() }
                 is HomeContact.Effect.NavigateToGiftDetail -> { moveToGiftDetail(effect.giftId) }

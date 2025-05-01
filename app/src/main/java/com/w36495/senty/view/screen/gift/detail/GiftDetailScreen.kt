@@ -71,6 +71,7 @@ fun GiftDetailRoute(
     giftId: String,
     moveToGiftEdit: (String) -> Unit,
     onBackPressed: () -> Unit,
+    onShowGlobalErrorSnackBar: (throwable: Throwable?) -> Unit,
 ) {
     val context = LocalContext.current
     val uiState by vm.state.collectAsStateWithLifecycle()
@@ -87,7 +88,7 @@ fun GiftDetailRoute(
                     vm.sendEffect(GiftDetailContact.Effect.NavigateToBack)
                 }
                 is GiftDetailContact.Effect.ShowError -> {
-
+                    onShowGlobalErrorSnackBar(effect.throwable)
                 }
                 is GiftDetailContact.Effect.NavigateToEditGift -> {
                     moveToGiftEdit(effect.giftId)

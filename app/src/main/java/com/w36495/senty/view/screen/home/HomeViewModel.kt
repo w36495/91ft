@@ -19,6 +19,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -60,10 +61,12 @@ class HomeViewModel @Inject constructor(
         }
     }
     private suspend fun fetchInitialData() {
-        viewModelScope.launch {
+        runCatching {
             giftRepository.fetchGifts()
             friendRepository.fetchFriends()
             anniversaryRepository.fetchSchedules()
+        }.onFailure {
+            _effect.send(HomeContact.Effect.ShowError(it))
         }
     }
 
@@ -96,6 +99,7 @@ class HomeViewModel @Inject constructor(
 
                 Triple(received, sent, homeSchedules)
             }
+                .catch { _effect.send(HomeContact.Effect.ShowError(it)) }
                 .collectLatest { (received, sent, schedules) ->
                     val enrichedReceivedGifts = coroutineScope {
                         received.map { gift ->

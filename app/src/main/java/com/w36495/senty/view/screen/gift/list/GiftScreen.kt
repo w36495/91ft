@@ -1,5 +1,6 @@
 package com.w36495.senty.view.screen.gift.list
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -71,7 +72,9 @@ fun GiftRoute(
     moveToGiftDetail: (String) -> Unit,
     moveToGiftCategories: () -> Unit,
     onBackPressed: () -> Unit,
+    onShowGlobalErrorSnackBar: (throwable: Throwable?) -> Unit,
 ) {
+    val context = LocalContext.current
     val uiState by vm.state.collectAsStateWithLifecycle()
 
     val tabList = GiftTabType.entries.toList()
@@ -93,10 +96,10 @@ fun GiftRoute(
         vm.effect.collect { effect ->
             when (effect) {
                 is GiftContact.Effect.ShowToast -> {
-
+                    Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
                 }
                 is GiftContact.Effect.ShowError -> {
-
+                    onShowGlobalErrorSnackBar(effect.throwable)
                 }
                 GiftContact.Effect.NavigateToBack -> { onBackPressed() }
                 GiftContact.Effect.NavigateToGiftCategories -> { moveToGiftCategories() }

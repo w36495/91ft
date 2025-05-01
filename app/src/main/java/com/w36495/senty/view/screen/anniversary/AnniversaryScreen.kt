@@ -26,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,6 +61,16 @@ fun AnniversaryRoute(
     onShowGlobalErrorSnackBar: (throwable: Throwable?) -> Unit,
 ) {
     val uiState by vm.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(true) {
+        vm.effect.collect { effect ->
+            when (effect) {
+                is AnniversaryContact.Effect.ShowError -> {
+                    onShowGlobalErrorSnackBar(effect.throwable)
+                }
+            }
+        }
+    }
 
     AnniversaryScreen(
         modifier = Modifier.padding(bottom = padding.calculateBottomPadding()),

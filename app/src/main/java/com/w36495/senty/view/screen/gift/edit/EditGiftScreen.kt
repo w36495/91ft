@@ -110,6 +110,7 @@ fun EditGiftRoute(
     moveToGiftCategories: () -> Unit,
     moveToFriendAdd: () -> Unit,
     moveToHome: () -> Unit,
+    onShowGlobalErrorSnackBar: (throwable: Throwable?) -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -160,7 +161,7 @@ fun EditGiftRoute(
                     vm.sendEffect(EditGiftContact.Effect.NavigateToBack)
                 }
                 is EditGiftContact.Effect.ShowError -> {
-
+                    onShowGlobalErrorSnackBar(effect.throwable)
                 }
                 EditGiftContact.Effect.ShowCamera -> {
                     val hasPermission = context.checkCameraPermission(arrayOf(Manifest.permission.CAMERA))

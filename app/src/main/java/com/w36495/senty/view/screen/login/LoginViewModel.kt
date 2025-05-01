@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.SignInClient
-import com.w36495.senty.R
 import com.w36495.senty.domain.entity.AuthUser
 import com.w36495.senty.domain.entity.LoginType
 import com.w36495.senty.domain.repository.AuthRepository
@@ -74,8 +73,9 @@ class LoginViewModel @Inject constructor(
                         _effect.send(LoginEffect.NavigateToHome)
                     }
                 }
-                .onFailure {
-                    _effect.send(LoginEffect.ShowError(context.getString(R.string.login_error1)))
+                .onFailure { throwable ->
+                    _uiState.update { LoginUiState.Idle }
+                    _effect.send(LoginEffect.ShowError(throwable))
                 }
         }
     }
@@ -94,7 +94,7 @@ class LoginViewModel @Inject constructor(
                     }
                 } else {
                     viewModelScope.launch {
-                        _effect.send(LoginEffect.ShowError(context.getString(R.string.login_error1)))
+                        _effect.send(LoginEffect.ShowError(task.exception))
                     }
                 }
             }
@@ -107,7 +107,7 @@ class LoginViewModel @Inject constructor(
             signInWithGoogleToken(idToken, context)
         } else {
             viewModelScope.launch {
-                _effect.send(LoginEffect.ShowError(context.getString(R.string.login_error1)))
+                _effect.send(LoginEffect.ShowError())
             }
         }
     }
@@ -127,7 +127,9 @@ class LoginViewModel @Inject constructor(
                     _effect.send(LoginEffect.NavigateToHome)
                 }
                 .onFailure {
-                    _effect.send(LoginEffect.ShowError(context.getString(R.string.login_error1)))
+                    Log.d("LoginVM(signInWithKakao)", "카카오 로그인 실패")
+                    _uiState.update { LoginUiState.Idle }
+                    _effect.send(LoginEffect.ShowError())
                 }
         }
     }
@@ -153,7 +155,9 @@ class LoginViewModel @Inject constructor(
                     }
                 }
                 .onFailure {
-                    _effect.send(LoginEffect.ShowError(context.getString(R.string.login_error1)))
+                    Log.d("LoginVM(signInWithGoogleToken)", "구글 로그인 실패")
+                    _uiState.update { LoginUiState.Idle }
+                    _effect.send(LoginEffect.ShowError())
                 }
         }
     }

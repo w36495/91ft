@@ -22,7 +22,8 @@ fun NavController.navigateToGiftCategories() {
 fun NavGraphBuilder.settingNavGraph(
     padding: PaddingValues,
     navController: NavController,
-) {
+    onShowGlobalErrorSnackBar: (throwable: Throwable?) -> Unit,
+    ) {
     composable<BottomTabRoute.Settings> {
         SettingsRoute(
             padding = padding,
@@ -36,12 +37,14 @@ fun NavGraphBuilder.settingNavGraph(
                 navController.navigateToLogin(navOptions)
             },
             moveToGiftCategories = { navController.navigateToGiftCategories() },
+            onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
         )
     }
 
     composable<Route.GiftCategories> {
         GiftCategoriesRoute(
             onBackPressed = { navController.popBackStack() },
+            onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
         )
     }
 }

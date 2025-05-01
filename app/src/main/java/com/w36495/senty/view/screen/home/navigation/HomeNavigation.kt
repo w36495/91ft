@@ -17,12 +17,14 @@ fun NavController.navigateToHome(navOption: NavOptions) {
 fun NavGraphBuilder.homeNavGraph(
     padding: PaddingValues,
     navController: NavController,
+    onShowGlobalErrorSnackBar: (throwable: Throwable?) -> Unit,
 ) {
     composable<BottomTabRoute.Home> {
         HomeRoute(
             padding = padding,
             moveToGifts = { navController.navigateToGifts() },
             moveToGiftDetail = { navController.navigateToGiftDetail(it) },
+            onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
         )
     }
 }

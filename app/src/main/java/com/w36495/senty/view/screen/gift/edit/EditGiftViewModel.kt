@@ -275,11 +275,9 @@ class EditGiftViewModel @Inject constructor(
                 }
                 .onFailure {
                     Log.d("EditGiftVM", it.stackTraceToString())
-                    _state.update { state ->
-                        state.copy(isLoading = false)
-                    }
+                    _state.update { state -> state.copy(isLoading = false) }
 
-                    sendEffect(EditGiftContact.Effect.ShowError("오류가 발생하였습니다."))
+                    sendEffect(EditGiftContact.Effect.ShowError(it))
                 }
         }
     }
@@ -302,9 +300,7 @@ class EditGiftViewModel @Inject constructor(
             }
 
             state.copy(
-                gift = state.gift.copy(
-                    images = LinkedHashMap(updatedImages),
-                ),
+                gift = state.gift.copy(images = LinkedHashMap(updatedImages)),
             )
         }
     }
@@ -427,7 +423,7 @@ class EditGiftViewModel @Inject constructor(
                 .onFailure {
                     Log.d("EditGiftVM", "선물 수정 실패 : ${it.stackTraceToString()}")
                     _state.update { state -> state.copy(isLoading = false) }
-                    sendEffect(EditGiftContact.Effect.ShowError("선물 수정에 실패하였습니다."))
+                    sendEffect(EditGiftContact.Effect.ShowError(it))
                 }
         }
     }
@@ -498,7 +494,7 @@ class EditGiftViewModel @Inject constructor(
                     Log.d("EditGiftVM","🔴 선물 저장 실패" )
 
                     _state.update { it.copy(isLoading = false) }
-                    sendEffect(EditGiftContact.Effect.ShowError("선물 등록에 실패하였습니다."))
+                    sendEffect(EditGiftContact.Effect.ShowError(it))
                 }
         }
     }
