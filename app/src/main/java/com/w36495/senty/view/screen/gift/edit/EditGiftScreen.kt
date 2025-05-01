@@ -286,9 +286,7 @@ private fun EditGiftScreen(
                     onAddImageClick = { onClickImageAdd() }
                 )
                 InputSection(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     isLoading = uiState.isLoading,
                     gift = uiState.gift,
                     isEditMode = isEditMode,
@@ -422,7 +420,8 @@ private fun DisplayGiftImage(
                 .size(32.dp),
             contentAlignment = Alignment.Center
         ) {
-            Box(modifier = Modifier.size(24.dp)
+            Box(modifier = Modifier
+                .size(24.dp)
                 .background(SentyWhite, CircleShape))
             Icon(
                 imageVector = Icons.Rounded.Cancel,
@@ -595,24 +594,31 @@ private fun InputSection(
             onClick = {}
         )
 
-        Text(
-            text = stringResource(id = R.string.gift_edit_memo_text),
-            style = SentyTheme.typography.labelSmall,
+        Column(
             modifier = Modifier
-                .padding(bottom = 12.dp, top = 16.dp)
-                .noRippleClickable { focusManager.clearFocus() },
-        )
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+        ) {
+            Text(
+                text = stringResource(id = R.string.gift_edit_memo_text),
+                style = SentyTheme.typography.labelSmall,
+                modifier = Modifier
+                    .padding(bottom = 12.dp, top = 16.dp)
+                    .noRippleClickable { focusManager.clearFocus() },
+            )
 
-        SentyMultipleTextField(
-            text = gift.memo,
-            onChangeText = onChangeMemo,
-            textStyle = SentyTheme.typography.bodyMedium,
-        )
+            SentyMultipleTextField(
+                text = gift.memo,
+                onChangeText = onChangeMemo,
+                textStyle = SentyTheme.typography.bodyMedium,
+            )
+        }
 
         SentyFilledButtonWithProgress(
             text = stringResource(id = if (isEditMode) { R.string.common_edit } else R.string.common_save),
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(horizontal = 16.dp)
                 .padding(bottom = 24.dp, top = 32.dp),
             enabled = !isLoading,
             onClick = {
@@ -638,7 +644,9 @@ private fun TextSection(
     onClick: () -> Unit,
 ) {
     Column(
-        modifier = modifier.clickable { onClick() }
+        modifier = modifier
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -680,7 +688,7 @@ private fun GiftTypeSection(
     onChangeToReceived: () -> Unit,
     onChangeToSent: () -> Unit,
 ) {
-    Row(modifier = modifier) {
+    Row(modifier = modifier.padding(horizontal = 16.dp)) {
         Chip(
             modifier = Modifier.weight(1f),
             colors = ChipDefaults.chipColors(
