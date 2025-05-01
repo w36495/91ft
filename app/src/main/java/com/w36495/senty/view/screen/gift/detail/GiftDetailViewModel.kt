@@ -7,7 +7,7 @@ import com.w36495.senty.data.mapper.toDomain
 import com.w36495.senty.data.mapper.toUiModel
 import com.w36495.senty.domain.repository.GiftImageRepository
 import com.w36495.senty.domain.repository.GiftRepository
-import com.w36495.senty.domain.usecase.DeleteGiftUseCase
+import com.w36495.senty.domain.usecase.DeleteGiftAndUpdateFriendUseCase
 import com.w36495.senty.view.screen.gift.detail.contact.GiftDetailContact
 import com.w36495.senty.view.screen.gift.model.GiftUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,8 +22,8 @@ import javax.inject.Inject
 @HiltViewModel
 class GiftDetailViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
-    private val GiftImageRepository: GiftImageRepository,
-    private val deleteGiftUseCase: DeleteGiftUseCase,
+    private val giftImageRepository: GiftImageRepository,
+    private val deleteGiftAndUpdateFriendUseCase: DeleteGiftAndUpdateFriendUseCase,
 ) : ViewModel() {
     private val _effect = Channel<GiftDetailContact.Effect>()
     val effect = _effect.receiveAsFlow()
@@ -73,7 +73,7 @@ class GiftDetailViewModel @Inject constructor(
                 .onSuccess {
                     val gift = it.toUiModel()
 
-                    val enrichedGifts = GiftImageRepository.getGiftImages(giftId)
+                    val enrichedGifts = giftImageRepository.getGiftImages(giftId)
                         .map { images -> gift.copy(images = images) }
                         .getOrElse { gift }
 
@@ -96,7 +96,7 @@ class GiftDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
-            deleteGiftUseCase(gift.toDomain())
+            deleteGiftAndUpdateFriendUseCase(gift.toDomain())
                 .onSuccess {
                     _state.update { it.copy(isLoading = false) }
                     sendEffect(GiftDetailContact.Effect.ShowToast("선물이 삭제되었습니다."))
