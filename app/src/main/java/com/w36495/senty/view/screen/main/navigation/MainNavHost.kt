@@ -25,7 +25,6 @@ fun MainNavHost(
     ) {
         introNavGraph(
             navController = navigator.navController,
-            onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
         )
 
         authNavGraph(
