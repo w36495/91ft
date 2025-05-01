@@ -1,0 +1,78 @@
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="app/src/main/res/drawable/add_circle-48px.xml" value="0.195" />
+        <entry key="app/src/main/res/drawable/background_gift_add_photo.xml" value="0.2955" />
+        <entry key="app/src/main/res/drawable/background_splash.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/background_splash_screen.xml" value="0.165" />
+        <entry key="app/src/main/res/drawable/baseline_chevron_left_24.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/baseline_visibility_24.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/bg_rounded_gray.xml" value="0.115" />
+        <entry key="app/src/main/res/drawable/bg_rounded_gray_edittext.xml" value="0.115" />
+        <entry key="app/src/main/res/drawable/btn_all_rounded_dark_gray.xml" value="0.273" />
+        <entry key="app/src/main/res/drawable/btn_rounded_gray.xml" value="0.195" />
+        <entry key="app/src/main/res/drawable/btn_rounded_green.xml" value="0.2955" />
+        <entry key="app/src/main/res/drawable/btn_rounded_purple.xml" value="0.195" />
+        <entry key="app/src/main/res/drawable/calendar_month-48px.xml" value="0.195" />
+        <entry key="app/src/main/res/drawable/gift_type_control_switch_background_border.xml" value="0.2955" />
+        <entry key="app/src/main/res/drawable/gift_type_control_switch_background_middle.xml" value="0.2955" />
+        <entry key="app/src/main/res/drawable/gift_type_control_switch_background_selector.xml" value="0.2955" />
+        <entry key="app/src/main/res/drawable/group-48px.xml" value="0.195" />
+        <entry key="app/src/main/res/drawable/ic_add_circle_24.xml" value="0.205" />
+        <entry key="app/src/main/res/drawable/ic_app_name.xml" value="0.1525" />
+        <entry key="app/src/main/res/drawable/ic_baseline_account_box_24.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_baseline_add_24.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_baseline_add_a_camera_48.xml" value="0.2955" />
+        <entry key="app/src/main/res/drawable/ic_baseline_arrow_back_ios_24.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_baseline_arrow_right_alt_24.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_baseline_calendar_month_24.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_baseline_card_giftcard_24.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_baseline_close_24.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_baseline_delete_24.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_baseline_home_24.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_baseline_person_24.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_baseline_visibility_24.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_outline_chevron_left_24.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/redeem-48px.xml" value="0.195" />
+        <entry key="app/src/main/res/drawable/search-48px.xml" value="0.1115" />
+        <entry key="app/src/main/res/drawable/settings-48px.xml" value="0.195" />
+        <entry key="app/src/main/res/drawable/shape_switch_off.xml" value="0.2955" />
+        <entry key="app/src/main/res/drawable/shape_switch_on.xml" value="0.2955" />
+        <entry key="app/src/main/res/drawable/switch_gift_type_selector.xml" value="0.2955" />
+        <entry key="app/src/main/res/layout/activity_friend_add.xml" value="0.335" />
+        <entry key="app/src/main/res/layout/activity_friend_info.xml" value="0.13697916666666668" />
+        <entry key="app/src/main/res/layout/activity_friend_list.xml" value="0.13697916666666668" />
+        <entry key="app/src/main/res/layout/activity_gift_add.xml" value="0.3640625" />
+        <entry key="app/src/main/res/layout/activity_gift_list.xml" value="0.335" />
+        <entry key="app/src/main/res/layout/activity_gift_show.xml" value="0.36302083333333335" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/activity_main_gift_list.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/activity_main_login.xml" value="0.36302083333333335" />
+        <entry key="app/src/main/res/layout/activity_signin.xml" value="0.4857539958304378" />
+        <entry key="app/src/main/res/layout/activity_signup.xml" value="0.5" />
+        <entry key="app/src/main/res/layout/activity_splash_screen.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/dialog_gift_detail.xml" value="0.2449717203776042" />
+        <entry key="app/src/main/res/layout/dialog_passwd_reset.xml" value="0.13697916666666668" />
+        <entry key="app/src/main/res/layout/fragment_gift_list.xml" value="0.16802536231884058" />
+        <entry key="app/src/main/res/layout/fragment_main_friend_list.xml" value="0.16802536231884058" />
+        <entry key="app/src/main/res/layout/fragment_main_gift_list.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/fragment_main_gift_list_page.xml" value="0.16802536231884058" />
+        <entry key="app/src/main/res/layout/fragment_sub_friend_list.xml" value="0.16802536231884058" />
+        <entry key="app/src/main/res/layout/fragment_sub_gift_list.xml" value="0.3640625" />
+        <entry key="app/src/main/res/layout/friend_list_item.xml" value="0.2318840579710145" />
+        <entry key="app/src/main/res/layout/gift_list_receive_item.xml" value="0.3640625" />
+        <entry key="app/src/main/res/menu/bottom_navigation_manu.xml" value="0.36302083333333335" />
+        <entry key="app/src/main/res/menu/bottom_navigation_menu.xml" value="0.3388888888888889" />
+        <entry key="app/src/main/res/menu/top_app_bar_home.xml" value="0.2703125" />
+        <entry key="app/src/main/res/menu/top_app_bar_search.xml" value="0.2703125" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_17" default="true" project-jdk-name="jbr-17" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>

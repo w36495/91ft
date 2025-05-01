@@ -1,5 +1,9 @@
 package com.w36495.senty
 
+import android.content.Context
+import com.google.firebase.auth.FirebaseUser
+import com.w36495.senty.domain.entity.AuthUser
+import com.w36495.senty.domain.entity.LoginType
 import com.w36495.senty.domain.repository.AuthRepository
 import com.w36495.senty.view.screen.signup.SignUpViewModel
 import kotlinx.coroutines.Dispatchers
@@ -16,6 +20,10 @@ import org.junit.Before
 import org.junit.Test
 
 class FakeAuthRepository : AuthRepository {
+    override suspend fun checkLoginState(): Result<AuthUser?> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun signUpWithEmail(email: String, password: String): Result<Unit> {
         return if (email.contains("success")) {
             Result.success(Unit)
@@ -23,7 +31,36 @@ class FakeAuthRepository : AuthRepository {
             Result.failure(Exception("가입 실패"))
         }
     }
+
+    override suspend fun signInWithEmail(email: String, password: String): Result<FirebaseUser?> {
+        return if (email.contains("success")) {
+            Result.success(null) // 또는 필요 시 FirebaseUser를 모킹
+        } else {
+            Result.failure(Exception("로그인 실패"))
+        }
+    }
+
+    override suspend fun signInWithGoogle(idToken: String): Result<FirebaseUser?> {
+        return if (idToken.contains("valid")) {
+            Result.success(null)
+        } else {
+            Result.failure(Exception("Google 로그인 실패"))
+        }
+    }
+
+    override suspend fun signInWithKakao(context: Context): Result<AuthUser> {
+        return Result.success(AuthUser("kakao_123456", LoginType.KAKAO))
+    }
+
+    override suspend fun signOut(loginType: LoginType, context: Context): Result<Unit> {
+        return Result.success(Unit)
+    }
+
+    override suspend fun withdraw(loginType: LoginType, context: Context): Result<Unit> {
+        TODO("Not yet implemented")
+    }
 }
+
 
 class SignUpViewModelTest {
     private val testDispatcher = StandardTestDispatcher()

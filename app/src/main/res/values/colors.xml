@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="senty_main_green">#2BBD4B</color>
     <color name="senty_green1">#7da453</color>
     <color name="senty_green2">#aed581</color>
     <color name="senty_green3">#e1ffb1</color>
     <color name="senty_gray1">#383838</color>
     <color name="senty_gray2">#F3F3F3</color>
+    <color name="senty_orange1">#F5A61D</color>
     <color name="senty_red">#EB4E3D</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
