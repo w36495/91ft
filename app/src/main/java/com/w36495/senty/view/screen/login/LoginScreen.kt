@@ -206,23 +206,23 @@ private fun LoginScreen(
                     visualTransformation = PasswordVisualTransformation()
                 )
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Checkbox(
-                        checked = formState.checkAutoLogin,
-                        onCheckedChange = { onChangeAutoLoginState(!formState.checkAutoLogin) },
-                        colors = CheckboxDefaults.colors(
-                            checkedColor = SentyGreen60
-                        )
-                    )
-
-                    Text(
-                        text = stringResource(id = R.string.login_auto_text),
-                        style = SentyTheme.typography.labelMedium,
-                    )
-                }
+//                Row(
+//                    modifier = Modifier.fillMaxWidth(),
+//                    verticalAlignment = Alignment.CenterVertically,
+//                ) {
+//                    Checkbox(
+//                        checked = formState.checkAutoLogin,
+//                        onCheckedChange = { onChangeAutoLoginState(!formState.checkAutoLogin) },
+//                        colors = CheckboxDefaults.colors(
+//                            checkedColor = SentyGreen60
+//                        )
+//                    )
+//
+//                    Text(
+//                        text = stringResource(id = R.string.login_auto_text),
+//                        style = SentyTheme.typography.labelMedium,
+//                    )
+//                }
 
                 SentyFilledButton(
                     text = stringResource(id = R.string.login_title),
