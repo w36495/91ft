@@ -1,14 +1,14 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Theme.Senty" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/senty_green2</item>
-        <item name="colorPrimaryVariant">@color/senty_green1</item>
-        <item name="colorOnPrimary">@color/white</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/senty_green2</item>
-        <item name="colorSecondaryVariant">@color/senty_green1</item>
-        <item name="colorOnSecondary">@color/black</item>
+<!--        &lt;!&ndash; Primary brand color. &ndash;&gt;-->
+<!--        <item name="colorPrimary">@color/senty_green2</item>-->
+<!--        <item name="colorPrimaryVariant">@color/senty_green1</item>-->
+<!--        <item name="colorOnPrimary">@color/white</item>-->
+<!--        &lt;!&ndash; Secondary brand color. &ndash;&gt;-->
+<!--        <item name="colorSecondary">@color/senty_green2</item>-->
+<!--        <item name="colorSecondaryVariant">@color/senty_green1</item>-->
+<!--        <item name="colorOnSecondary">@color/black</item>-->
 
         <!-- Status bar color. -->
         <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
@@ -16,17 +16,12 @@
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:enforceNavigationBarContrast" tools:targetApi="q">false</item>
         <item name="android:enforceStatusBarContrast" tools:targetApi="q">false</item>
+        <item name="android:windowIsTranslucent">true</item>
 
         <!-- Customize your theme here. -->
     </style>
-경
     <style name="ThemeOverlay.App.MaterialAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
         <item name="buttonBarPositiveButtonStyle">@style/Widget.App.PositiveButton</item>
         <item name="buttonBarNeutralButtonStyle">@style/Widget.App.NeutralButton</item>
-    </style>
-
-    <!-- Splash screen -->
-    <style name="Theme.Senty.Splash">
-        <item name="android:windowBackground">@drawable/background_splash_screen</item>
     </style>
 </resources>

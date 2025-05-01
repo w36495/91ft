@@ -113,6 +113,8 @@
     <string name="reset_password_email_text">이메일</string>
     <string name="reset_password_hint_text">이메일 입력</string>
 
+    <string name="reset_password_toast_text">메일이 발송되었습니다.</string>
+
     <!-- 로그인 -->
     <string name="login_title">로그인</string>
 
@@ -171,6 +173,9 @@
 
     <string name="friend_detail_tab_info_text">정보</string>
     <string name="friend_detail_tab_gift_text">선물</string>
+
+    <string name="friend_edit_name_error_text">이름을 입력해주세요.</string>
+    <string name="friend_edit_group_ereror_text">그룹을 선택해주세요.</string>
 
     <!-- 친구 그룹 -->
     <string name="friend_group_title">친구 그룹</string>
@@ -271,7 +276,7 @@
     <string name="settings_suggestion_box_text">건의사항</string>
 
     <string name="settings_logout_title">로그아웃 하시겠습니까?</string>
-    <string name="settings_logout_complete_text">로그아웃되였습니다.</string>
+    <string name="settings_logout_complete_text">로그아웃되었습니다.</string>
 
     <string name="settings_withdraw_title">계정을 삭제하시겠습니까?</string>
     <string name="settings_withdraw_message_text">계정을 삭제하면 복구할 수 없습니다.</string>
@@ -288,7 +293,14 @@
     <string name="common_received_gift_text">받은 선물</string>
     <string name="common_sent_gift_text">준 선물</string>
     <string name="common_required_star"> *</string>
+    <string name="common_exit_title">정말 종료하시겠습니까?</string>
 
     <string name="common_error_unknown">오류가 발생하였습니다.</string>
     <string name="common_error_message_network">네트워크 연결이 원활하지 않습니다.</string>
+
+    <!-- 오류 -->
+    <string name="error_common">오류가 발생하였습니다.</string>
+    <string name="error_login_failed">아이디 또는 비밀번호가 일치하지 않습니다.</string>
+    <string name="error_login_failed_too_many_request">잠시 후 다시 시도해주세요.</string>
+    <string name="error_signup_exsist_email">이미 존재하는 이메일입니다.</string>
 </resources>

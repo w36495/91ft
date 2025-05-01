@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
@@ -48,7 +49,8 @@ import com.naver.maps.map.compose.rememberCameraPositionState
 import com.naver.maps.map.overlay.Marker
 import com.w36495.senty.view.entity.SearchAddress
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
-import com.w36495.senty.view.ui.theme.Green40
+import com.w36495.senty.view.ui.theme.SentyGray20
+import com.w36495.senty.view.ui.theme.SentyGreen60
 import com.w36495.senty.viewModel.MapSearchViewModel
 
 @Composable
@@ -63,7 +65,7 @@ fun ScheduleMapScreen(
         searchAddress = resultAddress,
         onBackPressed = { onBackPressed() },
         onClickSearch = { vm.getSearchResult(it) },
-        onSelectLocation = { onSelectLocation(it) }
+        onSelectLocation = { onSelectLocation(it) },
     )
 }
 
@@ -94,14 +96,19 @@ private fun ScheduleMapContents(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(text = "장소선택") },
+                title = {
+                    Text(
+                        text = "장소 선택",
+                        style = SentyTheme.typography.headlineSmall,
+                    )
+                },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = Color.White
                 ),
                 navigationIcon = {
                     IconButton(onClick = { onBackPressed() }) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                             contentDescription = null
                         )
                     }
@@ -142,7 +149,7 @@ private fun ScheduleMapContents(
                     cameraPositionState.move(
                         CameraUpdate.scrollTo(latLng)
                     )
-                }
+                },
             )
         }
     }
@@ -176,8 +183,22 @@ private fun SearchSection(
                 )
 
                 if (index != resultAddress.lastIndex) {
-                    HorizontalDivider()
+                    HorizontalDivider(
+                        color = SentyGray20,
+                        thickness = 0.5.dp,
+                        modifier = Modifier.padding(horizontal = 4.dp),
+                    )
                 }
+//                else {
+//                    Box(modifier = Modifier.fillMaxWidth()
+//                        .background(Color.White),
+//                        contentAlignment = Alignment.CenterEnd) {
+//                        Text(text = "접기", style = MaterialTheme.typography.labelLarge,
+//                            modifier = Modifier.padding(vertical = 16.dp, horizontal = 12.dp)
+//                                .clickable { onResetSearchAddress() }
+//                        )
+//                    }
+//                }
             }
         }
     }
@@ -196,10 +217,10 @@ private fun ScheduleMapSearch(
             onValueChange = {
                 search = it
             },
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(4.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, Green40, RoundedCornerShape(4.dp)),
+                .border(1.dp, SentyGreen60, RoundedCornerShape(4.dp)),
             colors = TextFieldDefaults.colors(
                 disabledContainerColor = Color(0xFFFBFBFB),
                 focusedContainerColor = Color(0xFFFBFBFB),
@@ -220,7 +241,7 @@ private fun ScheduleMapSearch(
             placeholder = {
                 Text(
                     text = "주소를 입력해주세요.",
-                    style = MaterialTheme.typography.labelLarge
+                    style = SentyTheme.typography.bodyMedium,
                 )
             }
         )
@@ -239,7 +260,7 @@ private fun AddressList(
     ) {
         Text(
             text = searchAddress.address,
-            style = MaterialTheme.typography.bodyMedium,
+            style = SentyTheme.typography.bodyMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 16.dp)
@@ -259,4 +280,22 @@ private fun AddressMarker(
         ),
         onClick = { onClickMarker(it) }
     )
+}
+
+@Preview
+@Composable
+private fun AddressListPreview() {
+    SentyTheme {
+        SearchSection(
+            resultAddress = listOf(
+                SearchAddress(address = "123", x = "123", y = "123"),
+                SearchAddress(address = "123", x = "123", y = "123"),
+                SearchAddress(address = "123", x = "123", y = "123"),
+                SearchAddress(address = "123", x = "123", y = "123"),
+            ),
+            onClickSearch = {},
+            onClickAddress = {},
+//            onResetSearchAddress = {}
+        )
+    }
 }
