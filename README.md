@@ -1,14 +1,17 @@
-![Frame 12](https://github.com/w36495/senty/assets/52291662/cbe7cd8b-2f90-4fbc-bdc4-33b4c83aca91)
+![Frame 29](https://github.com/user-attachments/assets/ee775416-89f0-4c80-a3fc-53cbc1a0eb88)
 
-# 🎁 Senty
+# 🎁 91ft
 소중한 사람들과 정성스럽게 주고받은 선물을 기록할 수 있는 어플리케이션  
 
 </br>
 
+
 ⏳ 개발 기간
 ---
-2022.01. ~ 2022.03.  
-2024.05. ~ ing
+**2025.04. ~ 2025.05. (v3)**  
+2024.05. ~ 2024.07. (v2)  
+2022.01. ~ 2022.03. (v1)  
+
 
 </br>
 
@@ -22,25 +25,28 @@
 ---
 - Kotlin, Layered Architecture
 - Jetpack Compose
-- MVVM(Model-View-ViewModel) + Repository Pattern
-- Firebase Services(realtime database, storage, authentication)
+- MVVM(Model-View-ViewModel), MVI(Model-View-Intent)
+- Firebase Services(realtime database, storage, authentication, crashlytics)
 - AAC ViewModel
 - Coroutine + Flow
-- Glide
+- Coil
 - Hilt
 
 **사용한 외부 라이브러리**
 - [Calendar](https://github.com/vsnappy1/ComposeDatePicker)
-- [Naver-map-compose](https://github.com/fornewid/naver-map-compose)
+- ~[Naver-map-compose](https://github.com/fornewid/naver-map-compose)~ -> 추후 다시 사용 예정
 
 </br>  
 
 🤖 기능  
 ---
 ### 1️⃣ 회원  
-|`이메일/소셜 계정으로 로그인`|`이메일로 회원가입`|`비밀번호 재설정`|  
+|`이메일/구글 계정으로 로그인`|`이메일로 회원가입`|`비밀번호 재설정`|  
 |--|--|--|
-|![로그인](https://github.com/w36495/senty/assets/52291662/2b84c7b3-4bd9-49fa-85ca-6ed8dcba458f)|![회원가입](https://github.com/w36495/senty/assets/52291662/5d114b10-e807-4a7c-a107-88ebbecf0d6a)|![비밀번호재설정](https://github.com/w36495/senty/assets/52291662/905540f2-6e6d-421e-a6c1-e714f661ab1a)|
+|![로그인](https://github.com/user-attachments/assets/c5cf77a4-3856-4425-8aa7-a7b8b7ae3e31)|![회원가입](https://github.com/user-attachments/assets/2a6ba051-9f36-4a6a-9d1f-3b61f3e84246)|![비밀번호_재설정](https://github.com/user-attachments/assets/6b469cd8-8cc8-44fd-a625-c2654d8d2d8f)
+
+
+
 
 </br>
 
