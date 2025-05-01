@@ -1,4 +1,4 @@
-package com.w36495.senty.data.error
+package com.w36495.senty.domain.error
 
 sealed interface SentyError
 sealed interface GlobalError : SentyError {

@@ -1,7 +1,7 @@
 package com.w36495.senty.data.error.di
 
-import com.w36495.senty.data.error.ErrorHandler
 import com.w36495.senty.data.error.ErrorHandlerImpl
+import com.w36495.senty.domain.error.ErrorHandler
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

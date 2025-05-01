@@ -6,12 +6,13 @@ import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.w36495.senty.domain.error.AuthError
+import com.w36495.senty.domain.error.ErrorHandler
+import com.w36495.senty.domain.error.GlobalError
+import com.w36495.senty.domain.error.SentyError
 import java.net.UnknownHostException
 import javax.inject.Inject
 
-interface ErrorHandler {
-    fun handleError(throwable: Throwable?): SentyError
-}
 
 class ErrorHandlerImpl @Inject constructor(
 
