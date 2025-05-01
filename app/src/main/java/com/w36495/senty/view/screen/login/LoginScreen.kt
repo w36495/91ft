@@ -228,7 +228,9 @@ private fun LoginScreen(
                         .padding(top = 8.dp),
                     onClick = {
                         focusManager.clearFocus()
-                        onClickLogin()
+                        if (formState.email.isNotEmpty() && formState.password.isNotEmpty()) {
+                            onClickLogin()
+                        }
                     },
                 )
 
