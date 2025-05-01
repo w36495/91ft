@@ -32,13 +32,13 @@ android {
         }
 
         buildConfigField("String", "FIREBASE_WEB_API", localProperties.getProperty("FIREBASE_WEB_API"))
-        buildConfigField("String", "FIREBASE_ACCOUNT_BASE_URL", localProperties.getProperty("FIREBASE_ACCOUNT_BASE_URL"))
         buildConfigField("String", "FIREBASE_DATABASE_BASE_URL", localProperties.getProperty("FIREBASE_DATABASE_BASE_URL"))
         buildConfigField("String", "NAVER_GEOCODING_BASE_URI", localProperties.getProperty("NAVER_GEOCODING_BASE_URI"))
         buildConfigField("String", "NAVER_MAP_KEY", localProperties.getProperty("NAVER_MAP_KEY"))
         buildConfigField("String", "NAVER_MAP_SECRET_KEY", localProperties.getProperty("NAVER_MAP_SECRET_KEY"))
         buildConfigField("String", "KAKAO_NATIVE_APP_KEY", localProperties.getProperty("KAKAO_NATIVE_APP_KEY"))
         buildConfigField("String", "GOOGLE_CLOUD_WEB_CLIENT_ID", localProperties.getProperty("GOOGLE_CLOUD_WEB_CLIENT_ID"))
+        buildConfigField("String", "SUGGESTION_BOX_URL", localProperties.getProperty("SUGGESTION_BOX_URL"))
         manifestPlaceholders["NAVER_MAP_KEY"] = localProperties.getProperty("NAVER_MAP_KEY")
         manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = localProperties.getProperty("KAKAO_NATIVE_APP_KEY")
     }

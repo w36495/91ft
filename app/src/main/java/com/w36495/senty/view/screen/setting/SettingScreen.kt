@@ -1,5 +1,6 @@
 package com.w36495.senty.view.screen.setting
 
+import android.content.Intent
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
@@ -32,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.w36495.senty.BuildConfig
 import com.w36495.senty.R
 import com.w36495.senty.view.component.LoadingCircleIndicator
 import com.w36495.senty.view.screen.setting.model.SettingContact
@@ -69,6 +71,10 @@ fun SettingsRoute(
     SettingsScreen(
         uiState = uiState,
         onClickGiftCategories = moveToGiftCategories,
+        onClickSuggestionBox = {
+            val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(BuildConfig.SUGGESTION_BOX_URL))
+            context.startActivity(intent)
+        },
         onClickLogout = { vm.signOut(context) },
         onClickWithDraw = { vm.withDraw(context) },
     )
@@ -79,6 +85,7 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
     uiState: SettingContact.State,
     onClickGiftCategories: () -> Unit,
+    onClickSuggestionBox: () -> Unit,
     onClickLogout: () -> Unit,
     onClickWithDraw: () -> Unit,
 ) {
@@ -132,10 +139,11 @@ fun SettingsScreen(
                 onClickItem = onClickGiftCategories,
             )
 
-            HorizontalDivider(
-                color = SentyGray20,
-                thickness = 0.5.dp,
-                modifier = Modifier.padding(horizontal = 4.dp),
+            SettingItem(
+                modifier = Modifier.fillMaxWidth(),
+                title = R.string.settings_suggestion_box_text,
+                icon = Icons.Default.DeleteForever,
+                onClickItem = onClickSuggestionBox,
             )
 
             SettingItem(
@@ -145,23 +153,11 @@ fun SettingsScreen(
                 onClickItem = { showLogoutDialog = true },
             )
 
-            HorizontalDivider(
-                color = SentyGray20,
-                thickness = 0.5.dp,
-                modifier = Modifier.padding(horizontal = 4.dp),
-            )
-
             SettingItem(
                 modifier = Modifier.fillMaxWidth(),
                 title = R.string.settings_withdraw_text,
                 icon = Icons.Default.DeleteForever,
                 onClickItem = { showDeleteUserDialog = true }
-            )
-
-            HorizontalDivider(
-                color = SentyGray20,
-                thickness = 0.5.dp,
-                modifier = Modifier.padding(horizontal = 4.dp),
             )
         }
     }
@@ -202,9 +198,10 @@ private fun SettingItem(
 private fun SettingScreenPreview() {
     SentyTheme {
         SettingsScreen(
-            uiState = SettingContact.State(isLoading = true),
+            uiState = SettingContact.State(),
             onClickLogout = {},
             onClickGiftCategories = {},
+            onClickSuggestionBox = {},
             onClickWithDraw = {},
         )
     }

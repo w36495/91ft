@@ -268,6 +268,7 @@
     <string name="settings_gift_category_text">선물 카테고리 설정</string>
     <string name="settings_logout_text">로그아웃</string>
     <string name="settings_withdraw_text">회원탈퇴</string>
+    <string name="settings_suggestion_box_text">건의사항</string>
 
     <string name="settings_logout_title">로그아웃 하시겠습니까?</string>
     <string name="settings_logout_complete_text">로그아웃되였습니다.</string>
