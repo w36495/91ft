@@ -10,6 +10,7 @@ import com.w36495.senty.view.screen.friend.navigation.navigateToFriendAdd
 import com.w36495.senty.view.screen.gift.detail.GiftDetailRoute
 import com.w36495.senty.view.screen.gift.edit.EditGiftRoute
 import com.w36495.senty.view.screen.gift.list.GiftRoute
+import com.w36495.senty.view.screen.home.navigation.navigateToHome
 import com.w36495.senty.view.screen.main.BottomTabRoute
 import com.w36495.senty.view.screen.main.Route
 import com.w36495.senty.view.screen.setting.navigation.navigateToGiftCategories
@@ -33,7 +34,6 @@ fun NavController.navigateToGiftEdit(giftId: String) {
 fun NavGraphBuilder.giftNavGraph(
     padding: PaddingValues,
     navController: NavController,
-    moveToHome: () -> Unit,
     onShowGlobalErrorSnackBar: (throwable: Throwable?) -> Unit,
 ) {
     composable<BottomTabRoute.GiftAdd> { 
@@ -41,7 +41,16 @@ fun NavGraphBuilder.giftNavGraph(
             padding = padding,
             moveToGiftCategories = { navController.navigateToGiftCategories() },
             moveToFriendAdd = { navController.navigateToFriendAdd() },
-            moveToHome = { moveToHome() },
+            moveToHome = {
+                val navOptions = NavOptions.Builder()
+                    .setPopUpTo(
+                        route = BottomTabRoute.Home,
+                        inclusive = true
+                    )
+                    .build()
+
+                navController.navigateToHome(navOptions)
+            },
             onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
         )
     }

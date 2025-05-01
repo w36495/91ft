@@ -48,7 +48,6 @@ fun MainNavHost(
         giftNavGraph(
             padding = padding,
             navController = navigator.navController,
-            moveToHome = { navigator.navigate(MainBottomTab.HOME) },
             onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
         )
 
