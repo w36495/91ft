@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.w36495.senty.data.mapper.toUiModel
 import com.w36495.senty.domain.repository.FriendRepository
+import com.w36495.senty.view.screen.friend.model.FriendUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
@@ -16,12 +17,16 @@ import javax.inject.Inject
 class FriendSelectionViewModel @Inject constructor(
     private val friendRepository: FriendRepository,
 ) : ViewModel() {
-    val friends = friendRepository.friends
-        .map { it.map { friend -> friend.toUiModel() } }
+    val state = friendRepository.friends
+        .map {
+            val mappedFriends = it.map { friend -> friend.toUiModel() }
+
+            FriendSelectionUiState.Success(mappedFriends)
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = emptyList()
+            initialValue = FriendSelectionUiState.Loading
         )
 
     fun refresh() {
@@ -32,4 +37,9 @@ class FriendSelectionViewModel @Inject constructor(
                 }
         }
     }
+}
+
+sealed interface FriendSelectionUiState {
+    data object Loading : FriendSelectionUiState
+    data class Success(val data: List<FriendUiModel>) : FriendSelectionUiState
 }

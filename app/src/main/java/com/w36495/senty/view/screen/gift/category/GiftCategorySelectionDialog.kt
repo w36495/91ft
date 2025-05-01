@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -41,7 +42,6 @@ import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
 import com.w36495.senty.view.ui.theme.SentyGray20
 import com.w36495.senty.view.ui.theme.SentyGray70
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GiftCategorySelectionDialog(
     vm: GiftCategorySelectionViewModel = hiltViewModel(),
@@ -49,12 +49,28 @@ fun GiftCategorySelectionDialog(
     onClickCategoriesEdit: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val categories by vm.categories.collectAsStateWithLifecycle()
+    val uiState by vm.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         vm.loadGiftCategories()
     }
 
+    GiftCategorySelectionDialogContents(
+        uiState = uiState,
+        onClickCategory = onClickCategory,
+        onClickCategoriesEdit = onClickCategoriesEdit,
+        onDismiss = onDismiss
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun GiftCategorySelectionDialogContents(
+    uiState: GiftCategorySelectionUiState,
+    onClickCategory: (GiftCategoryUiModel) -> Unit,
+    onClickCategoriesEdit: () -> Unit,
+    onDismiss: () -> Unit,
+) {
     Dialog(onDismissRequest = { onDismiss() }) {
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -62,7 +78,7 @@ fun GiftCategorySelectionDialog(
                 containerColor = Color.White
             )
         ) {
-            Column{
+            Column {
                 CenterAlignedTopAppBar(
                     title = {
                         Text(
@@ -80,83 +96,98 @@ fun GiftCategorySelectionDialog(
                     )
                 )
 
-                when {
-                    categories.isEmpty() -> {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(360.dp),
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .weight(1f)
-                                    .background(Color(0xFFFBFBFB))
-                                    .padding(horizontal = 16.dp)
-                                    .padding(bottom = 16.dp),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Text(
-                                    text = stringResource(id = R.string.category_selection_empty_text),
-                                    style = SentyTheme.typography.bodyMedium
-                                        .copy(color = SentyGray70),
-                                    textAlign = TextAlign.Center,
-                                    overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier
-                                )
-                            }
-
-                            SentyFilledButton(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp)
-                                    .padding(bottom = 16.dp),
-                                text = stringResource(id = R.string.category_selection_empty_button_text),
-                                onClick = onClickCategoriesEdit
-                            )
-                        }
-                    }
-                    else -> {
-                        LazyColumn(
+                when (uiState) {
+                    GiftCategorySelectionUiState.Loading -> {
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(360.dp)
-                                .padding(bottom = 16.dp),
-                        ) {
-                            items(categories.size) { index ->
+                                .background(Color(0xFFFBFBFB)),
+                            contentAlignment = Alignment.Center,
+                        ) { CircularProgressIndicator() }
+                    }
+                    is GiftCategorySelectionUiState.Success -> {
+                        val categories = uiState.data
+
+                        when {
+                            categories.isEmpty() -> {
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .clickable { onClickCategory(categories[index]) },
-                                    verticalArrangement = Arrangement.Center,
+                                        .height(360.dp)
                                 ) {
-                                    Text(
-                                        text = categories[index].name,
-                                        style = SentyTheme.typography.bodyMedium,
-                                        overflow = TextOverflow.Ellipsis,
+                                    Box(
                                         modifier = Modifier
-                                            .padding(vertical = 16.dp, horizontal = 12.dp),
-                                    )
-
-                                    if (index != categories.lastIndex) {
-                                        HorizontalDivider(
-                                            color = SentyGray20,
-                                            thickness = 0.5.dp,
-                                            modifier = Modifier.padding(horizontal = 4.dp),
+                                            .fillMaxWidth()
+                                            .weight(1f)
+                                            .background(Color(0xFFFBFBFB))
+                                            .padding(horizontal = 16.dp)
+                                            .padding(bottom = 16.dp),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Text(
+                                            text = stringResource(id = R.string.category_selection_empty_text),
+                                            style = SentyTheme.typography.bodyMedium
+                                                .copy(color = SentyGray70),
+                                            textAlign = TextAlign.Center,
+                                            overflow = TextOverflow.Ellipsis,
+                                            modifier = Modifier
                                         )
                                     }
+
+                                    SentyFilledButton(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp)
+                                            .padding(bottom = 16.dp),
+                                        text = stringResource(id = R.string.category_selection_empty_button_text),
+                                        onClick = onClickCategoriesEdit
+                                    )
                                 }
                             }
-                        }
+                            else -> {
+                                LazyColumn(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(360.dp)
+                                        .padding(bottom = 16.dp),
+                                ) {
+                                    items(categories.size) { index ->
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clickable { onClickCategory(categories[index]) },
+                                            verticalArrangement = Arrangement.Center,
+                                        ) {
+                                            Text(
+                                                text = categories[index].name,
+                                                style = SentyTheme.typography.bodyMedium,
+                                                overflow = TextOverflow.Ellipsis,
+                                                modifier = Modifier
+                                                    .padding(vertical = 16.dp, horizontal = 12.dp),
+                                            )
 
-                        SentyFilledButton(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
-                                .padding(bottom = 16.dp),
-                            text = stringResource(id = R.string.category_selection_edit_button_text),
-                            onClick = onClickCategoriesEdit
-                        )
+                                            if (index != categories.lastIndex) {
+                                                HorizontalDivider(
+                                                    color = SentyGray20,
+                                                    thickness = 0.5.dp,
+                                                    modifier = Modifier.padding(horizontal = 4.dp),
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+
+                                SentyFilledButton(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp)
+                                        .padding(bottom = 16.dp),
+                                    text = stringResource(id = R.string.category_selection_edit_button_text),
+                                    onClick = onClickCategoriesEdit
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -168,7 +199,8 @@ fun GiftCategorySelectionDialog(
 @Composable
 private fun GiftCategorySelectionDialogPreview() {
     SentyTheme {
-        GiftCategorySelectionDialog(
+        GiftCategorySelectionDialogContents(
+            uiState = GiftCategorySelectionUiState.Loading,
             onClickCategory = {},
             onClickCategoriesEdit = {},
             onDismiss = {}
@@ -180,7 +212,8 @@ private fun GiftCategorySelectionDialogPreview() {
 @Composable
 private fun EmptyGiftCategorySelectionDialogPreview() {
     SentyTheme {
-        GiftCategorySelectionDialog(
+        GiftCategorySelectionDialogContents(
+            uiState = GiftCategorySelectionUiState.Success(emptyList()),
             onClickCategory = {},
             onClickCategoriesEdit = {},
             onDismiss = {}
