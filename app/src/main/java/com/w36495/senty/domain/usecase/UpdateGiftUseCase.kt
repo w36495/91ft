@@ -10,8 +10,9 @@ import javax.inject.Inject
 class UpdateGiftUseCase @Inject constructor(
     private val giftRepository: GiftRepository,
     private val friendRepository: FriendRepository,
+    private val updateFriendUseCase: UpdateFriendUseCase,
 ) {
-    suspend operator fun invoke(gift: Gift, friendId: String): Result<Unit> {
+    suspend operator fun invoke(gift: Gift): Result<Unit> {
         val beforeGift = giftRepository.getGift(gift.id).getOrThrow()
         val isDifferentGiftType = beforeGift.type != gift.type
 
@@ -19,11 +20,11 @@ class UpdateGiftUseCase @Inject constructor(
             .onSuccess {
                 // 친구 정보 업데이트
                 if (isDifferentGiftType) {
-                    val friend = friendRepository.getFriend(friendId).getOrThrow()
+                    val friend = friendRepository.getFriend(gift.friendId).getOrThrow()
 
-                    friendRepository.patchFriend(
+                    updateFriendUseCase(
                         friend.copy(
-                            received = if (gift.type == GiftType.RECEIVED) friend.received + 1 else friend.received - 1,
+                             received = if (gift.type == GiftType.RECEIVED) friend.received + 1 else friend.received - 1,
                             sent = if (gift.type == GiftType.SENT) friend.sent + 1 else friend.sent - 1,
                         )
                     )

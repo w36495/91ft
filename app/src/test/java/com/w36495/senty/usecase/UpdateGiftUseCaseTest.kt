@@ -2,6 +2,7 @@ package com.w36495.senty.usecase
 
 import com.w36495.senty.data.domain.GiftType
 import com.w36495.senty.data.mapper.toDomain
+import com.w36495.senty.domain.usecase.UpdateFriendUseCase
 import com.w36495.senty.domain.usecase.UpdateGiftUseCase
 import com.w36495.senty.repository.FakeFriendRepository
 import com.w36495.senty.repository.FakeGiftRepository
@@ -17,7 +18,8 @@ class UpdateGiftUseCaseTest {
     private val giftRepository = FakeGiftRepository()
     private val friendRepository = FakeFriendRepository()
 
-    private val useCase = UpdateGiftUseCase(giftRepository, friendRepository)
+    private val updateFriendUseCase = UpdateFriendUseCase(friendRepository)
+    private val useCase = UpdateGiftUseCase(giftRepository, friendRepository, updateFriendUseCase)
 
     @Before
     fun setUp() {
@@ -38,7 +40,7 @@ class UpdateGiftUseCaseTest {
         assertEquals(0, beforeFriend.sent)
 
         // When : 선물 타입을 받은 선물에서 준 선물로 변경하면
-        useCase(receivedGift.copy(type = GiftType.SENT).toDomain(), friend.id)
+        useCase(receivedGift.copy(type = GiftType.SENT).toDomain())
 
         // Then : 받은 선물 개수는 1 감소하고, 준 선물 개수는 1 증가한다
         val afterFriend = friendRepository.getFriend(friend.id).getOrThrow()
@@ -59,7 +61,7 @@ class UpdateGiftUseCaseTest {
         assertEquals(1, beforeFriend.sent)
 
         // When : 선물 타입을 준 선물에서 받은 선물로 변경하면
-        useCase(sentGift.copy(type = GiftType.RECEIVED).toDomain(), friend.id)
+        useCase(sentGift.copy(type = GiftType.RECEIVED).toDomain())
 
         // Then : 준 선물 개수는 1 감소하고, 받은 선물 개수는 1 증가한다
         val afterFriend = friendRepository.getFriend(friend.id).getOrThrow()
