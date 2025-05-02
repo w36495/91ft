@@ -7,6 +7,7 @@ import com.w36495.senty.domain.repository.GiftRepository
 import com.w36495.senty.domain.usecase.DeleteGiftAndUpdateFriendUseCase
 import com.w36495.senty.domain.usecase.DeleteGiftCategoryUseCase
 import com.w36495.senty.domain.usecase.DeleteGiftUseCase
+import com.w36495.senty.domain.usecase.UpdateFriendUseCase
 import com.w36495.senty.repository.FakeFriendRepository
 import com.w36495.senty.repository.FakeGiftCategoryRepository
 import com.w36495.senty.repository.FakeGiftImageRepository
@@ -16,8 +17,6 @@ import com.w36495.senty.view.screen.gift.category.model.GiftCategoryUiModel
 import com.w36495.senty.view.screen.gift.model.GiftUiModel
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -28,15 +27,9 @@ class DeleteGiftCategoryUseCaseTest {
     private val giftImageRepository = FakeGiftImageRepository()
     private val friendRepository = FakeFriendRepository()
 
-    private val deleteGiftUseCase = DeleteGiftUseCase(
-        giftRepository = giftRepository,
-        giftImageRepository = giftImageRepository,
-    )
-
-    private val deleteGiftAndUpdateFriendUseCase = DeleteGiftAndUpdateFriendUseCase(
-        friendRepository = friendRepository,
-        deleteGiftUseCase = deleteGiftUseCase,
-    )
+    private val updateFriendUseCase = UpdateFriendUseCase(friendRepository)
+    private val deleteGiftUseCase = DeleteGiftUseCase(giftRepository, giftImageRepository)
+    private val deleteGiftAndUpdateFriendUseCase = DeleteGiftAndUpdateFriendUseCase(friendRepository, deleteGiftUseCase, updateFriendUseCase)
 
     private val useCase = DeleteGiftCategoryUseCase(
         giftRepository = giftRepository,

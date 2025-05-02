@@ -1,11 +1,11 @@
 package com.w36495.senty.view.screen.friend.edit
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.w36495.senty.data.mapper.toDomain
 import com.w36495.senty.data.mapper.toUiModel
 import com.w36495.senty.domain.repository.FriendRepository
+import com.w36495.senty.domain.usecase.UpdateFriendUseCase
 import com.w36495.senty.view.screen.friend.edit.contact.EditFriendContact
 import com.w36495.senty.view.screen.friend.model.FriendUiModel
 import com.w36495.senty.view.screen.friendgroup.model.FriendGroupUiModel
@@ -21,7 +21,7 @@ import javax.inject.Inject
 @HiltViewModel
 class EditFriendViewModel @Inject constructor(
     private val friendRepository: FriendRepository,
-    private val savedStateHandle: SavedStateHandle,
+    private val updateFriendUseCase: UpdateFriendUseCase,
 ) : ViewModel() {
     private val _effect = Channel<EditFriendContact.Effect>()
     val effect = _effect.receiveAsFlow()
@@ -101,7 +101,6 @@ class EditFriendViewModel @Inject constructor(
             result
                 .onSuccess {
                     updateLoadingState(false)
-                    savedStateHandle["shouldRefreshFriends"] = true
                     _effect.send(EditFriendContact.Effect.ShowSnackBar("등록이 완료되었습니다."))
                 }
                 .onFailure {
@@ -117,7 +116,7 @@ class EditFriendViewModel @Inject constructor(
         viewModelScope.launch {
             updateLoadingState(true)
 
-            val result = friendRepository.patchFriend(friend.toDomain())
+            val result = updateFriendUseCase(friend.toDomain())
 
             result
                 .onSuccess {
