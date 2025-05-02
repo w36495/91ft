@@ -11,7 +11,6 @@ import com.w36495.senty.data.mapper.toEditUiModel
 import com.w36495.senty.domain.repository.FriendRepository
 import com.w36495.senty.domain.repository.GiftImageRepository
 import com.w36495.senty.domain.repository.GiftRepository
-import com.w36495.senty.domain.usecase.UpdateGiftUseCase
 import com.w36495.senty.util.ImageConverter
 import com.w36495.senty.util.toLinkedMap
 import com.w36495.senty.view.screen.gift.edit.contact.EditGiftContact
@@ -38,7 +37,6 @@ class EditGiftViewModel @Inject constructor(
     private val friendRepository: FriendRepository,
     private val giftRepository: GiftRepository,
     private val giftImageRepository: GiftImageRepository,
-    private val updateGiftUseCase: UpdateGiftUseCase,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
     private val _effect = Channel<EditGiftContact.Effect>()
@@ -334,7 +332,7 @@ class EditGiftViewModel @Inject constructor(
 
             val updateGift = state.value.gift
 
-            val result = updateGiftUseCase(updateGift.copy(
+            val result = giftRepository.updateGift(updateGift.copy(
                 thumbnail = updateGift.images.entries.firstOrNull()?.let {
                     if (it.value is EditImage.New) {
                         "thumbs_${it.key}"

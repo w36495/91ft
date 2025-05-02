@@ -9,7 +9,6 @@ import com.w36495.senty.domain.repository.GiftImageRepository
 import com.w36495.senty.domain.repository.GiftRepository
 import com.w36495.senty.domain.usecase.DeleteGiftAndUpdateFriendUseCase
 import com.w36495.senty.domain.usecase.DeleteGiftUseCase
-import com.w36495.senty.domain.usecase.UpdateFriendUseCase
 import com.w36495.senty.repository.FakeGiftImageRepository
 import com.w36495.senty.view.screen.friend.model.FriendUiModel
 import com.w36495.senty.view.screen.gift.model.GiftUiModel
@@ -27,11 +26,9 @@ class DeleteGiftAndUpdateFriendUseCaseTest {
     private val giftImageRepository: GiftImageRepository = FakeGiftImageRepository()
 
     private val deleteGiftUseCase: DeleteGiftUseCase = DeleteGiftUseCase(giftRepository, giftImageRepository)
-    private val updateFriendUseCase = UpdateFriendUseCase(friendRepository)
     private val useCase = DeleteGiftAndUpdateFriendUseCase(
         friendRepository = friendRepository,
         deleteGiftUseCase = deleteGiftUseCase,
-        updateFriendUseCase = updateFriendUseCase,
     )
     @Before
     fun setUp() {
