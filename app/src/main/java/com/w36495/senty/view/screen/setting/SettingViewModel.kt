@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.w36495.senty.R
 import com.w36495.senty.data.manager.CachedImageInfoManager
+import com.w36495.senty.domain.manager.VersionInfoManager
 import com.w36495.senty.domain.repository.AuthRepository
 import com.w36495.senty.domain.repository.UserRepository
 import com.w36495.senty.view.screen.setting.model.SettingContact
@@ -14,6 +15,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -22,7 +24,15 @@ import javax.inject.Inject
 class SettingViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
+    private val versionInfoManager: VersionInfoManager,
 ) : ViewModel() {
+    val versionInfo = versionInfoManager.versionInfo
+        .stateIn(
+            scope = viewModelScope,
+            started = kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000),
+            initialValue = null
+        )
+
     private val _effect = Channel<SettingContact.Effect>()
     val effect = _effect.receiveAsFlow()
 
