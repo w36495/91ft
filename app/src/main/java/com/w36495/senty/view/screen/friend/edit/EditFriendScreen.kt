@@ -403,7 +403,7 @@ private fun GroupSection(
         }
 
         SentyReadOnlyTextField(
-            text = stringResource(id = if (isError) R.string.friend_edit_group_ereror_text else R.string.friend_edit_group_hint_text),
+            text = stringResource(id = if (isError) R.string.friend_edit_group_error_text else R.string.friend_edit_group_hint_text),
             group = group,
             showChip = group != FriendGroupUiModel.emptyFriendGroup,
             textColor = if (isError) MaterialTheme.colorScheme.error else SentyGray50,

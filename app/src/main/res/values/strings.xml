@@ -175,7 +175,7 @@
     <string name="friend_detail_tab_gift_text">선물</string>
 
     <string name="friend_edit_name_error_text">이름을 입력해주세요.</string>
-    <string name="friend_edit_group_ereror_text">그룹을 선택해주세요.</string>
+    <string name="friend_edit_group_error_text">그룹을 선택해주세요.</string>
 
     <!-- 친구 그룹 -->
     <string name="friend_group_title">친구 그룹</string>
