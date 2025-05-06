@@ -116,6 +116,7 @@ firebase-crashlytics-ktx = { group = "com.google.firebase", name = "firebase-cra
 firebase-storage = { group = "com.google.firebase", name = "firebase-storage" }
 firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx" }
 firebase-appcheck-debug = { group = "com.google.firebase", name = "firebase-appcheck-debug" }
+firebase-config = { group = "com.google.firebase", name = "firebase-config" }
 
 # Login
 google-gms-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "google-gms-auth" }
@@ -203,6 +204,7 @@ firebase = [
     "firebase-storage",
     "firebase-storage-ktx",
     "firebase-appcheck-debug",
+    "firebase-config",
 ]
 
 login = [

@@ -1,14 +1,21 @@
 package com.w36495.senty.view.screen.setting
 
 import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
 import androidx.annotation.StringRes
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.CardGiftcard
@@ -20,10 +27,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -35,11 +44,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.w36495.senty.BuildConfig
 import com.w36495.senty.R
+import com.w36495.senty.domain.entity.VersionInfo
 import com.w36495.senty.view.component.LoadingCircleIndicator
 import com.w36495.senty.view.screen.setting.model.SettingContact
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.dialogs.BasicAlertDialog
 import com.w36495.senty.view.ui.theme.SentyGray20
+import com.w36495.senty.view.ui.theme.SentyGreen60
+import com.w36495.senty.view.ui.theme.SentyWhite
 
 @Composable
 fun SettingsRoute(
@@ -51,6 +63,7 @@ fun SettingsRoute(
 ) {
     val context = LocalContext.current
 
+    val versionInfo by vm.versionInfo.collectAsState()
     val uiState by vm.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
@@ -70,6 +83,7 @@ fun SettingsRoute(
 
     SettingsScreen(
         uiState = uiState,
+        versionInfo = versionInfo,
         onClickGiftCategories = moveToGiftCategories,
         onClickSuggestionBox = {
             val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(BuildConfig.SUGGESTION_BOX_URL))
@@ -84,6 +98,7 @@ fun SettingsRoute(
 fun SettingsScreen(
     modifier: Modifier = Modifier,
     uiState: SettingContact.State,
+    versionInfo: VersionInfo?,
     onClickGiftCategories: () -> Unit,
     onClickSuggestionBox: () -> Unit,
     onClickLogout: () -> Unit,
@@ -146,6 +161,13 @@ fun SettingsScreen(
                 onClickItem = onClickSuggestionBox,
             )
 
+            versionInfo?.let {
+                VersionItem(
+                    modifier = Modifier.fillMaxWidth(),
+                    versionInfo = it,
+                )
+            }
+
             SettingItem(
                 modifier = Modifier.fillMaxWidth(),
                 title = R.string.settings_logout_text,
@@ -192,6 +214,62 @@ private fun SettingItem(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun VersionItem(
+    modifier: Modifier = Modifier,
+    versionInfo: VersionInfo,
+) {
+    val context = LocalContext.current
+    Column(
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = "버전 정보 (${versionInfo.currentVersion} / ${versionInfo.latestVersion})",
+                modifier = Modifier.padding(vertical = 14.dp),
+                style = SentyTheme.typography.bodyMedium,
+            )
+
+            if (versionInfo.isNeedUpdate) {
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = SentyGreen60,
+                    border = BorderStroke(1.dp, SentyGreen60),
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW).apply {
+                            data = Uri.parse("market://details?id=com.w36495.senty")
+                            setPackage("com.android.vending") // 명시적으로 Play 스토어 앱에서 열도록 설정
+                        }
+
+                        context.startActivity(intent)
+                    }
+                ) {
+                    Text(
+                        text = "업데이트",
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        style = SentyTheme.typography.bodySmall,
+                        color = SentyWhite,
+                    )
+                }
+            }
+        }
+
+
+        HorizontalDivider(
+            color = SentyGray20,
+            thickness = 0.5.dp,
+            modifier = Modifier.padding(horizontal = 4.dp),
+        )
+    }
+}
+
 
 @Preview(showBackground = true)
 @Composable
@@ -199,6 +277,11 @@ private fun SettingScreenPreview() {
     SentyTheme {
         SettingsScreen(
             uiState = SettingContact.State(),
+            versionInfo = VersionInfo(
+                currentVersion = "2.0.0",
+                latestVersion = "2.1.0",
+                isNeedUpdate = true,
+            ),
             onClickLogout = {},
             onClickGiftCategories = {},
             onClickSuggestionBox = {},
