@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
 @HiltViewModel
@@ -27,6 +29,8 @@ class EditFriendGroupViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow<EditFriendGroupContact.State>(EditFriendGroupContact.State.Idle)
     val uiState get() = _uiState.asStateFlow()
+
+    private val mutex = Mutex()
 
     fun handleEvent(event: EditFriendGroupContact.Event) {
         when (event) {
@@ -43,7 +47,7 @@ class EditFriendGroupViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { EditFriendGroupContact.State.Loading }
 
-            val result = friendGroupRepository.insertFriendGroup(newFriendGroup.toDomain())
+            val result = mutex.withLock { friendGroupRepository.insertFriendGroup(newFriendGroup.toDomain()) }
 
             result
                 .onSuccess { _ ->
