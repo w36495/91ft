@@ -8,4 +8,6 @@ interface UserRepository {
 
     fun getUid(): String
     fun updateUser(user: AuthUser?)
+
+    suspend fun <T> runWithUid(block: suspend (uid: String) -> Result<T>): Result<T>
 }
