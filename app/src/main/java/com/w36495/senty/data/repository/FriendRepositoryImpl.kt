@@ -1,13 +1,13 @@
 package com.w36495.senty.data.repository
 
 import android.util.Log
-import com.google.firebase.auth.FirebaseAuth
 import com.w36495.senty.data.domain.FriendEntity
 import com.w36495.senty.data.mapper.toDomain
 import com.w36495.senty.data.mapper.toEntity
 import com.w36495.senty.data.remote.service.FriendService
 import com.w36495.senty.domain.entity.Friend
 import com.w36495.senty.domain.repository.FriendRepository
+import com.w36495.senty.domain.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,11 +18,9 @@ import kotlinx.serialization.json.jsonObject
 import javax.inject.Inject
 
 class FriendRepositoryImpl @Inject constructor(
-    private val firebaseAuth: FirebaseAuth,
     private val friendService: FriendService,
+    private val userRepository: UserRepository,
 ) : FriendRepository {
-    private var userId: String = firebaseAuth.currentUser!!.uid
-
     private val _friends = MutableStateFlow<List<Friend>>(emptyList())
     override val friends: StateFlow<List<Friend>>
         get() = _friends.asStateFlow()
@@ -48,28 +46,30 @@ class FriendRepositoryImpl @Inject constructor(
 
     override suspend fun fetchFriends(): Result<Unit> {
         return try {
-            val result = friendService.getFriends(userId)
+            userRepository.runWithUid { userId ->
+                val result = friendService.getFriends(userId)
 
-            if (result.isSuccessful) {
-                val body = result.body()?.string()
+                if (result.isSuccessful) {
+                    val body = result.body()?.string()
 
-                if (body != null && result.headers()["Content-length"]?.toInt() != 4) {
-                    val responseJson = Json.parseToJsonElement(body)
+                    if (body != null && result.headers()["Content-length"]?.toInt() != 4) {
+                        val responseJson = Json.parseToJsonElement(body)
 
-                    val friends = responseJson.jsonObject.map { (key, jsonFriend) ->
-                        Json.decodeFromJsonElement<FriendEntity>(jsonFriend).toDomain(key)
-                    }.toList()
+                        val friends = responseJson.jsonObject.map { (key, jsonFriend) ->
+                            Json.decodeFromJsonElement<FriendEntity>(jsonFriend).toDomain(key)
+                        }.toList()
 
-                    Log.d("FriendRepository", "친구 목록 조회 완료")
-                    _friends.update { friends }
-                    Result.success(Unit)
+                        Log.d("FriendRepository", "친구 목록 조회 완료")
+                        _friends.update { friends }
+                        Result.success(Unit)
+                    } else {
+                        _friends.update { emptyList() }
+                        Result.success(Unit)
+                    }
                 } else {
-                    _friends.update { emptyList() }
-                    Result.success(Unit)
+                    Log.d("FriendRepo", result.errorBody().toString())
+                    Result.failure(Exception(result.errorBody().toString()))
                 }
-            } else {
-                Log.d("FriendRepo", result.errorBody().toString())
-                Result.failure(Exception(result.errorBody().toString()))
             }
         } catch (e: Exception) {
             Log.d("FriendRepo", e.stackTraceToString())
@@ -79,12 +79,14 @@ class FriendRepositoryImpl @Inject constructor(
 
     override suspend fun insertFriend(friend: Friend): Result<Unit> {
         return try {
-            val response = friendService.insertFriend(userId, friend.toEntity())
-            
-            if (response.isSuccessful) {
-                fetchFriends()
-                Result.success(Unit)
-            } else Result.failure(Exception("친구 등록 실패"))
+            userRepository.runWithUid { userId ->
+                val response = friendService.insertFriend(userId, friend.toEntity())
+
+                if (response.isSuccessful) {
+                    fetchFriends()
+                    Result.success(Unit)
+                } else Result.failure(Exception("친구 등록 실패"))
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -92,12 +94,14 @@ class FriendRepositoryImpl @Inject constructor(
 
     override suspend fun patchFriend(friend: Friend): Result<Unit> {
         return try {
-            val response = friendService.patchFriend(userId, friend.id, friend.toEntity())
+            userRepository.runWithUid { userId ->
+                val response = friendService.patchFriend(userId, friend.id, friend.toEntity())
 
-            if (response.isSuccessful) {
-                fetchFriends()
-                Result.success(Unit)
-            } else Result.failure(Exception("친구 수정 실패"))
+                if (response.isSuccessful) {
+                    fetchFriends()
+                    Result.success(Unit)
+                } else Result.failure(Exception("친구 수정 실패"))
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -105,15 +109,17 @@ class FriendRepositoryImpl @Inject constructor(
 
     override suspend fun deleteFriend(friendId: String): Result<Unit> {
         return try {
-            val response = friendService.deleteFriend(userId, friendId)
+            userRepository.runWithUid { userId ->
+                val response = friendService.deleteFriend(userId, friendId)
 
-            if (response.isSuccessful) {
-                fetchFriends()
-                Log.d("FriendRepo", "친구 삭제 성공")
-                Result.success(Unit)
-            } else {
-                Log.d("FriendRepo", "친구 삭제 실패")
-                Result.failure(Exception("친구 삭제 실패"))
+                if (response.isSuccessful) {
+                    fetchFriends()
+                    Log.d("FriendRepo", "친구 삭제 성공")
+                    Result.success(Unit)
+                } else {
+                    Log.d("FriendRepo", "친구 삭제 실패")
+                    Result.failure(Exception("친구 삭제 실패"))
+                }
             }
         } catch (e: Exception) {
             Log.d("FriendRepo", e.stackTraceToString())
