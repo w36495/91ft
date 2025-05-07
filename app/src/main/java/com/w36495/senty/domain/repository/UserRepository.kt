@@ -6,5 +6,6 @@ import kotlinx.coroutines.flow.StateFlow
 interface UserRepository {
     val user: StateFlow<AuthUser?>
 
+    fun getUid(): String
     fun updateUser(user: AuthUser?)
 }

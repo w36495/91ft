@@ -15,6 +15,10 @@ class UserRepositoryImpl @Inject constructor(
     override val user: StateFlow<AuthUser?>
         get() = _user.asStateFlow()
 
+    override fun getUid(): String {
+        return _user.value?.uid ?: throw IllegalStateException("로그인된 사용자가 없습니다.")
+    }
+
     override fun updateUser(user: AuthUser?) {
         _user.update { user }
     }

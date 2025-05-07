@@ -1,9 +1,9 @@
 package com.w36495.senty.data.repository
 
 import android.util.Log
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
 import com.w36495.senty.domain.repository.GiftImageRepository
+import com.w36495.senty.domain.repository.UserRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -67,6 +67,7 @@ class GiftImageRepositoryImpl @Inject constructor(
         image: ByteArray
     ): Result<Unit> {
         return suspendCancellableCoroutine { cont ->
+            val userId = userRepository.getUid()
             Log.d("GiftImage","🟢 ${if (imageName.contains("thumbs")) "썸네일" else "이미지"} 저장 시작" )
             val giftImagePath = "images/gifts/$userId/$giftId/$imageName.jpg"
 
