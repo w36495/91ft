@@ -26,11 +26,12 @@
 - Kotlin, Layered Architecture
 - Jetpack Compose
 - MVVM(Model-View-ViewModel), MVI(Model-View-Intent)
-- Firebase Services(realtime database, storage, authentication, crashlytics)
+- Firebase Services(Realtime Database, Storage, Authentication, Remote Config, Crashlytics)
 - AAC ViewModel
 - Coroutine + Flow
 - Coil
 - Hilt
+- JUnit4
 
 **사용한 외부 라이브러리**
 - [Calendar](https://github.com/vsnappy1/ComposeDatePicker)
@@ -55,15 +56,16 @@
 
 |`카메라/앨범 선택`|`선물 카테고리 선택`|`친구 선택`|`날짜 선택`|
 |--|--|--|--|
-|![선물등록(카메라:앨범)](https://github.com/w36495/senty/assets/52291662/269d8dbb-bcd6-4535-b818-c412a7763708)|![선물등록(카테고리)](https://github.com/w36495/senty/assets/52291662/404f07ff-4ee3-4241-a56d-d02f06cf2531)|![선물등록(친구)](https://github.com/w36495/senty/assets/52291662/d49b80e6-0ece-4e69-ba75-7d412dc9c6b9)|![선물등록(날짜)](https://github.com/w36495/senty/assets/52291662/a96b451d-4894-4b8a-b101-f6db004f467c)|
+|![선물등록(카메라:앨범)](https://github.com/user-attachments/assets/9354ee09-13da-4826-85a7-96538dc71b60)|![선물등록(카테고리)](https://github.com/user-attachments/assets/67ad6c1b-7418-469e-a24d-f2d574f485c9)|![선물등록(친구)](https://github.com/user-attachments/assets/b9e541e2-6f7c-4797-ad60-3709cff5c08a)|![선물등록(날짜)](https://github.com/user-attachments/assets/04cdefb0-a006-4961-a7d3-7883cf0be013)|
+
 
 </br>
 
 - **선물목록**
 
 |`전체 선물 목록`|`받은 선물 목록`|`준 선물 목록`|
-|--|--|--|
-|![선물조회(전체)](https://github.com/w36495/senty/assets/52291662/255e26eb-3f0d-4e2d-b871-50d4b617d33e)|![선물조회(받은)](https://github.com/w36495/senty/assets/52291662/40cc7ad1-edd5-4b84-b0f7-fe07218d7c29)|![선물조회(준)](https://github.com/w36495/senty/assets/52291662/cf71f2fd-9c25-44a1-bef0-feef107a838e)|
+|:--:|:--:|:--:|
+|![전체_선물_목록](https://github.com/user-attachments/assets/b1ac2bfa-a54b-486d-bfaa-60882958fba5)|![받은_선물_목록](https://github.com/user-attachments/assets/ea78306e-6427-4d70-829b-e213fe594b2a)|![준_선물_목록](https://github.com/user-attachments/assets/c8982479-603a-4743-aa24-0f0c7b16690b)|
 
 </br>
 
@@ -71,30 +73,29 @@
 
 |`선물 조회`|`선물 수정`|`선물 삭제`|  
 |--|--|--|
-|![선물조회](https://github.com/w36495/senty/assets/52291662/0a98c270-1e1d-431b-b8bb-d0c577fbd0dc)|![선물수정](https://github.com/w36495/senty/assets/52291662/caa9a479-7436-4d01-b675-8b3cd502d341)|![선물삭제](https://github.com/w36495/senty/assets/52291662/0eefc509-991d-4793-976c-9d3787eb0ef6)|
+|![선물조회](https://github.com/user-attachments/assets/5ed3fb5d-7243-4538-90d6-4a8a93ef28a2)|![선물수정](https://github.com/user-attachments/assets/78acd583-c5e7-448e-ad79-77c8027706a2)|![선물삭제](https://github.com/user-attachments/assets/4a9015ff-6cce-4393-94d9-f5114ae6117f)|
 
 </br>
 
 ### 3️⃣ 친구  
-|`친구 목록`|`친구 등록/수정`|`친구 조회`|`친구 삭제`|
-|-|-|-|-|
-|![친구목록](https://github.com/w36495/senty/assets/52291662/e0864ce1-259e-413e-a1b7-7c2a2dd890b8)|![친구등록](https://github.com/w36495/senty/assets/52291662/ecfd04db-daa3-4248-a9f5-c15aa1e50056)|![친구조회](https://github.com/w36495/senty/assets/52291662/f0074f85-180d-4f18-85b6-4647f7585fa1)|![친구삭제](https://github.com/w36495/senty/assets/52291662/516a85f3-93ee-42d1-9cb8-e354821649fb)
+|`친구 목록`|`친구 조회`|`친구 등록/수정`|`선물 목록`|`친구 삭제`|
+|:--:|:--:|:--:|:--:|:--:|
+|![친구목록](https://github.com/user-attachments/assets/f6bed72f-132a-47e6-a927-d270e21a238c)|![친구조회](https://github.com/user-attachments/assets/b4427628-24d8-4142-9e36-96fe3dc2b1d6)|![친구등록/수정](https://github.com/user-attachments/assets/607c251e-29ee-4e24-8a31-8ef3eaff45e2)|![선물목록](https://github.com/user-attachments/assets/32524b68-f786-4af6-9b9e-e3c0eb660e4e)|![친구삭제](https://github.com/user-attachments/assets/24ae62bc-4a4b-4424-b245-4263d1ba38b1)|
+
 
 </br>
 
 ### 4️⃣ 친구 그룹  
 |`그룹 목록`|`그룹 색상 선택`|`그룹 등록`|`그룹 수정`|`그룹 삭제`|
 |--|--|--|--|--|
-|![친구그룹](https://github.com/w36495/senty/assets/52291662/33bf4bc3-0da2-462e-9236-b2f7e1ed33d1)|![친구그룹색상선택](https://github.com/w36495/senty/assets/52291662/fb93b407-3aaa-4b22-9a7a-6b37d35a3b5b)|![친구그룹등록](https://github.com/w36495/senty/assets/52291662/ef9cb331-6cab-443d-9ac9-ffc1546173a8)|![친구그룹수정](https://github.com/w36495/senty/assets/52291662/339388da-658a-4dd9-ab7c-e7ebde36da8e)|![친구그룹삭제](https://github.com/w36495/senty/assets/52291662/f25e35ea-be15-4764-8a43-c595fbb94234)|
+|![친구그룹](https://github.com/user-attachments/assets/a1697693-64aa-4393-ac0e-83b7fe0f0ec4)|![친구그룹색상선택](https://github.com/user-attachments/assets/ffd55fd2-6069-4c4b-8072-4e3cd97fc96a)|![친구그룹등록](https://github.com/user-attachments/assets/1437de2b-7040-4025-af39-0d3a44911080)|![친구그룹수정](https://github.com/user-attachments/assets/0335d5ad-4e8c-4369-90e7-78b93c383839)|![친구그룹삭제](https://github.com/user-attachments/assets/42451906-17cf-4f47-a7eb-2916a01729b1)|
 
 
 </br>
 
 ### 5️⃣ 기념일  
 
-|`기념일 목록`|`기념일 등록/수정`|`기념일 장소 검색`|`기념일 조회`|`기념일 삭제`|  
-|--|--|--|--|--|
-|![기념일](https://github.com/w36495/senty/assets/52291662/a05060ef-ad48-4d0a-ada5-d6465b6d1d3d)|![기념일등록](https://github.com/w36495/senty/assets/52291662/61db44dd-8a0e-4528-aef6-1189fc68a7d7)|![장소선택](https://github.com/w36495/senty/assets/52291662/36504ebf-0d02-464a-a204-982649844c6e)|![기념일조회](https://github.com/w36495/senty/assets/52291662/4dacffd4-aeeb-4ec8-8566-ba25b8e853ee)|![기념일삭제](https://github.com/w36495/senty/assets/52291662/f31d5c3b-cb72-4287-a293-a76dfed13307)|
-
-
+|`기념일 목록`|`기념일 등록/수정`|`기념일 조회`|`기념일 삭제`|  
+|:--:|:--:|:--:|:--:|
+|![기념일](https://github.com/user-attachments/assets/277c46e5-9c87-45ff-9a8e-f6f912f0dd7e)|![기념일등록/수정](https://github.com/user-attachments/assets/5b76d44b-053d-45f0-92e6-9fc5e16c41c3)|![기념일조회](https://github.com/user-attachments/assets/af9b2557-3fd1-4521-b520-0a00286787c5)|![기념일삭제](https://github.com/user-attachments/assets/e3d49f39-16fa-4cdd-87c2-890adc1ded30)|
 
