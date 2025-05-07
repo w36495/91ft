@@ -20,6 +20,8 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,6 +30,8 @@ class GiftCategoriesViewModel @Inject constructor(
     private val deleteGiftCategoryUseCase: DeleteGiftCategoryUseCase,
     private val updateGiftCategoryUseCase: UpdateGiftCategoryUseCase,
 ) : ViewModel() {
+    private val mutex = Mutex()
+
     private val _effect = Channel<GiftCategoryContact.Effect>()
     val effect = _effect.receiveAsFlow()
 
@@ -150,7 +154,7 @@ class GiftCategoriesViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
-            val result = giftCategoryRepository.insertCategory(category.toDomain())
+            val result = mutex.withLock { giftCategoryRepository.insertCategory(category.toDomain()) }
 
             result
                 .onSuccess {

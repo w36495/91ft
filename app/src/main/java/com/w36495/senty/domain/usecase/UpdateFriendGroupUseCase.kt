@@ -3,15 +3,20 @@ package com.w36495.senty.domain.usecase
 import com.w36495.senty.domain.entity.FriendGroup
 import com.w36495.senty.domain.repository.FriendGroupRepository
 import com.w36495.senty.domain.repository.FriendRepository
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
 class UpdateFriendGroupUseCase @Inject constructor(
     private val friendGroupRepository: FriendGroupRepository,
     private val friendRepository: FriendRepository,
 ) {
+    private val mutex = Mutex()
+
     suspend operator fun invoke(friendGroup: FriendGroup): Result<Unit> {
         return try {
-            friendGroupRepository.patchFriendGroup(friendGroup)
+            mutex
+                .withLock { friendGroupRepository.patchFriendGroup(friendGroup) }
                 .onSuccess {
                     friendRepository.getFriendsByFriendGroup(friendGroup.id)
                         .onSuccess {

@@ -30,6 +30,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -46,6 +48,8 @@ class EditGiftViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(EditGiftContact.State())
     val state get() = _state.asStateFlow()
+
+    private val mutex = Mutex()
 
     fun handleEvent(event: EditGiftContact.Event) {
         when (event) {
@@ -436,15 +440,16 @@ class EditGiftViewModel @Inject constructor(
         if (state.value.isLoading) return
 
         viewModelScope.launch {
-            Log.d("EditGiftVM","🟢 선물 저장 시작")
             _state.update { it.copy(isLoading = true) }
 
             val gift = state.value.gift
-            val result = giftRepository.insertGift(gift.copy(
-                thumbnail = if (gift.images.entries.firstOrNull() != null) {
-                    "thumbs_${gift.images.entries.first().key}"
-                } else null
-            ).toDomain())
+            val result = mutex.withLock {
+                giftRepository.insertGift(gift.copy(
+                    thumbnail = if (gift.images.entries.firstOrNull() != null) {
+                        "thumbs_${gift.images.entries.first().key}"
+                    } else null
+                ).toDomain())
+            }
 
             result
                 .onSuccess { giftId ->

@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,6 +30,8 @@ class EditFriendViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(EditFriendContact.State())
     val uiState = _uiState.asStateFlow()
+
+    private val mutex = Mutex()
 
     fun getFriend(friendId: String) {
         viewModelScope.launch {
@@ -96,8 +100,8 @@ class EditFriendViewModel @Inject constructor(
         viewModelScope.launch {
             updateLoadingState(true)
 
-            val result = friendRepository.insertFriend(friend.toDomain())
-            
+            val result = mutex.withLock { friendRepository.insertFriend(friend.toDomain()) }
+
             result
                 .onSuccess {
                     updateLoadingState(false)
@@ -116,7 +120,7 @@ class EditFriendViewModel @Inject constructor(
         viewModelScope.launch {
             updateLoadingState(true)
 
-            val result = updateFriendUseCase(friend.toDomain())
+            val result = mutex.withLock { updateFriendUseCase(friend.toDomain()) }
 
             result
                 .onSuccess {

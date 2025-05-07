@@ -6,6 +6,8 @@ import com.w36495.senty.domain.entity.Gift
 import com.w36495.senty.domain.local.datastore.DataStoreContact
 import com.w36495.senty.domain.repository.FriendRepository
 import com.w36495.senty.domain.repository.GiftRepository
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
 class UpdateGiftUseCase @Inject constructor(
@@ -14,11 +16,14 @@ class UpdateGiftUseCase @Inject constructor(
     private val updateFriendUseCase: UpdateFriendUseCase,
     private val friendSyncFlagDataStore: DataStoreContact<Boolean>,
 ) {
+    private val mutex = Mutex()
+
     suspend operator fun invoke(gift: Gift): Result<Unit> {
         val beforeGift = giftRepository.getGift(gift.id).getOrThrow()
         val isDifferentGiftType = beforeGift.type != gift.type
 
-        return giftRepository.updateGift(gift)
+        return mutex
+            .withLock { giftRepository.updateGift(gift) }
             .onSuccess {
                 // 친구 정보 업데이트
                 if (isDifferentGiftType) {
