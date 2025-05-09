@@ -41,9 +41,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import coil3.compose.rememberAsyncImagePainter
+import coil3.request.ImageRequest
+import coil3.size.Scale
 import com.vsnappy1.extension.noRippleClickable
 import com.w36495.senty.R
 import com.w36495.senty.util.dropShadow
+import com.w36495.senty.util.getScreenWidthPx
 import com.w36495.senty.view.component.SentyAnnotatedCenterAlignedTopAppBar
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.theme.SentyBlack
@@ -173,6 +176,8 @@ private fun ImagePickerPreview(
     modifier: Modifier = Modifier,
     selectedImageUris: List<Uri>,
 ) {
+    val context = LocalContext.current
+    val screenWidthPx = getScreenWidthPx()
     val coroutineScope = rememberCoroutineScope()
 
     if (selectedImageUris.isNotEmpty()) {
@@ -184,7 +189,13 @@ private fun ImagePickerPreview(
         ) { page ->
             Box(modifier = Modifier.fillMaxSize()) {
                 Image(
-                    painter = rememberAsyncImagePainter(model = selectedImageUris[page]),
+                    painter = rememberAsyncImagePainter(
+                        model = ImageRequest.Builder(context)
+                            .data(selectedImageUris[page])
+                            .size(screenWidthPx)
+                            .scale(Scale.FILL)
+                            .build()
+                    ),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize(),
@@ -251,6 +262,9 @@ private fun ImagePickerItem(
     onSelectedImage: (Uri) -> Unit,
     onUnSelectedImage: (Int) -> Unit,
 ) {
+    val context = LocalContext.current
+    val screenWidthPx = getScreenWidthPx()
+
     Box(modifier = Modifier
         .aspectRatio(1f)
         .padding(2.dp)
@@ -266,9 +280,16 @@ private fun ImagePickerItem(
                     onSelectedImage(selectedUri)
                 }
             }
-        }) {
+        }
+    ) {
         Image(
-            painter = rememberAsyncImagePainter(model = selectedUri),
+            painter = rememberAsyncImagePainter(
+                model = ImageRequest.Builder(context)
+                    .data(selectedUri)
+                    .size(screenWidthPx)
+                    .scale(Scale.FILL)
+                    .build()
+            ),
             contentDescription = "",
             contentScale = ContentScale.Crop,
             modifier = Modifier
