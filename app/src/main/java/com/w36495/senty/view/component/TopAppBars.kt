@@ -1,6 +1,7 @@
 package com.w36495.senty.view.component
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -20,6 +21,7 @@ import com.w36495.senty.view.ui.theme.SentyBlack
 fun SentyCenterAlignedTopAppBar(
     @StringRes title: Int,
     hasBackButton: Boolean = true,
+    actions: @Composable RowScope.() -> Unit = {},
     onBackPressed: () -> Unit = {},
 ) {
     CenterAlignedTopAppBar(
@@ -42,6 +44,7 @@ fun SentyCenterAlignedTopAppBar(
                 }
             }
         },
+        actions = actions,
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
             containerColor = Color.White
         )
