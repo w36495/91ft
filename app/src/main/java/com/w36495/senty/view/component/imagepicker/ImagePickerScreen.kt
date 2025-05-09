@@ -56,6 +56,8 @@ import com.w36495.senty.view.ui.theme.SentyGreen60
 import com.w36495.senty.view.ui.theme.SentyGreen80
 import kotlinx.coroutines.launch
 
+private const val MAX_IMAGE_COUNT = 3
+
 @Composable
 fun ImagePickerRoute(
     originalImageCount: Int = 0,
@@ -77,7 +79,7 @@ fun ImagePickerRoute(
             .navigationBarsPadding(),
         selectedImageUris = selectedImageUri,
         imageUris = imageUris,
-        originalImageCount = originalImageCount,
+        totalImageCount = MAX_IMAGE_COUNT.minus(originalImageCount),
         onClickComplete = {
             if (selectedImageUri.isEmpty()) onBackPressed()
             else moveToEditGift(selectedImageUri)
@@ -97,7 +99,7 @@ private fun ImagePickerScreen(
     modifier: Modifier = Modifier,
     selectedImageUris: List<Uri>,
     imageUris: List<Uri>,
-    originalImageCount: Int,
+    totalImageCount: Int,
     onSelectedImage: (Uri) -> Unit,
     onUnSelectedImage: (Int) -> Unit,
     onClickComplete: () -> Unit,
@@ -106,7 +108,7 @@ private fun ImagePickerScreen(
     Scaffold(
         topBar = {
             ImagePickerHeader(
-                originalImageCount = originalImageCount,
+                totalImageCount = totalImageCount,
                 selectedImageCount = selectedImageUris.size,
                 onClickComplete = onClickComplete,
                 onBackPressed = onBackPressed,
@@ -132,7 +134,7 @@ private fun ImagePickerScreen(
                         ImagePickerItem(
                             selectedUri = uri,
                             selectedImageUris = selectedImageUris,
-                            originalImageCount = originalImageCount,
+                            totalImageCount = totalImageCount,
                             onSelectedImage = onSelectedImage,
                             onUnSelectedImage = onUnSelectedImage,
                         )
@@ -145,12 +147,12 @@ private fun ImagePickerScreen(
 
 @Composable
 private fun ImagePickerHeader(
-    originalImageCount: Int,
+    totalImageCount: Int,
     selectedImageCount: Int = 0,
     onClickComplete: () -> Unit,
     onBackPressed: () -> Unit,
 ) {
-    val text = pluralStringResource(id = R.plurals.gift_image_picker_title, count = 1, selectedImageCount, 3-originalImageCount)
+    val text = pluralStringResource(id = R.plurals.gift_image_picker_title, count = 1, selectedImageCount, totalImageCount)
     val annotatedString = AnnotatedString
         .Builder(text)
         .toAnnotatedString()
@@ -258,7 +260,7 @@ private fun ImagePickerPreview(
 private fun ImagePickerItem(
     selectedUri: Uri,
     selectedImageUris: List<Uri>,
-    originalImageCount: Int,
+    totalImageCount: Int,
     onSelectedImage: (Uri) -> Unit,
     onUnSelectedImage: (Int) -> Unit,
 ) {
@@ -276,7 +278,7 @@ private fun ImagePickerItem(
                     onUnSelectedImage(index)
                 }
 
-                selectedImageUris.size < 3 - originalImageCount -> {
+                selectedImageUris.size < totalImageCount -> {
                     onSelectedImage(selectedUri)
                 }
             }
@@ -295,7 +297,7 @@ private fun ImagePickerItem(
             modifier = Modifier
         )
 
-        if (selectedImageUris.size == (3 - originalImageCount)) {
+        if (selectedImageUris.size == totalImageCount) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
