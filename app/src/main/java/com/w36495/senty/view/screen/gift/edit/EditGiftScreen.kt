@@ -116,13 +116,15 @@ fun EditGiftRoute(
     val context = LocalContext.current
 
     val imageUri = savedStateHandle
-        ?.getStateFlow<Uri>("imageUri", Uri.EMPTY)
+        ?.getStateFlow<List<Uri>>("imageUri", emptyList())
         ?.collectAsState()
 
     LaunchedEffect(imageUri) {
         imageUri?.let { uri ->
-            if (uri.value != Uri.EMPTY) {
-                vm.handleEvent(EditGiftContact.Event.UpdateImage(uri.value))
+            if (uri.value.isNotEmpty()) {
+                uri.value.forEach {
+                    vm.handleEvent(EditGiftContact.Event.UpdateImage(it))
+                }
             }
         }
     }

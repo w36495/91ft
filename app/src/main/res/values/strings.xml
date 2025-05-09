@@ -226,6 +226,11 @@
     <string name="gift_edit_mood_hint_text">기분 입력</string>
     <string name="gift_edit_memo_text">메모</string>
 
+    <!-- 선물 편집 - 이미지 선택 -->
+    <plurals name="gift_image_picker_title">
+        <item quantity="other">%s/3</item>
+    </plurals>
+
     <!-- 선물 편집 - 친구 선택 -->
     <string name="friend_selection_title">친구 선택</string>
 
