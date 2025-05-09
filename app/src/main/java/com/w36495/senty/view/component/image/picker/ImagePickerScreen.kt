@@ -1,4 +1,4 @@
-package com.w36495.senty.view.component.imagepicker
+package com.w36495.senty.view.component.image.picker
 
 import android.net.Uri
 import androidx.compose.foundation.Image

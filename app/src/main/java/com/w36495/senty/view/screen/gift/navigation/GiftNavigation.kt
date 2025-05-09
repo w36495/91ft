@@ -6,7 +6,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import com.w36495.senty.view.component.imagepicker.ImagePickerRoute
+import com.w36495.senty.view.component.image.picker.ImagePickerRoute
 import com.w36495.senty.view.screen.friend.navigation.navigateToFriendAdd
 import com.w36495.senty.view.screen.gift.detail.GiftDetailRoute
 import com.w36495.senty.view.screen.gift.edit.EditGiftRoute
