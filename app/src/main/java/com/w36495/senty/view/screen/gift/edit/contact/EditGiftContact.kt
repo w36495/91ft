@@ -18,6 +18,7 @@ sealed interface EditGiftContact {
         val showFriendsDialog: Boolean = false,
         val showImageSelectionDialog: Boolean = false,
         val showGiftCategoriesDialog: Boolean = false,
+        val checkGalleryPermission: Boolean = false,
     )
 
     sealed interface Event {
@@ -30,6 +31,7 @@ sealed interface EditGiftContact {
         data object OnClickDate : Event
         data object OnClickGiftCategory : Event
         data object OnClickGiftCategoriesEdit : Event
+        data object OnCheckGalleryPermission : Event
         data class OnSelectImageSelectionType(val type: ImageSelectionType?) : Event
         data class OnSelectGiftType(val type: GiftType) : Event
         data class OnSelectFriend(val friend: FriendUiModel?) : Event
@@ -38,6 +40,7 @@ sealed interface EditGiftContact {
         data class UpdateMood(val mood: String) : Event
         data class UpdateMemo(val memo: String) : Event
         data class UpdateImage(val image: Uri) : Event
+        data class UpdateGalleryPermission(val isGranted: Boolean) : Event
         data class RemoveImage(val imageName: String) : Event
     }
 
@@ -45,7 +48,8 @@ sealed interface EditGiftContact {
         data class ShowToast(val message: String) : Effect
         data class ShowError(val throwable: Throwable? = null) : Effect
         data object ShowCamera : Effect
-        data object ShowGallery : Effect
+        data object NavigateToImagePicker : Effect
+        data object CheckGalleryPermission : Effect
         data object NavigateToBack : Effect
         data object NavigateToFriendAdd : Effect
         data object NavigateToGiftCategories : Effect

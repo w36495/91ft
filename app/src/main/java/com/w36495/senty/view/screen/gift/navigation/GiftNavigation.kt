@@ -6,6 +6,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.w36495.senty.view.component.imagepicker.ImagePickerRoute
 import com.w36495.senty.view.screen.friend.navigation.navigateToFriendAdd
 import com.w36495.senty.view.screen.gift.detail.GiftDetailRoute
 import com.w36495.senty.view.screen.gift.edit.EditGiftRoute
@@ -31,6 +32,10 @@ fun NavController.navigateToGiftEdit(giftId: String) {
     navigate(Route.GiftEdit(giftId))
 }
 
+fun NavController.navigateToImagePicker() {
+    navigate(Route.ImagePicker)
+}
+
 fun NavGraphBuilder.giftNavGraph(
     padding: PaddingValues,
     navController: NavController,
@@ -39,6 +44,7 @@ fun NavGraphBuilder.giftNavGraph(
     composable<BottomTabRoute.GiftAdd> { 
         EditGiftRoute(
             padding = padding,
+            savedStateHandle = navController.currentBackStackEntry?.savedStateHandle,
             moveToGiftCategories = { navController.navigateToGiftCategories() },
             moveToFriendAdd = { navController.navigateToFriendAdd() },
             moveToHome = {
@@ -51,6 +57,7 @@ fun NavGraphBuilder.giftNavGraph(
 
                 navController.navigateToHome(navOptions)
             },
+            moveToImagePicker = { navController.navigateToImagePicker() },
             onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
         )
     }
@@ -83,10 +90,25 @@ fun NavGraphBuilder.giftNavGraph(
         EditGiftRoute(
             padding = padding,
             giftId = giftId,
+            savedStateHandle = navController.currentBackStackEntry?.savedStateHandle,
             moveToGiftCategories = { navController.navigateToGiftCategories() },
             moveToFriendAdd = { navController.navigateToFriendAdd() },
             moveToHome = { navController.popBackStack() },
+            moveToImagePicker = { navController.navigateToImagePicker() },
             onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
+        )
+    }
+
+    composable<Route.ImagePicker> {
+        ImagePickerRoute(
+            moveToEditGift = { uri ->
+                navController.previousBackStackEntry
+                    ?.savedStateHandle
+                    ?.set("imageUri", uri)
+
+                navController.popBackStack()
+            },
+            onBackPressed = { navController.popBackStack() },
         )
     }
 }
