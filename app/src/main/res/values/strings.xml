@@ -228,7 +228,7 @@
 
     <!-- 선물 편집 - 이미지 선택 -->
     <plurals name="gift_image_picker_title">
-        <item quantity="other">%s/3</item>
+        <item quantity="other">%s/%s</item>
     </plurals>
 
     <!-- 선물 편집 - 친구 선택 -->

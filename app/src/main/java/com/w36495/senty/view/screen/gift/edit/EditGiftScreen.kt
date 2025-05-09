@@ -107,7 +107,7 @@ fun EditGiftRoute(
     padding: PaddingValues,
     giftId: String? = null,
     savedStateHandle: SavedStateHandle?,
-    moveToImagePicker: () -> Unit,
+    moveToImagePicker: (Int) -> Unit,
     moveToGiftCategories: () -> Unit,
     moveToFriendAdd: () -> Unit,
     moveToHome: () -> Unit,
@@ -174,7 +174,7 @@ fun EditGiftRoute(
                     }
                 }
                 EditGiftContact.Effect.NavigateToImagePicker -> {
-                    moveToImagePicker()
+                    moveToImagePicker(uiState.gift.images.size)
                 }
                 EditGiftContact.Effect.CheckGalleryPermission -> {
                     vm.handleEvent(EditGiftContact.Event.OnCheckGalleryPermission)

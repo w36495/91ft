@@ -32,8 +32,8 @@ fun NavController.navigateToGiftEdit(giftId: String) {
     navigate(Route.GiftEdit(giftId))
 }
 
-fun NavController.navigateToImagePicker() {
-    navigate(Route.ImagePicker)
+fun NavController.navigateToImagePicker(count: Int) {
+    navigate(Route.ImagePicker(count))
 }
 
 fun NavGraphBuilder.giftNavGraph(
@@ -57,7 +57,7 @@ fun NavGraphBuilder.giftNavGraph(
 
                 navController.navigateToHome(navOptions)
             },
-            moveToImagePicker = { navController.navigateToImagePicker() },
+            moveToImagePicker = { navController.navigateToImagePicker(it) },
             onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
         )
     }
@@ -94,13 +94,16 @@ fun NavGraphBuilder.giftNavGraph(
             moveToGiftCategories = { navController.navigateToGiftCategories() },
             moveToFriendAdd = { navController.navigateToFriendAdd() },
             moveToHome = { navController.popBackStack() },
-            moveToImagePicker = { navController.navigateToImagePicker() },
+            moveToImagePicker = { navController.navigateToImagePicker(it) },
             onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
         )
     }
 
     composable<Route.ImagePicker> {
+        val imageCount = it.toRoute<Route.ImagePicker>().originalImageCount
+
         ImagePickerRoute(
+            originalImageCount = imageCount,
             moveToEditGift = { uri ->
                 navController.previousBackStackEntry
                     ?.savedStateHandle
