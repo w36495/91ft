@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
@@ -25,9 +27,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -37,13 +41,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import coil3.compose.rememberAsyncImagePainter
+import com.vsnappy1.extension.noRippleClickable
 import com.w36495.senty.R
+import com.w36495.senty.util.dropShadow
 import com.w36495.senty.view.component.SentyAnnotatedCenterAlignedTopAppBar
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.theme.SentyBlack
 import com.w36495.senty.view.ui.theme.SentyGray10
+import com.w36495.senty.view.ui.theme.SentyGray60
 import com.w36495.senty.view.ui.theme.SentyGreen60
 import com.w36495.senty.view.ui.theme.SentyGreen80
+import kotlinx.coroutines.launch
 
 @Composable
 fun ImagePickerRoute(
@@ -159,14 +167,69 @@ private fun ImagePickerPreview(
     modifier: Modifier = Modifier,
     selectedImageUris: List<Uri>,
 ) {
+    val coroutineScope = rememberCoroutineScope()
+
     if (selectedImageUris.isNotEmpty()) {
-        Image(
-            painter = rememberAsyncImagePainter(model = selectedImageUris.last()),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = modifier
-                .aspectRatio(1f)
-        )
+        val pagerState = rememberPagerState { selectedImageUris.size }
+
+        HorizontalPager(
+            modifier = Modifier.aspectRatio(1f),
+            state = pagerState,
+        ) { page ->
+            Box(modifier = Modifier.fillMaxSize()) {
+                Image(
+                    painter = rememberAsyncImagePainter(model = selectedImageUris[page]),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                )
+
+                if (page > 0) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_baseline_circle_right_24),
+                        contentDescription = null,
+                        tint = SentyGray60,
+                        modifier = Modifier
+                            .align(Alignment.CenterStart)
+                            .rotate(180f)
+                            .padding(8.dp)
+                            .dropShadow(
+                                shape = CircleShape,
+                                offsetX = 0.dp,
+                                offsetY = 0.dp,
+                                blur = 4.dp,
+                            )
+                            .noRippleClickable {
+                                coroutineScope.launch {
+                                    pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                                }
+                            },
+                    )
+                }
+
+                if (page < selectedImageUris.lastIndex) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_baseline_circle_right_24),
+                        contentDescription = null,
+                        tint = SentyGray60,
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .padding(8.dp)
+                            .dropShadow(
+                                shape = CircleShape,
+                                offsetX = 0.dp,
+                                offsetY = 0.dp,
+                                blur = 4.dp,
+                            )
+                            .noRippleClickable {
+                                coroutineScope.launch {
+                                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                }
+                            },
+                    )
+                }
+            }
+        }
     } else {
         Box(modifier = modifier
             .aspectRatio(1f)
