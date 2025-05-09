@@ -59,7 +59,7 @@ private const val MAX_IMAGE_COUNT = 3
 @Composable
 fun ImagePickerRoute(
     originalImageCount: Int = 0,
-    moveToEditGift: (List<Uri>) -> Unit,
+    moveToImageEditor: (List<Uri>) -> Unit,
     onBackPressed: () -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -75,9 +75,9 @@ fun ImagePickerRoute(
         selectedImageUris = selectedImageUri,
         imageUris = imageUris,
         totalImageCount = MAX_IMAGE_COUNT.minus(originalImageCount),
-        onClickComplete = {
+        onClickNext = {
             if (selectedImageUri.isEmpty()) onBackPressed()
-            else moveToEditGift(selectedImageUri)
+            else moveToImageEditor(selectedImageUri)
         },
         onSelectedImage = {
             selectedImageUri = selectedImageUri + listOf(it)
@@ -96,7 +96,7 @@ private fun ImagePickerScreen(
     totalImageCount: Int,
     onSelectedImage: (Uri) -> Unit,
     onUnSelectedImage: (Int) -> Unit,
-    onClickComplete: () -> Unit,
+    onClickNext: () -> Unit,
     onBackPressed: () -> Unit,
 ) {
     Scaffold(
@@ -104,7 +104,7 @@ private fun ImagePickerScreen(
             ImagePickerHeader(
                 totalImageCount = totalImageCount,
                 selectedImageCount = selectedImageUris.size,
-                onClickComplete = onClickComplete,
+                onClickNext = onClickNext,
                 onBackPressed = onBackPressed,
             )
         }
@@ -143,7 +143,7 @@ private fun ImagePickerScreen(
 private fun ImagePickerHeader(
     totalImageCount: Int,
     selectedImageCount: Int = 0,
-    onClickComplete: () -> Unit,
+    onClickNext: () -> Unit,
     onBackPressed: () -> Unit,
 ) {
     val text = pluralStringResource(id = R.plurals.gift_image_picker_title, count = 1, selectedImageCount, totalImageCount)
@@ -156,10 +156,10 @@ private fun ImagePickerHeader(
         hasBackButton = true,
         actions = {
             Text(
-                text = stringResource(id = R.string.common_complete),
+                text = stringResource(id = R.string.common_next),
                 style = SentyTheme.typography.bodyMedium,
                 modifier = Modifier
-                    .clickable { onClickComplete() }
+                    .clickable { onClickNext() }
                     .padding(14.dp),
             )
         },

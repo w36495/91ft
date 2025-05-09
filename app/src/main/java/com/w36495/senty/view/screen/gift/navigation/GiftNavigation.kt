@@ -1,11 +1,13 @@
 package com.w36495.senty.view.screen.gift.navigation
 
+import android.net.Uri
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.w36495.senty.view.component.image.editor.ImageEditorRoute
 import com.w36495.senty.view.component.image.picker.ImagePickerRoute
 import com.w36495.senty.view.screen.friend.navigation.navigateToFriendAdd
 import com.w36495.senty.view.screen.gift.detail.GiftDetailRoute
@@ -34,6 +36,10 @@ fun NavController.navigateToGiftEdit(giftId: String) {
 
 fun NavController.navigateToImagePicker(count: Int) {
     navigate(Route.ImagePicker(count))
+}
+
+fun NavController.navigateToImageEditor(imageUris: List<Uri>) {
+    navigate(Route.ImageEditor(imageUris.map { it.toString() }))
 }
 
 fun NavGraphBuilder.giftNavGraph(
@@ -104,13 +110,18 @@ fun NavGraphBuilder.giftNavGraph(
 
         ImagePickerRoute(
             originalImageCount = imageCount,
-            moveToEditGift = { uri ->
-                navController.previousBackStackEntry
-                    ?.savedStateHandle
-                    ?.set("imageUri", uri)
+            moveToImageEditor = { uri -> navController.navigateToImageEditor(uri) },
+            onBackPressed = { navController.popBackStack() },
+        )
+    }
 
-                navController.popBackStack()
-            },
+    composable<Route.ImageEditor> {
+        val imageUriStrings = it.toRoute<Route.ImageEditor>().imageUris
+        val imageUris = imageUriStrings.map { uriString -> Uri.parse(uriString) }
+
+        ImageEditorRoute(
+            imageUris = imageUris,
+            moveToEditGift = {},
             onBackPressed = { navController.popBackStack() },
         )
     }

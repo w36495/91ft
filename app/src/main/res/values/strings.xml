@@ -231,6 +231,9 @@
         <item quantity="other">%s/%s</item>
     </plurals>
 
+    <!-- 선물 편집 - 이미지 편집 -->
+    <string name="gift_image_editor_title">사진 편집</string>
+
     <!-- 선물 편집 - 친구 선택 -->
     <string name="friend_selection_title">친구 선택</string>
 
@@ -295,6 +298,7 @@
     <string name="common_remove">삭제</string>
     <string name="common_reset">초기화</string>
     <string name="common_complete">완료</string>
+    <string name="common_next">다음</string>
     <string name="common_heart">♥</string>
     <string name="common_received_gift_text">받은 선물</string>
     <string name="common_sent_gift_text">준 선물</string>

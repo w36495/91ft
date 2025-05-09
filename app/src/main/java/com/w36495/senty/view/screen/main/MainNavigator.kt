@@ -70,6 +70,7 @@ sealed interface Route {
     @Serializable data class GiftDetail(val giftId: String) : Route
     @Serializable data class GiftEdit(val giftId: String) : Route
     @Serializable data class ImagePicker(val originalImageCount: Int) : Route
+    @Serializable data class ImageEditor(val imageUris: List<String>) : Route
 
     // Settings
     @Serializable data object GiftCategories : Route
