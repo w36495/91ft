@@ -10,9 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -74,9 +72,6 @@ fun ImagePickerRoute(
     }
 
     ImagePickerScreen(
-        modifier = Modifier
-            .statusBarsPadding()
-            .navigationBarsPadding(),
         selectedImageUris = selectedImageUri,
         imageUris = imageUris,
         totalImageCount = MAX_IMAGE_COUNT.minus(originalImageCount),
@@ -96,7 +91,6 @@ fun ImagePickerRoute(
 
 @Composable
 private fun ImagePickerScreen(
-    modifier: Modifier = Modifier,
     selectedImageUris: List<Uri>,
     imageUris: List<Uri>,
     totalImageCount: Int,
@@ -116,7 +110,7 @@ private fun ImagePickerScreen(
         }
     ) { innerPadding ->
         Box(
-            modifier = modifier
+            modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
                 .background(Color(0xFFFBFBFB))
