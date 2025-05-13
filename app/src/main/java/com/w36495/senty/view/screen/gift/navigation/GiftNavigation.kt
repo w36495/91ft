@@ -7,7 +7,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import com.w36495.senty.view.component.image.editor.ImageEditorRoute
+import com.w36495.senty.view.component.image.editor.ImageEditorPreviewRoute
 import com.w36495.senty.view.component.image.picker.ImagePickerRoute
 import com.w36495.senty.view.screen.friend.navigation.navigateToFriendAdd
 import com.w36495.senty.view.screen.gift.detail.GiftDetailRoute
@@ -41,6 +41,10 @@ fun NavController.navigateToImagePicker(count: Int) {
 
 fun NavController.navigateToImageEditor(imageUris: List<Uri>) {
     navigate(Route.ImageEditor(imageUris.map { it.toString() }))
+}
+
+fun NavController.navigateToImageEditorPreview(editedImageFileUris: List<String>) {
+    navigate(Route.ImageEditorPreview(editedImageFileUris))
 }
 
 fun NavGraphBuilder.giftNavGraph(
@@ -122,13 +126,30 @@ fun NavGraphBuilder.giftNavGraph(
 
         ImageEditorRoute(
             imageUris = imageUris,
-            moveToEditGift = {},
             moveToEditPreview = { navController.navigateToImageEditorPreview(it) },
             onBackPressed = { navController.popBackStack() },
             onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
         )
     }
 
+    composable<Route.ImageEditorPreview> { navBackStackEntry ->
+        val imageFiles = navBackStackEntry.toRoute<Route.ImageEditorPreview>().editedImageFileUris
+        val fileUris = imageFiles.map { Uri.parse(it) }
+
+        ImageEditorPreviewRoute(
+            uris = fileUris,
+            moveToEditGift = {
+                navController.getBackStackEntry(BottomTabRoute.GiftAdd).savedStateHandle
+                    .set(
+                        key = "imageUri",
+                        value = it
+                    )
+
+                navController.popBackStack(
+                    route = BottomTabRoute.GiftAdd,
+                    inclusive = false,
+                )
+            },
             onBackPressed = { navController.popBackStack() },
         )
     }
