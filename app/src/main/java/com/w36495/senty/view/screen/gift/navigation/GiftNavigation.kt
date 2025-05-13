@@ -14,6 +14,7 @@ import com.w36495.senty.view.screen.gift.detail.GiftDetailRoute
 import com.w36495.senty.view.screen.gift.edit.EditGiftRoute
 import com.w36495.senty.view.screen.gift.list.GiftRoute
 import com.w36495.senty.view.screen.home.navigation.navigateToHome
+import com.w36495.senty.view.screen.imageeditor.ImageEditorRoute
 import com.w36495.senty.view.screen.main.BottomTabRoute
 import com.w36495.senty.view.screen.main.Route
 import com.w36495.senty.view.screen.setting.navigation.navigateToGiftCategories
@@ -115,13 +116,19 @@ fun NavGraphBuilder.giftNavGraph(
         )
     }
 
-    composable<Route.ImageEditor> {
-        val imageUriStrings = it.toRoute<Route.ImageEditor>().imageUris
+    composable<Route.ImageEditor> {navBackStackEntry ->
+        val imageUriStrings = navBackStackEntry.toRoute<Route.ImageEditor>().imageUris
         val imageUris = imageUriStrings.map { uriString -> Uri.parse(uriString) }
 
         ImageEditorRoute(
             imageUris = imageUris,
             moveToEditGift = {},
+            moveToEditPreview = { navController.navigateToImageEditorPreview(it) },
+            onBackPressed = { navController.popBackStack() },
+            onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
+        )
+    }
+
             onBackPressed = { navController.popBackStack() },
         )
     }
