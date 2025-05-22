@@ -1,7 +1,11 @@
 package com.w36495.senty.view.component.image.picker
 
+import android.content.Context
+import android.graphics.Bitmap
 import android.net.Uri
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -11,18 +15,21 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -30,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -37,12 +45,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
 import coil3.size.Scale
 import com.vsnappy1.extension.noRippleClickable
 import com.w36495.senty.R
+import com.w36495.senty.util.ImageConverter
 import com.w36495.senty.util.dropShadow
 import com.w36495.senty.util.getScreenWidthPx
 import com.w36495.senty.view.component.SentyAnnotatedCenterAlignedTopAppBar
@@ -176,13 +186,29 @@ private fun ImagePickerPreview(
     val screenWidthPx = getScreenWidthPx()
     val coroutineScope = rememberCoroutineScope()
 
-    if (selectedImageUris.isNotEmpty()) {
-        val pagerState = rememberPagerState { selectedImageUris.size }
+    val pagerState = rememberPagerState {
+        if (selectedImageUris.isEmpty()) 0 else selectedImageUris.size
+    }
+    val scrollStates = remember { mutableStateMapOf<Int, ScrollState>() }
+    val initializedPages = remember { mutableSetOf<Int>() }
 
+    LaunchedEffect(pagerState.currentPage) {
+        val page = pagerState.currentPage
+        val scrollState = scrollStates.getOrPut(page) { ScrollState(initial = 0) }
+
+        if (!initializedPages.contains(page)) {
+            initializedPages.add(page)
+            scrollState.scrollTo(0)
+        }
+    }
+
+    if (selectedImageUris.isNotEmpty()) {
         HorizontalPager(
             modifier = Modifier.aspectRatio(1f),
             state = pagerState,
         ) { page ->
+            val scrollState = scrollStates.getOrPut(page) { ScrollState(0) }
+
             Box(modifier = Modifier.fillMaxSize()) {
                 Image(
                     painter = rememberAsyncImagePainter(
@@ -194,7 +220,9 @@ private fun ImagePickerPreview(
                     ),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(scrollState),
                 )
 
                 if (page > 0) {
