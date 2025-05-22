@@ -115,7 +115,7 @@ fun NavGraphBuilder.giftNavGraph(
 
         ImagePickerRoute(
             originalImageCount = imageCount,
-            moveToImageEditor = { uri -> navController.navigateToImageEditor(uri) },
+            moveToImagePreview = { uri -> navController.navigateToImageEditorPreview(uri) },
             onBackPressed = { navController.popBackStack() },
         )
     }

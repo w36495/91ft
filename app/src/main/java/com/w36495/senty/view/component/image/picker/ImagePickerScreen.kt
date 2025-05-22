@@ -1,7 +1,5 @@
 package com.w36495.senty.view.component.image.picker
 
-import android.content.Context
-import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -15,11 +13,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -30,90 +28,140 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
 import coil3.size.Scale
 import com.vsnappy1.extension.noRippleClickable
 import com.w36495.senty.R
-import com.w36495.senty.util.ImageConverter
 import com.w36495.senty.util.dropShadow
 import com.w36495.senty.util.getScreenWidthPx
 import com.w36495.senty.view.component.SentyAnnotatedCenterAlignedTopAppBar
+import com.w36495.senty.view.component.image.picker.model.ImagePickerContract
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.theme.SentyBlack
 import com.w36495.senty.view.ui.theme.SentyGray10
 import com.w36495.senty.view.ui.theme.SentyGray60
 import com.w36495.senty.view.ui.theme.SentyGreen60
 import com.w36495.senty.view.ui.theme.SentyGreen80
+import com.w36495.senty.view.ui.theme.SentyWhite
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 private const val MAX_IMAGE_COUNT = 3
+private const val THUMBNAIL_SIZE = 600
 
 @Composable
 fun ImagePickerRoute(
+    vm: ImagePickerViewModel = hiltViewModel(),
     originalImageCount: Int = 0,
-    moveToImageEditor: (List<Uri>) -> Unit,
+    moveToImagePreview: (List<String>) -> Unit,
     onBackPressed: () -> Unit = {},
 ) {
     val context = LocalContext.current
-    var selectedImageUri by remember { mutableStateOf<List<Uri>>(emptyList()) }
-    var imageUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
+    val uiState by vm.state.collectAsStateWithLifecycle()
+
+    val pagerState = rememberPagerState {
+        if (uiState.selectedImageUris.isEmpty()) 0
+        else uiState.selectedImageUris.size
+    }
+    val scrollStates = remember { mutableStateMapOf<Int, ScrollState>() }
 
     LaunchedEffect(Unit) {
-        imageUris = ImagePickerUtils.getAllImages(context)
-        selectedImageUri = selectedImageUri + imageUris.first()
+        launch {
+            val imageUris = ImagePickerUtils.getAllImages(context)
+            vm.setImages(imageUris)
+        }
+
+        launch {
+            vm.effect.collect { effect ->
+                when (effect) {
+                    ImagePickerContract.Effect.NavigateToBack -> { onBackPressed() }
+                    is ImagePickerContract.Effect.NavigateToImagePreview -> {
+                        moveToImagePreview(effect.editedImageUris.map { it.toString() })
+                    }
+                }
+            }
+        }
+
+        launch {
+            snapshotFlow { pagerState.currentPage }
+                .distinctUntilChanged()
+                .collect { page ->
+                    val scrollState = scrollStates.getOrPut(page) { ScrollState(initial = 0) }
+
+                    if (!uiState.initializedPages.contains(page)) {
+                        vm.addInitializedPage(page)
+                        scrollState.scrollTo(0)
+                    }
+                }
+        }
+    }
+
+    LaunchedEffect(uiState.selectedImageUris.size) {
+        if (uiState.selectedImageUris.isNotEmpty()) {
+            pagerState.animateScrollToPage(uiState.selectedImageUris.lastIndex)
+        }
     }
 
     ImagePickerScreen(
-        selectedImageUris = selectedImageUri,
-        imageUris = imageUris,
+        uiState = uiState,
         totalImageCount = MAX_IMAGE_COUNT.minus(originalImageCount),
+        pagerState = pagerState,
+        scrollStates = scrollStates,
         onClickNext = {
-            if (selectedImageUri.isEmpty()) onBackPressed()
-            else moveToImageEditor(selectedImageUri)
+            val scrollValues = (0 until pagerState.pageCount).map { page ->
+                scrollStates[page]?.value ?: 0
+            }
+
+            vm.croppedImage(
+                context = context,
+                scrollValues = scrollValues,
+            )
         },
-        onSelectedImage = {
-            selectedImageUri = selectedImageUri + listOf(it)
-        },
-        onUnSelectedImage = {
-            selectedImageUri = selectedImageUri.filterIndexed { index, _ -> index != it }
-        },
+        onSelectedImage = { vm.selectImage(it) },
+        onUnSelectedImage = { vm.unselectImage(it) },
+        onChangeImageViewportSize = { vm.updateViewportSize(it) },
         onBackPressed = onBackPressed,
     )
 }
 
 @Composable
 private fun ImagePickerScreen(
-    selectedImageUris: List<Uri>,
-    imageUris: List<Uri>,
+    uiState: ImagePickerContract.State,
     totalImageCount: Int,
+    pagerState: PagerState,
+    scrollStates: SnapshotStateMap<Int, ScrollState>,
     onSelectedImage: (Uri) -> Unit,
     onUnSelectedImage: (Int) -> Unit,
     onClickNext: () -> Unit,
+    onChangeImageViewportSize: (IntSize) -> Unit,
     onBackPressed: () -> Unit,
 ) {
     Scaffold(
         topBar = {
             ImagePickerHeader(
                 totalImageCount = totalImageCount,
-                selectedImageCount = selectedImageUris.size,
+                selectedImageCount = uiState.selectedImageUris.size,
                 onClickNext = onClickNext,
                 onBackPressed = onBackPressed,
             )
@@ -127,17 +175,20 @@ private fun ImagePickerScreen(
         ) {
             Column {
                 ImagePickerPreview(
-                    selectedImageUris = selectedImageUris,
+                    selectedImageUris = uiState.selectedImageUris,
+                    pagerState = pagerState,
+                    scrollStates = scrollStates,
+                    onChangeImageViewportSize = onChangeImageViewportSize,
                 )
 
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(3),
                     contentPadding = PaddingValues(2.dp),
                 ) {
-                    items(imageUris) {uri ->
+                    items(uiState.images) {uri ->
                         ImagePickerItem(
                             selectedUri = uri,
-                            selectedImageUris = selectedImageUris,
+                            selectedImageUris = uiState.selectedImageUris,
                             totalImageCount = totalImageCount,
                             onSelectedImage = onSelectedImage,
                             onUnSelectedImage = onUnSelectedImage,
@@ -165,13 +216,15 @@ private fun ImagePickerHeader(
         annotatedString = annotatedString,
         hasBackButton = true,
         actions = {
-            Text(
-                text = stringResource(id = R.string.common_next),
-                style = SentyTheme.typography.bodyMedium,
-                modifier = Modifier
-                    .clickable { onClickNext() }
-                    .padding(14.dp),
-            )
+            if (selectedImageCount > 0) {
+                Text(
+                    text = stringResource(id = R.string.common_next),
+                    style = SentyTheme.typography.bodyMedium,
+                    modifier = Modifier
+                        .clickable { onClickNext() }
+                        .padding(14.dp),
+                )
+            }
         },
         onBackPressed = onBackPressed,
     )
@@ -181,33 +234,14 @@ private fun ImagePickerHeader(
 private fun ImagePickerPreview(
     modifier: Modifier = Modifier,
     selectedImageUris: List<Uri>,
+    pagerState: PagerState,
+    scrollStates: SnapshotStateMap<Int, ScrollState>,
+    onChangeImageViewportSize: (IntSize) -> Unit,
 ) {
     val context = LocalContext.current
     val screenWidthPx = getScreenWidthPx()
     val coroutineScope = rememberCoroutineScope()
-
-    val pagerState = rememberPagerState {
-        if (selectedImageUris.isEmpty()) 0 else selectedImageUris.size
-    }
-    val scrollStates = remember { mutableStateMapOf<Int, ScrollState>() }
-    val initializedPages = remember { mutableSetOf<Int>() }
-
-    LaunchedEffect(selectedImageUris.size) {
-        if (selectedImageUris.isNotEmpty()) {
-            pagerState.animateScrollToPage(selectedImageUris.lastIndex)
-        }
-    }
-
-    LaunchedEffect(pagerState.currentPage) {
-        val page = pagerState.currentPage
-        val scrollState = scrollStates.getOrPut(page) { ScrollState(initial = 0) }
-
-        if (!initializedPages.contains(page)) {
-            initializedPages.add(page)
-            scrollState.scrollTo(0)
-        }
-    }
-
+    
     if (selectedImageUris.isNotEmpty()) {
         HorizontalPager(
             modifier = Modifier.aspectRatio(1f),
@@ -215,7 +249,11 @@ private fun ImagePickerPreview(
         ) { page ->
             val scrollState = scrollStates.getOrPut(page) { ScrollState(0) }
 
-            Box(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .onGloballyPositioned { onChangeImageViewportSize(it.size) }
+            ) {
                 Image(
                     painter = rememberAsyncImagePainter(
                         model = ImageRequest.Builder(context)
@@ -295,7 +333,6 @@ private fun ImagePickerItem(
     onUnSelectedImage: (Int) -> Unit,
 ) {
     val context = LocalContext.current
-    val screenWidthPx = getScreenWidthPx()
 
     Box(modifier = Modifier
         .aspectRatio(1f)
@@ -318,7 +355,7 @@ private fun ImagePickerItem(
             painter = rememberAsyncImagePainter(
                 model = ImageRequest.Builder(context)
                     .data(selectedUri)
-                    .size(screenWidthPx)
+                    .size(THUMBNAIL_SIZE)
                     .scale(Scale.FILL)
                     .build()
             ),
@@ -351,7 +388,8 @@ private fun ImagePickerItem(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(4.dp)
-                        .border(1.dp, SentyGreen80, CircleShape),
+                        .border(1.dp, SentyGreen80, CircleShape)
+                        .background(SentyWhite, CircleShape),
                     tint = SentyGreen60
                 )
             }
