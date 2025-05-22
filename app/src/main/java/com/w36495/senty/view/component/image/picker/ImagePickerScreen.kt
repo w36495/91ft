@@ -192,6 +192,12 @@ private fun ImagePickerPreview(
     val scrollStates = remember { mutableStateMapOf<Int, ScrollState>() }
     val initializedPages = remember { mutableSetOf<Int>() }
 
+    LaunchedEffect(selectedImageUris.size) {
+        if (selectedImageUris.isNotEmpty()) {
+            pagerState.animateScrollToPage(selectedImageUris.lastIndex)
+        }
+    }
+
     LaunchedEffect(pagerState.currentPage) {
         val page = pagerState.currentPage
         val scrollState = scrollStates.getOrPut(page) { ScrollState(initial = 0) }
