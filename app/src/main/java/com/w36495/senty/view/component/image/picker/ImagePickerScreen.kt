@@ -269,6 +269,8 @@ private fun ImagePickerPreview(
                             },
                     )
                 }
+
+                ImagePickerGuideline()
             }
         }
     } else {
@@ -345,6 +347,41 @@ private fun ImagePickerItem(
                         .padding(4.dp)
                         .border(1.dp, SentyGreen80, CircleShape),
                     tint = SentyGreen60
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ImagePickerGuideline() {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val canvasWidth = size.width
+            val canvasHeight = size.height
+
+            val rowCount = 3
+            val columnCount = 3
+
+            // 수직선
+            for (i in 1 until columnCount) {
+                val x = canvasWidth * i / columnCount
+                drawLine(
+                    color = Color.White,
+                    start = Offset(x, 0f),
+                    end = Offset(x, canvasHeight),
+                    strokeWidth = 1.dp.toPx()
+                )
+            }
+
+            // 수평선
+            for (i in 1 until rowCount) {
+                val y = canvasHeight * i / rowCount
+                drawLine(
+                    color = Color.White,
+                    start = Offset(0f, y),
+                    end = Offset(canvasWidth, y),
+                    strokeWidth = 1.dp.toPx()
                 )
             }
         }
