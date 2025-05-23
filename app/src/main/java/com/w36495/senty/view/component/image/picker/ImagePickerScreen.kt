@@ -10,8 +10,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -24,6 +26,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -44,6 +49,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -56,10 +62,13 @@ import com.w36495.senty.R
 import com.w36495.senty.util.dropShadow
 import com.w36495.senty.util.getScreenWidthPx
 import com.w36495.senty.view.component.SentyAnnotatedCenterAlignedTopAppBar
+import com.w36495.senty.view.component.image.picker.component.GalleryFolderModalBottomSheet
+import com.w36495.senty.view.component.image.picker.model.GalleryFolderUiModel
 import com.w36495.senty.view.component.image.picker.model.ImagePickerContract
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.theme.SentyBlack
 import com.w36495.senty.view.ui.theme.SentyGray10
+import com.w36495.senty.view.ui.theme.SentyGray20
 import com.w36495.senty.view.ui.theme.SentyGray60
 import com.w36495.senty.view.ui.theme.SentyGreen60
 import com.w36495.senty.view.ui.theme.SentyGreen80
@@ -136,10 +145,13 @@ fun ImagePickerRoute(
         onSelectedImage = { vm.selectImage(it) },
         onUnSelectedImage = { vm.unselectImage(it) },
         onChangeImageViewportSize = { vm.updateViewportSize(it) },
+        onGalleryFolderSelectionClicked = { vm.clickGalleryFolder() },
+        onGalleryFolderSelected = { vm.selectGalleryFolder(it) },
         onBackPressed = onBackPressed,
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ImagePickerScreen(
     uiState: ImagePickerContract.State,
@@ -150,8 +162,23 @@ private fun ImagePickerScreen(
     onUnSelectedImage: (Int) -> Unit,
     onClickNext: () -> Unit,
     onChangeImageViewportSize: (IntSize) -> Unit,
+    onGalleryFolderSelectionClicked: () -> Unit,
+    onGalleryFolderSelected: (GalleryFolderUiModel) -> Unit,
     onBackPressed: () -> Unit,
 ) {
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+
+    if (uiState.showGalleryGroupBottomSheet) {
+        GalleryFolderModalBottomSheet(
+            galleryFolders = uiState.galleryFolders,
+            bottomSheetState = sheetState,
+            onDismiss = { onGalleryFolderSelectionClicked() },
+            onSelected = onGalleryFolderSelected,
+        )
+    }
+
     Scaffold(
         topBar = {
             ImagePickerHeader(
@@ -176,20 +203,15 @@ private fun ImagePickerScreen(
                     onChangeImageViewportSize = onChangeImageViewportSize,
                 )
 
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(3),
-                    contentPadding = PaddingValues(2.dp),
-                ) {
-                    items(uiState.images) {uri ->
-                        ImagePickerItem(
-                            selectedUri = uri,
-                            selectedImageUris = uiState.selectedImageUris,
-                            totalImageCount = totalImageCount,
-                            onSelectedImage = onSelectedImage,
-                            onUnSelectedImage = onUnSelectedImage,
-                        )
-                    }
-                }
+                ImageContents(
+                    images = uiState.images,
+                    selectedImageUris = uiState.selectedImageUris,
+                    totalImageCount = totalImageCount,
+                    folderName = uiState.currentFolderName,
+                    onSelectedImage = onSelectedImage,
+                    onUnSelectedImage = onUnSelectedImage,
+                    onGalleryFolderSelectionClicked = onGalleryFolderSelectionClicked,
+                )
             }
         }
     }
@@ -316,6 +338,64 @@ private fun ImagePickerPreview(
         Box(modifier = modifier
             .aspectRatio(1f)
             .background(Color(0xFFFBFBFB)))
+    }
+}
+
+@Composable
+private fun ImageContents(
+    images: List<Uri>,
+    selectedImageUris: List<Uri>,
+    totalImageCount: Int,
+    folderName: String,
+    onGalleryFolderSelectionClicked: () -> Unit,
+    onSelectedImage: (Uri) -> Unit,
+    onUnSelectedImage: (Int) -> Unit,
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        HorizontalDivider(
+            color = SentyGray20,
+            thickness = 0.5.dp,
+        )
+
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 6.dp)
+                .clickable { onGalleryFolderSelectionClicked() },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "$folderName (${images.size})",
+                style = SentyTheme.typography.bodySmall,
+            )
+
+            Icon(
+                painter = painterResource(id = R.drawable.ic_baseline_keyboard_arrow_down_24),
+                contentDescription = "gallery folder selection icon",
+                modifier = Modifier.padding(start = 4.dp),
+            )
+        }
+
+        HorizontalDivider(
+            color = SentyGray20,
+            thickness = 0.5.dp,
+        )
+
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(4),
+            contentPadding = PaddingValues(2.dp),
+        ) {
+            items(images) {uri ->
+                ImagePickerItem(
+                    selectedUri = uri,
+                    selectedImageUris = selectedImageUris,
+                    totalImageCount = totalImageCount,
+                    onSelectedImage = onSelectedImage,
+                    onUnSelectedImage = onUnSelectedImage,
+                )
+            }
+        }
     }
 }
 

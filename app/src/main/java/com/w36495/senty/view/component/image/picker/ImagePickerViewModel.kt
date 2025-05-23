@@ -44,7 +44,8 @@ class ImagePickerViewModel @Inject constructor(
     fun unselectImage(index: Int) {
         _state.update {
             it.copy(
-                selectedImageUris = it.selectedImageUris.filterIndexed { i, _ -> i != index }
+                selectedImageUris = it.selectedImageUris.filterIndexed { i, _ -> i != index },
+                initializedPages = it.initializedPages.filterIndexed { i, _ -> i != index }.toSet(),
             )
         }
     }
@@ -55,6 +56,22 @@ class ImagePickerViewModel @Inject constructor(
 
     fun updateViewportSize(size: IntSize) {
         _state.update { it.copy(viewportSize = size) }
+    }
+
+    fun selectGalleryFolder(folder: GalleryFolderUiModel) {
+        val images = galleryImageManager.getImagesInFolder(folder.name)
+
+        _state.update {
+            it.copy(
+                images = images,
+                currentFolderName = folder.getFolderNameKr(),
+                showGalleryGroupBottomSheet = false,
+            )
+        }
+    }
+
+    fun clickGalleryFolder() {
+        _state.update { it.copy(showGalleryGroupBottomSheet = !it.showGalleryGroupBottomSheet) }
     }
 
     fun sendEffect(effect: ImagePickerContract.Effect) {
@@ -134,6 +151,7 @@ class ImagePickerViewModel @Inject constructor(
     private fun loadImages() {
         viewModelScope.launch {
             galleryImageManager.loadAllImages()
+            val images = galleryImageManager.getAllImages()
 
             val folders = galleryImageManager.getGalleryFolders().map {
                 GalleryFolderUiModel(
@@ -143,10 +161,10 @@ class ImagePickerViewModel @Inject constructor(
                 )
             }
 
-            val images = galleryImageManager.getAllImages()
             _state.update {
                 it.copy(
                     images = images,
+                    currentFolderName = folders.first().name,
                     galleryFolders = folders,
                     selectedImageUris = if (state.value.selectedImageUris.isEmpty()) {
                         it.selectedImageUris + images.first()

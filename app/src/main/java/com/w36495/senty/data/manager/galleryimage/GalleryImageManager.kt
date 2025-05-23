@@ -40,7 +40,13 @@ class GalleryImageManager @Inject constructor(
     }
 
     fun getGalleryFolders(): List<GalleryFolderEntity> {
-        return allImages
+        return listOf(
+            GalleryFolderEntity(
+                name = FOLDER_ALL,
+                thumbnailUri = allImages.first().uri,
+                count = allImages.size
+            )
+        ) + allImages
             .groupBy { it.folderName }
             .map { (folderName, images) ->
                 GalleryFolderEntity(
@@ -51,9 +57,18 @@ class GalleryImageManager @Inject constructor(
             }
     }
 
+    fun getImagesInFolder(folderName: String): List<Uri> {
+        return if (folderName == FOLDER_ALL) {
+            allImages.map { it.uri }
+        } else {
+            allImages.filter { it.folderName == folderName }.map { it.uri }
+        }
+    }
+
     fun getAllImages(): List<Uri> = allImages.map { it.uri }
 
     companion object {
+        private const val FOLDER_ALL = "최근 항목"
         private const val SORT_ODER_DATE_ADDED = "${MediaStore.Images.Media.DATE_ADDED} DESC"
     }
 }
