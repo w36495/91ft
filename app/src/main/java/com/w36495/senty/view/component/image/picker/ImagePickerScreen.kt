@@ -88,11 +88,6 @@ fun ImagePickerRoute(
 
     LaunchedEffect(Unit) {
         launch {
-            val imageUris = ImagePickerUtils.getAllImages(context)
-            vm.setImages(imageUris)
-        }
-
-        launch {
             vm.effect.collect { effect ->
                 when (effect) {
                     ImagePickerContract.Effect.NavigateToBack -> { onBackPressed() }

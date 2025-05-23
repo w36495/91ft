@@ -6,6 +6,7 @@ import androidx.compose.ui.unit.IntSize
 sealed interface ImagePickerContract {
     data class State(
         val images: List<Uri> = emptyList(),
+        val galleryFolders: List<GalleryFolderUiModel> = emptyList(),
         val selectedImageUris: List<Uri> = emptyList(),
         val editedImageUris: List<Uri> = emptyList(),
         val initializedPages: Set<Int> = emptySet(),

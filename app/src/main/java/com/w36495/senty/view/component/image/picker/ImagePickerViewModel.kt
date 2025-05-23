@@ -6,7 +6,9 @@ import android.net.Uri
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.w36495.senty.data.manager.galleryimage.GalleryImageManager
 import com.w36495.senty.util.ImageConverter
+import com.w36495.senty.view.component.image.picker.model.GalleryFolderUiModel
 import com.w36495.senty.view.component.image.picker.model.ImagePickerContract
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +25,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ImagePickerViewModel @Inject constructor(
-
+    private val galleryImageManager: GalleryImageManager,
 ) : ViewModel() {
     private val _effect = Channel<ImagePickerContract.Effect>()
     val effect = _effect.receiveAsFlow()
@@ -31,17 +33,8 @@ class ImagePickerViewModel @Inject constructor(
     private val _state = MutableStateFlow(ImagePickerContract.State())
     val state get() = _state.asStateFlow()
 
-    fun setImages(images: List<Uri>) {
-        _state.update {
-            it.copy(
-                images = images,
-                selectedImageUris = if (state.value.selectedImageUris.isEmpty()) {
-                    it.selectedImageUris + images.first()
-                } else {
-                    it.selectedImageUris
-                }
-            )
-        }
+    init {
+        loadImages()
     }
 
     fun selectImage(uri: Uri) {
@@ -136,5 +129,32 @@ class ImagePickerViewModel @Inject constructor(
         val width = bitmap.width
         val height = (imageEndY - imageStartY).coerceAtLeast(1)
         return Bitmap.createBitmap(bitmap, 0, imageStartY, width, height)
+    }
+
+    private fun loadImages() {
+        viewModelScope.launch {
+            galleryImageManager.loadAllImages()
+
+            val folders = galleryImageManager.getGalleryFolders().map {
+                GalleryFolderUiModel(
+                    name = it.name,
+                    thumbnailUri = it.thumbnailUri,
+                    count = it.count
+                )
+            }
+
+            val images = galleryImageManager.getAllImages()
+            _state.update {
+                it.copy(
+                    images = images,
+                    galleryFolders = folders,
+                    selectedImageUris = if (state.value.selectedImageUris.isEmpty()) {
+                        it.selectedImageUris + images.first()
+                    } else {
+                        it.selectedImageUris
+                    }
+                )
+            }
+        }
     }
 }
