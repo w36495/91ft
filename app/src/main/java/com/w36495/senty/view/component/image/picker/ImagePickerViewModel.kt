@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.google.common.primitives.Ints.min
 import com.w36495.senty.data.manager.galleryimage.GalleryImageProvider
 import com.w36495.senty.data.manager.galleryimage.folder.GalleryFolderProvider
 import com.w36495.senty.data.mapper.toUiModel
@@ -32,6 +33,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.math.max
 
 @HiltViewModel
 class ImagePickerViewModel @Inject constructor(
@@ -135,10 +137,11 @@ class ImagePickerViewModel @Inject constructor(
 
         // 이미지의 높이 Offset (startY, endY)
         val (startY, endY) = getVisibleImageRegion(scrollValue, bitmap.height, viewportSize)
+        Log.d("ImagePickerVM", "cropAndSaveImage() : $startY, $endY")
 
         // 2) 크롭
         val cropped = withContext(Dispatchers.Default) {
-            createCropImage(bitmap, startY, endY)
+            createCropImage(bitmap, startY, viewportSize)
         }
 
         // 3) Bitmap → 파일 URI
@@ -159,11 +162,34 @@ class ImagePickerViewModel @Inject constructor(
     private fun createCropImage(
         bitmap: Bitmap,
         imageStartY: Int,
-        imageEndY: Int,
+        viewportSize: Int,
     ): Bitmap {
-        val width = bitmap.width
-        val height = (imageEndY - imageStartY).coerceAtLeast(1)
-        return Bitmap.createBitmap(bitmap, 0, imageStartY, width, height)
+        val imageWidth = bitmap.width
+        val imageHeight = bitmap.height
+
+        val widthRatio = viewportSize.toFloat() / imageWidth
+        val heightRatio = viewportSize.toFloat() / imageHeight
+
+        // 현재 CROP 으로 보여주고 있으니 max를 통해 ratio 계산
+        val scaleFactor = max(widthRatio, heightRatio)
+
+        // 화면에 보여지는 이미지의 크기
+        val displayImageWidth = imageWidth * scaleFactor
+
+        // 사용자가 스크롤한 만큼 더해줌
+        val cropTopInScaled = imageStartY
+        val cropLeftInScaled = (displayImageWidth -  viewportSize) / 2
+
+        val cropY = (cropTopInScaled / scaleFactor).toInt().coerceIn(0, bitmap.height - 1)
+        val cropX = (cropLeftInScaled / scaleFactor).toInt().coerceIn(0, bitmap.width - 1)
+
+        val cropSizeInBitmap = (viewportSize / scaleFactor).toInt()
+
+        // 잘릴 범위가 원본 범위를 벗어나지 않도록 보정
+        val finalCropWidth = min(cropSizeInBitmap, imageWidth - cropX)
+        val finalCropHeight = min(cropSizeInBitmap, imageHeight - cropY)
+
+        return Bitmap.createBitmap(bitmap, cropX, cropY, finalCropWidth, finalCropHeight)
     }
 
     private fun getAllGalleryFolders() {
