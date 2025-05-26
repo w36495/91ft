@@ -7,10 +7,11 @@ import android.util.Log
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.w36495.senty.data.manager.galleryimage.GalleryImageManager
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.w36495.senty.data.manager.galleryimage.GalleryImageProvider
+import com.w36495.senty.data.manager.galleryimage.folder.GalleryFolderProvider
+import com.w36495.senty.data.mapper.toUiModel
 import com.w36495.senty.domain.error.GlobalError
 import com.w36495.senty.domain.error.ImagePickerError
 import com.w36495.senty.util.ImageConverter
@@ -42,6 +43,9 @@ class ImagePickerViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(ImagePickerContract.State())
     val state get() = _state.asStateFlow()
+
+    private val _selectedFolder = MutableStateFlow<GalleryFolderUiModel?>(null)
+    val selectedFolder get() = _selectedFolder.asStateFlow()
     @OptIn(ExperimentalCoroutinesApi::class)
     val pagingImages: Flow<PagingData<Uri>> = _selectedFolder
         .flatMapLatest { folder ->
@@ -53,7 +57,7 @@ class ImagePickerViewModel @Inject constructor(
         .cachedIn(viewModelScope)
 
     init {
-        loadImages()
+        getAllGalleryFolders()
     }
 
     fun selectImage(uri: Uri) {
@@ -78,14 +82,9 @@ class ImagePickerViewModel @Inject constructor(
     }
 
     fun selectGalleryFolder(folder: GalleryFolderUiModel) {
-        val images = galleryImageManager.getImagesInFolder(folder.name)
-
+        _selectedFolder.update { folder }
         _state.update {
-            it.copy(
-                images = images,
-                currentFolderName = folder.getFolderNameKr(),
-                showGalleryGroupBottomSheet = false,
-            )
+            it.copy(showGalleryGroupBottomSheet = false,)
         }
     }
 
@@ -167,30 +166,25 @@ class ImagePickerViewModel @Inject constructor(
         return Bitmap.createBitmap(bitmap, 0, imageStartY, width, height)
     }
 
-    private fun loadImages() {
+    private fun getAllGalleryFolders() {
         viewModelScope.launch {
-            galleryImageManager.loadAllImages()
-            val images = galleryImageManager.getAllImages()
-
-            val folders = galleryImageManager.getGalleryFolders().map {
-                GalleryFolderUiModel(
-                    name = it.name,
-                    thumbnailUri = it.thumbnailUri,
-                    count = it.count
-                )
-            }
-
-            _state.update {
-                it.copy(
-                    images = images,
-                    currentFolderName = folders.first().name,
-                    galleryFolders = folders,
-                    selectedImageUris = if (state.value.selectedImageUris.isEmpty()) {
-                        it.selectedImageUris + images.first()
-                    } else {
-                        it.selectedImageUris
+            runCatching {
+                galleryFolderProvider.loadAllGalleryFolders()
+                    .onSuccess { allFolders ->
+                        _selectedFolder.value = allFolders.first().toUiModel()
+                        _state.update {
+                            it.copy(
+                                galleryFolders = allFolders.map {  folder -> folder.toUiModel() }
+                            )
+                        }
                     }
-                )
+                    .onFailure {
+                        Log.d("ImagePickerVM", "getAllGalleryFolder() : ${it.stackTraceToString()}")
+                        sendEffect(ImagePickerContract.Effect.ShowError(ImagePickerError.NoGalleryFolders))
+                    }
+            }.onFailure {
+                Log.d("ImagePickerVM", "getAllGalleryFolder() : ${it.stackTraceToString()}")
+                sendEffect(ImagePickerContract.Effect.ShowError(GlobalError.UnKnownError))
             }
         }
     }

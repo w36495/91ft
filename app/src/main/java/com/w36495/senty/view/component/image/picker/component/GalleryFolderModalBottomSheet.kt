@@ -2,6 +2,7 @@ package com.w36495.senty.view.component.image.picker.component
 
 import android.net.Uri
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,6 +35,7 @@ import com.vsnappy1.extension.noRippleClickable
 import com.w36495.senty.R
 import com.w36495.senty.view.component.image.picker.model.GalleryFolderUiModel
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
+import com.w36495.senty.view.ui.theme.SentyGray10
 import com.w36495.senty.view.ui.theme.SentyGray20
 import com.w36495.senty.view.ui.theme.SentyWhite
 
@@ -138,7 +140,9 @@ private fun GalleryFolderItem(
                 ),
                 contentScale = ContentScale.Crop,
                 contentDescription = "gallery group thumbnail",
-                modifier = Modifier.size(56.dp),
+                modifier = Modifier
+                    .size(56.dp)
+                    .border(1.dp, SentyGray10),
             )
 
             Text(

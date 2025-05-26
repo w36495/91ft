@@ -11,3 +11,8 @@ sealed interface AuthError : SentyError {
     data object TooManyRequest : AuthError
     data object ExistedEmail : AuthError
 }
+
+sealed interface ImagePickerError : SentyError {
+    data object NoGalleryImages : ImagePickerError
+    data object NoGalleryFolders : ImagePickerError
+}

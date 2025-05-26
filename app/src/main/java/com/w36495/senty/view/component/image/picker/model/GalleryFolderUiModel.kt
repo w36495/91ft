@@ -7,6 +7,8 @@ data class GalleryFolderUiModel(
     val thumbnailUri: Uri,
     val count: Int,
 ) {
+    val isAll = name == "all"
+
     fun getFolderNameKr(): String {
         return folderNameMap[name.lowercase()] ?: name
     }
