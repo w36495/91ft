@@ -1,7 +1,8 @@
 package com.w36495.senty.data.manager.di
 
 import android.content.Context
-import com.w36495.senty.data.manager.galleryimage.GalleryImageManager
+import com.w36495.senty.data.manager.galleryimage.GalleryImageProvider
+import com.w36495.senty.data.manager.galleryimage.folder.GalleryFolderProvider
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -14,9 +15,17 @@ import javax.inject.Singleton
 object ManagerProvideModule {
     @Provides
     @Singleton
-    fun provideGalleryImageManager(
+    fun provideGalleryImageProvider(
         @ApplicationContext context: Context
-    ): GalleryImageManager {
-        return GalleryImageManager(context)
+    ): GalleryImageProvider {
+        return GalleryImageProvider(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGalleryFolderProvider(
+        @ApplicationContext context: Context,
+    ): GalleryFolderProvider {
+        return GalleryFolderProvider(context)
     }
 }

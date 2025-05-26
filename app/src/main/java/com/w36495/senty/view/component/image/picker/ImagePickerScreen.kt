@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -49,16 +48,18 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
 import coil3.size.Scale
 import com.vsnappy1.extension.noRippleClickable
 import com.w36495.senty.R
+import com.w36495.senty.domain.error.ImagePickerError
 import com.w36495.senty.util.dropShadow
 import com.w36495.senty.util.getScreenWidthPx
 import com.w36495.senty.view.component.SentyAnnotatedCenterAlignedTopAppBar
@@ -88,6 +89,8 @@ fun ImagePickerRoute(
 ) {
     val context = LocalContext.current
     val uiState by vm.state.collectAsStateWithLifecycle()
+    val selectedFolder by vm.selectedFolder.collectAsStateWithLifecycle()
+    val pagingImages = vm.pagingImages.collectAsLazyPagingItems()
 
     val pagerState = rememberPagerState {
         if (uiState.selectedImageUris.isEmpty()) 0
@@ -95,11 +98,18 @@ fun ImagePickerRoute(
     }
     val scrollStates = remember { mutableStateMapOf<Int, ScrollState>() }
 
+    if (pagingImages.loadState.hasError) {
+        vm.sendEffect(ImagePickerContract.Effect.ShowError(ImagePickerError.NoGalleryImages))
+    }
+
     LaunchedEffect(Unit) {
         launch {
             vm.effect.collect { effect ->
                 when (effect) {
                     ImagePickerContract.Effect.NavigateToBack -> { onBackPressed() }
+                    is ImagePickerContract.Effect.ShowError -> {
+
+                    }
                     is ImagePickerContract.Effect.NavigateToImagePreview -> {
                         moveToImagePreview(effect.editedImageUris.map { it.toString() })
                     }
@@ -129,6 +139,8 @@ fun ImagePickerRoute(
 
     ImagePickerScreen(
         uiState = uiState,
+        pagingImages = pagingImages,
+        selectedFolder = selectedFolder,
         totalImageCount = MAX_IMAGE_COUNT.minus(originalImageCount),
         pagerState = pagerState,
         scrollStates = scrollStates,
@@ -155,6 +167,8 @@ fun ImagePickerRoute(
 @Composable
 private fun ImagePickerScreen(
     uiState: ImagePickerContract.State,
+    pagingImages: LazyPagingItems<Uri>,
+    selectedFolder: GalleryFolderUiModel?,
     totalImageCount: Int,
     pagerState: PagerState,
     scrollStates: SnapshotStateMap<Int, ScrollState>,
@@ -204,10 +218,10 @@ private fun ImagePickerScreen(
                 )
 
                 ImageContents(
-                    images = uiState.images,
+                    pagingImages = pagingImages,
                     selectedImageUris = uiState.selectedImageUris,
                     totalImageCount = totalImageCount,
-                    folderName = uiState.currentFolderName,
+                    currentFolder = selectedFolder,
                     onSelectedImage = onSelectedImage,
                     onUnSelectedImage = onUnSelectedImage,
                     onGalleryFolderSelectionClicked = onGalleryFolderSelectionClicked,
@@ -343,10 +357,10 @@ private fun ImagePickerPreview(
 
 @Composable
 private fun ImageContents(
-    images: List<Uri>,
+    pagingImages: LazyPagingItems<Uri>,
     selectedImageUris: List<Uri>,
     totalImageCount: Int,
-    folderName: String,
+    currentFolder: GalleryFolderUiModel?,
     onGalleryFolderSelectionClicked: () -> Unit,
     onSelectedImage: (Uri) -> Unit,
     onUnSelectedImage: (Int) -> Unit,
@@ -366,7 +380,7 @@ private fun ImageContents(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "$folderName (${images.size})",
+                text = currentFolder?.let { "${it.getFolderNameKr()} (${it.count})" } ?: "",
                 style = SentyTheme.typography.bodySmall,
             )
 
@@ -386,14 +400,16 @@ private fun ImageContents(
             columns = GridCells.Fixed(4),
             contentPadding = PaddingValues(2.dp),
         ) {
-            items(images) {uri ->
-                ImagePickerItem(
-                    selectedUri = uri,
-                    selectedImageUris = selectedImageUris,
-                    totalImageCount = totalImageCount,
-                    onSelectedImage = onSelectedImage,
-                    onUnSelectedImage = onUnSelectedImage,
-                )
+            items(pagingImages.itemCount) {index ->
+                pagingImages[index]?.let { uri ->
+                    ImagePickerItem(
+                        imageUris = uri,
+                        selectedImageUris = selectedImageUris,
+                        totalImageCount = totalImageCount,
+                        onSelectedImage = onSelectedImage,
+                        onUnSelectedImage = onUnSelectedImage,
+                    )
+                }
             }
         }
     }
@@ -401,7 +417,7 @@ private fun ImageContents(
 
 @Composable
 private fun ImagePickerItem(
-    selectedUri: Uri,
+    imageUris: Uri,
     selectedImageUris: List<Uri>,
     totalImageCount: Int,
     onSelectedImage: (Uri) -> Unit,
@@ -415,13 +431,13 @@ private fun ImagePickerItem(
         .border(1.dp, SentyGray10)
         .clickable {
             when {
-                selectedImageUris.contains(selectedUri) -> {
-                    val index = selectedImageUris.indexOf(selectedUri)
+                selectedImageUris.contains(imageUris) -> {
+                    val index = selectedImageUris.indexOf(imageUris)
                     onUnSelectedImage(index)
                 }
 
                 selectedImageUris.size < totalImageCount -> {
-                    onSelectedImage(selectedUri)
+                    onSelectedImage(imageUris)
                 }
             }
         }
@@ -429,7 +445,7 @@ private fun ImagePickerItem(
         Image(
             painter = rememberAsyncImagePainter(
                 model = ImageRequest.Builder(context)
-                    .data(selectedUri)
+                    .data(imageUris)
                     .size(THUMBNAIL_SIZE)
                     .scale(Scale.FILL)
                     .build()
@@ -448,7 +464,7 @@ private fun ImagePickerItem(
         }
 
         if (selectedImageUris.isNotEmpty()) {
-            selectedImageUris.find { it == selectedUri }?.let {
+            selectedImageUris.find { it == imageUris }?.let {
                 val index = selectedImageUris.indexOf(it).plus(1)
 
                 Icon(

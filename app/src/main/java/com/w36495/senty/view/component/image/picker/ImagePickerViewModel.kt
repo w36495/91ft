@@ -3,20 +3,29 @@ package com.w36495.senty.view.component.image.picker
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
+import android.util.Log
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.w36495.senty.data.manager.galleryimage.GalleryImageManager
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import com.w36495.senty.data.manager.galleryimage.GalleryImageProvider
+import com.w36495.senty.domain.error.GlobalError
+import com.w36495.senty.domain.error.ImagePickerError
 import com.w36495.senty.util.ImageConverter
 import com.w36495.senty.view.component.image.picker.model.GalleryFolderUiModel
 import com.w36495.senty.view.component.image.picker.model.ImagePickerContract
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -25,13 +34,23 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ImagePickerViewModel @Inject constructor(
-    private val galleryImageManager: GalleryImageManager,
+    private val galleryImageProvider: GalleryImageProvider,
+    private val galleryFolderProvider: GalleryFolderProvider,
 ) : ViewModel() {
     private val _effect = Channel<ImagePickerContract.Effect>()
     val effect = _effect.receiveAsFlow()
 
     private val _state = MutableStateFlow(ImagePickerContract.State())
     val state get() = _state.asStateFlow()
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val pagingImages: Flow<PagingData<Uri>> = _selectedFolder
+        .flatMapLatest { folder ->
+            folder?.let {
+                if (it.isAll) galleryImageProvider.getGalleryImages()
+                else galleryImageProvider.getGalleryImages(it.name)
+            } ?: run { galleryImageProvider.getGalleryImages() }
+        }
+        .cachedIn(viewModelScope)
 
     init {
         loadImages()

@@ -49,6 +49,7 @@ coil = "3.1.0"
 datePickerCompose = "2.2.0"
 threeTenAbp = "1.4.9"
 gridLayoutCompose = "2.0.0"
+paging = "3.3.6"
 
 # Test
 junit = "4.13.2"
@@ -83,6 +84,10 @@ androidx-compose-material-icon-pxtended = { group = "androidx.compose.material",
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "compose-material3" }
 androidx-compose-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3Android" }
 google-accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "compose-permission" }
+
+androidx-paging = { group = "androidx.paging", name = "paging-runtime", version.ref = "paging" }
+androidx-paging-common = { group = "androidx.paging", name = "paging-common", version.ref = "paging" }
+androidx-paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
 
 # Database (Room, DataStore)
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
@@ -176,6 +181,9 @@ compose = [
     "androidx-compose-material3-android",
     "androidx-navigation-compose",
     "google-accompanist-permissions",
+    "androidx-paging",
+    "androidx-paging-common",
+    "androidx-paging-compose",
 ]
 
 database = [
