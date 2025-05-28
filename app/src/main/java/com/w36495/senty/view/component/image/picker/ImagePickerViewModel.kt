@@ -136,7 +136,7 @@ class ImagePickerViewModel @Inject constructor(
         viewportSize: Int,
     ): Uri = withContext(Dispatchers.IO) {
         // 1) URI → Bitmap
-        val bitmap = ImageConverter.uriToBitmap(context, image.uri)
+        val bitmap = ImageConverter.uriToBitmap(context, image.uri, true)
 
         // 이미지의 높이 Offset (startY, endY)
         val offsetY = scrollValue.coerceIn(0, bitmap.height)

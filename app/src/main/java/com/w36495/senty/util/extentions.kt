@@ -6,7 +6,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.BlurMaskFilter
 import android.graphics.ImageDecoder
-import android.graphics.drawable.BitmapDrawable
+import android.graphics.ImageDecoder.OnHeaderDecodedListener
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
@@ -56,10 +56,34 @@ object ImageConverter {
     /**
      * 카메라/갤러리로부터 받은 Uri를 Bitmap으로 변환하는 함수
      */
-    fun uriToBitmap(context: Context, uri: Uri): Bitmap {
+    fun uriToBitmap(context: Context, uri: Uri, isResized: Boolean = false): Bitmap {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             val source = ImageDecoder.createSource(context.contentResolver, uri)
-            ImageDecoder.decodeBitmap(source)
+
+            if (isResized) {
+                try {
+                    val onHeaderDecodedListener =
+                        OnHeaderDecodedListener { decoder, imageInfo, _ ->
+                            val width = imageInfo.size.width.toFloat()
+                            val height = imageInfo.size.height.toFloat()
+
+                            val maxSize = 1080
+                            val scale = min(maxSize / width, maxSize / height)
+
+                            val targetWidth = (width * scale).toInt()
+                            val targetHeight = (height * scale).toInt()
+
+                            decoder.setTargetSize(targetWidth, targetHeight)
+                        }
+
+                    ImageDecoder.decodeBitmap(source, onHeaderDecodedListener)
+                } catch (e: Exception) {
+                    Log.d("ImageConverter", "Exception: ${e.stackTraceToString()}")
+                    ImageDecoder.decodeBitmap(source)
+                }
+            } else {
+                ImageDecoder.decodeBitmap(source)
+            }
         } else {
             MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
         }
