@@ -7,8 +7,9 @@ import com.w36495.senty.domain.error.SentyError
 
 sealed interface ImagePickerContract {
     data class State(
+        val isLoading: Boolean = false,
         val galleryFolders: List<GalleryFolderUiModel> = emptyList(),
-        val selectedImageUris: List<Uri> = emptyList(),
+        val selectedImages: List<GalleryImageUiModel> = emptyList(),
         val editedImageUris: List<Uri> = emptyList(),
         val initializedPages: Set<Int> = emptySet(),
         val scrollStates: Map<Int, ScrollState> = emptyMap(),

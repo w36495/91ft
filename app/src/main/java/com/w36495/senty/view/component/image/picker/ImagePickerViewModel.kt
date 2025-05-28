@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.paging.map
 import com.google.common.primitives.Ints.min
 import com.w36495.senty.data.manager.galleryimage.GalleryImageProvider
 import com.w36495.senty.data.manager.galleryimage.folder.GalleryFolderProvider
@@ -17,6 +18,7 @@ import com.w36495.senty.domain.error.GlobalError
 import com.w36495.senty.domain.error.ImagePickerError
 import com.w36495.senty.util.ImageConverter
 import com.w36495.senty.view.component.image.picker.model.GalleryFolderUiModel
+import com.w36495.senty.view.component.image.picker.model.GalleryImageUiModel
 import com.w36495.senty.view.component.image.picker.model.ImagePickerContract
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +30,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -49,27 +52,27 @@ class ImagePickerViewModel @Inject constructor(
     private val _selectedFolder = MutableStateFlow<GalleryFolderUiModel?>(null)
     val selectedFolder get() = _selectedFolder.asStateFlow()
     @OptIn(ExperimentalCoroutinesApi::class)
-    val pagingImages: Flow<PagingData<Uri>> = _selectedFolder
+    val pagingImages: Flow<PagingData<GalleryImageUiModel>> = _selectedFolder
         .flatMapLatest { folder ->
             folder?.let {
                 if (it.isAll) galleryImageProvider.getGalleryImages()
                 else galleryImageProvider.getGalleryImages(it.name)
             } ?: run { galleryImageProvider.getGalleryImages() }
-        }
+        }.map { it.map { image -> image.toUiModel() } }
         .cachedIn(viewModelScope)
 
     init {
         getAllGalleryFolders()
     }
 
-    fun selectImage(uri: Uri) {
-        _state.update { it.copy(selectedImageUris = it.selectedImageUris + uri) }
+    fun selectImage(image: GalleryImageUiModel) {
+        _state.update { it.copy(selectedImages = it.selectedImages + image) }
     }
 
     fun unselectImage(index: Int) {
         _state.update {
             it.copy(
-                selectedImageUris = it.selectedImageUris.filterIndexed { i, _ -> i != index },
+                selectedImages = it.selectedImages.filterIndexed { i, _ -> i != index },
                 initializedPages = it.initializedPages.filterIndexed { i, _ -> i != index }.toSet(),
             )
         }
@@ -104,15 +107,15 @@ class ImagePickerViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             if (state.value.viewportSize == IntSize.Zero) return@launch
+            _state.update { it.copy(isLoading = true) }
 
             val baseState = state.value
-
-            val results = baseState.selectedImageUris
-                .mapIndexed { index, uri ->
+            val results = baseState.selectedImages
+                .mapIndexed { index, image ->
                     async {
                         cropAndSaveImage(
                             context = context,
-                            uri = uri,
+                            image = image,
                             scrollValue = scrollValues[index],
                             viewportSize = state.value.viewportSize.width,
                         )
@@ -121,42 +124,30 @@ class ImagePickerViewModel @Inject constructor(
 
             val resultUris = results.awaitAll()
 
-            _state.update { it.copy(editedImageUris = resultUris) }
+            _state.update { it.copy(isLoading = false, editedImageUris = resultUris) }
             _effect.send(ImagePickerContract.Effect.NavigateToImagePreview(state.value.editedImageUris))
         }
     }
 
     private suspend fun cropAndSaveImage(
         context: Context,
-        uri: Uri,
+        image: GalleryImageUiModel,
         scrollValue: Int,
         viewportSize: Int,
     ): Uri = withContext(Dispatchers.IO) {
         // 1) URI → Bitmap
-        val bitmap = ImageConverter.uriToBitmap(context, uri)
+        val bitmap = ImageConverter.uriToBitmap(context, image.uri)
 
         // 이미지의 높이 Offset (startY, endY)
-        val (startY, endY) = getVisibleImageRegion(scrollValue, bitmap.height, viewportSize)
-        Log.d("ImagePickerVM", "cropAndSaveImage() : $startY, $endY")
+        val offsetY = scrollValue.coerceIn(0, bitmap.height)
 
         // 2) 크롭
         val cropped = withContext(Dispatchers.Default) {
-            createCropImage(bitmap, startY, viewportSize)
+            createCropImage(bitmap, offsetY, viewportSize)
         }
 
         // 3) Bitmap → 파일 URI
         ImageConverter.bitmapToFileUri(context, cropped)
-    }
-
-    private fun getVisibleImageRegion(
-        scrollOffset: Int,
-        imageHeight: Int,
-        viewportSize: Int,
-    ): Pair<Int, Int> {
-        val startY = scrollOffset.coerceIn(0, imageHeight)
-        val endY = (scrollOffset + viewportSize).coerceIn(0, imageHeight)
-
-        return startY to endY
     }
 
     private fun createCropImage(

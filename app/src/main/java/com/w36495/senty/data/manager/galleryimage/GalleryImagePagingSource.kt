@@ -46,7 +46,10 @@ class GalleryImagePagingSource(
         val uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
         val projection = arrayOf(
             MediaStore.Images.Media._ID,
-            MediaStore.Images.Media.BUCKET_DISPLAY_NAME
+            MediaStore.Images.Media.BUCKET_DISPLAY_NAME,
+            MediaStore.Images.Media.WIDTH,
+            MediaStore.Images.Media.HEIGHT,
+            MediaStore.Images.Media.ORIENTATION,
         )
 
         val selection = folderName?.let { "${MediaStore.Images.Media.BUCKET_DISPLAY_NAME} = ?" }
@@ -62,6 +65,9 @@ class GalleryImagePagingSource(
         )?.use { cursor ->
             val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
             val bucketColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME)
+            val widthColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.WIDTH)
+            val heightColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.HEIGHT)
+            val orientationColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.ORIENTATION)
 
             val offset = page * pageSize
             if (cursor.moveToPosition(offset)) {
@@ -71,8 +77,11 @@ class GalleryImagePagingSource(
                     val id = cursor.getLong(idColumn)
                     val bucket = cursor.getString(bucketColumn) ?: "Unknown"
                     val imageUri = ContentUris.withAppendedId(uri, id)
+                    val width = cursor.getInt(widthColumn)
+                    val height = cursor.getInt(heightColumn)
+                    val orientation = cursor.getInt(orientationColumn)
 
-                    result.add(GalleryImageEntity(id = id, folderName = bucket, uri = imageUri))
+                    result.add(GalleryImageEntity(id, bucket, imageUri, width, height, orientation))
                     count++
                 } while (cursor.moveToNext() && count < pageSize)
             }

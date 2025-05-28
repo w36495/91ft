@@ -1,6 +1,5 @@
 package com.w36495.senty.view.component.image.picker
 
-import android.net.Uri
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
@@ -62,9 +61,11 @@ import com.w36495.senty.R
 import com.w36495.senty.domain.error.ImagePickerError
 import com.w36495.senty.util.dropShadow
 import com.w36495.senty.util.getScreenWidthPx
+import com.w36495.senty.view.component.LoadingCircleIndicator
 import com.w36495.senty.view.component.SentyAnnotatedCenterAlignedTopAppBar
 import com.w36495.senty.view.component.image.picker.component.GalleryFolderModalBottomSheet
 import com.w36495.senty.view.component.image.picker.model.GalleryFolderUiModel
+import com.w36495.senty.view.component.image.picker.model.GalleryImageUiModel
 import com.w36495.senty.view.component.image.picker.model.ImagePickerContract
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.theme.SentyBlack
@@ -93,8 +94,8 @@ fun ImagePickerRoute(
     val pagingImages = vm.pagingImages.collectAsLazyPagingItems()
 
     val pagerState = rememberPagerState {
-        if (uiState.selectedImageUris.isEmpty()) 0
-        else uiState.selectedImageUris.size
+        if (uiState.selectedImages.isEmpty()) 0
+        else uiState.selectedImages.size
     }
     val scrollStates = remember { mutableStateMapOf<Int, ScrollState>() }
 
@@ -131,9 +132,9 @@ fun ImagePickerRoute(
         }
     }
 
-    LaunchedEffect(uiState.selectedImageUris.size) {
-        if (uiState.selectedImageUris.isNotEmpty()) {
-            pagerState.animateScrollToPage(uiState.selectedImageUris.lastIndex)
+    LaunchedEffect(uiState.selectedImages.size) {
+        if (uiState.selectedImages.isNotEmpty()) {
+            pagerState.animateScrollToPage(uiState.selectedImages.lastIndex)
         }
     }
 
@@ -167,12 +168,12 @@ fun ImagePickerRoute(
 @Composable
 private fun ImagePickerScreen(
     uiState: ImagePickerContract.State,
-    pagingImages: LazyPagingItems<Uri>,
+    pagingImages: LazyPagingItems<GalleryImageUiModel>,
     selectedFolder: GalleryFolderUiModel?,
     totalImageCount: Int,
     pagerState: PagerState,
     scrollStates: SnapshotStateMap<Int, ScrollState>,
-    onSelectedImage: (Uri) -> Unit,
+    onSelectedImage: (GalleryImageUiModel) -> Unit,
     onUnSelectedImage: (Int) -> Unit,
     onClickNext: () -> Unit,
     onChangeImageViewportSize: (IntSize) -> Unit,
@@ -197,7 +198,7 @@ private fun ImagePickerScreen(
         topBar = {
             ImagePickerHeader(
                 totalImageCount = totalImageCount,
-                selectedImageCount = uiState.selectedImageUris.size,
+                selectedImageCount = uiState.selectedImages.size,
                 onClickNext = onClickNext,
                 onBackPressed = onBackPressed,
             )
@@ -211,7 +212,7 @@ private fun ImagePickerScreen(
         ) {
             Column {
                 ImagePickerPreview(
-                    selectedImageUris = uiState.selectedImageUris,
+                    selectedImages = uiState.selectedImages,
                     pagerState = pagerState,
                     scrollStates = scrollStates,
                     onChangeImageViewportSize = onChangeImageViewportSize,
@@ -219,7 +220,7 @@ private fun ImagePickerScreen(
 
                 ImageContents(
                     pagingImages = pagingImages,
-                    selectedImageUris = uiState.selectedImageUris,
+                    selectedImages = uiState.selectedImages,
                     totalImageCount = totalImageCount,
                     currentFolder = selectedFolder,
                     onSelectedImage = onSelectedImage,
@@ -228,6 +229,10 @@ private fun ImagePickerScreen(
                 )
             }
         }
+    }
+
+    if (uiState.isLoading) {
+        LoadingCircleIndicator()
     }
 }
 
@@ -264,7 +269,7 @@ private fun ImagePickerHeader(
 @Composable
 private fun ImagePickerPreview(
     modifier: Modifier = Modifier,
-    selectedImageUris: List<Uri>,
+    selectedImages: List<GalleryImageUiModel>,
     pagerState: PagerState,
     scrollStates: SnapshotStateMap<Int, ScrollState>,
     onChangeImageViewportSize: (IntSize) -> Unit,
@@ -273,7 +278,7 @@ private fun ImagePickerPreview(
     val screenWidthPx = getScreenWidthPx()
     val coroutineScope = rememberCoroutineScope()
     
-    if (selectedImageUris.isNotEmpty()) {
+    if (selectedImages.isNotEmpty()) {
         HorizontalPager(
             modifier = Modifier.aspectRatio(1f),
             state = pagerState,
@@ -288,7 +293,7 @@ private fun ImagePickerPreview(
                 Image(
                     painter = rememberAsyncImagePainter(
                         model = ImageRequest.Builder(context)
-                            .data(selectedImageUris[page])
+                            .data(selectedImages[page].uri)
                             .size(screenWidthPx)
                             .scale(Scale.FILL)
                             .build()
@@ -323,7 +328,7 @@ private fun ImagePickerPreview(
                     )
                 }
 
-                if (page < selectedImageUris.lastIndex) {
+                if (page < selectedImages.lastIndex) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_circle_right_24),
                         contentDescription = null,
@@ -357,12 +362,12 @@ private fun ImagePickerPreview(
 
 @Composable
 private fun ImageContents(
-    pagingImages: LazyPagingItems<Uri>,
-    selectedImageUris: List<Uri>,
+    pagingImages: LazyPagingItems<GalleryImageUiModel>,
+    selectedImages: List<GalleryImageUiModel>,
     totalImageCount: Int,
     currentFolder: GalleryFolderUiModel?,
     onGalleryFolderSelectionClicked: () -> Unit,
-    onSelectedImage: (Uri) -> Unit,
+    onSelectedImage: (GalleryImageUiModel) -> Unit,
     onUnSelectedImage: (Int) -> Unit,
 ) {
     Column(
@@ -401,10 +406,10 @@ private fun ImageContents(
             contentPadding = PaddingValues(2.dp),
         ) {
             items(pagingImages.itemCount) {index ->
-                pagingImages[index]?.let { uri ->
+                pagingImages[index]?.let { galleryImage ->
                     ImagePickerItem(
-                        imageUris = uri,
-                        selectedImageUris = selectedImageUris,
+                        image = galleryImage,
+                        selectedImages = selectedImages,
                         totalImageCount = totalImageCount,
                         onSelectedImage = onSelectedImage,
                         onUnSelectedImage = onUnSelectedImage,
@@ -417,10 +422,10 @@ private fun ImageContents(
 
 @Composable
 private fun ImagePickerItem(
-    imageUris: Uri,
-    selectedImageUris: List<Uri>,
+    image: GalleryImageUiModel,
+    selectedImages: List<GalleryImageUiModel>,
     totalImageCount: Int,
-    onSelectedImage: (Uri) -> Unit,
+    onSelectedImage: (GalleryImageUiModel) -> Unit,
     onUnSelectedImage: (Int) -> Unit,
 ) {
     val context = LocalContext.current
@@ -431,13 +436,13 @@ private fun ImagePickerItem(
         .border(1.dp, SentyGray10)
         .clickable {
             when {
-                selectedImageUris.contains(imageUris) -> {
-                    val index = selectedImageUris.indexOf(imageUris)
+                selectedImages.contains(image) -> {
+                    val index = selectedImages.indexOf(image)
                     onUnSelectedImage(index)
                 }
 
-                selectedImageUris.size < totalImageCount -> {
-                    onSelectedImage(imageUris)
+                selectedImages.size < totalImageCount -> {
+                    onSelectedImage(image)
                 }
             }
         }
@@ -445,7 +450,7 @@ private fun ImagePickerItem(
         Image(
             painter = rememberAsyncImagePainter(
                 model = ImageRequest.Builder(context)
-                    .data(imageUris)
+                    .data(image.uri)
                     .size(THUMBNAIL_SIZE)
                     .scale(Scale.FILL)
                     .build()
@@ -455,7 +460,7 @@ private fun ImagePickerItem(
             modifier = Modifier
         )
 
-        if (selectedImageUris.size == totalImageCount) {
+        if (selectedImages.size == totalImageCount) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -463,9 +468,9 @@ private fun ImagePickerItem(
             )
         }
 
-        if (selectedImageUris.isNotEmpty()) {
-            selectedImageUris.find { it == imageUris }?.let {
-                val index = selectedImageUris.indexOf(it).plus(1)
+        if (selectedImages.isNotEmpty()) {
+            selectedImages.find { it == image }?.let {
+                val index = selectedImages.indexOf(it).plus(1)
 
                 Icon(
                     painter = painterResource(
