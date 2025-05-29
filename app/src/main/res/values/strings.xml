@@ -226,6 +226,18 @@
     <string name="gift_edit_mood_hint_text">기분 입력</string>
     <string name="gift_edit_memo_text">메모</string>
 
+    <!-- 선물 편집 - 이미지 선택 -->
+    <plurals name="gift_image_picker_title">
+        <item quantity="other">%s/%s</item>
+    </plurals>
+
+    <!-- 선물 편집 - 이미지 편집 -->
+    <string name="gift_image_editor_title">사진 편집</string>
+    <string name="gift_image_editor_save_dialog_title">편집을 저장하시겠습니까?</string>
+
+    <!-- 선물 편집 - 미리보기 -->
+    <string name="gift_image_preview_titile">미리보기</string>
+
     <!-- 선물 편집 - 친구 선택 -->
     <string name="friend_selection_title">친구 선택</string>
 
@@ -289,18 +301,25 @@
     <string name="common_edit">수정</string>
     <string name="common_remove">삭제</string>
     <string name="common_reset">초기화</string>
+    <string name="common_complete">완료</string>
+    <string name="common_prev">이전</string>
+    <string name="common_next">다음</string>
     <string name="common_heart">♥</string>
     <string name="common_received_gift_text">받은 선물</string>
     <string name="common_sent_gift_text">준 선물</string>
     <string name="common_required_star"> *</string>
     <string name="common_exit_title">정말 종료하시겠습니까?</string>
+    <string name="common_title_empty"> </string>
 
     <string name="common_error_unknown">오류가 발생하였습니다.</string>
     <string name="common_error_message_network">네트워크 연결이 원활하지 않습니다.</string>
+    <string name="common_permission_denied_message">\'설정\'에서 권한을 허용해주세요.</string>
 
     <!-- 오류 -->
     <string name="error_common">오류가 발생하였습니다.</string>
     <string name="error_login_failed">아이디 또는 비밀번호가 일치하지 않습니다.</string>
     <string name="error_login_failed_too_many_request">잠시 후 다시 시도해주세요.</string>
     <string name="error_signup_exsist_email">이미 존재하는 이메일입니다.</string>
+    <string name="error_image_picker_no_gallery_images">이미지를 불러오지 못했습니다.</string>
+    <string name="error_image_picker_no_gallery_folders">사진첩을 불러오지 못했습니다.</string>
 </resources>

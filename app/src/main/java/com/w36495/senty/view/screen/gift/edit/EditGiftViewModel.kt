@@ -3,8 +3,10 @@ package com.w36495.senty.view.screen.gift.edit
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.w36495.senty.data.domain.GiftType
 import com.w36495.senty.data.mapper.toDomain
 import com.w36495.senty.data.mapper.toEditUiModel
@@ -17,6 +19,7 @@ import com.w36495.senty.util.toLinkedMap
 import com.w36495.senty.view.screen.gift.edit.contact.EditGiftContact
 import com.w36495.senty.view.screen.gift.edit.model.EditImage
 import com.w36495.senty.view.screen.gift.edit.model.ImageSelectionType
+import com.w36495.senty.view.screen.main.Route
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Deferred
@@ -110,6 +113,9 @@ class EditGiftViewModel @Inject constructor(
                     }
                 }
             }
+            EditGiftContact.Event.OnCheckGalleryPermission -> {
+                _state.update { it.copy(checkGalleryPermission = true) }
+            }
             is EditGiftContact.Event.OnSelectImageSelectionType -> {
                 event.type?.let {
                     when(it) {
@@ -122,12 +128,11 @@ class EditGiftViewModel @Inject constructor(
                             }
                         }
                         ImageSelectionType.GALLERY -> {
-                            sendEffect(EditGiftContact.Effect.ShowGallery)
-                            viewModelScope.launch {
-                                _state.update { state ->
-                                    state.copy(showImageSelectionDialog = false)
-                                }
+                            _state.update { state ->
+                                state.copy(showImageSelectionDialog = false)
                             }
+
+                            sendEffect(EditGiftContact.Effect.CheckGalleryPermission)
                         }
                     }
                 } ?: run {
@@ -234,6 +239,15 @@ class EditGiftViewModel @Inject constructor(
                             ),
                         )
                     }
+                }
+            }
+            is EditGiftContact.Event.UpdateGalleryPermission -> {
+                _state.update { it.copy(checkGalleryPermission = false) }
+
+                if (event.isGranted) {
+                    sendEffect(EditGiftContact.Effect.NavigateToImagePicker)
+                } else {
+                    sendEffect(EditGiftContact.Effect.ShowToast("'설정'에서 권한을 허용해주세요."))
                 }
             }
         }

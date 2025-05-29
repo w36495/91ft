@@ -1,10 +1,7 @@
 package com.w36495.senty.view.screen.gift.edit
 
 import android.Manifest
-import android.app.Activity
-import android.content.Intent
 import android.net.Uri
-import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -52,6 +49,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -71,6 +69,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vsnappy1.extension.noRippleClickable
 import com.w36495.senty.R
@@ -88,6 +87,7 @@ import com.w36495.senty.view.screen.gift.edit.model.EditGiftUiModel
 import com.w36495.senty.view.screen.gift.edit.model.EditImage
 import com.w36495.senty.view.screen.gift.edit.model.ImageSelectionType
 import com.w36495.senty.view.screen.gift.edit.model.getImageData
+import com.w36495.senty.view.screen.gift.edit.permission.GalleryPermissionHandler
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButtonWithProgress
 import com.w36495.senty.view.ui.component.dialogs.BasicCalendarDialog
@@ -106,12 +106,28 @@ fun EditGiftRoute(
     vm: EditGiftViewModel = hiltViewModel(),
     padding: PaddingValues,
     giftId: String? = null,
+    savedStateHandle: SavedStateHandle?,
+    moveToImagePicker: (Int) -> Unit,
     moveToGiftCategories: () -> Unit,
     moveToFriendAdd: () -> Unit,
     moveToHome: () -> Unit,
     onShowGlobalErrorSnackBar: (throwable: Throwable?) -> Unit,
 ) {
     val context = LocalContext.current
+
+    val imageUri = savedStateHandle
+        ?.getStateFlow<List<Uri>>("imageUri", emptyList())
+        ?.collectAsState()
+
+    LaunchedEffect(imageUri) {
+        imageUri?.let { uri ->
+            if (uri.value.isNotEmpty()) {
+                uri.value.forEach {
+                    vm.handleEvent(EditGiftContact.Event.UpdateImage(it))
+                }
+            }
+        }
+    }
 
     LaunchedEffect(giftId) {
         giftId?.let { vm.getGift(it) }
@@ -134,30 +150,15 @@ fun EditGiftRoute(
         }
     }
 
-    val takePhotoFromGallery =
-        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                result.data?.data?.let { uri -> vm.handleEvent(EditGiftContact.Event.UpdateImage(uri)) }
-            }
-        }
-
-    val takePhotoFromGalleryIntent =
-        Intent(Intent.ACTION_GET_CONTENT, MediaStore.Images.Media.EXTERNAL_CONTENT_URI).apply {
-            type = "image/*"
-            action = Intent.ACTION_GET_CONTENT
-            putExtra(
-                Intent.EXTRA_MIME_TYPES,
-                arrayOf("image/jpeg", "image/png", "image/bmp", "image/webp")
-            )
-            putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false)
-        }
-
     LaunchedEffect(Unit) {
         vm.effect.collect { effect ->
             when (effect) {
                 is EditGiftContact.Effect.ShowToast -> {
                     Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
-                    vm.sendEffect(EditGiftContact.Effect.NavigateToBack)
+
+                    if (effect.message != context.getString(R.string.common_permission_denied_message)) {
+                        vm.sendEffect(EditGiftContact.Effect.NavigateToBack)
+                    }
                 }
                 is EditGiftContact.Effect.ShowError -> {
                     onShowGlobalErrorSnackBar(effect.throwable)
@@ -172,8 +173,11 @@ fun EditGiftRoute(
                         takePhotoFromCamera.launch(tempImageUri)
                     }
                 }
-                EditGiftContact.Effect.ShowGallery -> {
-                    takePhotoFromGallery.launch(Intent.createChooser(takePhotoFromGalleryIntent, "Select Picture"))
+                EditGiftContact.Effect.NavigateToImagePicker -> {
+                    moveToImagePicker(uiState.gift.images.size)
+                }
+                EditGiftContact.Effect.CheckGalleryPermission -> {
+                    vm.handleEvent(EditGiftContact.Event.OnCheckGalleryPermission)
                 }
                 EditGiftContact.Effect.NavigateToBack -> {
                     moveToHome()
@@ -186,6 +190,17 @@ fun EditGiftRoute(
                 }
             }
         }
+    }
+
+    if (uiState.checkGalleryPermission) {
+        GalleryPermissionHandler(
+            onPermissionGranted = {
+                vm.handleEvent(EditGiftContact.Event.UpdateGalleryPermission(true))
+            },
+            onPermissionDenied = {
+                vm.handleEvent(EditGiftContact.Event.UpdateGalleryPermission(false))
+            }
+        )
     }
 
     EditGiftScreen(

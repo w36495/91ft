@@ -6,7 +6,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.BlurMaskFilter
 import android.graphics.ImageDecoder
-import android.graphics.drawable.BitmapDrawable
+import android.graphics.ImageDecoder.OnHeaderDecodedListener
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
@@ -28,8 +28,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileOutputStream
 import java.net.MalformedURLException
 import java.net.URL
 import kotlin.math.min
@@ -54,10 +56,34 @@ object ImageConverter {
     /**
      * 카메라/갤러리로부터 받은 Uri를 Bitmap으로 변환하는 함수
      */
-    fun uriToBitmap(context: Context, uri: Uri): Bitmap {
+    fun uriToBitmap(context: Context, uri: Uri, isResized: Boolean = false): Bitmap {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             val source = ImageDecoder.createSource(context.contentResolver, uri)
-            ImageDecoder.decodeBitmap(source)
+
+            if (isResized) {
+                try {
+                    val onHeaderDecodedListener =
+                        OnHeaderDecodedListener { decoder, imageInfo, _ ->
+                            val width = imageInfo.size.width.toFloat()
+                            val height = imageInfo.size.height.toFloat()
+
+                            val maxSize = 1080
+                            val scale = min(maxSize / width, maxSize / height)
+
+                            val targetWidth = (width * scale).toInt()
+                            val targetHeight = (height * scale).toInt()
+
+                            decoder.setTargetSize(targetWidth, targetHeight)
+                        }
+
+                    ImageDecoder.decodeBitmap(source, onHeaderDecodedListener)
+                } catch (e: Exception) {
+                    Log.d("ImageConverter", "Exception: ${e.stackTraceToString()}")
+                    ImageDecoder.decodeBitmap(source)
+                }
+            } else {
+                ImageDecoder.decodeBitmap(source)
+            }
         } else {
             MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
         }
@@ -184,6 +210,34 @@ object ImageConverter {
     fun stringToBitmap(encodedString: String): Bitmap {
         val encodedBytes = Base64.decode(encodedString, Base64.DEFAULT)
         return BitmapFactory.decodeByteArray(encodedBytes, 0, encodedBytes.size)
+    }
+
+    fun bitmapToFile(
+        context: Context,
+        bitmap: Bitmap,
+        fileName: String = "edited_${System.currentTimeMillis()}"
+    ): File {
+        val format = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Bitmap.CompressFormat.WEBP_LOSSLESS
+        } else Bitmap.CompressFormat.WEBP
+
+        val file = File(context.cacheDir, fileName)
+        file.createNewFile()
+
+        FileOutputStream(file).use { outputStream ->
+            bitmap.compress(format, 100, outputStream)
+        }
+
+        return file
+    }
+
+    fun bitmapToFileUri(
+        context: Context,
+        bitmap: Bitmap,
+        fileName: String = "edited_${System.currentTimeMillis()}"
+    ): Uri {
+        val file = bitmapToFile(context, bitmap, fileName)
+        return file.toUri()
     }
 }
 
