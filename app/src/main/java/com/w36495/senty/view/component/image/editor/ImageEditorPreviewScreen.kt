@@ -96,7 +96,7 @@ private fun ImageEditorPreviewScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .background(SentyBlack.copy(alpha = 0.7f)),
+                .background(Color(0xFFFBFBFB)),
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 HorizontalPager(
