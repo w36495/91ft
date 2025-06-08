@@ -84,7 +84,7 @@ import com.w36495.senty.view.screen.gift.category.GiftCategorySelectionDialog
 import com.w36495.senty.view.screen.gift.category.model.GiftCategoryUiModel
 import com.w36495.senty.view.screen.gift.edit.contact.EditGiftContact
 import com.w36495.senty.view.screen.gift.edit.model.EditGiftUiModel
-import com.w36495.senty.view.screen.gift.edit.model.EditImage
+import com.w36495.senty.view.screen.gift.edit.model.EditImageUiModel
 import com.w36495.senty.view.screen.gift.edit.model.ImageSelectionType
 import com.w36495.senty.view.screen.gift.edit.model.getImageData
 import com.w36495.senty.view.screen.gift.edit.permission.GalleryPermissionHandler
@@ -357,7 +357,7 @@ private fun EditGiftScreen(
 @Composable
 private fun ImgSection(
     modifier: Modifier = Modifier,
-    giftImages: List<Pair<String, EditImage>>,
+    giftImages: List<Pair<String, EditImageUiModel>>,
     onRemoveImageClick: (String) -> Unit,
     onAddImageClick: () -> Unit,
 ) {
@@ -401,7 +401,7 @@ private fun ImgSection(
 @Composable
 private fun DisplayGiftImage(
     modifier: Modifier = Modifier,
-    giftImage: EditImage,
+    giftImage: EditImageUiModel,
     onRemoveImageClick: () -> Unit,
 ) {
     val imageData = giftImage.getImageData()

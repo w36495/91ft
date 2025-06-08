@@ -17,7 +17,7 @@ import com.w36495.senty.domain.usecase.UpdateGiftUseCase
 import com.w36495.senty.util.ImageConverter
 import com.w36495.senty.util.toLinkedMap
 import com.w36495.senty.view.screen.gift.edit.contact.EditGiftContact
-import com.w36495.senty.view.screen.gift.edit.model.EditImage
+import com.w36495.senty.view.screen.gift.edit.model.EditImageUiModel
 import com.w36495.senty.view.screen.gift.edit.model.ImageSelectionType
 import com.w36495.senty.view.screen.main.Route
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -265,11 +265,11 @@ class EditGiftViewModel @Inject constructor(
                     if (gift.images.isNotEmpty()) {
                         giftImageRepository.getGiftImages(giftId)
                             .onSuccess { imagePaths ->
-                                val originalImagePaths = linkedMapOf<String, EditImage>().apply {
+                                val originalImagePaths = linkedMapOf<String, EditImageUiModel>().apply {
                                     imagePaths
                                         .map { path ->
                                             val key = path.substringAfterLast("%2F").substringBefore(".jpg?")
-                                            key to EditImage.Original(path)
+                                            key to EditImageUiModel.Original(path)
                                         }
                                         .sortedBy { (key, _) -> key } // 필요 시 정렬
                                         .forEach { (key, image) -> this[key] = image }
@@ -316,7 +316,7 @@ class EditGiftViewModel @Inject constructor(
 
         _state.update { state ->
             val updatedImages = state.gift.images.toMutableMap().apply {
-                this[imageName] = EditImage.New(resizedBitmap)
+                this[imageName] = EditImageUiModel.New(resizedBitmap)
             }
 
             state.copy(
@@ -354,7 +354,7 @@ class EditGiftViewModel @Inject constructor(
 
             val result = updateGiftUseCase(updateGift.copy(
                 thumbnail = updateGift.images.entries.firstOrNull()?.let {
-                    if (it.value is EditImage.New) {
+                    if (it.value is EditImageUiModel.New) {
                         "thumbs_${it.key}"
                     } else {
                         // 기존 썸네일과 같다면
@@ -377,7 +377,7 @@ class EditGiftViewModel @Inject constructor(
                             val (firstImageName, firstImage) = updateGift.images.entries.first()
 
                             // 새로운 썸네일
-                            if (firstImage is EditImage.New) {
+                            if (firstImage is EditImageUiModel.New) {
                                 resultJobs += async {
                                     val resizedThumbnail = ImageConverter.resizeToWidth(context, firstImage.bitmap, 600)
                                     val webPThumbnail = ImageConverter.compressToWebP(resizedThumbnail)
@@ -389,7 +389,7 @@ class EditGiftViewModel @Inject constructor(
 
                                 if (!sameThumbnail) {
                                     val bitmap = withContext(Dispatchers.IO) {
-                                        ImageConverter.urlToBitmap((firstImage as EditImage.Original).path)
+                                        ImageConverter.urlToBitmap((firstImage as EditImageUiModel.Original).path)
                                     }
 
                                     if (bitmap != null) {
@@ -411,7 +411,7 @@ class EditGiftViewModel @Inject constructor(
 
                             // 새로운 이미지 저장
                             updateGift.images.map { (imageName, image) ->
-                                if (image is EditImage.New) {
+                                if (image is EditImageUiModel.New) {
                                     resultJobs += async {
                                         val webPImage = ImageConverter.compressToWebP(image.bitmap)
                                         giftImageRepository.insertGiftImageByBitmap(updateGift.id, imageName, webPImage)

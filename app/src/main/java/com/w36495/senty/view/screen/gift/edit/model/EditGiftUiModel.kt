@@ -12,7 +12,7 @@ data class EditGiftUiModel(
     val date: String = "",
     val mood: String = "",
     val memo: String = "",
-    val images: LinkedHashMap<String, EditImage> = linkedMapOf(),
+    val images: LinkedHashMap<String, EditImageUiModel> = linkedMapOf(),
     val originalImages: List<String> = emptyList(),
     val thumbnail: String? = null,
 )
