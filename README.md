@@ -54,9 +54,13 @@
 ### 2️⃣ 선물  
 - **선물등록**
 
-|`카메라/앨범 선택`|`선물 카테고리 선택`|`친구 선택`|`날짜 선택`|
-|--|--|--|--|
-|![선물등록(카메라:앨범)](https://github.com/user-attachments/assets/9354ee09-13da-4826-85a7-96538dc71b60)|![선물등록(카테고리)](https://github.com/user-attachments/assets/67ad6c1b-7418-469e-a24d-f2d574f485c9)|![선물등록(친구)](https://github.com/user-attachments/assets/b9e541e2-6f7c-4797-ad60-3709cff5c08a)|![선물등록(날짜)](https://github.com/user-attachments/assets/04cdefb0-a006-4961-a7d3-7883cf0be013)|
+|`카메라/앨범 선택`|`카메라로 사진 촬영`|`카메라 미리보기`|`앨범에서 사진 선택(크롭)`|`선택한 사진 미리보기`|
+|:--:|:--:|:--:|:--:|:--:|
+|![선물등록(카메라:앨범)](https://github.com/user-attachments/assets/9354ee09-13da-4826-85a7-96538dc71b60)|![카메라 촬영](https://github.com/user-attachments/assets/58f619ce-94ed-471d-ad48-4e0fbeda4903)|![카메라 미리보기](https://github.com/user-attachments/assets/0f1213f4-8cc6-4651-bda8-2cbb81ef5374)|![앨범에서 사진 선택](https://github.com/user-attachments/assets/f7bdb6c6-5c66-42cc-91e6-253335d73737)|![미리보기](https://github.com/user-attachments/assets/d8035fc8-0f99-4696-bd02-7b1255a51bc3)|
+
+|`선물 카테고리 선택`|`친구 선택`|`날짜 선택`|
+|--|--|--|
+|![선물등록(카테고리)](https://github.com/user-attachments/assets/67ad6c1b-7418-469e-a24d-f2d574f485c9)|![선물등록(친구)](https://github.com/user-attachments/assets/b9e541e2-6f7c-4797-ad60-3709cff5c08a)|![선물등록(날짜)](https://github.com/user-attachments/assets/04cdefb0-a006-4961-a7d3-7883cf0be013)|
 
 
 </br>
