@@ -16,3 +16,7 @@ sealed interface ImagePickerError : SentyError {
     data object NoGalleryImages : ImagePickerError
     data object NoGalleryFolders : ImagePickerError
 }
+
+sealed interface EditGiftError : SentyError {
+    data class ImageUploadFailed(val msg: String): Exception(msg), EditGiftError
+}

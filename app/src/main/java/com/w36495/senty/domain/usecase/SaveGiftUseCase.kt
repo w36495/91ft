@@ -19,6 +19,7 @@ class SaveGiftUseCase @Inject constructor(
     private val giftRepository: GiftRepository,
     private val giftImageRepository: GiftImageRepository,
     private val friendRepository: FriendRepository,
+    private val uploadGiftImageUseCase: UploadGiftImageUseCase,
 ) {
     private val mutex = Mutex()
 
@@ -31,7 +32,7 @@ class SaveGiftUseCase @Inject constructor(
                 onSuccess = { giftId ->
                     if (gift.images.isNotEmpty()) {
                         coroutineScope {
-                            val resultJobs = mutableListOf<Deferred<Result<Unit>>>()
+                            val resultJobs = mutableListOf<Deferred<Result<String>>>()
                             // 썸네일 저장
                             val (thumbnailName, thumbnail) = imageMap.entries.first()
                             if (thumbnail is EditImage.New) {
@@ -41,13 +42,7 @@ class SaveGiftUseCase @Inject constructor(
                             }
 
                             // 이미지 저장
-                            resultJobs += imageMap.mapNotNull { (imageName, image) ->
-                                if (image is EditImage.New) {
-                                    async {
-                                        giftImageRepository.insertGiftImageByBitmap(giftId, imageName, image.byteArray)
-                                    }
-                                } else null
-                            }
+                            uploadGiftImageUseCase(giftId, imageMap)
 
                             resultJobs.awaitAll()
                         }

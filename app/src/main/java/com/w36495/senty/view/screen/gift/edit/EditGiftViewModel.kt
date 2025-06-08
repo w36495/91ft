@@ -365,7 +365,7 @@ class EditGiftViewModel @Inject constructor(
                     if (updateGift.images.isNotEmpty()) {
                         // 새로운 이미지 저장
                         coroutineScope {
-                            val resultJobs = mutableListOf<Deferred<Result<Unit>>>()
+                            val resultJobs = mutableListOf<Deferred<Result<String>>>()
 
                             val (firstImageName, firstImage) = updateGift.images.entries.first()
 
@@ -450,8 +450,8 @@ class EditGiftViewModel @Inject constructor(
             _state.update { it.copy(isLoading = true) }
 
             val gift = state.value.gift
-            val imageMap = gift.images.map {(thumbnailName, image) ->
-                thumbnailName to if (image is EditImageUiModel.New) {
+            val imageMap = gift.images.map {(imageName, image) ->
+                imageName to if (image is EditImageUiModel.New) {
                     image.toDomain(context)
                 } else {
                    (image as EditImageUiModel.Original).toDomain()

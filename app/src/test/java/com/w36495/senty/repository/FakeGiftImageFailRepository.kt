@@ -3,7 +3,7 @@ package com.w36495.senty.repository
 import com.w36495.senty.domain.error.EditGiftError
 import com.w36495.senty.domain.repository.GiftImageRepository
 
-class FakeGiftImageRepository : GiftImageRepository {
+class FakeGiftImageFailRepository : GiftImageRepository {
     private val imageMap = mutableMapOf<String, MutableList<String>>() // giftId -> image list
     private var imageCounter = 0
     override suspend fun getGiftThumbs(giftId: String, imageName: String): Result<String> {
@@ -19,10 +19,7 @@ class FakeGiftImageRepository : GiftImageRepository {
         imageName: String,
         image: ByteArray
     ): Result<String> {
-        val list = imageMap.getOrPut(giftId) { mutableListOf() }
-        list.add("img_$imageName${imageCounter++}.jpg")
-
-        return Result.success(imageName)
+        return Result.failure(EditGiftError.ImageUploadFailed("이미지 업로드 실패"))
     }
 
     override suspend fun deleteGiftImage(giftId: String, imgPath: String): Result<String> {

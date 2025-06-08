@@ -67,7 +67,7 @@ class GiftImageRepositoryImpl @Inject constructor(
         giftId: String,
         imageName: String,
         image: ByteArray
-    ): Result<Unit> {
+    ): Result<String> {
         return suspendCancellableCoroutine { cont ->
             val userId = userRepository.getUid()
             Log.d("GiftImage","🟢 ${if (imageName.contains("thumbs")) "썸네일" else "이미지"} 저장 시작" )
@@ -81,7 +81,7 @@ class GiftImageRepositoryImpl @Inject constructor(
                 .addOnSuccessListener { task ->
                     if (task.task.isSuccessful) {
                         Log.d("GiftImage","🟢 ${if (imageName.contains("thumbs")) "썸네일" else "이미지"} 저장 완료" )
-                        cont.resume(Result.success(Unit))
+                        cont.resume(Result.success(imageName))
                     } else {
                         Log.d("GiftImage","🔴 ${if (imageName.contains("thumbs")) "썸네일" else "이미지"} 저장 실패" )
                         cont.resume(Result.failure(task.error ?: Exception("Unknown error")))
@@ -90,7 +90,7 @@ class GiftImageRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun deleteGiftImage(giftId: String, imgPath: String): Result<Unit> {
+    override suspend fun deleteGiftImage(giftId: String, imgPath: String): Result<String> {
         return try {
             userRepository.runWithUid { userId ->
                 Log.d("GiftImage","🟢 이미지 삭제 시작" )
@@ -98,7 +98,7 @@ class GiftImageRepositoryImpl @Inject constructor(
                 firebaseStorage.reference.child(imagePath).delete().await()
 
                 Log.d("GiftImage","🟢 이미지 삭제 완료" )
-                Result.success(Unit)
+                Result.success(imgPath)
             }
         } catch (e: Exception) {
             Log.d("GiftImage","🔴 이미지 삭제 실패" )
