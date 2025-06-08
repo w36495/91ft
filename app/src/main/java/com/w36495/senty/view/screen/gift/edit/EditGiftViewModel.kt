@@ -3,23 +3,19 @@ package com.w36495.senty.view.screen.gift.edit
 import android.content.Context
 import android.net.Uri
 import android.util.Log
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
-import com.w36495.senty.data.domain.GiftType
 import com.w36495.senty.data.mapper.toDomain
 import com.w36495.senty.data.mapper.toEditUiModel
-import com.w36495.senty.domain.repository.FriendRepository
 import com.w36495.senty.domain.repository.GiftImageRepository
 import com.w36495.senty.domain.repository.GiftRepository
+import com.w36495.senty.domain.usecase.SaveGiftUseCase
 import com.w36495.senty.domain.usecase.UpdateGiftUseCase
 import com.w36495.senty.util.ImageConverter
 import com.w36495.senty.util.toLinkedMap
 import com.w36495.senty.view.screen.gift.edit.contact.EditGiftContact
 import com.w36495.senty.view.screen.gift.edit.model.EditImageUiModel
 import com.w36495.senty.view.screen.gift.edit.model.ImageSelectionType
-import com.w36495.senty.view.screen.main.Route
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Deferred
@@ -34,16 +30,15 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class EditGiftViewModel @Inject constructor(
-    private val friendRepository: FriendRepository,
     private val giftRepository: GiftRepository,
     private val giftImageRepository: GiftImageRepository,
     private val updateGiftUseCase: UpdateGiftUseCase,
+    private val saveGiftUseCase: SaveGiftUseCase,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
     private val _effect = Channel<EditGiftContact.Effect>()
@@ -51,8 +46,6 @@ class EditGiftViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(EditGiftContact.State())
     val state get() = _state.asStateFlow()
-
-    private val mutex = Mutex()
 
     fun handleEvent(event: EditGiftContact.Event) {
         when (event) {
@@ -457,63 +450,29 @@ class EditGiftViewModel @Inject constructor(
             _state.update { it.copy(isLoading = true) }
 
             val gift = state.value.gift
-            val result = mutex.withLock {
-                giftRepository.insertGift(gift.copy(
+            val imageMap = gift.images.map {(thumbnailName, image) ->
+                thumbnailName to if (image is EditImageUiModel.New) {
+                    image.toDomain(context)
+                } else {
+                   (image as EditImageUiModel.Original).toDomain()
+                }
+            }
+
+            val result = saveGiftUseCase(
+                gift = gift.copy(
                     thumbnail = if (gift.images.entries.firstOrNull() != null) {
                         "thumbs_${gift.images.entries.first().key}"
                     } else null
-                ).toDomain())
-            }
+                ).toDomain(),
+                imageMap = imageMap.toMap()
+            )
 
             result
-                .onSuccess { giftId ->
-                    if (gift.images.isNotEmpty()) {
-                        coroutineScope {
-                            val resultJobs = mutableListOf<Deferred<Result<Unit>>>()
-                            // 썸네일 저장
-                            val (thumbnailName, thumbnailBitmap) = gift.images.entries.first()
-                            if (thumbnailBitmap is EditImage.New) {
-                                resultJobs += async {
-                                    val resizedThumbnail = ImageConverter.resizeToWidth(context, thumbnailBitmap.bitmap, 600)
-                                    val webPThumbnail = ImageConverter.compressToWebP(resizedThumbnail)
-
-                                    giftImageRepository.insertGiftImageByBitmap(giftId, "thumbs_$thumbnailName", webPThumbnail)
-                                }
-                            }
-
-                            // 이미지 저장
-                            resultJobs += gift.images.mapNotNull { (imageName, image) ->
-                                if (image is EditImage.New) {
-                                    async {
-                                        val webPImage = ImageConverter.compressToWebP(image.bitmap)
-                                        giftImageRepository.insertGiftImageByBitmap(giftId, imageName, webPImage)
-                                    }
-                                } else null
-                            }
-
-                            resultJobs.awaitAll()
-                        }
-                    }
-
-                    _state.update {
-                        it.copy(isLoading = false)
-                    }
+                .onSuccess {
+                    _state.update { it.copy(isLoading = false) }
                     Log.d("EditGiftVM","🟢 선물 저장 완료")
 
                     sendEffect(EditGiftContact.Effect.ShowToast("등록 완료되었습니다."))
-
-                    friendRepository.getFriend(state.value.gift.friendId)
-                        .onSuccess {
-                            Log.d("EditGiftVM","🟢 친구 정보 수정 시작")
-                            friendRepository.patchFriend(
-                                it.copy(
-                                    received = if (state.value.gift.type == GiftType.RECEIVED) it.received + 1 else it.received,
-                                    sent = if (state.value.gift.type == GiftType.SENT) it.sent + 1 else it.sent
-                                )
-                            ).onSuccess {
-                                Log.d("EditGiftVM","🟢 친구 정보 수정 완료")
-                            }
-                        }
                 }
                 .onFailure {
                     Log.d("EditGiftVM","🔴 선물 저장 실패" )
