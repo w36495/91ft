@@ -120,6 +120,7 @@ dependencies {
     implementation(libs.thired.party.date.picker.compose)
     implementation(libs.thired.party.three.ten.abp)
     implementation(libs.thired.party.grid.layout.compose)
+    implementation(libs.thired.party.timber)
 
     // Test
     testImplementation(libs.bundles.test)
