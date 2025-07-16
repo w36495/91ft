@@ -50,6 +50,7 @@ datePickerCompose = "2.2.0"
 threeTenAbp = "1.4.9"
 gridLayoutCompose = "2.0.0"
 paging = "3.3.6"
+timber = "5.0.1"
 
 # Test
 junit = "4.13.2"
@@ -140,6 +141,7 @@ coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp"
 thired-party-date-picker-compose = { group = "com.github.vsnappy1", name = "ComposeDatePicker", version.ref = "datePickerCompose" }
 thired-party-three-ten-abp = { group = "com.jakewharton.threetenabp", name = "threetenabp", version.ref = "threeTenAbp" }
 thired-party-grid-layout-compose = { group = "com.cheonjaeung.compose.grid", name = "grid", version.ref = "gridLayoutCompose" }
+thired-party-timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 
 # Test
 junit = { group = "junit", name = "junit", version.ref = "junit"}
