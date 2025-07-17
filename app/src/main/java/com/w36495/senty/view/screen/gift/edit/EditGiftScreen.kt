@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -42,6 +43,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -82,12 +84,14 @@ import com.w36495.senty.view.screen.friend.FriendSelectionDialog
 import com.w36495.senty.view.screen.friend.model.FriendUiModel
 import com.w36495.senty.view.screen.gift.category.GiftCategorySelectionDialog
 import com.w36495.senty.view.screen.gift.category.model.GiftCategoryUiModel
+import com.w36495.senty.view.screen.gift.edit.component.FriendNameChip
 import com.w36495.senty.view.screen.gift.edit.contact.EditGiftContact
 import com.w36495.senty.view.screen.gift.edit.model.EditGiftUiModel
 import com.w36495.senty.view.screen.gift.edit.model.EditImageUiModel
 import com.w36495.senty.view.screen.gift.edit.model.ImageSelectionType
 import com.w36495.senty.view.screen.gift.edit.model.getImageData
 import com.w36495.senty.view.screen.gift.edit.permission.GalleryPermissionHandler
+import com.w36495.senty.view.screen.gift.model.SimpleFriendUiModel
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButtonWithProgress
 import com.w36495.senty.view.ui.component.dialogs.BasicCalendarDialog
@@ -96,6 +100,7 @@ import com.w36495.senty.view.ui.component.textFields.SentyMultipleTextField
 import com.w36495.senty.view.ui.component.textFields.SentyTextField
 import com.w36495.senty.view.ui.theme.SentyBlack
 import com.w36495.senty.view.ui.theme.SentyGray20
+import com.w36495.senty.view.ui.theme.SentyGray50
 import com.w36495.senty.view.ui.theme.SentyGray60
 import com.w36495.senty.view.ui.theme.SentyGray80
 import com.w36495.senty.view.ui.theme.SentyGreen60
@@ -156,7 +161,7 @@ fun EditGiftRoute(
                 is EditGiftContact.Effect.ShowToast -> {
                     Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
 
-                    if (effect.message != context.getString(R.string.common_permission_denied_message)) {
+                    if (effect.message.contains("완료")) {
                         vm.sendEffect(EditGiftContact.Effect.NavigateToBack)
                     }
                 }
@@ -208,6 +213,7 @@ fun EditGiftRoute(
         uiState = uiState,
         isEditMode = giftId?.let { true } ?: false,
         onRemoveImageClick = { vm.handleEvent(EditGiftContact.Event.RemoveImage(it)) },
+        onRemoveFriend = { vm.handleEvent(EditGiftContact.Event.RemoveFriend(it)) },
         onPressedBack = { vm.handleEvent(EditGiftContact.Event.OnClickBack) },
         onClickSave = { 
             giftId?.let {
@@ -237,6 +243,7 @@ private fun EditGiftScreen(
     uiState: EditGiftContact.State,
     isEditMode: Boolean,
     onRemoveImageClick: (String) -> Unit,
+    onRemoveFriend: (SimpleFriendUiModel) -> Unit,
     onPressedBack: () -> Unit,
     onClickSave: () -> Unit,
     onClickImageAdd: () -> Unit,
@@ -316,6 +323,7 @@ private fun EditGiftScreen(
                     onChangeMemo = onChangeMemo,
                     onSelectGiftType = onSelectGiftType,
                     onSelectDate = onSelectDate,
+                    onRemoveFriend = onRemoveFriend,
                 )
             }
 
@@ -523,6 +531,7 @@ private fun InputSection(
     onChangeMemo: (String) -> Unit,
     onSelectGiftType: (GiftType) -> Unit,
     onSelectDate: (String?) -> Unit,
+    onRemoveFriend: (SimpleFriendUiModel) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -560,12 +569,10 @@ private fun InputSection(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        TextSection(
+        FriendSection(
             modifier = Modifier.fillMaxWidth(),
             title = R.string.gift_edit_friend_text,
-            text = gift.friendName,
-            placeHolder = gift.friendName.ifEmpty { stringResource(id = R.string.gift_edit_friend_hint_text) },
-            onChangeText = { },
+            friends = gift.friends,
             enable = false,
             isRequired = true,
             isError = isErrorFriend,
@@ -574,6 +581,7 @@ private fun InputSection(
                 focusManager.clearFocus()
                 onClickFriend()
             },
+            onClickRemove = onRemoveFriend,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -695,6 +703,98 @@ private fun TextSection(
     }
 }
 
+@Composable
+private fun FriendSection(
+    modifier: Modifier = Modifier,
+    @StringRes title: Int,
+    friends: List<SimpleFriendUiModel>,
+    isRequired: Boolean = false,
+    enable: Boolean = true,
+    isError: Boolean = false,
+    @StringRes errorMsg: Int? = null,
+    onClick: () -> Unit,
+    onClickRemove: (SimpleFriendUiModel) -> Unit,
+) {
+    Column(
+        modifier = modifier
+            .clickable { onClick( ) }
+            .padding(horizontal = 16.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(bottom = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(id = title),
+                style = SentyTheme.typography.labelSmall,
+            )
+
+            if (isRequired) {
+                Text(
+                    text = stringResource(id = R.string.common_required_star),
+                    style = SentyTheme.typography.labelMedium
+                        .copy(MaterialTheme.colorScheme.error),
+                )
+            }
+        }
+
+        Column {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)
+            ) {
+                if (friends.isEmpty()) {
+                    Box(
+                        modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = "친구 선택",
+                            style = SentyTheme.typography.bodyMedium
+                                .copy(SentyGray50),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 16.dp, end = 16.dp, top = 4.dp)
+                        )
+                    }
+                } else {
+                    LazyRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        items(friends) { friend ->
+                            FriendNameChip(
+                                friendName = friend.name,
+                                onClick = { onClickRemove(friend) }
+                            )
+                        }
+                    }
+                }
+
+                HorizontalDivider(
+                    color = if (isError) MaterialTheme.colorScheme.error else SentyGreen60
+                )
+            }
+
+            if (isError) {
+                Text(
+                    text = "친구를 선택해주세요.",
+                    style = SentyTheme.typography.bodySmall
+                        .copy(color = MaterialTheme.colorScheme.error),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, top = 4.dp)
+                )
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun GiftTypeSection(
@@ -769,7 +869,8 @@ private fun GiftAddContentsPreview() {
             onSelectGiftType = {},
             onSelectFriend = {},
             onSelectDate = {},
-            onSelectGiftCategory ={}
+            onSelectGiftCategory ={},
+            onRemoveFriend = {},
         ) {
 
         }

@@ -2,11 +2,14 @@ package com.w36495.senty.data.mapper
 
 import com.w36495.senty.data.domain.GiftEntity
 import com.w36495.senty.data.domain.GiftType
+import com.w36495.senty.data.domain.SimpleFriendEntity
 import com.w36495.senty.domain.entity.Gift
+import com.w36495.senty.domain.entity.SimpleFriend
 import com.w36495.senty.view.screen.friend.detail.model.FriendDetailGiftUiModel
 import com.w36495.senty.view.screen.gift.edit.model.EditGiftUiModel
 import com.w36495.senty.view.screen.gift.list.model.GiftListUiModel
 import com.w36495.senty.view.screen.gift.model.GiftUiModel
+import com.w36495.senty.view.screen.gift.model.SimpleFriendUiModel
 import com.w36495.senty.view.screen.home.model.HomeGiftUiModel
 
 fun GiftEntity.toDomain(id: String) = Gift(
@@ -16,6 +19,7 @@ fun GiftEntity.toDomain(id: String) = Gift(
     categoryName = this.categoryName,
     friendId = this.friendId,
     friendName = this.friendName,
+    friends = this.friends.map { it.toDomain() },
     date = this.date,
     mood = this.mood,
     memo = this.memo,
@@ -32,6 +36,7 @@ fun Gift.toEntity() = GiftEntity(
     categoryName = this.categoryName,
     friendId = this.friendId,
     friendName = this.friendName,
+    friends = this.friends.map { it.toEntity() },
     date = this.date,
     mood = this.mood,
     memo = this.memo,
@@ -79,6 +84,7 @@ fun Gift.toEditUiModel() = EditGiftUiModel(
     categoryName = this.categoryName,
     friendId = this.friendId,
     friendName = this.friendName,
+    friends = this.friends.map { it.toUiModel() },
     date = this.date,
     mood = this.mood,
     memo = this.memo,
@@ -100,6 +106,7 @@ fun GiftUiModel.toDomain() = Gift(
     categoryName = this.categoryName,
     friendId = this.friendId,
     friendName = this.friendName,
+    friends = this.friends.map { it.toDomain() },
     date = this.date,
     mood = this.mood,
     memo = this.memo,
@@ -117,6 +124,7 @@ fun EditGiftUiModel.toDomain() = Gift(
     categoryName = this.categoryName,
     friendId = this.friendId,
     friendName = this.friendName,
+    friends = this.friends.map { it.toDomain() },
     date = this.date,
     mood = this.mood,
     memo = this.memo,
@@ -125,4 +133,25 @@ fun EditGiftUiModel.toDomain() = Gift(
     images = this.images.keys.toList(),
     createdAt = System.currentTimeMillis(),
     updatedAt = System.currentTimeMillis(),
+)
+
+fun SimpleFriendEntity.toDomain() = SimpleFriend(
+    id = this.id,
+    name = this.name,
+)
+
+fun SimpleFriend.toEntity() = SimpleFriendEntity(
+    id = this.id,
+    name = this.name,
+)
+
+fun SimpleFriend.toUiModel() = SimpleFriendUiModel(
+    id = this.id,
+    name = this.name,
+)
+
+fun SimpleFriendUiModel.toDomain() = SimpleFriend(
+    id = this.id,
+    name = this.name,
+
 )

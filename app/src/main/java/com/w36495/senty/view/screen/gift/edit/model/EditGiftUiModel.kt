@@ -1,6 +1,7 @@
 package com.w36495.senty.view.screen.gift.edit.model
 
 import com.w36495.senty.data.domain.GiftType
+import com.w36495.senty.view.screen.gift.model.SimpleFriendUiModel
 
 data class EditGiftUiModel(
     val id: String = "",
@@ -9,6 +10,7 @@ data class EditGiftUiModel(
     val categoryName: String = "",
     val friendId: String = "",
     val friendName: String = "",
+    val friends: List<SimpleFriendUiModel> = emptyList(),
     val date: String = "",
     val mood: String = "",
     val memo: String = "",

@@ -1,6 +1,5 @@
 package com.w36495.senty.domain.usecase
 
-import android.util.Log
 import com.w36495.senty.data.domain.GiftType
 import com.w36495.senty.domain.entity.EditImage
 import com.w36495.senty.domain.entity.Gift
@@ -8,11 +7,16 @@ import com.w36495.senty.domain.repository.FriendRepository
 import com.w36495.senty.domain.repository.GiftImageRepository
 import com.w36495.senty.domain.repository.GiftRepository
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import timber.log.Timber
 import javax.inject.Inject
 
 class SaveGiftUseCase @Inject constructor(
@@ -30,41 +34,47 @@ class SaveGiftUseCase @Inject constructor(
 
         return result.fold(
                 onSuccess = { giftId ->
-                    if (gift.images.isNotEmpty()) {
-                        coroutineScope {
-                            val resultJobs = mutableListOf<Deferred<Result<String>>>()
-                            // 썸네일 저장
-                            val (thumbnailName, thumbnail) = imageMap.entries.first()
-                            if (thumbnail is EditImage.New) {
-                                resultJobs += async {
-                                    giftImageRepository.insertGiftImageByBitmap(giftId, "thumbs_$thumbnailName", thumbnail.byteArray)
-                                }
-                            }
-
-                            // 이미지 저장
-                            uploadGiftImageUseCase(giftId, imageMap)
-
-                            resultJobs.awaitAll()
-                        }
+                    coroutineScope {
+                        saveGiftImages(giftId, imageMap, gift)
+                        updateFriends(gift)
                     }
 
-                    friendRepository.getFriend(gift.friendId)
-                        .onSuccess {
-                            Log.d("EditGiftVM","🟢 친구 정보 수정 시작")
-                            friendRepository.patchFriend(
-                                it.copy(
-                                    received = if (gift.type == GiftType.RECEIVED) it.received + 1 else it.received,
-                                    sent = if (gift.type == GiftType.SENT) it.sent + 1 else it.sent
-                                )
-                            ).onSuccess {
-                                Log.d("EditGiftVM","🟢 친구 정보 수정 완료")
-                            }
-                        }
                     Result.success(Unit)
                 },
-                onFailure = {
-                    Result.failure<Unit>(it)
-                }
+                onFailure = { Result.failure(it) }
             )
+    }
+
+
+    private suspend fun saveGiftImages(giftId: String, imageMap: Map<String, EditImage>, gift: Gift) = coroutineScope {
+        if (gift.images.isEmpty()) return@coroutineScope
+
+        val results = mutableListOf<Deferred<Result<String>>>()
+
+        val (thumbnailName, thumbnail) = imageMap.entries.first()
+        if (thumbnail is EditImage.New) {
+            results += async(Dispatchers.IO) {
+                giftImageRepository.insertGiftImageByBitmap(giftId, "thumbs_$thumbnailName", thumbnail.byteArray)
+            }
+        }
+
+        uploadGiftImageUseCase(giftId, imageMap)
+
+        results.awaitAll()
+    }
+
+    private suspend fun updateFriends(gift: Gift) = supervisorScope {
+        gift.friends.map { friend ->
+            launch(Dispatchers.IO) {
+                val current = friendRepository.getFriend(friend.id).getOrThrow()
+                val updated = current.copy(
+                    received = if (gift.type == GiftType.RECEIVED) current.received + 1 else current.received,
+                    sent = if (gift.type == GiftType.SENT) current.sent + 1 else current.sent
+                )
+
+                friendRepository.patchFriend(updated)
+                    .onSuccess { Timber.d("🟢 친구[${friend.id}] 정보 수정 완료") }
+            }
+        }.joinAll()
     }
 }

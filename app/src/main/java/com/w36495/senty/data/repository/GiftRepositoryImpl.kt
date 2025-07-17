@@ -2,6 +2,7 @@ package com.w36495.senty.data.repository
 
 import android.util.Log
 import com.w36495.senty.data.domain.GiftEntity
+import com.w36495.senty.data.domain.SimpleFriendEntity
 import com.w36495.senty.data.mapper.toDomain
 import com.w36495.senty.data.mapper.toEntity
 import com.w36495.senty.data.remote.service.GiftService
@@ -69,7 +70,15 @@ class GiftRepositoryImpl @Inject constructor(
                         val responseJson = Json.parseToJsonElement(body)
 
                         val gifts = responseJson.jsonObject.map { (key, jsonElement) ->
-                            Json.decodeFromJsonElement<GiftEntity>(jsonElement).toDomain(key)
+                            Json.decodeFromJsonElement<GiftEntity>(jsonElement).let { entity ->
+                                val updatedEntity = if (entity.friends.isEmpty()) {
+                                    entity.copy(friends = listOf(SimpleFriendEntity(entity.friendId, entity.friendName)))
+                                } else {
+                                    entity
+                                }
+
+                                updatedEntity.toDomain(key)
+                            }
                         }.toList().sortedByDescending { LocalDate.parse(it.date) }
 
                         Log.d("GiftRepo","🟢 선물 조회 완료")

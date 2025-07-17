@@ -6,6 +6,7 @@ import com.w36495.senty.view.screen.friend.model.FriendUiModel
 import com.w36495.senty.view.screen.gift.category.model.GiftCategoryUiModel
 import com.w36495.senty.view.screen.gift.edit.model.EditGiftUiModel
 import com.w36495.senty.view.screen.gift.edit.model.ImageSelectionType
+import com.w36495.senty.view.screen.gift.model.SimpleFriendUiModel
 
 sealed interface EditGiftContact {
     data class State(
@@ -42,6 +43,7 @@ sealed interface EditGiftContact {
         data class UpdateImage(val image: Uri) : Event
         data class UpdateGalleryPermission(val isGranted: Boolean) : Event
         data class RemoveImage(val imageName: String) : Event
+        data class RemoveFriend(val friend: SimpleFriendUiModel) : Event
     }
 
     sealed interface Effect {

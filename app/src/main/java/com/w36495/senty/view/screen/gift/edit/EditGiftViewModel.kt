@@ -16,6 +16,7 @@ import com.w36495.senty.util.toLinkedMap
 import com.w36495.senty.view.screen.gift.edit.contact.EditGiftContact
 import com.w36495.senty.view.screen.gift.edit.model.EditImageUiModel
 import com.w36495.senty.view.screen.gift.edit.model.ImageSelectionType
+import com.w36495.senty.view.screen.gift.model.SimpleFriendUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Deferred
@@ -147,21 +148,23 @@ class EditGiftViewModel @Inject constructor(
                 }
             }
             is EditGiftContact.Event.OnSelectFriend -> {
-                viewModelScope.launch {
-                    event.friend?.let { friend ->
-                        _state.update { state ->
-                            state.copy(
-                                showFriendsDialog = false,
-                                isErrorFriend = false,
-                                gift = state.gift.copy(
-                                    friendId = friend.id,
-                                    friendName = friend.name,
-                                )
-                            )
-                        }
-                    } ?: run {
-                        _state.update { state -> state.copy(showFriendsDialog = false) }
+                event.friend?.let { friend ->
+                    val newFriends = SimpleFriendUiModel(friend.id, friend.name)
+
+                    _state.update { state ->
+                        state.copy(
+                            showFriendsDialog = false,
+                            isErrorFriend = false,
+                            gift = if (state.gift.friends.contains(newFriends)) {
+                                sendEffect(EditGiftContact.Effect.ShowToast("이미 선택한 친구입니다."))
+                                state.gift
+                            } else {
+                                state.gift.copy(friends = state.gift.friends + newFriends)
+                            }
+                        )
                     }
+                } ?: run {
+                    _state.update { state -> state.copy(showFriendsDialog = false) }
                 }
             }
             is EditGiftContact.Event.OnSelectGiftCategory -> {
@@ -243,6 +246,15 @@ class EditGiftViewModel @Inject constructor(
                     sendEffect(EditGiftContact.Effect.ShowToast("'설정'에서 권한을 허용해주세요."))
                 }
             }
+            is EditGiftContact.Event.RemoveFriend -> {
+                _state.update { state ->
+                    val updatedFriends = state.gift.friends.filter { it != event.friend }
+
+                    state.copy(
+                        gift = state.gift.copy(friends = updatedFriends)
+                    )
+                }
+            }
         }
     }
 
@@ -321,7 +333,7 @@ class EditGiftViewModel @Inject constructor(
     private fun validateInputForm(): Boolean {
         val currentGift = _state.value.gift
 
-        val friendError = currentGift.friendName.isEmpty()
+        val friendError = currentGift.friends.isEmpty()
         val categoryError = currentGift.categoryName.isEmpty()
         val dateError = currentGift.date.isEmpty()
 
