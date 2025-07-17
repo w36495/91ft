@@ -5,9 +5,12 @@ import com.w36495.senty.domain.entity.Gift
 import com.w36495.senty.domain.local.datastore.DataStoreContact
 import com.w36495.senty.domain.repository.FriendRepository
 import com.w36495.senty.domain.repository.GiftRepository
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import timber.log.Timber
@@ -21,90 +24,102 @@ class UpdateGiftUseCase @Inject constructor(
 ) {
     private val mutex = Mutex()
 
-    suspend operator fun invoke(gift: Gift): Result<Unit> {
-        val originalGift = giftRepository.getGift(gift.id).getOrThrow()
-        val isDifferentGiftType = originalGift.type != gift.type
+    suspend operator fun invoke(gift: Gift): Result<Unit> = mutex.withLock {
+        runCatching {
+            val originalGift = giftRepository.getGift(gift.id).getOrThrow()
+            val isGiftTypeChanged = originalGift.type != gift.type
 
-        val deletedFriendIds = originalGift.friends.map { it.id }
-            .filterNot { friendId -> gift.friends.map { it.id }.contains(friendId) }
-        val addedFriendIds = gift.friends.map { it.id }
-            .filterNot { friendId -> originalGift.friends.map { it.id }.contains(friendId) }
+            val originalFriendIds = originalGift.friends.map { it.id }.toSet()
+            val newFriendIds = gift.friends.map { it.id }.toSet()
 
-        return mutex
-            .withLock { giftRepository.updateGift(gift) }
-            .onSuccess {
-                // 삭제된 친구 정보 업데이트
-                if (deletedFriendIds.isNotEmpty()) {
-                    coroutineScope {
-                        deletedFriendIds.map { friendId ->
-                            async {
-                                val friend = friendRepository.getFriend(friendId).getOrThrow()
-                                val receivedCount =
-                                    if (gift.type == GiftType.RECEIVED) friend.received - 1 else friend.received
-                                val sentCount =
-                                    if (gift.type == GiftType.SENT) friend.sent - 1 else friend.sent
+            val addedFriendIds = newFriendIds - originalFriendIds
+            val deletedFriendIds = originalFriendIds - newFriendIds
+            val commonFriendIds = originalFriendIds intersect newFriendIds
 
-                                updateFriendUseCase(
-                                    friend = friend.copy(
-                                        received = receivedCount,
-                                        sent = sentCount,
-                                    )
-                                )
-                            }
-                        }
-                    }.awaitAll()
+            giftRepository.updateGift(gift).getOrThrow()
+
+            coroutineScope {
+                val jobs = mutableListOf<Deferred<Unit>>()
+
+                if (isGiftTypeChanged) {
+                    jobs += async { updateCountOnTypeChange(commonFriendIds, gift.type) }
                 }
 
-                // 추가된 친구 정보 업데이트
                 if (addedFriendIds.isNotEmpty()) {
-                    coroutineScope {
-                        addedFriendIds.map { friendId ->
-                            async {
-                                val friend = friendRepository.getFriend(friendId).getOrThrow()
-                                val receivedCount = if (gift.type == GiftType.RECEIVED) friend.received + 1 else friend.received
-                                val sentCount = if (gift.type == GiftType.SENT) friend.sent + 1 else friend.sent
-
-                                updateFriendUseCase(
-                                    friend = friend.copy(
-                                        received = receivedCount,
-                                        sent = sentCount,
-                                    )
-                                )
-                            }
-                        }
-                    }.awaitAll()
+                    jobs += async { incrementFriendCount(addedFriendIds, gift.type) }
                 }
 
-                if (deletedFriendIds.isEmpty() && addedFriendIds.isEmpty()) {
-                    // 친구 정보 업데이트
-                    if (isDifferentGiftType) {
-                        coroutineScope {
-                            gift.friends.map { friendId ->
-                                async {
-                                    val friend = friendRepository.getFriend(gift.friendId).getOrThrow()
-
-                                    val receivedCount = if (gift.type == GiftType.RECEIVED) friend.received + 1 else friend.received - 1
-                                    val sentCount = if (gift.type == GiftType.SENT) friend.sent + 1 else friend.sent - 1
-
-                                    if (receivedCount < 0 || sentCount < 0) {
-                                        friendSyncFlagDataStore.save(true)
-                                    }
-
-                                    updateFriendUseCase(
-                                        friend.copy(
-                                            received = receivedCount,
-                                            sent = sentCount,
-                                        )
-                                    )
-                                        .onFailure {
-                                            Timber.d("🔴 친구 정보 업데이트 실패")
-                                            friendSyncFlagDataStore.save(true)
-                                        }
-                                }
-                            }
-                        }.awaitAll()
-                    }
+                if (deletedFriendIds.isNotEmpty()) {
+                    jobs += async { decrementFriendCount(deletedFriendIds, originalGift.type) }
                 }
+
+                jobs.awaitAll()
             }
+
+            Unit
+        }
     }
+
+    private suspend fun decrementFriendCount(friendIds: Set<String>, giftType: GiftType) = coroutineScope {
+        friendIds.map { friendId ->
+            launch {
+                val friend = friendRepository.getFriend(friendId).getOrThrow()
+                val updatedFriend = when (giftType) {
+                    GiftType.RECEIVED -> friend.copy(received = (friend.received - 1).coerceAtLeast(0))
+                    GiftType.SENT -> friend.copy(sent = (friend.sent - 1).coerceAtLeast(0))
+                }
+
+                updateFriendUseCase(updatedFriend)
+                    .onFailure {
+                        Timber.d("🔴 친구 카운트 감소 실패")
+                        friendSyncFlagDataStore.save(true)
+                    }
+            }
+        }
+    }.joinAll()
+
+    private suspend fun incrementFriendCount(friendIds: Set<String>, giftType: GiftType) = coroutineScope {
+        friendIds.map { friendId ->
+            launch {
+                val friend = friendRepository.getFriend(friendId).getOrThrow()
+
+                val updatedFriend = when (giftType) {
+                    GiftType.RECEIVED -> friend.copy(received = friend.received + 1)
+                    GiftType.SENT -> friend.copy(sent = friend.sent + 1)
+                }
+                updateFriendUseCase(updatedFriend).getOrThrow()
+            }
+        }
+    }.joinAll()
+
+    private suspend fun updateCountOnTypeChange(friendIds: Set<String>, newGiftType: GiftType) = coroutineScope {
+        friendIds.map { friendId ->
+            launch {
+                val friend = friendRepository.getFriend(friendId = friendId).getOrThrow()
+
+                val updatedFriend = when (newGiftType) {
+                    GiftType.RECEIVED -> friend.copy(
+                        received = friend.received + 1,
+                        sent = (friend.sent - 1).coerceAtLeast(0)
+                    )
+
+                    GiftType.SENT -> friend.copy(
+                        sent = friend.sent + 1,
+                        received = (friend.received - 1).coerceAtLeast(0)
+                    )
+                }
+
+                val countsAreValid = updatedFriend.received >= 0 && updatedFriend.sent >= 0
+                if (!countsAreValid) {
+                    friendSyncFlagDataStore.save(true)
+                }
+
+                updateFriendUseCase(updatedFriend)
+                    .onFailure {
+                        Timber.d("🔴 친구 선물 카운트 변경 실패")
+                        friendSyncFlagDataStore.save(true)
+                    }
+            }
+        }
+    }.joinAll()
 }
