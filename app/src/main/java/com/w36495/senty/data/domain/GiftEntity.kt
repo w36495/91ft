@@ -9,6 +9,7 @@ data class GiftEntity(
     val categoryName: String = "",
     val friendId: String = "",
     val friendName: String = "",
+    val friends: List<SimpleFriendEntity> = emptyList(),
     val date: String = "",
     val mood: String = "",
     val memo: String = "",

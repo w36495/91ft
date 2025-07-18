@@ -3,23 +3,20 @@ package com.w36495.senty.view.screen.gift.edit
 import android.content.Context
 import android.net.Uri
 import android.util.Log
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
-import com.w36495.senty.data.domain.GiftType
 import com.w36495.senty.data.mapper.toDomain
 import com.w36495.senty.data.mapper.toEditUiModel
-import com.w36495.senty.domain.repository.FriendRepository
 import com.w36495.senty.domain.repository.GiftImageRepository
 import com.w36495.senty.domain.repository.GiftRepository
+import com.w36495.senty.domain.usecase.SaveGiftUseCase
 import com.w36495.senty.domain.usecase.UpdateGiftUseCase
 import com.w36495.senty.util.ImageConverter
 import com.w36495.senty.util.toLinkedMap
 import com.w36495.senty.view.screen.gift.edit.contact.EditGiftContact
-import com.w36495.senty.view.screen.gift.edit.model.EditImage
+import com.w36495.senty.view.screen.gift.edit.model.EditImageUiModel
 import com.w36495.senty.view.screen.gift.edit.model.ImageSelectionType
-import com.w36495.senty.view.screen.main.Route
+import com.w36495.senty.view.screen.gift.model.SimpleFriendUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Deferred
@@ -34,16 +31,15 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class EditGiftViewModel @Inject constructor(
-    private val friendRepository: FriendRepository,
     private val giftRepository: GiftRepository,
     private val giftImageRepository: GiftImageRepository,
     private val updateGiftUseCase: UpdateGiftUseCase,
+    private val saveGiftUseCase: SaveGiftUseCase,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
     private val _effect = Channel<EditGiftContact.Effect>()
@@ -51,8 +47,6 @@ class EditGiftViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(EditGiftContact.State())
     val state get() = _state.asStateFlow()
-
-    private val mutex = Mutex()
 
     fun handleEvent(event: EditGiftContact.Event) {
         when (event) {
@@ -154,21 +148,23 @@ class EditGiftViewModel @Inject constructor(
                 }
             }
             is EditGiftContact.Event.OnSelectFriend -> {
-                viewModelScope.launch {
-                    event.friend?.let { friend ->
-                        _state.update { state ->
-                            state.copy(
-                                showFriendsDialog = false,
-                                isErrorFriend = false,
-                                gift = state.gift.copy(
-                                    friendId = friend.id,
-                                    friendName = friend.name,
-                                )
-                            )
-                        }
-                    } ?: run {
-                        _state.update { state -> state.copy(showFriendsDialog = false) }
+                event.friend?.let { friend ->
+                    val newFriends = SimpleFriendUiModel(friend.id, friend.name)
+
+                    _state.update { state ->
+                        state.copy(
+                            showFriendsDialog = false,
+                            isErrorFriend = false,
+                            gift = if (state.gift.friends.contains(newFriends)) {
+                                sendEffect(EditGiftContact.Effect.ShowToast("이미 선택한 친구입니다."))
+                                state.gift
+                            } else {
+                                state.gift.copy(friends = state.gift.friends + newFriends)
+                            }
+                        )
                     }
+                } ?: run {
+                    _state.update { state -> state.copy(showFriendsDialog = false) }
                 }
             }
             is EditGiftContact.Event.OnSelectGiftCategory -> {
@@ -250,6 +246,15 @@ class EditGiftViewModel @Inject constructor(
                     sendEffect(EditGiftContact.Effect.ShowToast("'설정'에서 권한을 허용해주세요."))
                 }
             }
+            is EditGiftContact.Event.RemoveFriend -> {
+                _state.update { state ->
+                    val updatedFriends = state.gift.friends.filter { it != event.friend }
+
+                    state.copy(
+                        gift = state.gift.copy(friends = updatedFriends)
+                    )
+                }
+            }
         }
     }
 
@@ -265,11 +270,11 @@ class EditGiftViewModel @Inject constructor(
                     if (gift.images.isNotEmpty()) {
                         giftImageRepository.getGiftImages(giftId)
                             .onSuccess { imagePaths ->
-                                val originalImagePaths = linkedMapOf<String, EditImage>().apply {
+                                val originalImagePaths = linkedMapOf<String, EditImageUiModel>().apply {
                                     imagePaths
                                         .map { path ->
                                             val key = path.substringAfterLast("%2F").substringBefore(".jpg?")
-                                            key to EditImage.Original(path)
+                                            key to EditImageUiModel.Original(path)
                                         }
                                         .sortedBy { (key, _) -> key } // 필요 시 정렬
                                         .forEach { (key, image) -> this[key] = image }
@@ -316,7 +321,7 @@ class EditGiftViewModel @Inject constructor(
 
         _state.update { state ->
             val updatedImages = state.gift.images.toMutableMap().apply {
-                this[imageName] = EditImage.New(resizedBitmap)
+                this[imageName] = EditImageUiModel.New(resizedBitmap)
             }
 
             state.copy(
@@ -328,7 +333,7 @@ class EditGiftViewModel @Inject constructor(
     private fun validateInputForm(): Boolean {
         val currentGift = _state.value.gift
 
-        val friendError = currentGift.friendName.isEmpty()
+        val friendError = currentGift.friends.isEmpty()
         val categoryError = currentGift.categoryName.isEmpty()
         val dateError = currentGift.date.isEmpty()
 
@@ -354,7 +359,7 @@ class EditGiftViewModel @Inject constructor(
 
             val result = updateGiftUseCase(updateGift.copy(
                 thumbnail = updateGift.images.entries.firstOrNull()?.let {
-                    if (it.value is EditImage.New) {
+                    if (it.value is EditImageUiModel.New) {
                         "thumbs_${it.key}"
                     } else {
                         // 기존 썸네일과 같다면
@@ -372,12 +377,12 @@ class EditGiftViewModel @Inject constructor(
                     if (updateGift.images.isNotEmpty()) {
                         // 새로운 이미지 저장
                         coroutineScope {
-                            val resultJobs = mutableListOf<Deferred<Result<Unit>>>()
+                            val resultJobs = mutableListOf<Deferred<Result<String>>>()
 
                             val (firstImageName, firstImage) = updateGift.images.entries.first()
 
                             // 새로운 썸네일
-                            if (firstImage is EditImage.New) {
+                            if (firstImage is EditImageUiModel.New) {
                                 resultJobs += async {
                                     val resizedThumbnail = ImageConverter.resizeToWidth(context, firstImage.bitmap, 600)
                                     val webPThumbnail = ImageConverter.compressToWebP(resizedThumbnail)
@@ -389,7 +394,7 @@ class EditGiftViewModel @Inject constructor(
 
                                 if (!sameThumbnail) {
                                     val bitmap = withContext(Dispatchers.IO) {
-                                        ImageConverter.urlToBitmap((firstImage as EditImage.Original).path)
+                                        ImageConverter.urlToBitmap((firstImage as EditImageUiModel.Original).path)
                                     }
 
                                     if (bitmap != null) {
@@ -411,7 +416,7 @@ class EditGiftViewModel @Inject constructor(
 
                             // 새로운 이미지 저장
                             updateGift.images.map { (imageName, image) ->
-                                if (image is EditImage.New) {
+                                if (image is EditImageUiModel.New) {
                                     resultJobs += async {
                                         val webPImage = ImageConverter.compressToWebP(image.bitmap)
                                         giftImageRepository.insertGiftImageByBitmap(updateGift.id, imageName, webPImage)
@@ -457,63 +462,29 @@ class EditGiftViewModel @Inject constructor(
             _state.update { it.copy(isLoading = true) }
 
             val gift = state.value.gift
-            val result = mutex.withLock {
-                giftRepository.insertGift(gift.copy(
+            val imageMap = gift.images.map {(imageName, image) ->
+                imageName to if (image is EditImageUiModel.New) {
+                    image.toDomain(context)
+                } else {
+                   (image as EditImageUiModel.Original).toDomain()
+                }
+            }
+
+            val result = saveGiftUseCase(
+                gift = gift.copy(
                     thumbnail = if (gift.images.entries.firstOrNull() != null) {
                         "thumbs_${gift.images.entries.first().key}"
                     } else null
-                ).toDomain())
-            }
+                ).toDomain(),
+                imageMap = imageMap.toMap()
+            )
 
             result
-                .onSuccess { giftId ->
-                    if (gift.images.isNotEmpty()) {
-                        coroutineScope {
-                            val resultJobs = mutableListOf<Deferred<Result<Unit>>>()
-                            // 썸네일 저장
-                            val (thumbnailName, thumbnailBitmap) = gift.images.entries.first()
-                            if (thumbnailBitmap is EditImage.New) {
-                                resultJobs += async {
-                                    val resizedThumbnail = ImageConverter.resizeToWidth(context, thumbnailBitmap.bitmap, 600)
-                                    val webPThumbnail = ImageConverter.compressToWebP(resizedThumbnail)
-
-                                    giftImageRepository.insertGiftImageByBitmap(giftId, "thumbs_$thumbnailName", webPThumbnail)
-                                }
-                            }
-
-                            // 이미지 저장
-                            resultJobs += gift.images.mapNotNull { (imageName, image) ->
-                                if (image is EditImage.New) {
-                                    async {
-                                        val webPImage = ImageConverter.compressToWebP(image.bitmap)
-                                        giftImageRepository.insertGiftImageByBitmap(giftId, imageName, webPImage)
-                                    }
-                                } else null
-                            }
-
-                            resultJobs.awaitAll()
-                        }
-                    }
-
-                    _state.update {
-                        it.copy(isLoading = false)
-                    }
+                .onSuccess {
+                    _state.update { it.copy(isLoading = false) }
                     Log.d("EditGiftVM","🟢 선물 저장 완료")
 
                     sendEffect(EditGiftContact.Effect.ShowToast("등록 완료되었습니다."))
-
-                    friendRepository.getFriend(state.value.gift.friendId)
-                        .onSuccess {
-                            Log.d("EditGiftVM","🟢 친구 정보 수정 시작")
-                            friendRepository.patchFriend(
-                                it.copy(
-                                    received = if (state.value.gift.type == GiftType.RECEIVED) it.received + 1 else it.received,
-                                    sent = if (state.value.gift.type == GiftType.SENT) it.sent + 1 else it.sent
-                                )
-                            ).onSuccess {
-                                Log.d("EditGiftVM","🟢 친구 정보 수정 완료")
-                            }
-                        }
                 }
                 .onFailure {
                     Log.d("EditGiftVM","🔴 선물 저장 실패" )

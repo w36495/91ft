@@ -9,6 +9,7 @@ data class GiftUiModel(
     val categoryName: String = "",
     val friendId: String = "",
     val friendName: String = "",
+    val friends: List<SimpleFriendUiModel> = emptyList(),
     val date: String = "",
     val mood: String = "",
     val memo: String = "",

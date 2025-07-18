@@ -4,15 +4,19 @@ import com.w36495.senty.repository.FakeFriendRepository
 import com.w36495.senty.repository.FakeGiftRepository
 import com.w36495.senty.data.domain.GiftType
 import com.w36495.senty.data.mapper.toDomain
+import com.w36495.senty.domain.entity.EditImage
 import com.w36495.senty.domain.repository.FriendRepository
 import com.w36495.senty.domain.repository.GiftImageRepository
 import com.w36495.senty.domain.repository.GiftRepository
 import com.w36495.senty.domain.usecase.DeleteGiftAndUpdateFriendUseCase
 import com.w36495.senty.domain.usecase.DeleteGiftUseCase
+import com.w36495.senty.domain.usecase.SaveGiftUseCase
 import com.w36495.senty.domain.usecase.UpdateFriendUseCase
+import com.w36495.senty.domain.usecase.UploadGiftImageUseCase
 import com.w36495.senty.repository.FakeGiftImageRepository
 import com.w36495.senty.view.screen.friend.model.FriendUiModel
 import com.w36495.senty.view.screen.gift.model.GiftUiModel
+import com.w36495.senty.view.screen.gift.model.SimpleFriendUiModel
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert
@@ -28,6 +32,8 @@ class DeleteGiftAndUpdateFriendUseCaseTest {
 
     private val deleteGiftUseCase: DeleteGiftUseCase = DeleteGiftUseCase(giftRepository, giftImageRepository)
     private val updateFriendUseCase = UpdateFriendUseCase(friendRepository)
+    private val uploadGiftImageUseCase = UploadGiftImageUseCase(giftImageRepository)
+    private val saveGiftUseCase = SaveGiftUseCase(giftRepository, giftImageRepository, friendRepository, uploadGiftImageUseCase)
     private val useCase = DeleteGiftAndUpdateFriendUseCase(
         friendRepository = friendRepository,
         deleteGiftUseCase = deleteGiftUseCase,
@@ -40,14 +46,12 @@ class DeleteGiftAndUpdateFriendUseCaseTest {
             giftRepository.fetchGifts()
 
             // 데이터 추가
-            friendRepository.insertFriend(friend.toDomain())
-            giftRepository.insertGift(gift.toDomain())
-            giftRepository.insertGift(sentGift.toDomain())
-
-            repeat(3) {
-                giftImageRepository.insertGiftImageByBitmap(gift.id, "testImage123", giftImage)
-                giftImageRepository.insertGiftImageByBitmap(sentGift.id, "testImage1234", giftImage)
+            friends.forEach {
+                friendRepository.insertFriend(it.toDomain())
             }
+
+            saveGiftUseCase(receivedGift.toDomain(), mapOf("testImage123" to EditImage.New(giftImage)))
+            saveGiftUseCase(sentGift.toDomain(), mapOf("testImage123" to EditImage.New(giftImage)))
         }
     }
 
@@ -55,24 +59,24 @@ class DeleteGiftAndUpdateFriendUseCaseTest {
     fun `선물을 삭제하면, 이미지도 함께 삭제된다`() = runTest {
         // Given
         // 이미지 존재 여부 확인
-        val originalGiftImages = giftImageRepository.getGiftImages(gift.id).getOrThrow()
-        Assert.assertEquals(3, originalGiftImages.size)
+        val originalGiftImages = giftImageRepository.getGiftImages(receivedGift.id).getOrThrow()
+        assertEquals(3, originalGiftImages.size)
 
         // When
-        useCase(gift.toDomain())
+        useCase(receivedGift.toDomain())
 
         // Then
-        val updatedGiftImages = giftImageRepository.getGiftImages(gift.id).getOrThrow()
+        val updatedGiftImages = giftImageRepository.getGiftImages(receivedGift.id).getOrThrow()
         assertTrue(updatedGiftImages.isEmpty())
     }
 
     @Test
     fun `이미지가 없는 선물을 삭제하면, 선물만 삭제된다`() = runTest {
         // Given
-        val originalFriend = friendRepository.getFriend(friendId = friend.id).getOrThrow()
+        val originalFriend = friendRepository.getFriend(friendId = simpleFriends.first().id).getOrThrow()
         // 새로운 선물 추가 (이미지X)
-        val newGift = GiftUiModel(id = "Gift 200", friendId = friend.id)
-        giftRepository.insertGift(newGift.toDomain())
+        val newGift = GiftUiModel(id = "Gift 200", friends = simpleFriends)
+        saveGiftUseCase(newGift.toDomain(), emptyMap())
 
         assertEquals(13, giftRepository.gifts.value.size)
 
@@ -83,42 +87,42 @@ class DeleteGiftAndUpdateFriendUseCaseTest {
         // Then
         assertTrue(result.isSuccess)
 
-        val updatedFriend = friendRepository.getFriend(gift.friendId).getOrThrow()
+        val updatedFriend = friendRepository.getFriend(receivedGift.friends.first().id).getOrThrow()
         assertEquals(originalFriend.received-1, updatedFriend.received)
     }
 
     @Test
     fun `받은 선물 1개를 삭제하면, 친구의 받은 선물의 개수가 1만큼 줄어든다`() = runTest {
         // Given
-        val originalFriend = friendRepository.getFriend(friendId = friend.id).getOrThrow()
-        val originalGiftImages = giftImageRepository.getGiftImages(gift.id).getOrThrow()
+        val originalFriend = friendRepository.getFriend(friendId = simpleFriends.first().id).getOrThrow()
 
         // When : 선물을 삭제하면
-        useCase(gift.toDomain())
+        useCase(receivedGift.toDomain())
 
         // Then : 해당 타입의 선물 개수가 줄어든다.
-        val updatedFriend = friendRepository.getFriend(gift.friendId).getOrThrow()
+        val updatedFriend = friendRepository.getFriend(receivedGift.friends.first().id).getOrThrow()
         assertEquals(originalFriend.received-1, updatedFriend.received)
     }
 
     @Test
     fun `준 선물 1개를 삭제하면, 친구의 준 선물의 개수가 1만큼 줄어든다`() = runTest {
         // Given
-        val originalFriend = friendRepository.getFriend(friendId = friend.id).getOrThrow()
-        val originalGiftImages = giftImageRepository.getGiftImages(sentGift.id).getOrThrow()
+        val originalFriend = friendRepository.getFriend(friendId = simpleFriends.first().id).getOrThrow()
 
         // When : 선물을 삭제하면
         useCase(sentGift.toDomain())
 
         // Then : 해당 타입의 선물 개수가 줄어든다.
-        val updatedFriend = friendRepository.getFriend(gift.friendId).getOrThrow()
-        Assert.assertEquals(originalFriend.sent-1, updatedFriend.sent)
+        val updatedFriend = friendRepository.getFriend(receivedGift.friends.first().id).getOrThrow()
+        assertEquals(originalFriend.sent-1, updatedFriend.sent)
     }
 
     companion object {
+        private val friends = List(5) { FriendUiModel(id = it.toString(), name = "Friend $it") }
+        private val simpleFriends = List(5) { SimpleFriendUiModel(id = it.toString(), name = "Friend $it") }
         private val friend = FriendUiModel(id = "Friend 100", received = 1, sent = 1)
-        private val gift = GiftUiModel(id = "Gift 100", friendId = friend.id, type = GiftType.RECEIVED)
-        private val sentGift = GiftUiModel(id = "Gift 101", friendId = friend.id, type = GiftType.SENT)
+        private val receivedGift = GiftUiModel(id = "Gift 100", friends = simpleFriends, type = GiftType.RECEIVED)
+        private val sentGift = GiftUiModel(id = "Gift 101", friends = simpleFriends, type = GiftType.SENT)
         private val giftImage = ByteArray(10) { 0 }
     }
 }

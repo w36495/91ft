@@ -1,5 +1,6 @@
 package com.w36495.senty.view.ui.component.textFields
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.Divider
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -25,12 +27,18 @@ fun SentyReadOnlyTextField(
     text: String,
     textColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     textStyle: TextStyle = LocalTextStyle.current,
+    hasTextHorizontalScroll: Boolean = false,
+    maxLine: Int = Int.MAX_VALUE,
     showChip: Boolean = false,
     group: FriendGroupUiModel? = null,
     dividerColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
 ) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        Row {
+    Column(
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = if (hasTextHorizontalScroll) Modifier.horizontalScroll(rememberScrollState()) else Modifier,
+        ) {
             Spacer(modifier = Modifier.width(16.dp))
 
             if (showChip) {
@@ -45,6 +53,7 @@ fun SentyReadOnlyTextField(
                     color = textColor,
                     modifier = Modifier.padding(vertical = 16.dp),
                     style = textStyle,
+                    maxLines = maxLine,
                 )
             }
         }

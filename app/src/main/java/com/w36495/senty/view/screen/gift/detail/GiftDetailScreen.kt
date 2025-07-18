@@ -38,24 +38,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
 import com.w36495.senty.R
 import com.w36495.senty.data.domain.GiftType
 import com.w36495.senty.util.StringUtils
 import com.w36495.senty.view.component.LoadingCircleIndicator
 import com.w36495.senty.view.component.SentyAsyncImage
-import com.w36495.senty.view.screen.friend.model.FriendUiModel
 import com.w36495.senty.view.screen.gift.category.model.GiftCategoryUiModel
 import com.w36495.senty.view.screen.gift.detail.contact.GiftDetailContact
 import com.w36495.senty.view.screen.gift.model.GiftUiModel
+import com.w36495.senty.view.screen.gift.model.SimpleFriendUiModel
 import com.w36495.senty.view.screen.ui.theme.SentyTheme
 import com.w36495.senty.view.ui.component.buttons.SentyFilledButton
 import com.w36495.senty.view.ui.component.buttons.SentyOutlinedButton
@@ -164,7 +161,7 @@ private fun GiftDetailContents(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
                     category = GiftCategoryUiModel(id = uiState.gift.categoryId, name = uiState.gift.categoryName),
-                    friend = FriendUiModel(id = uiState.gift.friendId, name = uiState.gift.friendName),
+                    friends = uiState.gift.friends,
                     giftDetail = uiState.gift,
                 )
 
@@ -292,7 +289,7 @@ private fun InfoSection(
     modifier: Modifier = Modifier,
     category: GiftCategoryUiModel,
     giftDetail: GiftUiModel,
-    friend: FriendUiModel,
+    friends: List<SimpleFriendUiModel>,
 ) {
     Column(modifier = modifier) {
         InfoSectionItem(title = "카테고리", text = category.name)
@@ -309,7 +306,7 @@ private fun InfoSection(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        InfoSectionItem(title = "친구", text = friend.name)
+        InfoSectionItem(title = "친구 (${friends.size})", text = friends.joinToString(", ") { it.name })
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -347,5 +344,7 @@ private fun InfoSectionItem(
         text = text,
         textStyle = SentyTheme.typography.bodyMedium
             .copy(color = SentyBlack),
+        hasTextHorizontalScroll = title.contains("친구"),
+        maxLine = if (title.contains("친구")) 1 else Int.MAX_VALUE,
     )
 }
