@@ -37,6 +37,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -59,6 +60,7 @@ import com.w36495.senty.view.ui.theme.SentyGray60
 import com.w36495.senty.view.ui.theme.SentyGreen60
 import com.w36495.senty.view.ui.theme.SentyWhite
 import com.w36495.senty.view.ui.theme.antonFontFamily
+import com.w36495.senty.view.ui.theme.poppinsFontFamily
 
 @Composable
 fun LoginRoute(
@@ -145,8 +147,8 @@ private fun LoginScreen(
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
-                text = stringResource(id = R.string.app_name).uppercase(),
-                fontFamily = antonFontFamily,
+                text = stringResource(id = R.string.app_name).lowercase(),
+                fontFamily = poppinsFontFamily,
                 fontSize = 32.sp,
                 color = SentyGreen60,
                 modifier = Modifier.fillMaxWidth(),

@@ -19,6 +19,7 @@ import com.w36495.senty.view.screen.intro.model.IntroUiState
 import com.w36495.senty.view.ui.theme.SentyGreen60
 import com.w36495.senty.view.ui.theme.SentyWhite
 import com.w36495.senty.view.ui.theme.antonFontFamily
+import com.w36495.senty.view.ui.theme.poppinsFontFamily
 import kotlinx.coroutines.delay
 
 @Composable
@@ -56,8 +57,8 @@ private fun IntroScreen(
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            text = stringResource(id = R.string.app_name).uppercase(),
-            fontFamily = antonFontFamily,
+            text = stringResource(id = R.string.app_name).lowercase(),
+            fontFamily = poppinsFontFamily,
             fontSize = 48.sp,
             color = SentyWhite,
         )
