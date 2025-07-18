@@ -65,6 +65,7 @@ import com.w36495.senty.view.ui.theme.SentyPink60
 import com.w36495.senty.view.ui.theme.SentyWhite
 import com.w36495.senty.view.ui.theme.SentyYellow60
 import com.w36495.senty.view.ui.theme.antonFontFamily
+import com.w36495.senty.view.ui.theme.poppinsFontFamily
 
 @Composable
 fun HomeRoute(
@@ -111,9 +112,9 @@ private fun HomeScreen(
         TopAppBar(
             title = {
                 Text(
-                    text = stringResource(id = R.string.app_name).uppercase(),
+                    text = stringResource(id = R.string.app_name),
                     color = SentyWhite,
-                    fontFamily = antonFontFamily,
+                    fontFamily = poppinsFontFamily,
                     fontSize = 16.sp,
                 )
             },
