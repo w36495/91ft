@@ -54,6 +54,7 @@ fun Gift.toUiModel() = GiftUiModel(
     categoryName = this.categoryName,
     friendId = this.friendId,
     friendName = this.friendName,
+    friends = this.friends.map { it.toUiModel() },
     date = this.date,
     mood = this.mood,
     memo = this.memo,
