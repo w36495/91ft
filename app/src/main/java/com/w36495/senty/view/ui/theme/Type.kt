@@ -23,6 +23,11 @@ val antonFontFamily = FontFamily(
     Font(R.font.anton_regular, FontWeight.W400, FontStyle.Normal),
 )
 
+val poppinsFontFamily = FontFamily(
+    Font(R.font.poppins_black_italic, FontWeight.Black, FontStyle.Italic),
+    Font(R.font.poppins_bold_italic, FontWeight.Bold, FontStyle.Italic),
+)
+
 private val pretendardStyle = TextStyle(
     fontFamily = pretendardFontFamily,
     letterSpacing = (-0.6).sp,
