@@ -44,7 +44,9 @@ class FriendDetailViewModel @Inject constructor(
                 giftRepository.gifts
             ) { friends, allGift ->
                 val friend = friends.first { it.id == friendId }.toUiModel()
-                val gifts = allGift.filter { it.friendId == friendId }.map { it.toFriendDetailUiModel() }
+                val gifts = allGift.filter {
+                    it.friends.any { friend -> friend.id == friendId }
+                }.map { it.toFriendDetailUiModel() }
 
                 friend to gifts
             }
