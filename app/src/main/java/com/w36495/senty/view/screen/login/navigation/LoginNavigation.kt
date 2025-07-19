@@ -39,7 +39,13 @@ fun NavGraphBuilder.authNavGraph(
     composable<Route.SignUp> {
         SignUpRoute(
             padding = padding,
-            moveToLogin = { navController.navigateToLogin() },
+            moveToLogin = {
+                val navOptions = NavOptions.Builder().apply {
+                    setPopUpTo<Route.Login>(true)
+                }.build()
+
+                navController.navigateToLogin(navOptions)
+            },
             onBackPressed = { navController.popBackStack() },
             onShowGlobalErrorSnackBar = onShowGlobalErrorSnackBar,
         )
